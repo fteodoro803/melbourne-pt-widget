@@ -1,5 +1,7 @@
 # Tram Widget
-This application makes gives users widgets for easy access to information on PTV. 
+This application gives users features for easy access to information on PTV. 
+
+The functionality here is a base, which should be converted to the programming language of whichever Operating System contains the widget.
 
 ### Dependencies
 - python 3.10
