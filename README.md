@@ -1,4 +1,4 @@
-# Tram Widget
+# PTV Widget
 This application gives users features for easy access to information on PTV. 
 
 The functionality here is a base, which should be converted to the programming language of whichever Operating System contains the widget.
