@@ -1,19 +1,18 @@
 import hashlib
 import hmac
-import requests
+import configparser
 
-from enum import Enum
-
-
-def getUrl(request):  # The request (make sure to format it as described in the documentation)
+# Gets Request URL
+def getURL(request):
     # Request
     url_http = "http://timetableapi.ptv.vic.gov.au"
     url_https = "https://timetableapi.ptv.vic.gov.au"
-    # make APIName an Enumerator of departrues, fares, search, etc
 
     # Signature
-    developer_id = 3002772
-    api_key = '22e5146f-b255-4ead-a64f-a21deb8acd2c'
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    developer_id = config['DEFAULT']['USER_ID']
+    api_key = config['DEFAULT']['API_KEY']
 
     # Encode the api_key and message to bytes
     key_bytes = api_key.encode()
@@ -25,14 +24,3 @@ def getUrl(request):  # The request (make sure to format it as described in the 
 
     # return f"{url_https}/{versionNumber}{request}?devid={developer_id}&signature={signature}"
     return f"{url_https}/{request}?devid={developer_id}&signature={signature}"
-
-
-req1 = "/v3/route_types"
-
-ptvRequest = req1
-ptvUrl = getUrl(ptvRequest)
-print(ptvUrl)
-
-req = requests.get(ptvUrl)
-print(req)
-print(req.content)
