@@ -1,7 +1,7 @@
 # PTV Widget
 This application gives users features for easy access to information on PTV. 
 
-The functionality here is a base, which should be converted to the programming language of whichever Operating System contains the widget.
+The functionality here is a template, which should be converted to the programming language of whichever Operating System contains the widget.
 
 ### To-Do
 - Priority: Trams
@@ -15,8 +15,16 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 - requests 2.31.0
 - pytest 8.1.1
 
-### Testing Notes
+### Notes
+- Features.py
+  - URL signatures are order-dependent
+    - make sure parameters are in order according to PTV API site
+    - Request seems to end in a Question Mark, and any parameter after that has an And sign, but only to the additional ones.
+      - https://timetableapi.ptv.vic.gov.au/v3/stops/location/latitude,longitude?route_types=1&max_results=100&devid=yourID&signature=yourSignature
+
+
+### Testing
 - PyTest
-- Features
+- Features.py
   - Can't really do tests on valid/invalid URLS, since that's done by the API, but include these responses as tests maybe???
-  - Maybe some tests for, if the site is down or something 
+  - Maybe some tests for, if the site is down or something
