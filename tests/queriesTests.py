@@ -3,10 +3,13 @@ import configparser
 
 """ Config """
 # Reads config.ini
+
+
 def readConfig():
     config = configparser.ConfigParser()
     config.read('../config.ini')
     return config
+
 
 # Checks if User_ID field is not empty
 def testUserIDNotEmpty():
@@ -14,6 +17,7 @@ def testUserIDNotEmpty():
     user_id = config['DEFAULT']['USER_ID']
     # print(f"USER_ID: '{user_id}'")  # Debug print
     assert user_id, "USER_ID should not be empty"
+
 
 # Checks if API_KEY field is not empty
 def testAPIKeyNotEmpty():
