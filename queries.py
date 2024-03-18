@@ -6,6 +6,7 @@ from urllib.parse import urlencode, unquote      # for URL modifications
 
 # Data Gathering
 import requests         # for getting data from PTV API
+from requests import Response
 
 
 # Gets Request URL
@@ -43,7 +44,10 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
 
 
 # Gets Nearest form of PTV
-def getNearestTransport(latitude: float, longitude: float, route_types: list[int] = None, max_results=None, max_distance=None):
+def getNearestTransport(latitude: float, longitude: float, route_types: list[int] = None,
+                        max_results: int = None, max_distance: int = None) -> Response:
+
+    # Adding parameters
     parameters = []
 
     if route_types is not None:
@@ -56,23 +60,19 @@ def getNearestTransport(latitude: float, longitude: float, route_types: list[int
     if max_distance is not None:
         parameters += [('max_distance', max_distance)]
 
-    # if route_types is not None:
-    #     # conversion to tuples
-    #     route_tuples = [('route_types', typeInt) for typeInt in route_types]
-    #     url = getURL(f"/v3/stops/location/{latitude},{longitude}", route_tuples)
-
+    # PTV API request
     if len(parameters) >= 1:
         url = getURL(f"/v3/stops/location/{latitude},{longitude}", parameters)
     else:
         url = getURL(f"/v3/stops/location/{latitude},{longitude}")
 
-    request = requests.get(url)
-    return request
+    response = requests.get(url)
+    return response
 
 
 # Gets the Route Types available by PTV
-def getRouteTypes():
+def getRouteTypes() -> Response:
     url = getURL(f"/v3/route_types")
-    request = requests.get(url)
-    return request
+    response = requests.get(url)
+    return response
 

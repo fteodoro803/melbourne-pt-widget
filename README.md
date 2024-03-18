@@ -30,6 +30,6 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 
 ### Testing
 - PyTest
-- Features.py
+- Queries.py
   - Can't really do tests on valid/invalid URLS, since that's done by the API, but include these responses as tests maybe???
   - Maybe some tests for, if the site is down or something

@@ -1,7 +1,7 @@
 import json
 
 import requests
-from features import getURL, getRouteTypes, getNearestTransport
+from queries import getURL, getRouteTypes, getNearestTransport
 
 # # Get Route Types
 # route_types = getRouteTypes()
