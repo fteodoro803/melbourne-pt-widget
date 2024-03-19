@@ -44,8 +44,8 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
 
 
 # Gets Nearest form of PTV
-def getNearestTransport(latitude: float, longitude: float, route_types: list[int] = None,
-                        max_results: int = None, max_distance: int = None) -> Response:
+def getStopsByLocation(latitude: float, longitude: float, route_types: list[int] = None,
+                       max_results: int = None, max_distance: int = None) -> Response:
 
     # Adding parameters
     parameters = []

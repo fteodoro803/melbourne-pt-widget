@@ -27,6 +27,8 @@ For the program to work, paste your User/Developer ID and API Key in the *config
   - Home Address
   - Destination Address
 - What if 2+ forms of PTV are needed to get to a destination?
+- Calendar Integration
+  - ex: I want to take a tram to get to X Location, to arrive at Y time. Add a Notification/Calendar Alert for when they should leave
 
 ### Testing
 - PyTest
