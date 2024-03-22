@@ -7,6 +7,7 @@ from urllib.parse import urlencode, unquote      # for URL modifications
 # Data Gathering
 import requests         # for getting data from PTV API
 from requests import Response
+from datetime import datetime
 
 
 # Gets Request URL
@@ -29,7 +30,7 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
     key_bytes = api_key.encode()
     signature_value_parameters = urlencode(parameters)
     signature_value = f"{request}?{signature_value_parameters}"     # "The signature value is a HMAC-SHA1 hash of the completed request (minus the base URL but including your user ID, known as “devid”) and the API key"
-    print(signature_value)
+    print(signature_value)      #~test
     message_bytes = signature_value.encode()
 
     # Generate HMAC SHA1 signature
@@ -76,3 +77,41 @@ def getRouteTypes() -> Response:
     response = requests.get(url)
     return response
 
+
+# Gets Route direction
+def getRouteDirections(route_id: int) -> Response:
+    url = getURL(f"/v3/routes/{route_id}")
+    response = requests.get(url)
+    return response
+
+
+# Departures from Stop
+def getDepartures(route_type: int, stop_id: int, route_id: int = None, expand: list[str] = None, date_utc: datetime = None) -> Response:
+
+    parameters = []
+
+    # Ensures only Future Departures are returned
+    # parameters += [('look_backwards', "true")]
+
+    if route_id:
+        if len(parameters) >= 1:
+            url = getURL(f"/v3/departures/route_type/{route_type}/stop/{stop_id}/route/{route_id}", parameters)
+        else:
+            url = getURL(f"/v3/departures/route_type/{route_type}/stop/{stop_id}/route/{route_id}")
+    else:
+        if len(parameters) >= 1:
+            url = getURL(f"/v3/departures/route_type/{route_type}/stop/{stop_id}", parameters)
+        else:
+            url = getURL(f"/v3/departures/route_type/{route_type}/stop/{stop_id}")
+
+    # Date
+    if date_utc is not None:
+        parameters += [('date_utc', date_utc)]
+
+    # Expands
+    if expand is not None:
+        expand_tuples = [('expand', expandStr) for expandStr in expand]
+        parameters += expand_tuples
+
+    response = requests.get(url)
+    return response
