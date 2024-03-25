@@ -1,3 +1,5 @@
+# PTV API Calls/Requests
+
 # URL Generation
 import hashlib          # for signature generation
 import hmac             # for signature generation
@@ -86,14 +88,25 @@ def getRouteDirections(route_id: int) -> Response:
 
 
 # Departures from Stop
-def getDepartures(route_type: int, stop_id: int, route_id: int = None, expand: list[str] = None, date_utc: datetime = None) -> Response:
+def getDepartures(route_type: int, stop_id: int, route_id: int = None, date_utc: datetime = None, max_results: int = None, expand: list[str] = None) -> Response:
 
     parameters = []
 
-    # Ensures only Future Departures are returned
-    # parameters += [('look_backwards', "true")]
+    # Date
+    if date_utc:
+        parameters += [('date_utc', date_utc)]
 
-    if route_id:
+    # Max Results
+    if max_results:
+        parameters += [('max_results', max_results)]
+
+    # Expands
+    if expand:
+        expand_tuples = [('expand', expandStr) for expandStr in expand]
+        parameters += expand_tuples
+
+    # PTV API request
+    if route_id:        # If route ID is provided
         if len(parameters) >= 1:
             url = getURL(f"/v3/departures/route_type/{route_type}/stop/{stop_id}/route/{route_id}", parameters)
         else:
@@ -103,15 +116,6 @@ def getDepartures(route_type: int, stop_id: int, route_id: int = None, expand: l
             url = getURL(f"/v3/departures/route_type/{route_type}/stop/{stop_id}", parameters)
         else:
             url = getURL(f"/v3/departures/route_type/{route_type}/stop/{stop_id}")
-
-    # Date
-    if date_utc is not None:
-        parameters += [('date_utc', date_utc)]
-
-    # Expands
-    if expand is not None:
-        expand_tuples = [('expand', expandStr) for expandStr in expand]
-        parameters += expand_tuples
 
     response = requests.get(url)
     return response
