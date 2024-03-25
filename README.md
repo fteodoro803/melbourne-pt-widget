@@ -12,11 +12,15 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 - pytest 8.1.1
 
 ### Notes
-- Features.py
+- api.py
   - URL signatures are order-dependent
     - make sure parameters are in order according to PTV API site
     - Request seems to end in a Question Mark, and any parameter after that has an And sign, but only to the additional ones.
       - https://timetableapi.ptv.vic.gov.au/v3/stops/location/latitude,longitude?route_types=1&max_results=100&devid=yourID&signature=yourSignature
+- Time from Departures API is in UTC, so it has to be converted to the timezone of the user's device
+  - Case: if user's device's time is incorrect
+    - match it to the user's device and not actual time;
+    - show how many minutes until it arrives, and maybe the time as a subtext (the correct time)
 
 ### To-Do
 - Priority: 
@@ -29,9 +33,15 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 - What if 2+ forms of PTV are needed to get to a destination?
 - Calendar Integration
   - ex: I want to take a tram to get to X Location, to arrive at Y time. Add a Notification/Calendar Alert for when they should leave
+- Flow:
+  - Select location
+  - Get stops (and transport options) from a Location
+  - Select Stop
+  - Choose Direction of Travel
+  - Final Selection
 
 ### Testing
 - PyTest
-- Queries.py
+- apiTests.py
   - Can't really do tests on valid/invalid URLS, since that's done by the API, but include these responses as tests maybe???
   - Maybe some tests for, if the site is down or something
