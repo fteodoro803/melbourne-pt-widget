@@ -1,4 +1,4 @@
-from queries import getStopsByLocation
+from api import getStopsByLocation
 from requests import Response
 
 
