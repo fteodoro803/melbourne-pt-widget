@@ -3,7 +3,6 @@ import json
 
 import requests
 from api import getURL, getRouteTypes, getStopsByLocation, getRouteDirections, getDepartures
-from transport import getNearestStops
 from utilities import convertUTCtoLocalTime, convertDepartureTimesToLocalTime
 
 # Test Variables
@@ -42,13 +41,9 @@ route_type = 1
 # stops = getStopsByLocation(latitude, longitude, route_types=route_types, max_results=max_results, max_distance=max_distance)
 # print(f"Stops: \n{json.dumps(stops.json(), indent=2)} \n")
 
-# # Test Getting Nearest Transport Options
-# nearest_ptv = getNearestStops(latitude, longitude)
-# print(f"Nearest Options: \n{json.dumps(nearest_ptv.json(), indent=3)} \n")
 
 # # Test Getting Route Directions
 # print(f"Directions for Route {route_id}: \n{json.dumps(getRouteDirections(route_id).json(), indent=2)} \n")
-
 
 # Test Departures
 expands = None

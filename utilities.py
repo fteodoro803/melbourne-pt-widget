@@ -45,23 +45,20 @@ def convertDepartureTimesToLocalTime(departures: Dict[str, Any]) -> Dict[str, An
     """
 
     print(departures)      #~test
-    updated_departures = departures
+    # updated_departures = departures
 
-    # Convert scheduled Departure Times to Local Time
-    for departure in updated_departures['departures']:
+    # Convert UTC Departure Times to Local Time
+    for departure in departures['departures']:
         # scheduled departure time
         scheduled_departure_utc = departure['scheduled_departure_utc']
-        scheduled_departure_local_time = convertUTCtoLocalTime(scheduled_departure_utc)
-        departure['scheduled_departure_local_time'] = scheduled_departure_local_time
+        scheduled_departure = convertUTCtoLocalTime(scheduled_departure_utc)
+        departure['scheduled_departure'] = scheduled_departure
 
         # estimated departure time
         estimated_departure_utc = departure['estimated_departure_utc']
-        estimated_departure_local_time = convertUTCtoLocalTime(estimated_departure_utc)
-        departure['estimated_departure_local_time'] = estimated_departure_local_time
-
-        # print(f"Scheduled: {scheduled_departure_utc} --> {scheduled_departure_local_time} "
-        #       f"| Estimated: {estimated_departure_utc} --> {estimated_departure_local_time}")     #~test
+        estimated_departure = convertUTCtoLocalTime(estimated_departure_utc)
+        departure['estimated_departure'] = estimated_departure
 
     # print(json.dumps(updated_departures, indent=4))        #~test
 
-    return updated_departures
+    return departures
