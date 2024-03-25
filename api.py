@@ -82,15 +82,19 @@ def getRouteTypes() -> Response:
 
 # Gets Route direction
 def getRouteDirections(route_id: int) -> Response:
-    url = getURL(f"/v3/routes/{route_id}")
+    url = getURL(f"/v3/directions/route/{route_id}")
     response = requests.get(url)
     return response
 
 
 # Departures from Stop
-def getDepartures(route_type: int, stop_id: int, route_id: int = None, date_utc: datetime = None, max_results: int = None, expand: list[str] = None) -> Response:
+def getDepartures(route_type: int, stop_id: int, route_id: int = None, direction_id: int = None, date_utc: datetime = None, max_results: int = None, expand: list[str] = None) -> Response:
 
     parameters = []
+
+    # Direction
+    if direction_id:
+        parameters += [('direction_id', direction_id)]
 
     # Date
     if date_utc:
