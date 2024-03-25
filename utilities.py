@@ -44,9 +44,6 @@ def convertDepartureTimesToLocalTime(departures: Dict[str, Any]) -> Dict[str, An
         to the input JSON file
     """
 
-    print(departures)      #~test
-    # updated_departures = departures
-
     # Convert UTC Departure Times to Local Time
     for departure in departures['departures']:
         # scheduled departure time
