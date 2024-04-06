@@ -4,6 +4,7 @@
 import hashlib          # for signature generation
 import hmac             # for signature generation
 import configparser     # for getting userID/devID and API Key from config
+import os               # for locating config
 from urllib.parse import urlencode, unquote      # for URL modifications
 
 # Data Gathering
@@ -23,7 +24,9 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
 
     # Signature
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+    # config.read('config.ini')
+    config.read(config_path)
     developer_id = config['DEFAULT']['USER_ID']
     parameters.append(('devid', developer_id))
     api_key = config['DEFAULT']['API_KEY']
@@ -46,9 +49,9 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
     return url
 
 
-# Gets Nearest form of PTV
-def getStopsByLocation(latitude: float, longitude: float, route_types: list[int] = None,
-                       max_results: int = None, max_distance: int = None) -> Response:
+# Gets stops by Location (Latitude, Longitude)
+def stops(latitude: float, longitude: float, route_types: list[int] = None,
+          max_results: int = None, max_distance: int = None) -> Response:
 
     # Adding parameters
     parameters = []
@@ -74,21 +77,21 @@ def getStopsByLocation(latitude: float, longitude: float, route_types: list[int]
 
 
 # Gets the Route Types available by PTV
-def getRouteTypes() -> Response:
+def routeTypes() -> Response:
     url = getURL(f"/v3/route_types")
     response = requests.get(url)
     return response
 
 
 # Gets Route direction
-def getRouteDirections(route_id: int) -> Response:
+def routeDirections(route_id: int) -> Response:
     url = getURL(f"/v3/directions/route/{route_id}")
     response = requests.get(url)
     return response
 
 
 # Departures from Stop
-def getDepartures(route_type: int, stop_id: int, route_id: int = None, direction_id: int = None, date_utc: datetime = None, max_results: int = None, expand: list[str] = None) -> Response:
+def departures(route_type: int, stop_id: int, route_id: int = None, direction_id: int = None, date_utc: datetime = None, max_results: int = None, expand: list[str] = None) -> Response:
 
     parameters = []
 

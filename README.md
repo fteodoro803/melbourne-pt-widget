@@ -25,7 +25,11 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 ### To-Do
 - Priority: 
   - Trams based on Location, and Direction
-  - Selecting 1 form of PTV and getting information on that to Widget
+  - Selecting 1 form of PTV and getting information on that to Widget:
+    1. Big Widget (saving a stop)
+       1. ![tram_sample_screen.jpg](images%2Ftram_sample_screen.jpg)
+    2. Small Widget (saving a tram)
+       1. just one of the above
 - Get functionality to work on all public transport
 - Setup Screens
   - Home Address
@@ -38,9 +42,14 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 - Flow:
   - Select location
   - Get stops (and transport options) from a Location
-    - Select Stop
+    - Select Stop (stop contains tram numbers, name)
   - Choose Direction of Travel
   - Final Selection
+- API Calls / Data Collection
+  - Stops within Distance --> route (id, name, number, type)
+    - Get unique PTV Numbers (Tram Numbers, Train, Etc)
+  - If I do multiple calls, such as looping to get directions for each Tram Route, does that count as spamming the API? Any way I can minimise calls?
+    - Maybe I can create a little text file storing directions for routes, like a cache
 
 ### Testing
 - PyTest

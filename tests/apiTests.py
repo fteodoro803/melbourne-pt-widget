@@ -1,4 +1,3 @@
-# from features import getURL
 import configparser
 
 """ Config """
