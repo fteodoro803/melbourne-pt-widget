@@ -12,15 +12,16 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 - pytest 8.1.1
 
 ### Notes
-- api.py
-  - URL signatures are order-dependent
-    - make sure parameters are in order according to PTV API site
-    - Request seems to end in a Question Mark, and any parameter after that has an And sign, but only to the additional ones.
-      - https://timetableapi.ptv.vic.gov.au/v3/stops/location/latitude,longitude?route_types=1&max_results=100&devid=yourID&signature=yourSignature
 - Time from Departures API is in UTC, so it has to be converted to the timezone of the user's device
   - Case: if user's device's time is incorrect
     - match it to the user's device and not actual time;
     - show how many minutes until it arrives, and maybe the time as a subtext (the correct time)
+- Flow:
+  - Select location
+  - Get stops (and transport options) from a Location
+    - Select Stop (stop contains tram numbers, name)
+  - Choose Direction of Travel
+  - Final Selection
 
 ### To-Do
 - Priority: 
@@ -30,21 +31,10 @@ For the program to work, paste your User/Developer ID and API Key in the *config
        1. ![tram_sample_screen.jpg](images%2Ftram_sample_screen.jpg)
     2. Small Widget (saving a tram)
        1. just one of the above
-- Get functionality to work on all public transport
-- Setup Screens
-  - Home Address
-  - Destination Address
-- What if 2+ forms of PTV are needed to get to a destination?
 - Figure out Disruption and their IDs
   - Particularly in Disruptions
 - Calendar Integration
   - ex: I want to take a tram to get to X Location, to arrive at Y time. Add a Notification/Calendar Alert for when they should leave
-- Flow:
-  - Select location
-  - Get stops (and transport options) from a Location
-    - Select Stop (stop contains tram numbers, name)
-  - Choose Direction of Travel
-  - Final Selection
 - API Calls / Data Collection
   - Stops within Distance --> route (id, name, number, type)
     - Get unique PTV Numbers (Tram Numbers, Train, Etc)
