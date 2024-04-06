@@ -12,6 +12,7 @@ For the program to work, paste your User/Developer ID and API Key in the *config
 - pytest 8.1.1
 
 ### Notes
+- Changes to config.ini __*must*__ not be pushed
 - Time from Departures API is in UTC, so it has to be converted to the timezone of the user's device
   - Case: if user's device's time is incorrect
     - match it to the user's device and not actual time;
