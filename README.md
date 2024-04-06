@@ -32,6 +32,9 @@ For the program to work, paste your User/Developer ID and API Key in the *config
        1. ![tram_sample_screen.jpg](images%2Ftram_sample_screen.jpg)
     2. Small Widget (saving a tram)
        1. just one of the above
+- Continuous Integration and Development
+  - Github Actions
+  - https://www.youtube.com/watch?v=scEDHsr3APg
 - Figure out Disruption and their IDs
   - Particularly in Disruptions
 - Calendar Integration
