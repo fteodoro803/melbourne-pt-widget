@@ -1,50 +1,54 @@
-from datetime import datetime, timezone
+import ptv_api as ptv
 import json
 
-import requests
-import ptv_api as ptv
-import utilities
+
+def main():
+    print("===== PTV WIDGET TESTING =====\n")
+
+    """ Showing Stops near Location """
+    location = input("Enter your location (latitude, longitude): ")
+
+    # Splitting the input string to Latitude and Longitude
+    string_array = location.split(',')
+    latitude, longitude = float(string_array[0]), float(string_array[1])
+
+    stops_info = getStops(latitude, longitude)
+    stop = input("Select stop id (int): ")
+
+    """ Show Directions of a Route """
+    route = input("Select route id (int): ")
+    direction_info = getDirection(route)
+
+    """ Show Departures for a Route at a Stop """
+    direction = input("Select direction id (int): ")
+    # departures =
 
 
-# Test Variables #
+# Get Stops and their respective Route Names and Numbers
+def getStops(latitude, longitude):
+    max_results, max_distance, route_types = 5, 300, [1]  # test values
 
-# Hope Street
-latitude, longitude = -37.761665989492705, 144.9422826877412
-route_type = 1
-route_types = [1]
-route_id = 11529
-max_results = 5
-max_distance = 300
-stop_id = 3086
-direction_id = 21   # towards city
+    print(f"\n---Getting Stops---")
 
-# # Queen Vic Market
-# latitude, longitude = -37.80607940323542, 144.95735362615287
-# route_type = 1
-# route_types = [1]
-# max_results = 5
-# max_distance = 300
-# route_id = 725
-# route_ids = [725, 887, 897]     # 19, 57, 59
+    print(f"latitude, longitude = {latitude}, {longitude}")
+    print(f"Stops near your location:")
+
+    stops = ptv.stops(latitude, longitude, max_results=max_results,
+                      max_distance=max_distance, route_types=route_types)
+    print(f"\nStops within {max_distance}m of ({latitude}, {longitude}): \n{json.dumps(stops.json(), indent=2)} \n")
+
+    return stops
 
 
-# Function Testing
-
-# # Get Route Types
-# route_types = ptv.routeTypes()
-# print(f"Route Types: \n{route_types.json()} \n")
-
-# # Test Latitude and Longitude  --> get stop that we want
-# stops = ptv.stops(latitude, longitude, route_types=route_types, max_results=max_results, max_distance=max_distance)
-# print(f"Stops: \n{json.dumps(stops.json(), indent=2)} \n")
-
-# # Test Getting Route Directions   --> from stop, get directions
-# print(f"Directions for Route {route_id}: \n{json.dumps(ptv.routeDirections(route_id).json(), indent=2)} \n")
-
-# Test Departures
-expands = None
-departures = ptv.departures(route_type, stop_id, route_id, direction_id=direction_id, max_results=5)    # JSON File
-new_departures = utilities.convertDepartureTimesToLocalTime(departures.json())
-print(f"Departures for stopID {stop_id}, routeType {route_type}: \n{json.dumps(new_departures, indent=4)} \n")
+def getDirection(route):
+    directions = ptv.routeDirections(route)
+    print(f"\n---Getting Route Directions---")
+    print(f"\nDirections of Route {route}: \n{json.dumps(directions.json(), indent=2)} \n")
+    return directions
 
 
+# def getDeparture(route_info, direction)
+
+
+if __name__ == "__main__":
+    main()
