@@ -23,10 +23,11 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
     url_https = "https://timetableapi.ptv.vic.gov.au"
 
     # Signature
-    config = configparser.ConfigParser()
-    config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
-    # config.read('config.ini')
-    config.read(config_path)
+    # config = configparser.ConfigParser()
+    # config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+    # # config.read('config.ini')
+    # config.read(config_path)
+    config = loadConfig()
     developer_id = config['DEFAULT']['USER_ID']
     parameters.append(('devid', developer_id))
     api_key = config['DEFAULT']['API_KEY']
@@ -47,6 +48,21 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
     url = f"{url_https}/{request}?{encoded_parameters}"
     print(f"Url: {url}")    # ~test
     return url
+
+
+# Loading Config
+def loadConfig():
+    # Get the directory of the current script
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    # Go up one level to the parent directory where config.ini resides
+    parent_dir_path = os.path.join(dir_path, '..')
+    # Create the full path to the config.ini file
+    config_path = os.path.join(parent_dir_path, 'config.ini')
+
+    config = configparser.ConfigParser()
+    config.read(config_path)
+
+    return config
 
 
 # Gets stops by Location (Latitude, Longitude)
