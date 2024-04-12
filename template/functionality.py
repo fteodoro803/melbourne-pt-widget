@@ -1,5 +1,5 @@
 from requests import Response
-import ptv_api as ptv
+from template import ptv_api as ptv
 from typing import Dict, Any            # for typehints (JSON)
 
 

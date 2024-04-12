@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
 import json
+import sys
+import os
 
-import requests
-import ptv_api as ptv
-import utilities
-import functionality
+from template import ptv_api as ptv
+from template import utilities
+from template import functionality
 
 # Test Variables #
 
@@ -30,11 +30,11 @@ import functionality
 
 # Melb Central
 latitude, longitude = -37.811359153253406, 144.96215876061984
-route_types = [0,1]
+route_types = [0, 1]
 max_results = 1
 max_distance = 500
-route_type = 1      # tram
-stop_id = 2718      # tram
+route_type = 1  # tram
+stop_id = 2718  # tram
 # route_type = 0      # train
 # stop_id = 1120      # train
 
@@ -54,13 +54,13 @@ stop_id = 2718      # tram
 # Test Departures
 # expands = None
 # expands = ["Direction", "Stop", "Route"]
-expands = ["Direction", "Disruption", "Stop", "Route", "VehicleDescription"]
-# expands = ["All"]
+# expands = ["Direction", "Disruption", "Stop", "Route", "VehicleDescription"]
+expands = ["All"]
 # departures = ptv.departures(route_type, stop_id, route_id, max_results=3, expand=expands)    # JSON File
-departures = ptv.departures(route_type, stop_id, max_results=1, expand=expands)    # JSON File , no Direction ID, no Route ID
+departures = ptv.departures(route_type, stop_id, max_results=1,
+                            expand=expands)  # JSON File , no Direction ID, no Route ID
 new_departures = utilities.convertDepartureTimesToLocalTime(departures.json())
 print(f"Departures for stopID {stop_id}, routeType {route_type}: \n{json.dumps(new_departures, indent=4)} \n")
-
 
 # Widget Functionality Testing #
 
