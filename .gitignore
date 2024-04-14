@@ -1,2 +1,3 @@
-/config.ini
-/qodana.yaml
+config.ini
+qodana.yaml
+.idea/

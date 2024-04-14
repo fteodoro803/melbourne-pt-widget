@@ -7,9 +7,14 @@ The functionality here is a template, which should be converted to the programmi
 For the program to work, paste your User/Developer ID and API Key in the *config.ini* file. 
 
 ### Dependencies
-- python 3.10
-- requests 2.31.0
-- pytest 8.1.1
+- Python Base Template
+  - python 3.10
+  - requests 2.31.0
+  - pytest 8.1.1
+- MAUI Application
+  - Microsoft .NET SDK 8.0.204
+  - AdaptiveCards 3.1.0
+  - Java JDK 11 (not sure, this might be a Jetbrains Rider dependency)
 
 ### Notes
 - Changes to config.ini __*must*__ not be pushed
@@ -59,6 +64,8 @@ For the program to work, paste your User/Developer ID and API Key in the *config
   - Notification for Disruptions?
     - A way of notifying that a Tram is going to the depot/stops early
     - Cancellation?
+- iOS
+  - Xamarin on Rider????
 
 ### Testing
 - PyTest
