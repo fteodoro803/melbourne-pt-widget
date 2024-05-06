@@ -7,11 +7,26 @@ namespace maui.Services;
 
 public class PtvApiService : IPtvApiService
 {
+    // API Credentials
     private readonly IConfiguration _config;
-
+    private readonly string _userID;
+    private readonly string _apiKey;
+    
     public PtvApiService(IConfiguration config)
     {
         _config = config;
+        _userID = config["DEVELOPER_CREDENTIALS:USER_ID"];
+        _apiKey = config["DEVELOPER_CREDENTIALS:API_KEY"];
+
+        if (config == null)
+        {
+            throw new SystemException("config does not exist / is empty");
+        }
+
+        if (_userID.Length == 0 || _apiKey.Length == 0)
+        {
+            throw new SystemException("USER_ID or API_KEY is empty");
+        }
     }
 
     public Task<string> GetUrl()
@@ -27,13 +42,6 @@ public class PtvApiService : IPtvApiService
 
     public string GetApiCredentials()
     {
-        // Getting config.json
-        var configValues = _config.AsEnumerable();
-        
-        // Converting to String
-        var jsonString = JsonConvert.SerializeObject(configValues, Formatting.Indented);
-        
-        Console.WriteLine(jsonString);
-        return jsonString;
+        return _userID;
     }
 }
