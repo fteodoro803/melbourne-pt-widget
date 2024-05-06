@@ -14,7 +14,7 @@
                 SemanticProperties.Description="dot net bot in a race car number eight" />
 
             <Label
-                Text="Hello, Fish!"
+                Text="Hello, User!"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
 
@@ -28,8 +28,11 @@
                 x:Name="CounterBtn"
                 Text="Click me" 
                 SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
+                Clicked="OnButtonClicked"
                 HorizontalOptions="Fill" />
+            
+            <Label x:Name="ApiLabel" Text="InitialText"></Label>
+            
         </VerticalStackLayout>
     </ScrollView>
 

@@ -52,12 +52,18 @@ def getURL(request: str, parameters: list[tuple[str, str]] = None) -> str:
 
 # Loading Config
 def loadConfig():
-    # Get the directory of the current script
+    # # Get the directory of the current script
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    # # Go up one level to the parent directory where config.ini resides
+    # parent_dir_path = os.path.join(dir_path, '..')
+    # # Create the full path to the config.ini file
+    # config_path = os.path.join(parent_dir_path, 'config.ini')
+    #
+    # config = configparser.ConfigParser()
+    # config.read(config_path)
+
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    # Go up one level to the parent directory where config.ini resides
-    parent_dir_path = os.path.join(dir_path, '..')
-    # Create the full path to the config.ini file
-    config_path = os.path.join(parent_dir_path, 'config.ini')
+    config_path = os.path.join(dir_path, 'config.ini')
 
     config = configparser.ConfigParser()
     config.read(config_path)

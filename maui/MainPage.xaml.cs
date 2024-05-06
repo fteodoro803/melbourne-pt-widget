@@ -1,23 +1,26 @@
-﻿namespace maui;
+﻿using maui.Services;
+
+namespace maui;
 
 public partial class MainPage : ContentPage
 {
     int count = 0;
+    
+    // ptv client
+    readonly IPtvApiService _ptv;
 
-    public MainPage()
+    public MainPage(IPtvApiService ptv)
     {
         InitializeComponent();
+        _ptv = ptv;
     }
 
-    private void OnCounterClicked(object sender, EventArgs e)
+    private async void OnButtonClicked(object sender, EventArgs e)
     {
+        // Sample counter button
         count++;
+        CounterBtn.Text = count == 1 ? $"Clicked {count} time" : $"Clicked {count} times";
 
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
-        else
-            CounterBtn.Text = $"Clicked {count} times";
-
-        SemanticScreenReader.Announce(CounterBtn.Text);
+        ApiLabel.Text = _ptv.GetApiCredentials();
     }
 }

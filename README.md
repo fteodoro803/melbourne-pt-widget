@@ -11,10 +11,12 @@ For the program to work, paste your User/Developer ID and API Key in the *config
   - python 3.10
   - requests 2.31.0
   - pytest 8.1.1
+  - tzdata
 - MAUI Application
   - Microsoft .NET SDK 8.0.204
   - AdaptiveCards 3.1.0
   - Java JDK 11 (not sure, this might be a Jetbrains Rider dependency)
+  - Newtonsoft.Json 13.0.3 (testing, for parsing JSONS )
 
 ### Notes
 - Changes to config.ini __*must*__ not be pushed
@@ -34,6 +36,11 @@ For the program to work, paste your User/Developer ID and API Key in the *config
     - direction is matched with route ids from _stops_ via _directions_
 - LucidChart:
   - https://lucid.app/lucidchart/82b010cd-4cd5-42c0-8c19-f3066488b55a/edit?viewport_loc=-1937%2C-126%2C4157%2C2105%2C0_0&invitationId=inv_6c5333c9-7546-45d1-8473-e3fdb2c4135c
+- MAUI
+  - PtvApiService is a Singleton bc
+    - it's fairly simple and stateless
+    - the service is purely for getting data
+    - Preferences can be loaded in before functionality
 
 ### To-Do
 - Priority: 
@@ -64,11 +71,17 @@ For the program to work, paste your User/Developer ID and API Key in the *config
   - Notification for Disruptions?
     - A way of notifying that a Tram is going to the depot/stops early
     - Cancellation?
+  - A setting filtering for PTV with specific descriptors (low floor, aircon, etc)
 - iOS
   - Xamarin on Rider????
+- Accessibility / Semantics support for MAUI app?
 
 ### Testing
 - PyTest
 - apiTests.py
   - Can't really do tests on valid/invalid URLS, since that's done by the API, but include these responses as tests maybe???
   - Maybe some tests for, if the site is down or something
+
+### Decisions
+- config.ini over appsettings.json
+  - both would contain the 
