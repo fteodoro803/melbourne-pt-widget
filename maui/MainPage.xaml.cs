@@ -21,6 +21,15 @@ public partial class MainPage : ContentPage
         count++;
         CounterBtn.Text = count == 1 ? $"Clicked {count} time" : $"Clicked {count} times";
 
-        ApiLabel.Text = _ptv.GetApiCredentials();
+        List<(string, string)> testParameters =
+        [
+            ("John", "Doe"),
+            ("Alice", "Smith"),
+            ("Bob", "Johnson")
+
+        ];
+        
+        ApiLabel.Text = await _ptv.GetRouteTypes();
+        UrlLabel.Text = _ptv.GetCurrentUrl();       // ~test
     }
 }

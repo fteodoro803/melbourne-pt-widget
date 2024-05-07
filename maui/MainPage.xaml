@@ -31,6 +31,8 @@
                 Clicked="OnButtonClicked"
                 HorizontalOptions="Fill" />
             
+            <Label x:Name="UrlLabel" Text="Url"></Label>
+            
             <Label x:Name="ApiLabel" Text="InitialText"></Label>
             
         </VerticalStackLayout>
