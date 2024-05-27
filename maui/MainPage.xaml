@@ -23,16 +23,15 @@
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Button
-                x:Name="CounterBtn"
-                Text="Click me" 
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnButtonClicked"
-                HorizontalOptions="Fill" />
+            
+            <Entry x:Name="RouteIdEntry" Placeholder="route_id" Keyboard="Default" />
+            <Entry x:Name="LocationEntry" Placeholder="location(lat,long)" Keyboard="Default" />
+            
+            <Button x:Name="RouteTypesBtn" Text="Route Types" Clicked="OnRouteTypeButtonClicked" />
+            <Button x:Name="RouteDirectionsBtn" Text="Route Directions" Clicked="OnRouteDirectionsButtonClicked" />
+            <Button x:Name="StopsBtn" Text="Stops" Clicked="OnStopsButtonClicked" />
             
             <Label x:Name="UrlLabel" Text="Url"></Label>
-            
             <Label x:Name="ApiLabel" Text="InitialText"></Label>
             
         </VerticalStackLayout>

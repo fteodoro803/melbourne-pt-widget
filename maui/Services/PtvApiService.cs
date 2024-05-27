@@ -6,6 +6,7 @@ using System.Web;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Cryptography;
+using Newtonsoft.Json.Linq;
 
 
 namespace maui.Services;
@@ -90,7 +91,8 @@ public class PtvApiService : IPtvApiService
         return queryString.ToString();
     }
 
-    public async Task<string> GetRouteTypes() // should be a Resposne equivalent type, not string 
+    // Gets Route Size
+    public async Task<string> GetRouteTypes() // should be a Response equivalent type, not string 
     {
         string url = GetUrl("/v3/route_types");
 
@@ -98,10 +100,131 @@ public class PtvApiService : IPtvApiService
         {
             HttpResponseMessage response = await client.GetAsync(url);
             string jsonResponse = await response.Content.ReadAsStringAsync();
-            
-            return jsonResponse;
+            string parsedJson = JToken.Parse(jsonResponse).ToString(Formatting.Indented);        // Parsing and Formatting the JSON Response for readability
+            return parsedJson;
         }
     }
+    
+    // Gets Route Directions
+    public async Task<string> GetRouteDirections(string routeId) // should be a Response equivalent type, not string 
+    {
+        int routeIdInt = int.Parse(routeId);
+        string url = GetUrl($"/v3/directions/route/{routeIdInt}");
+
+        using (HttpClient client = new HttpClient())
+        {
+            HttpResponseMessage response = await client.GetAsync(url);
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            string parsedJson = JToken.Parse(jsonResponse).ToString(Formatting.Indented);        // Parsing and Formatting the JSON Response for readability
+            return parsedJson;
+        }
+    }
+    
+    // Getting Stops based on Location
+    public async Task<string> GetStops(string location, List<int>? routeTypes = null, int? maxResults = null, int? maxDistance = null)
+    {
+        var parameters = new List<(string, string)>();
+
+        string[] locations = location.Split(",");
+        double latitude = double.Parse(locations[0]);
+        double longitude = double.Parse(locations[1]);
+
+        if (routeTypes != null)
+        {
+            foreach (var typeInt in routeTypes)
+            {
+                parameters.Add(("route_types", typeInt.ToString()));
+            }
+        }
+
+        if (maxResults != null)
+        {
+            parameters.Add(("max_results", maxResults.ToString()));
+        }
+
+        if (maxDistance != null)
+        {
+            parameters.Add(("max_distance", maxDistance.ToString()));
+        }
+
+        // PTV API request
+        string url = GetUrl($"/v3/stops/location/{latitude},{longitude}", parameters);
+
+        using (HttpClient client = new HttpClient())
+        {
+            HttpResponseMessage response = await client.GetAsync(url);
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            string parsedJson = JToken.Parse(jsonResponse).ToString(Formatting.Indented);        // Parsing and Formatting the JSON Response for readability
+            return parsedJson;
+        }
+    }
+    
+    // GET DEPARTURES UNEDITED
+    public async Task<string> Departures(int routeType, int stopId, int? routeId = null, int? directionId = null, DateTime? dateUtc = null, int? maxResults = null, List<string> expand = null)
+        {
+            var parameters = new List<(string, string)>();
+
+            // Direction
+            if (directionId.HasValue)
+            {
+                parameters.Add(("direction_id", directionId.Value.ToString()));
+            }
+
+            // Date
+            if (dateUtc.HasValue)
+            {
+                parameters.Add(("date_utc", dateUtc.Value.ToString("yyyy-MM-ddTHH:mm:ssZ")));
+            }
+
+            // Max Results
+            if (maxResults.HasValue)
+            {
+                parameters.Add(("max_results", maxResults.Value.ToString()));
+            }
+
+            // Expands
+            if (expand != null)
+            {
+                foreach (var expandStr in expand)
+                {
+                    parameters.Add(("expand", expandStr));
+                }
+            }
+
+            // PTV API request
+            string url;
+            if (routeId.HasValue)
+            {
+                if (parameters.Count >= 1)
+                {
+                    url = GetUrl($"/v3/departures/route_type/{routeType}/stop/{stopId}/route/{routeId}", parameters);
+                }
+                else
+                {
+                    url = GetUrl($"/v3/departures/route_type/{routeType}/stop/{stopId}/route/{routeId}");
+                }
+            }
+            else
+            {
+                if (parameters.Count >= 1)
+                {
+                    url = GetUrl($"/v3/departures/route_type/{routeType}/stop/{stopId}", parameters);
+                }
+                else
+                {
+                    url = GetUrl($"/v3/departures/route_type/{routeType}/stop/{stopId}");
+                }
+            }
+            
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(url);
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                string parsedJson = JToken.Parse(jsonResponse).ToString(Formatting.Indented);        // Parsing and Formatting the JSON Response for readability
+                return parsedJson;
+            }
+        }
+
     
     // TEST
     public string GetCurrentUrl()

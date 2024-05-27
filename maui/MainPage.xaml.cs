@@ -15,21 +15,23 @@ public partial class MainPage : ContentPage
         _ptv = ptv;
     }
 
-    private async void OnButtonClicked(object sender, EventArgs e)
+    private async void OnRouteTypeButtonClicked(object sender, EventArgs e)
     {
-        // Sample counter button
-        count++;
-        CounterBtn.Text = count == 1 ? $"Clicked {count} time" : $"Clicked {count} times";
-
-        List<(string, string)> testParameters =
-        [
-            ("John", "Doe"),
-            ("Alice", "Smith"),
-            ("Bob", "Johnson")
-
-        ];
-        
         ApiLabel.Text = await _ptv.GetRouteTypes();
+        UrlLabel.Text = _ptv.GetCurrentUrl();       // ~test
+    }
+    
+    private async void OnRouteDirectionsButtonClicked(object sender, EventArgs e)
+    {
+        string routeId = RouteIdEntry.Text;
+        ApiLabel.Text = await _ptv.GetRouteDirections(routeId);
+        UrlLabel.Text = _ptv.GetCurrentUrl();       // ~test
+    }
+    
+    private async void OnStopsButtonClicked(object sender, EventArgs e)
+    {
+        string location = LocationEntry.Text;
+        ApiLabel.Text = await _ptv.GetStops(location);
         UrlLabel.Text = _ptv.GetCurrentUrl();       // ~test
     }
 }
