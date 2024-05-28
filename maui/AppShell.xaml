@@ -11,5 +11,10 @@
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
+    
+    <!-- Registering other pages -->
+    <ShellContent
+        ContentTemplate="{DataTemplate local:AddPage}"
+        Route="AddPage" />
 
 </Shell>

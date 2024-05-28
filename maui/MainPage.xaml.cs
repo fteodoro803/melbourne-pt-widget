@@ -4,8 +4,6 @@ namespace maui;
 
 public partial class MainPage : ContentPage
 {
-    int count = 0;
-    
     // ptv client
     readonly IPtvApiService _ptv;
 
@@ -34,4 +32,12 @@ public partial class MainPage : ContentPage
         ApiLabel.Text = await _ptv.GetStops(location);
         UrlLabel.Text = _ptv.GetCurrentUrl();       // ~test
     }
+    
+    //* Navigation *//
+    // AddPage
+    private async void AddPageClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync("///AddPage");
+    }
+    
 }

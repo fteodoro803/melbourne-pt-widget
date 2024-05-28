@@ -24,8 +24,18 @@
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
             
-            <Entry x:Name="RouteIdEntry" Placeholder="route_id" Keyboard="Default" />
-            <Entry x:Name="LocationEntry" Placeholder="location(lat,long)" Keyboard="Default" />
+            <StackLayout>
+                <Button Text="Go to Add Page" Clicked="AddPageClicked" />
+            </StackLayout>
+            
+            <StackLayout Orientation="Vertical" Spacing="10">
+                <Label Text="route_id:" />
+                <Entry x:Name="RouteIdEntry" Placeholder="Enter route ID" Keyboard="Default" />
+            </StackLayout>
+            <StackLayout Orientation="Vertical" Spacing="10">
+                <Label Text="location(lat, long):" />
+                <Entry x:Name="LocationEntry" Placeholder="Enter location" Keyboard="Default" />
+            </StackLayout>
             
             <Button x:Name="RouteTypesBtn" Text="Route Types" Clicked="OnRouteTypeButtonClicked" />
             <Button x:Name="RouteDirectionsBtn" Text="Route Directions" Clicked="OnRouteDirectionsButtonClicked" />
