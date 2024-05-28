@@ -18,6 +18,9 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
         
+        // Different Pages
+        builder.Services.AddTransient<AddPage>();
+        
         // PTV Service
         builder.Services.AddSingleton<IPtvApiService, PtvApiService>();     // Singleton bc its fairly simple, program is stateless, just uses inputs (prefs) and spit outputs
         
