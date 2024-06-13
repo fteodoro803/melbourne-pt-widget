@@ -27,8 +27,8 @@ class Data {
 // Handles fetching Data from API
 class PtvApiService {
   // Credentials (Delete before committing to git !!!!!!!!!)
-  String userId = "3002772";
-  String apiKey = "22e5146f-b255-4ead-a64f-a21deb8acd2c";
+  String userId = "";
+  String apiKey = "";
 
   // Generate URL for API Calls
   Uri getURL(String request, {Map<String, String>? parameters}) {
