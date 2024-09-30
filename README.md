@@ -4,7 +4,14 @@ This application gives users features for easy access to information on PTV.
 The functionality here is a template, which should be converted to the programming language of whichever Operating System contains the widget.
 
 ### Setup
-For the program to work, paste your User/Developer ID and API Key in the *config.ini* file. 
+For the program to work, paste your User/Developer ID and API Key in the config files.
+  - Python/Template: config.ini
+  - Flutter: assets/cfg/config.json
+
+If developing, copy-paste these commands so that the developer credential files don't get tracked by Git:
+```
+git update-index --assume-unchanged template/config.ini
+```
 
 ### Dependencies
 - Python Base Template
@@ -12,11 +19,8 @@ For the program to work, paste your User/Developer ID and API Key in the *config
   - requests 2.31.0
   - pytest 8.1.1
   - tzdata
-- MAUI Application
-  - Microsoft .NET SDK 8.0.204
-  - AdaptiveCards 3.1.0
-  - Java JDK 11 (not sure, this might be a Jetbrains Rider dependency)
-  - Newtonsoft.Json 13.0.3 (testing, for parsing JSONS )
+- Flutter Application (run 'flutter pub get' to install dependencies (idk if u have to do this more than once))
+  - Http
 
 ### Notes
 - Changes to config.ini __*must*__ not be pushed
@@ -36,11 +40,6 @@ For the program to work, paste your User/Developer ID and API Key in the *config
     - direction is matched with route ids from _stops_ via _directions_
 - LucidChart:
   - https://lucid.app/lucidchart/82b010cd-4cd5-42c0-8c19-f3066488b55a/edit?viewport_loc=-1937%2C-126%2C4157%2C2105%2C0_0&invitationId=inv_6c5333c9-7546-45d1-8473-e3fdb2c4135c
-- MAUI
-  - PtvApiService is a Singleton bc
-    - it's fairly simple and stateless
-    - the service is purely for getting data
-    - Preferences can be loaded in before functionality
 
 ### To-Do
 - Priority: 
@@ -74,7 +73,8 @@ For the program to work, paste your User/Developer ID and API Key in the *config
   - A setting filtering for PTV with specific descriptors (low floor, aircon, etc)
 - iOS
   - Xamarin on Rider????
-- Accessibility / Semantics support for MAUI app?
+- Icons
+  - Cupertino_Icons in Flutter?
 
 ### Testing
 - PyTest
@@ -83,5 +83,4 @@ For the program to work, paste your User/Developer ID and API Key in the *config
   - Maybe some tests for, if the site is down or something
 
 ### Decisions
-- config.ini over appsettings.json
-  - both would contain the 
+

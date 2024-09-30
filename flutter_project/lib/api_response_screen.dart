@@ -14,7 +14,13 @@ class _ApiResponseScreenState extends State<ApiResponseScreen> {
   TextEditingController _routeIdController = TextEditingController();
   TextEditingController _locationIdController = TextEditingController();
   TextEditingController _routeTypeController = TextEditingController();
+  TextEditingController _routeTypesController = TextEditingController();
   TextEditingController _stopIdController = TextEditingController();
+  TextEditingController _maxResultsController = TextEditingController();
+  TextEditingController _maxDistanceController = TextEditingController();
+  TextEditingController _directionIdController = TextEditingController();
+  TextEditingController _expandController = TextEditingController();
+
 
 
   void fetchRouteTypes() async {
@@ -31,15 +37,19 @@ class _ApiResponseScreenState extends State<ApiResponseScreen> {
     });
   }
 
-  void fetchStops(String location) async {
-    Data responseData = await apiService.stops(location);
+  void fetchStops(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
+    Data responseData = await apiService.stops(location, routeTypes: routeTypes, maxResults: maxResults, maxDistance: maxDistance);
     setState(() {
       response = responseData;
     });
   }
 
-  void fetchDepartures(String routeType, String stopId, String? routeId) async {
-    Data responseData = await apiService.departures(routeType, stopId, routeId);
+  void fetchDepartures(String routeType, String stopId,
+      {String? routeId,
+      String? directionId,
+      String? maxResults,
+      String? expand}) async {
+    Data responseData = await apiService.departures(routeType, stopId, routeId: routeId, directionId: directionId, maxResults: maxResults, expand: expand);
     setState(() {
       response = responseData;
     });
@@ -56,39 +66,109 @@ class _ApiResponseScreenState extends State<ApiResponseScreen> {
         child: Column(
           children: [
             // TEXT FIELDS
-            TextField(
-              controller: _routeTypeController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Enter Route Type',
-              ),
-            ),
-            TextField(
-              controller: _routeIdController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Enter Route ID',
-              ),
-            ),
-            TextField(
-              controller: _locationIdController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Enter Location',
-              ),
-            ),
-            TextField(
-              controller: _stopIdController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Enter Stop',
-              ),
+
+            Wrap(
+              direction: Axis.horizontal,
+              spacing: 20,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: TextField(
+                    controller: _routeTypeController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Route Type',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: TextField(
+                    controller: _routeIdController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Route ID',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 300,
+                  child: TextField(
+                    controller: _locationIdController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Location --> -Latitude,-Longitude',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: TextField(
+                    controller: _stopIdController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Stop ID',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 200,
+                  child: TextField(
+                    controller: _routeTypesController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Route Types --> 1,2,3,4',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: TextField(
+                    controller: _maxResultsController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Max Results',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: TextField(
+                    controller: _maxDistanceController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Max Distance',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: TextField(
+                    controller: _directionIdController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Direction ID',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 200,
+                  child: TextField(
+                    controller: _expandController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Expand --> All,None,Disruption',
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             SizedBox(height: 16),
 
             // BUTTONS
-            Row(
+            Wrap(
+              direction: Axis.horizontal,
               children: [
                 ElevatedButton(
                   onPressed: () {
@@ -104,13 +184,13 @@ class _ApiResponseScreenState extends State<ApiResponseScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    fetchStops(_locationIdController.text);
+                    fetchStops(_locationIdController.text, routeTypes: _routeTypesController.text, maxResults: _maxResultsController.text, maxDistance: _maxDistanceController.text);
                   },
                   child: Text('Fetch Stops'),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    fetchDepartures(_routeTypeController.text, _stopIdController.text, _routeIdController.text);
+                    fetchDepartures(_routeTypeController.text, _stopIdController.text, routeId: _routeIdController.text, directionId: _directionIdController.text, maxResults: _maxResultsController.text, expand: _expandController.text);
                   },
                   child: Text('Fetch Departures'),
                 ),

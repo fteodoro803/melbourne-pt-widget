@@ -12,6 +12,7 @@ void _incrementCounter() {
 **/
 
 import 'dart:convert';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:crypto/crypto.dart';
@@ -27,13 +28,14 @@ class Data {
 // Handles fetching Data from API
 class PtvApiService {
   // Credentials (Delete before committing to git !!!!!!!!!)
-  String userId = "";
-  String apiKey = "";
+  String userId = GlobalConfiguration().get("userId");
+  String apiKey = GlobalConfiguration().get("apiKey");
 
   // Generate URL for API Calls
   Uri getURL(String request, {Map<String, String>? parameters}) {
     // Signature
-    parameters ??= {};
+    parameters ??= {};    // initialises if parameters is null
+    if (parameters.isEmpty) { parameters = {}; }    // initialises if parameters is empty
     parameters ['devid'] = userId;
 
     // Encode the api_key and message to bytes
@@ -77,7 +79,7 @@ class PtvApiService {
     String request = "/v3/route_types";
     Uri url = getURL(request);
     String response = await getResponse(url);
-    // print("(ptv_api_service -> routeTypes): response: $response");  // *test
+    // print("(pt v_api_service -> routeTypes): response: $response");  // *test
     return Data(url, response);
   }
 
@@ -91,25 +93,60 @@ class PtvApiService {
   }
 
   // Get Stops around a Location
-  Future<Data> stops(String location) async {
+  Future<Data> stops(String location,
+      {String? routeTypes, String? maxResults, String? maxDistance}) async {
     String request = "/v3/stops/location/$location";
-    Uri url = getURL(request);
+    Map<String, String> parameters = {};
+
+    // Parameter handling
+    if (routeTypes != null && routeTypes.isNotEmpty) {
+      List<String> routeTypesList = routeTypes.split(',');
+      for (int i=0; i<routeTypesList.length; i++) {
+        parameters['route_types'] = routeTypesList[i];
+      }
+    }
+    if (maxResults != null && maxResults.isNotEmpty) {
+      parameters['max_results'] = maxResults;
+    }
+    if (maxDistance != null && maxDistance.isNotEmpty) {
+      parameters['max_distance'] = maxDistance;
+    }
+
+    Uri url = getURL(request, parameters: parameters);
     String response = await getResponse(url);
     // print("(ptv_api_service -> stops): response: $response"); //*test
     return Data(url, response);
   }
 
   // Get Departures from a Stop
-  Future<Data> departures(String routeType, String stopId, String? routeId) async {
+  Future<Data> departures(String routeType, String stopId, {String? routeId, String? directionId, String? maxResults, String? expand}) async {
     String request;
-    if (routeId == null) {
+    if (routeId == null || routeId.isEmpty) {
       request = "/v3/departures/route_type/$routeType/stop/$stopId";
     }
     else {
       request = "/v3/departures/route_type/$routeType/stop/$stopId/route/$routeId";
     }
 
-    Uri url = getURL(request);
+    // Parameter Handling
+    Map<String, String> parameters = {};
+    if (directionId != null && directionId.isNotEmpty) {
+      parameters['direction_id'] = directionId;
+    }
+    if (maxResults != null && maxResults.isNotEmpty) {
+      parameters['max_results'] = maxResults;
+    }
+    print('expand: $expand');
+    if (expand != null && expand.isNotEmpty) {
+      List<String> expandList = expand.split(',');
+      print('expandList: $expandList');
+      for (int i=0; i<expandList.length; i++) {
+        parameters['expand'] = expandList[i];   // NOTE :::: SO FAR THIS IS WRONG BC IT OVERWRITES THE PREVIOUS EXPAND, BC THERE ARE NO DUPLICATE KEYS IN MAP
+      }
+      print('parameters: $parameters');
+    }
+
+    Uri url = getURL(request, parameters: parameters);
     String response = await getResponse(url);
     // print("(ptv_api_service -> departures): response: $response"); //*test
     return Data(url, response);
