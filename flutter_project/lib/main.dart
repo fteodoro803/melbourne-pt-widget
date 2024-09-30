@@ -4,8 +4,17 @@ import 'package:flutter/material.dart';
 import "ptv_api_service.dart";
 import "utilities.dart";
 import "api_response_screen.dart";
+import 'package:global_configuration/global_configuration.dart';
 
-void main() {
+// void main() {
+void main() async {
+  // Ensures Flutter bindings are initialised
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Loads Config
+  await GlobalConfiguration().loadFromAsset("config");
+
+  // Runs app
   runApp(const MyApp());
 }
 
@@ -63,37 +72,17 @@ class _MyHomePageState extends State<MyHomePage> {
         // Safe area is so the UI elements are below the notch
         child: Column(
           children: [
+            // DEV INPUT TESTING
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/apiResponse');
               },
               child: const Text('Go to API Response Viewer'),
             ),
-            Row(
-              children: [
-                Text("Request: "),
-                SizedBox(
-                    width: 300,
-                    child: TextField(
-                      controller: requestController,
-                      decoration: InputDecoration(),
-                    )),
-              ],
-            ),
-            Row(
-              children: [
-                Text("Location: "),
-                SizedBox(
-                    width: 250,
-                    child: TextField(
-                      controller: locationController,
-                      decoration: InputDecoration(),
-                    )),
-                ElevatedButton(onPressed: getLocation, child: Text("Auto")),
-              ],
-            ),
+
+            // ADD PAGE
             ElevatedButton(
-                onPressed: handleRouteTypes, child: Text("RouteTypes")),
+                onPressed: handleRouteTypes, child: Text("Add PT")),
           ],
         ),
       ),
