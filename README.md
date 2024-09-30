@@ -4,14 +4,16 @@ This application gives users features for easy access to information on PTV.
 The functionality here is a template, which should be converted to the programming language of whichever Operating System contains the widget.
 
 ### Setup
-For the program to work, paste your User/Developer ID and API Key in the config files.
+For the program to work, paste your User/Developer ID and API Key in the respective config files.
   - Python/Template: config.ini
   - Flutter: assets/cfg/config.json
 
 If developing, copy-paste these commands so that the developer credential files don't get tracked by Git:
 ```
 git update-index --assume-unchanged template/config.ini
+git update-index --assume-unchanged flutter_project/assets/cfg/config.json
 ```
+*Make sure to cd to the root of the project directory
 
 ### Dependencies
 - Python Base Template
