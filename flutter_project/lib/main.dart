@@ -1,6 +1,9 @@
 import "dart:io";
 
 import 'package:flutter/material.dart';
+import "package:flutter_project/select_route_type_screen.dart";
+// add cupertino for apple version
+
 import "ptv_api_service.dart";
 import "utilities.dart";
 import "api_response_screen.dart";
@@ -31,8 +34,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
+
+        // Pages/Screens
         routes: {
           '/apiResponse': (context) => ApiResponseScreen(),
+          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(),
         }
     );
   }
@@ -70,20 +76,22 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: SafeArea(
         // Safe area is so the UI elements are below the notch
-        child: Column(
-          children: [
-            // DEV INPUT TESTING
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/apiResponse');
-              },
-              child: const Text('Go to API Response Viewer'),
-            ),
+        child: Center(
+          child: Column(
+            children: [
+              // DEV INPUT TESTING
+              ElevatedButton(
+                onPressed: () {Navigator.pushNamed(context, '/apiResponse');},
+                child: const Text('Go to API Response Viewer'),
+              ),
 
-            // ADD PAGE
-            ElevatedButton(
-                onPressed: handleRouteTypes, child: Text("Add PT")),
-          ],
+              // ADD PAGE
+              ElevatedButton(
+                  onPressed: () {Navigator.pushNamed(context, '/selectRouteTypeScreen');},
+                  child: Text("Add PT")
+              ),
+            ],
+          ),
         ),
       ),
     );
