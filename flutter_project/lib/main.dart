@@ -1,13 +1,12 @@
-import "dart:io";
-
 import 'package:flutter/material.dart';
+import "package:flutter_project/select_location_screen.dart";
 import "package:flutter_project/select_route_type_screen.dart";
 // add cupertino for apple version
 
 import "ptv_api_service.dart";
-import "utilities.dart";
 import "api_response_screen.dart";
 import 'package:global_configuration/global_configuration.dart';
+import 'selections.dart';
 
 // void main() {
 void main() async {
@@ -18,29 +17,31 @@ void main() async {
   await GlobalConfiguration().loadFromAsset("config");
 
   // Runs app
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final selections = Selections();    // stores new user selections
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
 
         // Pages/Screens
         routes: {
           '/apiResponse': (context) => ApiResponseScreen(),
-          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(),
-        }
-    );
+          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(userSelections: selections),
+          '/selectLocationScreen': (context) => SelectLocationScreen(userSelections: selections),
+        });
   }
 }
 
@@ -74,6 +75,10 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text("PTV App"),
+        centerTitle: true,
+      ),
       body: SafeArea(
         // Safe area is so the UI elements are below the notch
         child: Center(
@@ -81,15 +86,18 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               // DEV INPUT TESTING
               ElevatedButton(
-                onPressed: () {Navigator.pushNamed(context, '/apiResponse');},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/apiResponse');
+                },
                 child: const Text('Go to API Response Viewer'),
               ),
 
               // ADD PAGE
               ElevatedButton(
-                  onPressed: () {Navigator.pushNamed(context, '/selectRouteTypeScreen');},
-                  child: Text("Add PT")
-              ),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/selectRouteTypeScreen');
+                  },
+                  child: Text("+")),
             ],
           ),
         ),
