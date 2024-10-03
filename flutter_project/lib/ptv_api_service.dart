@@ -27,7 +27,6 @@ class Data {
 
 // Handles fetching Data from API
 class PtvApiService {
-  // Credentials (Delete before committing to git !!!!!!!!!)
   String userId = GlobalConfiguration().get("userId");
   String apiKey = GlobalConfiguration().get("apiKey");
 
