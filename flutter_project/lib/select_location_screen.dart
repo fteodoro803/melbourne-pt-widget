@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'selections.dart';
 
@@ -12,12 +13,21 @@ class SelectLocationScreen extends StatefulWidget {
 }
 
 class _SelectLocationScreenState extends State<SelectLocationScreen> {
+  String _screenName = "SelectLocation";
+  TextEditingController _locationController = TextEditingController();    // Placeholder until map api is implemented
+
+  // Initialising State
   @override
   void initState() {
     super.initState();
-    print(widget.userSelections.toString());
+
+    // Debug Printing
+    if (kDebugMode) {
+      print("Screen: $_screenName\n${widget.userSelections}");
+    }
   }
 
+  // Rendering
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +35,30 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
         title: Text("Select Location"),
         centerTitle: true,
       ),
-      body: Placeholder(),
+      body: Column(
+        children: [
+          SizedBox(
+            width: 300,
+            child: TextField(
+              controller: _locationController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Latitude,Longitude',
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 100,
+            child: ElevatedButton(
+              onPressed: () {
+                widget.userSelections.selectedLocation = _locationController.text;
+                Navigator.pushNamed(context, '/selectStopScreen');
+              },
+              child: Text("Next"),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
