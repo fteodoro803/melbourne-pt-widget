@@ -73,10 +73,9 @@ git update-index --assume-unchanged flutter_project/assets/cfg/config.json
     - A way of notifying that a Tram is going to the depot/stops early
     - Cancellation?
   - A setting filtering for PTV with specific descriptors (low floor, aircon, etc)
-- iOS
-  - Xamarin on Rider????
-- Icons
-  - Cupertino_Icons in Flutter?
+- Appearance
+  - for Android --> Material
+  - for Apple --> Cupertino
 
 ### Testing
 - PyTest
@@ -85,4 +84,8 @@ git update-index --assume-unchanged flutter_project/assets/cfg/config.json
   - Maybe some tests for, if the site is down or something
 
 ### Decisions
+- Every variable will be of String type, because the API handles the numbers in strings
+
+### References
+- [Sending Data across Screens][https://docs.flutter.dev/cookbook/navigation/passing-data]
 
