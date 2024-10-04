@@ -87,5 +87,5 @@ git update-index --assume-unchanged flutter_project/assets/cfg/config.json
 - Every variable will be of String type, because the API handles the numbers in strings
 
 ### References
-- [Sending Data across Screens][https://docs.flutter.dev/cookbook/navigation/passing-data]
+- [Sending Data across Screens](https://docs.flutter.dev/cookbook/navigation/passing-data]=)
 
