@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:flutter_project/select_location_screen.dart";
 import "package:flutter_project/select_route_type_screen.dart";
+import "package:flutter_project/select_stop_screen.dart";
 // add cupertino for apple version
 
 import "ptv_api_service.dart";
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
           '/apiResponse': (context) => ApiResponseScreen(),
           '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(userSelections: selections),
           '/selectLocationScreen': (context) => SelectLocationScreen(userSelections: selections),
+          '/selectStopScreen': (context) => SelectStopScreen(userSelections: selections),
         });
   }
 }
