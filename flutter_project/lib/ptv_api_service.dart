@@ -20,7 +20,7 @@ import 'package:crypto/crypto.dart';
 // Data type for PTV API Responses
 class Data {
   Uri url;
-  String response;
+  Map<String, dynamic>? response;    // json response
 
   Data(this.url, this.response);
 }
@@ -58,18 +58,20 @@ class PtvApiService {
   }
 
   // Get JSON Response
-  Future<String> getResponse(Uri url) async {
+  Future<Map<String, dynamic>?> getResponse(Uri url) async {
     try {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        return JsonEncoder.withIndent('  ').convert(jsonResponse); // human-readable JSON
+        return jsonResponse;
       } else {
-        return "Response Error (ptv_api_service): ${response.statusCode}: ${response.reasonPhrase}";
+        print("Response Error (ptv_api_service): ${response.statusCode}: ${response.reasonPhrase}");
+        return null;
       }
     } catch (e) {
-      return "(ptv_api_service -> getResponse): Fetching error occurred: $e";
+      print("(ptv_api_service -> getResponse): Fetching error occurred: $e");
+      return null;
     }
   }
 
@@ -77,7 +79,7 @@ class PtvApiService {
   Future<Data> routeTypes() async {
     String request = "/v3/route_types";
     Uri url = getURL(request);
-    String response = await getResponse(url);
+    Map<String, dynamic>? response = await getResponse(url);
     // print("(pt v_api_service -> routeTypes): response: $response");  // *test
     return Data(url, response);
   }
@@ -86,7 +88,7 @@ class PtvApiService {
   Future<Data> routeDirections(String routeId) async {
     String request = "/v3/directions/route/$routeId";
     Uri url = getURL(request);
-    String response = await getResponse(url);
+    Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> routeDirections): response: $response"); //*test
     return Data(url, response);
   }
@@ -112,7 +114,7 @@ class PtvApiService {
     }
 
     Uri url = getURL(request, parameters: parameters);
-    String response = await getResponse(url);
+    Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> stops): response: $response"); //*test
     return Data(url, response);
   }
@@ -146,7 +148,7 @@ class PtvApiService {
     }
 
     Uri url = getURL(request, parameters: parameters);
-    String response = await getResponse(url);
+    Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> departures): response: $response"); //*test
     return Data(url, response);
   }

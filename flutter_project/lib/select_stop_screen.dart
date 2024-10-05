@@ -38,10 +38,13 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().stops(location!, routeTypes: routeType);
-    Map<String, dynamic> jsonResponse = jsonDecode(data.response);
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Early Exit
+    if (data.response == null) {print("NULL DATA RESPONSE --> Improper Location Data"); return;}
 
     // Populating Stops List
-    for (var stop in jsonResponse["stops"]) {
+    for (var stop in jsonResponse!["stops"]) {
       for (var route in stop["routes"]) {
         if (route["route_type"].toString() != widget.userSelections.routeType) {continue;}
 
@@ -74,7 +77,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         itemCount: _stops.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text("${_stops[index].name}: ${_stops[index].routeName!} (${_stops[index].routeNumber})"),
+            // title: Text("${_stops[index].name}: ${_stops[index].routeName!} (${_stops[index].routeNumber})"),
+            title: Text("StopName: RouteName (RouteNumber)"),
             onTap: () {            },
           );
         },

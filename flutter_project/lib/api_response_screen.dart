@@ -10,7 +10,7 @@ class _ApiResponseScreenState extends State<ApiResponseScreen> {
   PtvApiService apiService = PtvApiService();
 
   // Input Values and Responses
-  Data response = Data(Uri(), '');
+  Data response = Data(Uri(), null);    // was previously '' but now null for the conversion from JSON string to raw json
   TextEditingController _routeIdController = TextEditingController();
   TextEditingController _locationIdController = TextEditingController();
   TextEditingController _routeTypeController = TextEditingController();
@@ -201,7 +201,7 @@ class _ApiResponseScreenState extends State<ApiResponseScreen> {
             Expanded(
               child: SingleChildScrollView(
                 child: Text(
-                  response.response,
+                  response.toString(),
                   style: TextStyle(fontSize: 14),
                 ),
               ),

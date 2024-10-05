@@ -38,10 +38,10 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   Future<void> fetchRouteTypes() async {
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().routeTypes();
-    Map<String, dynamic> jsonResponse = jsonDecode(data.response);
+    Map<String, dynamic>? jsonResponse = data.response;
 
     // Populating RouteTypes List                                                         // add case for if 0
-    for (var entry in jsonResponse["route_types"]) {
+    for (var entry in jsonResponse!["route_types"]) {
       RouteType newRouteType = RouteType();
       newRouteType.type = entry["route_type"].toString();
       newRouteType.name = entry["route_type_name"];
