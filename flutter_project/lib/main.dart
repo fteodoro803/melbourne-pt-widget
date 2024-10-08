@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import "package:flutter_project/select_location_screen.dart";
-import "package:flutter_project/select_direction_screen.dart";
-import "package:flutter_project/select_route_type_screen.dart";
-import "package:flutter_project/select_stop_screen.dart";
+import "package:flutter_project/addScreens/select_location_screen.dart";
+import "package:flutter_project/addScreens/select_direction_screen.dart";
+import "package:flutter_project/addScreens/select_route_type_screen.dart";
+import "package:flutter_project/addScreens/select_stop_screen.dart";
 // add cupertino for apple version
 
 import "ptv_api_service.dart";

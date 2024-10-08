@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptvInfoClasses/RouteTypeInfo.dart';
-import 'ptv_api_service.dart';
-import 'transport.dart';
+import '../ptv_api_service.dart';
+import '../transport.dart';
 
 
 class SelectRouteTypeScreen extends StatefulWidget {
