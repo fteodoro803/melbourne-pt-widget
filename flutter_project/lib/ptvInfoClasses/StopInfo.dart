@@ -1,10 +1,6 @@
-import 'package:flutter_project/ptvInfoClasses/RouteInfo.dart';
-
 class Stop {
   String id;
   String name;
-
-  late Route route;
 
   // idk if these are necessary
   String? suburb;
@@ -15,8 +11,8 @@ class Stop {
 
   @override
   String toString() {
-    return "Stop:"
-        "\n\tID: $id"
-        "\n\tName: $name";
+    return "Stop:\n"
+        "\tID: $id\n"
+        "\tName: $name\n";
   }
 }

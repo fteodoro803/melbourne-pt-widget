@@ -8,6 +8,6 @@ class Location {
 
   @override
   String toString() {
-    return "Location: $location";
+    return "Location: $location\n";
   }
 }

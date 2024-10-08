@@ -2,15 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptvInfoClasses/RouteTypeInfo.dart';
 import 'ptv_api_service.dart';
-import 'selections.dart';
+import 'transport.dart';
 
 
 class SelectRouteTypeScreen extends StatefulWidget {
   // Constructor
-  const SelectRouteTypeScreen({super.key, required this.userSelections});
+  const SelectRouteTypeScreen({super.key, required this.transport});
 
-  // Stores User Selections
-  final Selections userSelections;
+  // Stores user Transport details
+  final Transport transport;
 
   @override
   State<SelectRouteTypeScreen> createState() => _SelectRouteTypeScreenState();
@@ -55,11 +55,11 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   }
 
   void setRouteType(int index) {
-    widget.userSelections.routeType = _routeTypesClass[index];
+    widget.transport.routeType = _routeTypesClass[index];
 
     // TestPrint
     if (kDebugMode) {
-      print(widget.userSelections);
+      print(widget.transport);
     }
   }
 

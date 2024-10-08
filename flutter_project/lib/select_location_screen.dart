@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptvInfoClasses/LocationInfo.dart';
-import 'selections.dart';
+import 'transport.dart';
 
 class SelectLocationScreen extends StatefulWidget {
-  const SelectLocationScreen({super.key, required this.userSelections});
+  const SelectLocationScreen({super.key, required this.transport});
 
   // Stores User Selections
-  final Selections userSelections;
+  final Transport transport;
 
   @override
   State<SelectLocationScreen> createState() => _SelectLocationScreenState();
@@ -30,11 +30,11 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
 
   void setLocation() {
     Location newLocation = Location(location: _locationController.text);
-    widget.userSelections.location = newLocation;
+    widget.transport.location = newLocation;
 
     // TestPrint
     if (kDebugMode) {
-      print(widget.userSelections);
+      print(widget.transport);
     }
   }
 

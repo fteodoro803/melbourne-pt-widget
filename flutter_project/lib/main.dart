@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import "package:flutter_project/select_location_screen.dart";
+import "package:flutter_project/select_direction_screen.dart";
 import "package:flutter_project/select_route_type_screen.dart";
 import "package:flutter_project/select_stop_screen.dart";
 // add cupertino for apple version
 
 import "ptv_api_service.dart";
-import "api_response_screen.dart";
 import 'package:global_configuration/global_configuration.dart';
-import 'selections.dart';
+import 'transport.dart';
 
 // void main() {
 void main() async {
@@ -24,7 +24,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  final selections = Selections();    // stores new user selections
+  final selections = Transport();    // stores new user selections
 
   // This widget is the root of your application.
   @override
@@ -39,10 +39,10 @@ class MyApp extends StatelessWidget {
 
         // Pages/Screens
         routes: {
-          '/apiResponse': (context) => ApiResponseScreen(),
-          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(userSelections: selections),
-          '/selectLocationScreen': (context) => SelectLocationScreen(userSelections: selections),
-          '/selectStopScreen': (context) => SelectStopScreen(userSelections: selections),
+          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(transport: selections),
+          '/selectLocationScreen': (context) => SelectLocationScreen(transport: selections),
+          '/selectStopScreen': (context) => SelectStopScreen(transport: selections),
+          '/selectDirectionScreen': (context) => SelectDirectionScreen(transport: selections),
         });
   }
 }
@@ -86,13 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Center(
           child: Column(
             children: [
-              // DEV INPUT TESTING
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/apiResponse');
-                },
-                child: const Text('Go to API Response Viewer'),
-              ),
+              // TRANSIT OPTIONS DISPLAY
 
               // ADD PAGE
               ElevatedButton(

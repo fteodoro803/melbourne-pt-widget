@@ -6,6 +6,8 @@ class RouteType {
 
   @override
   String toString() {
-    return "RouteType: $type - $name\n";
+    return "RouteType:\n"
+        "\tType: $type\n"
+        "\tName: $name\n";
   }
 }

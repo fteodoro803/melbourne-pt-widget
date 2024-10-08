@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/selections.dart';
+import 'package:flutter_project/transport.dart';
 import 'ptv_api_service.dart';
 import 'ptvInfoClasses/StopInfo.dart';
 import 'ptvInfoClasses/RouteInfo.dart' as PTRoute;    // to avoid conflict with material's "Route"
 
 class SelectStopScreen extends StatefulWidget {
-  const SelectStopScreen({super.key, required this.userSelections});
+  const SelectStopScreen({super.key, required this.transport});
 
-  final Selections userSelections;
+  final Transport transport;
 
   @override
   State<SelectStopScreen> createState() => _SelectStopScreenState();
@@ -17,6 +17,7 @@ class SelectStopScreen extends StatefulWidget {
 class _SelectStopScreenState extends State<SelectStopScreen> {
   String _screenName = "SelectStop";
   List<Stop> _stops = [];
+  List<PTRoute.Route> _routes = [];
 
   // Initialising State
   @override
@@ -32,8 +33,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
   // Fetch Stops            -- do tests to see if not null
   Future<void> fetchStops() async {
-    String? location = widget.userSelections.location?.location;
-    String? routeType = widget.userSelections.routeType?.type;
+    String? location = widget.transport.location?.location;
+    String? routeType = widget.transport.routeType?.type;
 
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().stops(location!, routeTypes: routeType);
@@ -45,7 +46,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     // Populating Stops List
     for (var stop in jsonResponse!["stops"]) {
       for (var route in stop["routes"]) {
-        if (route["route_type"].toString() != widget.userSelections.routeType!.type) {continue;}
+        if (route["route_type"].toString() != widget.transport.routeType!.type) {continue;}
 
         String stopId = stop["stop_id"].toString();
         String stopName = stop["stop_name"];
@@ -56,13 +57,22 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         String routeId = route["route_id"].toString();
         PTRoute.Route newRoute = PTRoute.Route(name: routeName,number: routeNumber, id: routeId);
 
-        newStop.route = newRoute;
-
         _stops.add(newStop);
+        _routes.add(newRoute);
       }
     }
 
     setState(() {});
+  }
+
+  void setStopAndRoute(index) {
+    widget.transport.stop = _stops[index];
+    widget.transport.route = _routes[index];
+
+    // TestPrint
+    if (kDebugMode) {
+      print(widget.transport);
+    }
   }
 
   @override
@@ -78,10 +88,11 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         itemCount: _stops.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text("${_stops[index].name}: (${_stops[index].route.number})"),
-            subtitle: Text(_stops[index].route.name),
+            title: Text("${_stops[index].name}: (${_routes[index].number})"),
+            subtitle: Text(_routes[index].name),
             onTap: () {
-
+              setStopAndRoute(index);
+              Navigator.pushNamed(context, '/selectDirectionScreen');
             },
 
           );
