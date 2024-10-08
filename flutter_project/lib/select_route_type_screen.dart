@@ -2,7 +2,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'ptv_api_service.dart';
-import 'dart:convert';
 import 'selections.dart';
 import 'ptvInfoClasses/routeTypeInfo.dart';
 
@@ -39,6 +38,9 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().routeTypes();
     Map<String, dynamic>? jsonResponse = data.response;
+
+    // Early Exit     // Make it display on screen if there is no data
+    if (data.response == null) {print("NULL DATA RESPONSE --> Improper Location Data"); return;}
 
     // Populating RouteTypes List                                                         // add case for if 0
     for (var entry in jsonResponse!["route_types"]) {
