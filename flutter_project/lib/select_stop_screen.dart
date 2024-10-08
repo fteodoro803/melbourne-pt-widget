@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/selections.dart';
@@ -77,9 +75,10 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         itemCount: _stops.length,
         itemBuilder: (context, index) {
           return ListTile(
-            // title: Text("${_stops[index].name}: ${_stops[index].routeName!} (${_stops[index].routeNumber})"),
-            title: Text("StopName: RouteName (RouteNumber)"),
+            title: Text("${_stops[index].name}: (${_stops[index].routeNumber})"),
+            subtitle: Text("${_stops[index].routeName!} bv"),
             onTap: () {            },
+
           );
         },
       ),
