@@ -1,14 +1,12 @@
-class Selections {      // consider changing these to the Info classes
-  // route
-  String? routeType;   // public transport type (tram, train, bus, etc)
-  String? routeTypeName;  // for readability
-  String? routeId;
-  String? routeName;
-  String? routeNumber;
+import 'package:flutter_project/ptvInfoClasses/LocationInfo.dart';
+import 'package:flutter_project/ptvInfoClasses/RouteTypeInfo.dart';
 
+class Selections {      // consider changing these to the Info classes
+  // Public Transport Type
+  RouteType? routeType;
 
   // location
-  String? selectedLocation;
+  Location? location;
 
   // stop
   String? stopId;
@@ -19,7 +17,11 @@ class Selections {      // consider changing these to the Info classes
 
   @override
   String toString() {
-    return "Route Type: $routeType - $routeTypeName \n"
-        "Selected Location: $selectedLocation";
+    String str = "";
+
+    if (routeType != null) {str += routeType.toString();}
+    if (location != null) {str += location.toString();}
+
+    return str;
   }
 }

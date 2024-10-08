@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/ptvInfoClasses/LocationInfo.dart';
 import 'selections.dart';
 
 class SelectLocationScreen extends StatefulWidget {
@@ -23,7 +24,17 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
 
     // Debug Printing
     if (kDebugMode) {
-      print("Screen: $_screenName\n${widget.userSelections}");
+      print("Screen: $_screenName");
+    }
+  }
+
+  void setLocation() {
+    Location newLocation = Location(location: _locationController.text);
+    widget.userSelections.location = newLocation;
+
+    // TestPrint
+    if (kDebugMode) {
+      print(widget.userSelections);
     }
   }
 
@@ -51,7 +62,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
             width: 100,
             child: ElevatedButton(
               onPressed: () {
-                widget.userSelections.selectedLocation = _locationController.text;
+                setLocation();
                 Navigator.pushNamed(context, '/selectStopScreen');
               },
               child: Text("Next"),

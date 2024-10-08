@@ -1,9 +1,9 @@
-// import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/ptvInfoClasses/RouteTypeInfo.dart';
 import 'ptv_api_service.dart';
 import 'selections.dart';
-import 'ptvInfoClasses/routeTypeInfo.dart';
+
 
 class SelectRouteTypeScreen extends StatefulWidget {
   // Constructor
@@ -29,7 +29,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
 
     // Debug Printing
     if (kDebugMode) {
-      print("Screen: $_screenName\n${widget.userSelections}");
+      print("Screen: $_screenName");
     }
   }
 
@@ -44,14 +44,23 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
 
     // Populating RouteTypes List                                                         // add case for if 0
     for (var entry in jsonResponse!["route_types"]) {
-      RouteType newRouteType = RouteType();
-      newRouteType.type = entry["route_type"].toString();
-      newRouteType.name = entry["route_type_name"];
+      String name = entry["route_type_name"];
+      String type = entry["route_type"].toString();
+      RouteType newRouteType = RouteType(name: name, type: type);
 
       _routeTypesClass.add(newRouteType);
     }
 
     setState(() {});
+  }
+
+  void setRouteType(int index) {
+    widget.userSelections.routeType = _routeTypesClass[index];
+
+    // TestPrint
+    if (kDebugMode) {
+      print(widget.userSelections);
+    }
   }
 
   // Rendering
@@ -68,12 +77,11 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
         itemCount: _routeTypesClass.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(_routeTypesClass[index].name!),
+            title: Text(_routeTypesClass[index].name),
             onTap: () {
-              widget.userSelections.routeType = _routeTypesClass[index].type;
-              widget.userSelections.routeTypeName = _routeTypesClass[index].name;
+              setRouteType(index);
               Navigator.pushNamed(context, '/selectLocationScreen');
-            },
+              },
           );
         },
       ),

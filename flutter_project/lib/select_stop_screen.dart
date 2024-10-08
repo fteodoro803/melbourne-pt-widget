@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/selections.dart';
 import 'ptv_api_service.dart';
 import 'ptvInfoClasses/StopInfo.dart';
+import 'ptvInfoClasses/RouteInfo.dart' as PTRoute;    // to avoid conflict with material's "Route"
 
 class SelectStopScreen extends StatefulWidget {
   const SelectStopScreen({super.key, required this.userSelections});
@@ -25,14 +26,14 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
     // Debug Printing
     if (kDebugMode) {
-      print("Screen: $_screenName\n${widget.userSelections}");
+      print("Screen: $_screenName");
     }
   }
 
   // Fetch Stops            -- do tests to see if not null
   Future<void> fetchStops() async {
-    String? location = widget.userSelections.selectedLocation;
-    String? routeType = widget.userSelections.routeType;
+    String? location = widget.userSelections.location?.location;
+    String? routeType = widget.userSelections.routeType?.type;
 
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().stops(location!, routeTypes: routeType);
@@ -44,18 +45,20 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     // Populating Stops List
     for (var stop in jsonResponse!["stops"]) {
       for (var route in stop["routes"]) {
-        if (route["route_type"].toString() != widget.userSelections.routeType) {continue;}
+        if (route["route_type"].toString() != widget.userSelections.routeType!.type) {continue;}
 
-        Stop newStop = Stop();
-        newStop.id = stop["stop_id"].toString();
-        newStop.name = stop["stop_name"];
-        newStop.suburb = stop["suburb"];
+        String stopId = stop["stop_id"].toString();
+        String stopName = stop["stop_name"];
+        Stop newStop = Stop(id: stopId, name: stopName);
 
-        newStop.routeName = route["route_name"];
-        newStop.routeNumber = route["route_number"];
+        String routeName = route["route_name"];
+        String routeNumber = route["route_number"].toString();
+        String routeId = route["route_id"].toString();
+        PTRoute.Route newRoute = PTRoute.Route(name: routeName,number: routeNumber, id: routeId);
+
+        newStop.route = newRoute;
 
         _stops.add(newStop);
-
       }
     }
 
@@ -75,9 +78,11 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         itemCount: _stops.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text("${_stops[index].name}: (${_stops[index].routeNumber})"),
-            subtitle: Text("${_stops[index].routeName!} bv"),
-            onTap: () {            },
+            title: Text("${_stops[index].name}: (${_stops[index].route.number})"),
+            subtitle: Text(_stops[index].route.name),
+            onTap: () {
+
+            },
 
           );
         },
