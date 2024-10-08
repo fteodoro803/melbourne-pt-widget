@@ -1,11 +1,22 @@
+import 'package:flutter_project/ptvInfoClasses/RouteInfo.dart';
+
 class Stop {
-  String? id;
-  String? name;
+  String id;
+  String name;
+
+  late Route route;
+
+  // idk if these are necessary
+  String? suburb;
   String? latitude;
   String? longitude;
-  String? suburb;
 
-  String? routeId;
-  String? routeName;
-  String? routeNumber;
+  Stop({required this.id, required this.name});
+
+  @override
+  String toString() {
+    return "Stop:"
+        "\n\tID: $id"
+        "\n\tName: $name";
+  }
 }
