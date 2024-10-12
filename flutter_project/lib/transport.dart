@@ -12,7 +12,7 @@ class Transport {
   Route? route;
   RouteDirection? direction;
 
-  // Next 3 Departures, update this every now and then
+  // Next 3 Departures, make a function to update this on selected intervals later
   List<Departure>? departures;
 
   @override

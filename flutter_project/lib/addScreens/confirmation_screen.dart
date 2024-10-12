@@ -19,7 +19,6 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
   String _screenName = "ConfirmationScreen";
-  List<Departure> _departures = [];
 
   @override
   void initState() {
@@ -44,8 +43,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     List<Departure> fetchedDepartures = await departureService.fetchDepartures(routeType, stopId, directionId, routeId);
 
     setState(() {
-      _departures = fetchedDepartures;
-      // widget.transport.departures = fetchedDepartures;
+      widget.transport.departures = fetchedDepartures;
     });
   }
 
@@ -70,11 +68,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
       // Generates List of Stops
       body: ListView.builder(      // old
-        itemCount: _departures.length,
+        itemCount: widget.transport.departures?.length ?? 0,    // if null, fallback to 0
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text("Scheduled: ${getTime(_departures[index].scheduledDeparture)}"),
-            subtitle: Text("Estimated: ${getTime(_departures[index].estimatedDeparture)}"),
+            title: Text("Scheduled: ${getTime(widget.transport.departures![index].scheduledDeparture)}"),
+            subtitle: Text("Estimated: ${getTime(widget.transport.departures![index].estimatedDeparture)}"),
             onTap: () {},
 
           );
