@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:flutter_project/addScreens/confirmation_screen.dart";
 import "package:flutter_project/addScreens/select_location_screen.dart";
 import "package:flutter_project/addScreens/select_direction_screen.dart";
 import "package:flutter_project/addScreens/select_route_type_screen.dart";
@@ -30,12 +31,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'PTV Widget App Demo',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: const MyHomePage(title: 'Demo Home Page'),
 
         // Pages/Screens
         routes: {
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
           '/selectLocationScreen': (context) => SelectLocationScreen(transport: selections),
           '/selectStopScreen': (context) => SelectStopScreen(transport: selections),
           '/selectDirectionScreen': (context) => SelectDirectionScreen(transport: selections),
+          '/confirmationScreen': (context) => ConfirmationScreen(transport: selections),
         });
   }
 }

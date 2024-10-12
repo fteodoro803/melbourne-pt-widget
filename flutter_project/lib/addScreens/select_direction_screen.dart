@@ -79,6 +79,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
             title: Text("${_directions[index].name} (${_directions[index].id})"),
             onTap: () {
               setDirection(index);
+              Navigator.pushNamed(context, '/confirmationScreen');
             },
 
           );

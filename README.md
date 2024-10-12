@@ -73,12 +73,12 @@ git update-index --assume-unchanged flutter_project/assets/cfg/config.json
 - Appearance
   - for Android --> Material
   - for Apple --> Cupertino
+- Show Disruptions from the Departures (expands=All) 
 
 ### Testing
-- PyTest
-- apiTests.py
-  - Can't really do tests on valid/invalid URLS, since that's done by the API, but include these responses as tests maybe???
-  - Maybe some tests for, if the site is down or something
+- Mockito?
+  - Learn how to mock
+  - To test how the UI behaves, without reliance on the API
 
 ### Decisions
 - Every variable will be of String type, because the API handles the numbers in strings
