@@ -4,7 +4,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptvInfoClasses/DepartureInfo.dart';
-import 'package:flutter_project/ptv_api_service.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/departure_service.dart';
 
@@ -33,58 +32,22 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     }
   }
 
-  // OLD FETCH DEPARTURES
+  // NEW FETCH DEPARTURES
   Future<void> fetchDepartures() async {
-    // Fetching Data and converting to JSON
     String routeType = widget.transport.routeType!.type;
     String stopId = widget.transport.stop!.id;
     String directionId = widget.transport.direction!.id;
     String routeId = widget.transport.route!.id;
-    String maxResults = "3";
-    String expands = "All";   //test
 
-    Data data = await PtvApiService().departures(routeType, stopId, directionId: directionId, routeId: routeId, maxResults: maxResults, expand: expands);
-    Map<String, dynamic>? jsonResponse = data.response;
+    // Gets Departures
+    DepartureService departureService = DepartureService();
+    List<Departure> fetchedDepartures = await departureService.fetchDepartures(routeType, stopId, directionId, routeId);
 
-    // Early Exit     // Make it display on screen if there is no data
-    if (data.response == null) {print("NULL DATA RESPONSE --> Improper Location Data"); return;}
-
-    // Populating RouteTypes List                                                         // add case for if 0
-    String? fetchedScheduledDeparture;
-    String? fetchedEstimatedDeparture;
-    DateTime? scheduledDepartureUTC;
-    DateTime? estimatedDepartureUTC;
-
-    for (var departure in jsonResponse!["departures"]) {
-      fetchedScheduledDeparture = departure["scheduled_departure_utc"];
-      scheduledDepartureUTC = fetchedScheduledDeparture != null ? DateTime.parse(fetchedScheduledDeparture) : null;
-
-      fetchedEstimatedDeparture = departure["estimated_departure_utc"];
-      estimatedDepartureUTC = fetchedEstimatedDeparture != null ? DateTime.parse(fetchedEstimatedDeparture) : null;
-
-      Departure newDeparture = Departure(scheduledDepartureUTC: scheduledDepartureUTC, estimatedDepartureUTC: estimatedDepartureUTC);
-      _departures.add(newDeparture);
-    }
-
-    setState(() {    });
+    setState(() {
+      _departures = fetchedDepartures;
+      // widget.transport.departures = fetchedDepartures;
+    });
   }
-
-  // // NEW FETCH DEPARTURES
-  // Future<void> fetchDepartures() async {
-  //   String routeType = widget.transport.routeType!.type;
-  //   String stopId = widget.transport.stop!.id;
-  //   String directionId = widget.transport.direction!.id;
-  //   String routeId = widget.transport.route!.id;
-  //
-  //   // Gets Departures
-  //   DepartureService departureService = DepartureService();
-  //   List<Departure> fetchedDepartures = await departureService.fetchDepartures(routeType, stopId, directionId, routeId);
-  //
-  //   setState(() {
-  //     _departures = fetchedDepartures;
-  //     // widget.transport.departures = fetchedDepartures;
-  //   });
-  // }
 
   // Returns the Time from a DateTime variable
   String? getTime(DateTime? dateTime) {
