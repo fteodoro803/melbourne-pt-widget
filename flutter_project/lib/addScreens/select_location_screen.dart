@@ -30,6 +30,10 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
 
   void setLocation() {
     Location newLocation = Location(location: _locationController.text);
+
+    // Normalize the location input by removing spaces
+    newLocation.location = newLocation.location.replaceAll(' ', '');
+
     widget.transport.location = newLocation;
 
     // TestPrint
