@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
 import '../ptv_api_service.dart';
-import '../ptvInfoClasses/stop_info.dart';
-import '../ptvInfoClasses/route_info.dart' as PTRoute;    // to avoid conflict with material's "Route"
+import '../ptv_info_classes/stop_info.dart';
+import '../ptv_info_classes/route_info.dart' as PTRoute;    // to avoid conflict with material's "Route"
 
 class SelectStopScreen extends StatefulWidget {
   const SelectStopScreen({super.key, required this.transport});

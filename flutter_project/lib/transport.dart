@@ -1,9 +1,9 @@
-import 'package:flutter_project/ptvInfoClasses/departure_info.dart';
-import 'package:flutter_project/ptvInfoClasses/location_info.dart';
-import 'package:flutter_project/ptvInfoClasses/route_direction_info.dart';
-import 'package:flutter_project/ptvInfoClasses/route_info.dart';
-import 'package:flutter_project/ptvInfoClasses/route_type_info.dart';
-import 'package:flutter_project/ptvInfoClasses/stop_info.dart';
+import 'package:flutter_project/ptv_info_classes/departure_info.dart';
+import 'package:flutter_project/ptv_info_classes/location_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 
 class Transport {
   RouteType? routeType;

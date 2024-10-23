@@ -1,6 +1,6 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
-import 'package:flutter_project/ptvInfoClasses/departure_info.dart';
+import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 
 class DepartureService {

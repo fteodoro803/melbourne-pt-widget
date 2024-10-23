@@ -3,7 +3,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptvInfoClasses/departure_info.dart';
+import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/departure_service.dart';
 
