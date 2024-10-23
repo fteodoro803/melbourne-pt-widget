@@ -7,7 +7,7 @@ import 'package:flutter_project/ptvInfoClasses/departure_info.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/departure_service.dart';
 
-import 'package:flutter_project/CustomListTile.dart';
+import 'package:flutter_project/custom_list_tile.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key, required this.transport});
