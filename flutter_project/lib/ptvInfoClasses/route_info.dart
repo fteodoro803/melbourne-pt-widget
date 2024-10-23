@@ -1,4 +1,4 @@
-import 'package:flutter_project/ptvInfoClasses/RouteDirectionInfo.dart';
+import 'package:flutter_project/ptvInfoClasses/route_direction_info.dart';
 
 class Route {
   String id;

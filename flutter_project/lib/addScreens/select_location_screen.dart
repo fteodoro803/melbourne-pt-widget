@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptvInfoClasses/LocationInfo.dart';
+import 'package:flutter_project/ptvInfoClasses/location_info.dart';
 import '../transport.dart';
 
 class SelectLocationScreen extends StatefulWidget {

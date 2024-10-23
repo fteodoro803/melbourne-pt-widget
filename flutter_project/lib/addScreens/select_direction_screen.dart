@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptvInfoClasses/RouteDirectionInfo.dart';
+import 'package:flutter_project/ptvInfoClasses/route_direction_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 import '../transport.dart';
 

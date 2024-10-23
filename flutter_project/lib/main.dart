@@ -88,7 +88,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Center(
           child: Column(
             children: [
-              // TRANSIT OPTIONS DISPLAY
+              // TRANSPORT OPTIONS DISPLAY
+              // ListTiles of List<Transport>
 
               // ADD PAGE
               ElevatedButton(

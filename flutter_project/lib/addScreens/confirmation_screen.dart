@@ -3,9 +3,11 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptvInfoClasses/DepartureInfo.dart';
+import 'package:flutter_project/ptvInfoClasses/departure_info.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/departure_service.dart';
+
+import 'package:flutter_project/CustomListTile.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key, required this.transport});
@@ -40,7 +42,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
     // Gets Departures
     DepartureService departureService = DepartureService();
-    List<Departure> fetchedDepartures = await departureService.fetchDepartures(routeType, stopId, directionId, routeId);
+    List<Departure> fetchedDepartures = await departureService.fetchDepartures(
+        routeType, stopId, directionId, routeId);
 
     setState(() {
       widget.transport.departures = fetchedDepartures;
@@ -49,11 +52,13 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
   // Returns the Time from a DateTime variable
   String? getTime(DateTime? dateTime) {
-    if (dateTime == null) { return null; }
+    if (dateTime == null) {
+      return null;
+    }
 
     // Adds a '0' to the left, if Single digit time (ex: 7 becomes 07)
-    String hour = dateTime.hour.toString().padLeft(2,"0");
-    String minute = dateTime.minute.toString().padLeft(2,"0");
+    String hour = dateTime.hour.toString().padLeft(2, "0");
+    String minute = dateTime.minute.toString().padLeft(2, "0");
 
     return "$hour:$minute";
   }
@@ -67,16 +72,13 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       ),
 
       // Generates List of Stops
-      body: ListView.builder(      // old
-        itemCount: widget.transport.departures?.length ?? 0,    // if null, fallback to 0
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text("Scheduled: ${getTime(widget.transport.departures![index].scheduledDeparture)}"),
-            subtitle: Text("Estimated: ${getTime(widget.transport.departures![index].estimatedDeparture)}"),
-            onTap: () {},
-
-          );
-        },
+      body: ListTile(
+        isThreeLine: true,
+        title: Text(
+            "${widget.transport.routeType?.name} ${widget.transport.route?.number} - ${widget.transport.direction?.name}"),
+        subtitle: Text("${widget.transport.stop?.name}\n" // Stop Name
+            "Next Departure: ${getTime(widget.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
+        onTap: () {},
       ),
     );
   }
