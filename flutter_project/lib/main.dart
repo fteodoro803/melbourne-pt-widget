@@ -4,6 +4,7 @@ import "package:flutter_project/add_screens/select_location_screen.dart";
 import "package:flutter_project/add_screens/select_direction_screen.dart";
 import "package:flutter_project/add_screens/select_route_type_screen.dart";
 import "package:flutter_project/add_screens/select_stop_screen.dart";
+import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
 
 import "ptv_api_service.dart";
@@ -25,9 +26,8 @@ void main() async {
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  final selections = Transport();    // stores new user selections
+  final List<Transport> transportList = [];
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -40,11 +40,13 @@ class MyApp extends StatelessWidget {
 
         // Pages/Screens
         routes: {
-          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(transport: selections),
-          '/selectLocationScreen': (context) => SelectLocationScreen(transport: selections),
-          '/selectStopScreen': (context) => SelectStopScreen(transport: selections),
-          '/selectDirectionScreen': (context) => SelectDirectionScreen(transport: selections),
-          '/confirmationScreen': (context) => ConfirmationScreen(transport: selections),
+          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(
+              arguments: ScreenArguments(transportList, Transport())
+          ),
+          '/selectLocationScreen': (context) => SelectLocationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
+          '/selectStopScreen': (context) => SelectStopScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
+          '/selectDirectionScreen': (context) => SelectDirectionScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
+          '/confirmationScreen': (context) => ConfirmationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
         });
   }
 }
@@ -71,13 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
     return Scaffold(
       appBar: AppBar(
         title: Text("PTV App"),

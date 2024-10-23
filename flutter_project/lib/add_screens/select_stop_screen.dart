@@ -1,14 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/transport.dart';
-import '../ptv_api_service.dart';
-import '../ptv_info_classes/stop_info.dart';
-import '../ptv_info_classes/route_info.dart' as PTRoute;    // to avoid conflict with material's "Route"
+import 'package:flutter_project/dev/dev_tools.dart';
+import 'package:flutter_project/screen_arguments.dart';
+import 'package:flutter_project/ptv_api_service.dart';
+import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_info.dart'
+    as PTRoute; // to avoid conflict with material's "Route"
 
 class SelectStopScreen extends StatefulWidget {
-  const SelectStopScreen({super.key, required this.transport});
+  const SelectStopScreen({super.key, required this.arguments});
 
-  final Transport transport;
+  // Stores user Transport details
+  final ScreenArguments arguments;
 
   @override
   State<SelectStopScreen> createState() => _SelectStopScreenState();
@@ -18,6 +20,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   String _screenName = "SelectStop";
   List<Stop> _stops = [];
   List<PTRoute.Route> _routes = [];
+  DevTools tools = DevTools();
 
   // Initialising State
   @override
@@ -26,27 +29,31 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     fetchStops();
 
     // Debug Printing
-    if (kDebugMode) {
-      print("Screen: $_screenName");
-    }
+    tools.printScreenState(_screenName, widget.arguments);
   }
 
   // Fetch Stops            -- do tests to see if not null
   Future<void> fetchStops() async {
-    String? location = widget.transport.location?.location;
-    String? routeType = widget.transport.routeType?.type;
+    String? location = widget.arguments.transport.location?.location;
+    String? routeType = widget.arguments.transport.routeType?.type;
 
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().stops(location!, routeTypes: routeType);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
-    if (data.response == null) {print("NULL DATA RESPONSE --> Improper Location Data"); return;}
+    if (data.response == null) {
+      print("NULL DATA RESPONSE --> Improper Location Data");
+      return;
+    }
 
     // Populating Stops List
     for (var stop in jsonResponse!["stops"]) {
       for (var route in stop["routes"]) {
-        if (route["route_type"].toString() != widget.transport.routeType!.type) {continue;}
+        if (route["route_type"].toString() !=
+            widget.arguments.transport.routeType!.type) {
+          continue;
+        }
 
         String stopId = stop["stop_id"].toString();
         String stopName = stop["stop_name"];
@@ -55,7 +62,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
         String routeId = route["route_id"].toString();
-        PTRoute.Route newRoute = PTRoute.Route(name: routeName,number: routeNumber, id: routeId);
+        PTRoute.Route newRoute =
+            PTRoute.Route(name: routeName, number: routeNumber, id: routeId);
 
         _stops.add(newStop);
         _routes.add(newRoute);
@@ -66,13 +74,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   }
 
   void setStopAndRoute(index) {
-    widget.transport.stop = _stops[index];
-    widget.transport.route = _routes[index];
-
-    // TestPrint
-    if (kDebugMode) {
-      print(widget.transport);
-    }
+    widget.arguments.transport.stop = _stops[index];
+    widget.arguments.transport.route = _routes[index];
   }
 
   @override
@@ -84,7 +87,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
       ),
 
       // Generates List of Stops
-      body: ListView.builder(      // old
+      body: ListView.builder(
+        // old
         itemCount: _stops.length,
         itemBuilder: (context, index) {
           return ListTile(
@@ -92,9 +96,10 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
             subtitle: Text(_routes[index].name),
             onTap: () {
               setStopAndRoute(index);
-              Navigator.pushNamed(context, '/selectDirectionScreen');
+              Navigator.pushNamed(context, '/selectDirectionScreen',
+                  arguments: ScreenArguments(widget.arguments.transportList,
+                      widget.arguments.transport));
             },
-
           );
         },
       ),

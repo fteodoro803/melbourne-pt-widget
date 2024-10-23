@@ -1,21 +1,23 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
-import '../transport.dart';
+import 'package:flutter_project/screen_arguments.dart';
 
 class SelectDirectionScreen extends StatefulWidget {
-  const SelectDirectionScreen({super.key, required this.transport});
+  const SelectDirectionScreen({super.key, required this.arguments});
 
-  final Transport transport;
+  // Stores user Transport details
+  final ScreenArguments arguments;
 
   @override
   State<SelectDirectionScreen> createState() => _SelectDirectionScreenState();
 }
 
 class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
-  String _screenName = "Direction";
+  String _screenName = "selectDirection";
   List<RouteDirection> _directions = [];
+  DevTools tools = DevTools();
 
   // Initialising State
   @override
@@ -24,13 +26,11 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
     fetchRouteDirections();
 
     // Debug Printing
-    if (kDebugMode) {
-      print("Screen: $_screenName");
-    }
+    tools.printScreenState(_screenName, widget.arguments);
   }
 
   void fetchRouteDirections() async {
-    String? routeId = widget.transport.route?.id; // this seems a bit convoluted
+    String? routeId = widget.arguments.transport.route?.id; // this seems a bit convoluted
 
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().routeDirections(routeId!);
@@ -55,12 +55,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   }
 
   void setDirection(index) {
-    widget.transport.direction = _directions[index];
-
-    // TestPrint
-    if (kDebugMode) {
-      print(widget.transport);
-    }
+    widget.arguments.transport.direction = _directions[index];
   }
 
   @override
@@ -79,7 +74,9 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
             title: Text("${_directions[index].name} (${_directions[index].id})"),
             onTap: () {
               setDirection(index);
-              Navigator.pushNamed(context, '/confirmationScreen');
+              Navigator.pushNamed(context, '/confirmationScreen',
+                  arguments: ScreenArguments(widget.arguments.transportList,
+                      widget.arguments.transport));
             },
 
           );

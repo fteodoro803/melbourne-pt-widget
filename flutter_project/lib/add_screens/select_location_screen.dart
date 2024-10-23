@@ -1,13 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
-import '../transport.dart';
+import 'package:flutter_project/screen_arguments.dart';
 
 class SelectLocationScreen extends StatefulWidget {
-  const SelectLocationScreen({super.key, required this.transport});
+  const SelectLocationScreen({super.key, required this.arguments});
 
-  // Stores User Selections
-  final Transport transport;
+  // Stores user Transport details
+  final ScreenArguments arguments;
 
   @override
   State<SelectLocationScreen> createState() => _SelectLocationScreenState();
@@ -16,6 +16,7 @@ class SelectLocationScreen extends StatefulWidget {
 class _SelectLocationScreenState extends State<SelectLocationScreen> {
   String _screenName = "SelectLocation";
   TextEditingController _locationController = TextEditingController();    // Placeholder until map api is implemented
+  DevTools tools = DevTools();
 
   // Initialising State
   @override
@@ -23,9 +24,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     super.initState();
 
     // Debug Printing
-    if (kDebugMode) {
-      print("Screen: $_screenName");
-    }
+      tools.printScreenState(_screenName, widget.arguments);
   }
 
   void setLocation() {
@@ -34,12 +33,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     // Normalize the location input by removing spaces
     newLocation.location = newLocation.location.replaceAll(' ', '');
 
-    widget.transport.location = newLocation;
-
-    // TestPrint
-    if (kDebugMode) {
-      print(widget.transport);
-    }
+    widget.arguments.transport.location = newLocation;
   }
 
   // Rendering
@@ -67,7 +61,9 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
             child: ElevatedButton(
               onPressed: () {
                 setLocation();
-                Navigator.pushNamed(context, '/selectStopScreen');
+                Navigator.pushNamed(context, '/selectStopScreen',
+                    arguments: ScreenArguments(widget.arguments.transportList,
+                        widget.arguments.transport));
               },
               child: Text("Next"),
             ),

@@ -1,25 +1,26 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
-import '../ptv_api_service.dart';
-import '../transport.dart';
-
+import 'package:flutter_project/screen_arguments.dart';
+import 'package:flutter_project/ptv_api_service.dart';
+import 'package:flutter_project/dev/dev_tools.dart';
 
 class SelectRouteTypeScreen extends StatefulWidget {
   // Constructor
-  const SelectRouteTypeScreen({super.key, required this.transport});
+  const SelectRouteTypeScreen({super.key, required this.arguments});
 
   // Stores user Transport details
-  final Transport transport;
+  final ScreenArguments arguments;
 
   @override
   State<SelectRouteTypeScreen> createState() => _SelectRouteTypeScreenState();
 }
 
 class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
-  PtvApiService apiService = PtvApiService();
-  String _screenName = "SelectRouteType";
-  List<RouteType> _routeTypesClass = [];
+  // PtvApiService apiService = PtvApiService();
+
+  final String _screenName = "SelectRouteType";
+  final List<RouteType> _routeTypesClass = [];
+  DevTools tools = DevTools();
 
   // Initialising State
   @override
@@ -28,9 +29,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
     fetchRouteTypes();
 
     // Debug Printing
-    if (kDebugMode) {
-      print("Screen: $_screenName");
-    }
+    tools.printScreenState(_screenName, widget.arguments);
   }
 
   // Fetches Routes and generates Map/Dictionary of PT Options               // I dont like how this logic is in the same file as the frontend rendering, find a way to split this
@@ -40,7 +39,10 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit     // Make it display on screen if there is no data
-    if (data.response == null) {print("NULL DATA RESPONSE --> Improper Location Data"); return;}
+    if (data.response == null) {
+      print("NULL DATA RESPONSE --> Improper Location Data");
+      return;
+    }
 
     // Populating RouteTypes List                                                         // add case for if 0
     for (var entry in jsonResponse!["route_types"]) {
@@ -55,12 +57,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   }
 
   void setRouteType(int index) {
-    widget.transport.routeType = _routeTypesClass[index];
-
-    // TestPrint
-    if (kDebugMode) {
-      print(widget.transport);
-    }
+    widget.arguments.transport.routeType = _routeTypesClass[index];
   }
 
   // Rendering
@@ -73,15 +70,18 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
       ),
 
       // Generates List of Options
-      body: ListView.builder(      // old
+      body: ListView.builder(
+        // old
         itemCount: _routeTypesClass.length,
         itemBuilder: (context, index) {
           return ListTile(
             title: Text(_routeTypesClass[index].name),
             onTap: () {
               setRouteType(index);
-              Navigator.pushNamed(context, '/selectLocationScreen');
-              },
+              Navigator.pushNamed(context, '/selectLocationScreen',
+                  arguments: ScreenArguments(widget.arguments.transportList,
+                      widget.arguments.transport));
+            },
           );
         },
       ),

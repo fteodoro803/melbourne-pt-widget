@@ -1,19 +1,19 @@
 // Shows a Sample of what the Transit Departure Screen will display
 // Also is a confirmation, which leads back to the home page
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/departure_service.dart';
 
 import 'package:flutter_project/custom_list_tile.dart';
 
 class ConfirmationScreen extends StatefulWidget {
-  const ConfirmationScreen({super.key, required this.transport});
+  const ConfirmationScreen({super.key, required this.arguments});
 
   // Stores user Transport details
-  final Transport transport;
+  final ScreenArguments arguments;
 
   @override
   State<ConfirmationScreen> createState() => _ConfirmationScreenState();
@@ -21,6 +21,7 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
   String _screenName = "ConfirmationScreen";
+  DevTools tools = DevTools();
 
   @override
   void initState() {
@@ -28,17 +29,15 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     fetchDepartures();
 
     // Debug Printing
-    if (kDebugMode) {
-      print("Screen: $_screenName");
-    }
+    tools.printScreenState(_screenName, widget.arguments);
   }
 
   // NEW FETCH DEPARTURES
   Future<void> fetchDepartures() async {
-    String routeType = widget.transport.routeType!.type;
-    String stopId = widget.transport.stop!.id;
-    String directionId = widget.transport.direction!.id;
-    String routeId = widget.transport.route!.id;
+    String routeType = widget.arguments.transport.routeType!.type;
+    String stopId = widget.arguments.transport.stop!.id;
+    String directionId = widget.arguments.transport.direction!.id;
+    String routeId = widget.arguments.transport.route!.id;
 
     // Gets Departures
     DepartureService departureService = DepartureService();
@@ -46,7 +45,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
         routeType, stopId, directionId, routeId);
 
     setState(() {
-      widget.transport.departures = fetchedDepartures;
+      widget.arguments.transport.departures = fetchedDepartures;
     });
   }
 
@@ -75,9 +74,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       body: ListTile(
         isThreeLine: true,
         title: Text(
-            "${widget.transport.routeType?.name} ${widget.transport.route?.number} - ${widget.transport.direction?.name}"),
-        subtitle: Text("${widget.transport.stop?.name}\n" // Stop Name
-            "Next Departure: ${getTime(widget.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
+            "${widget.arguments.transport.routeType?.name} ${widget.arguments.transport.route?.number} - ${widget.arguments.transport.direction?.name}"),
+        subtitle: Text("${widget.arguments.transport.stop?.name}\n" // Stop Name
+            "Next Departure: ${getTime(widget.arguments.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
         onTap: () {},
       ),
     );
