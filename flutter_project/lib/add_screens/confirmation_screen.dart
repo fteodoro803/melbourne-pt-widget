@@ -77,7 +77,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
             "${widget.arguments.transport.routeType?.name} ${widget.arguments.transport.route?.number} - ${widget.arguments.transport.direction?.name}"),
         subtitle: Text("${widget.arguments.transport.stop?.name}\n" // Stop Name
             "Next Departure: ${getTime(widget.arguments.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
-        onTap: () {},
+        onTap: () {
+          Navigator.popUntil(context, ModalRoute.withName("/"));
+        },
       ),
     );
   }

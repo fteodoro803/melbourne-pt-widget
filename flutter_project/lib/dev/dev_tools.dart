@@ -14,7 +14,6 @@ class DevTools {
 
       print("Screen: $screenName\n"
         "Arguments: {\n"
-          "\tList: ${arguments.transportList}\n"
           "\tTransport:\n$indentedTransportDetails"
         "}");
     }

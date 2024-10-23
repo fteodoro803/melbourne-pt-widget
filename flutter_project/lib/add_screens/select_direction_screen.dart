@@ -30,14 +30,18 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   }
 
   void fetchRouteDirections() async {
-    String? routeId = widget.arguments.transport.route?.id; // this seems a bit convoluted
+    String? routeId =
+        widget.arguments.transport.route?.id; // this seems a bit convoluted
 
     // Fetching Data and converting to JSON
     Data data = await PtvApiService().routeDirections(routeId!);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
-    if (data.response == null) {print("NULL DATA RESPONSE --> Improper Location Data"); return;}
+    if (data.response == null) {
+      print("NULL DATA RESPONSE --> Improper Location Data");
+      return;
+    }
 
     // Populating Stops List
     for (var direction in jsonResponse!["directions"]) {
@@ -46,7 +50,8 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       String id = direction["direction_id"].toString();
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
-      RouteDirection newDirection = RouteDirection(id: id, name: name, description: description);
+      RouteDirection newDirection =
+          RouteDirection(id: id, name: name, description: description);
 
       _directions.add(newDirection);
     }
@@ -67,18 +72,18 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       ),
 
       // Generates List of Stops
-      body: ListView.builder(      // old
+      body: ListView.builder(
+        // old
         itemCount: _directions.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text("${_directions[index].name} (${_directions[index].id})"),
+            title:
+                Text("${_directions[index].name} (${_directions[index].id})"),
             onTap: () {
               setDirection(index);
               Navigator.pushNamed(context, '/confirmationScreen',
-                  arguments: ScreenArguments(widget.arguments.transportList,
-                      widget.arguments.transport));
+                  arguments: ScreenArguments(widget.arguments.transport));
             },
-
           );
         },
       ),

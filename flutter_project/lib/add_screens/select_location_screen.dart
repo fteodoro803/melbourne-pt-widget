@@ -15,7 +15,8 @@ class SelectLocationScreen extends StatefulWidget {
 
 class _SelectLocationScreenState extends State<SelectLocationScreen> {
   String _screenName = "SelectLocation";
-  TextEditingController _locationController = TextEditingController();    // Placeholder until map api is implemented
+  TextEditingController _locationController =
+      TextEditingController(); // Placeholder until map api is implemented
   DevTools tools = DevTools();
 
   // Initialising State
@@ -24,7 +25,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     super.initState();
 
     // Debug Printing
-      tools.printScreenState(_screenName, widget.arguments);
+    tools.printScreenState(_screenName, widget.arguments);
   }
 
   void setLocation() {
@@ -62,8 +63,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
               onPressed: () {
                 setLocation();
                 Navigator.pushNamed(context, '/selectStopScreen',
-                    arguments: ScreenArguments(widget.arguments.transportList,
-                        widget.arguments.transport));
+                    arguments: ScreenArguments(widget.arguments.transport));
               },
               child: Text("Next"),
             ),

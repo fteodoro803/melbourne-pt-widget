@@ -40,9 +40,7 @@ class MyApp extends StatelessWidget {
 
         // Pages/Screens
         routes: {
-          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(
-              arguments: ScreenArguments(transportList, Transport())
-          ),
+          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(arguments: ScreenArguments(Transport())),
           '/selectLocationScreen': (context) => SelectLocationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectStopScreen': (context) => SelectStopScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectDirectionScreen': (context) => SelectDirectionScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),

@@ -15,6 +15,7 @@ class Transport {
   // Next 3 Departures, make a function to update this on selected intervals later
   List<Departure>? departures;
 
+  // Make the toString for list representation???~
   @override
   String toString() {
     String str = "";
