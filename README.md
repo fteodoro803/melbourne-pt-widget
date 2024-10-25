@@ -1,20 +1,12 @@
 # PTV Widget
 This application gives users features for easy access to information on PTV. 
 
-The functionality here is a template, which should be converted to the programming language of whichever Operating System contains the widget.
+The functionality in the Python section is a template, which should be converted to the programming language of whichever Operating System the widget app is for.
 
 ### Setup
-For the program to work, paste your User/Developer ID and API Key in the respective config files.
-  - Python/Template: config.ini
+For the program to work, paste your User/Developer ID and API Key in the config file:
   - Flutter: assets/cfg/config.json
 
-If developing, copy-paste these commands so that the developer credential files don't get tracked by Git:
-```
-git update-index --assume-unchanged template/config.ini
-```
-*Make sure to cd to the root of the project directory
-
-### Flutter
 Copy-paste these commands to 
   1. Get dependencies
   2. Ensure developer credential files don't get tracked by Git
@@ -26,13 +18,11 @@ dart run build_runner watch --delete-conflicting-outputs
 ```
 
 ### Dependencies
-- Python Base Template
-  - python 3.10
-  - requests 2.31.0
-  - pytest 8.1.1
-  - tzdata
-- Flutter Application (run 'flutter pub get' to install dependencies (idk if u have to do this more than once))
-  - Http
+  - crypto 3.0.6
+  - global_configuration 2.0.0 
+  - http 1.2.2 
+  - json_annotation 4.9.0 
+  - path_provider 2.1.4
 
 ### Notes
 - Changes to config.ini __*must*__ not be pushed
@@ -93,6 +83,23 @@ dart run build_runner watch --delete-conflicting-outputs
 
 ### Decisions
 - Every variable will be of String type, because the API handles the numbers in strings
+
+<details>
+  <summary><h2><b>Python/Template</b></h2></summary>
+
+  ### Setup:
+  1. Paste developer credentials in: config.ini
+  2. Copy-paste this command
+    ```
+    git update-index --assume-unchanged template/config.ini
+    ```
+  3. Dependencies
+       - python 3.10
+       - requests 2.31.0
+       - pytest 8.1.1
+       - tzdata
+
+</details>
 
 ### References
 - [Sending Data across Screens](https://docs.flutter.dev/cookbook/navigation/passing-data]=)
