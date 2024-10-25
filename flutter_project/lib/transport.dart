@@ -4,13 +4,20 @@ import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'transport.g.dart';
+
+@JsonSerializable()
 class Transport {
   RouteType? routeType;
   Location? location;
   Stop? stop;
   Route? route;
   RouteDirection? direction;
+
+  // Constructor
+  Transport();
 
   // Next 3 Departures, make a function to update this on selected intervals later
   List<Departure>? departures;
@@ -29,4 +36,8 @@ class Transport {
 
     return str;
   }
+
+  // Methods for JSON Serialization
+  factory Transport.fromJson(Map<String, dynamic> json) => _$TransportFromJson(json);
+  Map<String, dynamic> toJson() => _$TransportToJson(this);
 }

@@ -1,8 +1,11 @@
 // Shows a Sample of what the Transit Departure Screen will display
 // Also is a confirmation, which leads back to the home page
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
+import 'package:flutter_project/file_service.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/departure_service.dart';
@@ -77,7 +80,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
             "${widget.arguments.transport.routeType?.name} ${widget.arguments.transport.route?.number} - ${widget.arguments.transport.direction?.name}"),
         subtitle: Text("${widget.arguments.transport.stop?.name}\n" // Stop Name
             "Next Departure: ${getTime(widget.arguments.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
-        onTap: () {
+        onTap: () async {
+          await append("=== update - ${DateTime.now().toLocal()}: ===\n");
+          await append(jsonEncode(widget.arguments.transport));
           widget.arguments.callback();    // calls the screen arguments callback function
           Navigator.popUntil(context, ModalRoute.withName("/"));
         },

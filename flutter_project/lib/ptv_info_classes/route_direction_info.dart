@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'route_direction_info.g.dart';
+
+@JsonSerializable()
 class RouteDirection {
   String id;
   String name;
@@ -11,4 +16,8 @@ class RouteDirection {
         "\tID: $id\n"
         "\tName: $name\n";
   }
+
+  // Methods for JSON Serialization
+  factory RouteDirection.fromJson(Map<String, dynamic> json) => _$RouteDirectionFromJson(json);
+  Map<String, dynamic> toJson() => _$RouteDirectionToJson(this);
 }

@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'stop_info.g.dart';
+
+@JsonSerializable()
 class Stop {
   String id;
   String name;
@@ -15,4 +20,8 @@ class Stop {
         "\tID: $id\n"
         "\tName: $name\n";
   }
+
+  // Methods for JSON Serialization
+  factory Stop.fromJson(Map<String, dynamic> json) => _$StopFromJson(json);
+  Map<String, dynamic> toJson() => _$StopToJson(this);
 }

@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'departure_info.g.dart';
+
+@JsonSerializable()
 class Departure {
   // Departures in UTC Time
   DateTime? scheduledDepartureUTC;
@@ -25,9 +30,13 @@ class Departure {
   // Add an Update Departure Function
 
   @override
-    String toString() {
-      return "Departures:\n"
-          "\tScheduled Departure: $scheduledDeparture\n"
-          "\tEstimated Departure: $estimatedDeparture\n";
-    }
+  String toString() {
+    return "Departures:\n"
+        "\tScheduled Departure: $scheduledDeparture\n"
+        "\tEstimated Departure: $estimatedDeparture\n";
+  }
+
+  // Methods for JSON Serialization
+  factory Departure.fromJson(Map<String, dynamic> json) => _$DepartureFromJson(json);
+  Map<String, dynamic> toJson() => _$DepartureToJson(this);
 }

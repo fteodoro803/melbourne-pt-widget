@@ -11,9 +11,19 @@ For the program to work, paste your User/Developer ID and API Key in the respect
 If developing, copy-paste these commands so that the developer credential files don't get tracked by Git:
 ```
 git update-index --assume-unchanged template/config.ini
-git update-index --assume-unchanged flutter_project/assets/cfg/config.json
 ```
 *Make sure to cd to the root of the project directory
+
+### Flutter
+Copy-paste these commands to 
+  1. Get dependencies
+  2. Ensure developer credential files don't get tracked by Git
+  3. [Continuously build](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility) the JSON Serializable files 
+```
+flutter pub get
+git update-index --assume-unchanged flutter_project/assets/cfg/config.json
+dart run build_runner watch --delete-conflicting-outputs
+```
 
 ### Dependencies
 - Python Base Template

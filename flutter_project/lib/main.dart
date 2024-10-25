@@ -31,12 +31,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // final List<Transport> transportList = [];
-
-  // // Updates the Main Page in response to changes in Confirmation screen
-  // void updateMainPage() {
-  //   setState(() {});
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +44,13 @@ class _MyAppState extends State<MyApp> {
 
         // Pages/Screens
         routes: {
-          // '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(arguments: ScreenArguments(Transport())),
           '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectLocationScreen': (context) => SelectLocationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectStopScreen': (context) => SelectStopScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectDirectionScreen': (context) => SelectDirectionScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/confirmationScreen': (context) => ConfirmationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
-        });
+        }
+    );
   }
 }
 
@@ -77,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _loadFile(); // Call the method to load the file content
+    _loadFile();
   }
 
   Future<void> _loadFile() async {
@@ -89,7 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Updates the Main Page in response to changes in Confirmation screen
   void _updateMainPage() async {
-    await append("updated - ${DateTime.now().toLocal()}\n");
     await _loadFile();
   }
 

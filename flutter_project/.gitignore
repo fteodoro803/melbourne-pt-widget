@@ -44,3 +44,6 @@ app.*.map.json
 
 # Config
 /assets/cfg/config.json
+
+# JSON Serializable/Annotations generated files
+*.g.dart
