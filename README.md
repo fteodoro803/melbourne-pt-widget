@@ -8,14 +8,13 @@ For the program to work, paste your User/Developer ID and API Key in the config 
   - Flutter: assets/cfg/config.json
 
 Copy-paste these commands to 
-  1. Get dependencies
-  2. Ensure developer credential files don't get tracked by Git
-  3. [Continuously build](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility) the JSON Serializable files 
-```
-flutter pub get
-git update-index --assume-unchanged flutter_project/assets/cfg/config.json
-dart run build_runner watch --delete-conflicting-outputs
-```
+  1. Get dependencies 
+     - ```flutter pub get```
+  2. Ensure developer credential files don't get tracked by Git 
+     - ```git update-index --assume-unchanged flutter_project/assets/cfg/config.json```
+  3. [Build JSON Serializable files](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility)
+     - ```dart run build_runner build --delete-conflicting-outputs```
+
 
 ### Dependencies
   - crypto 3.0.6
@@ -36,11 +35,10 @@ dart run build_runner watch --delete-conflicting-outputs
     - Select Stop (stop contains tram numbers, name)
   - Choose Direction of Travel
   - Final Selection
-- How to:
-  - use _stops_ to get the tram name and number (route_id)
-  - use _departure_ to show direction
-    - direction is matched with route ids from _stops_ via _directions_
 - [LucidChart](https://lucid.app/lucidchart/82b010cd-4cd5-42c0-8c19-f3066488b55a/edit?viewport_loc=-1937%2C-126%2C4157%2C2105%2C0_0&invitationId=inv_6c5333c9-7546-45d1-8473-e3fdb2c4135c)
+- If modifying Transport or any -info class, make sure to run either:
+  - Once: ```dart run build_runner build --delete-conflicting-outputs```
+  - Continuously: ```dart run build_runner watch --delete-conflicting-outputs```
 
 ### To-Do
 - Priority: 
