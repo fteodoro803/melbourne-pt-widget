@@ -82,7 +82,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
             onTap: () {
               setDirection(index);
               Navigator.pushNamed(context, '/confirmationScreen',
-                  arguments: ScreenArguments(widget.arguments.transport));
+                  arguments: widget.arguments);
             },
           );
         },

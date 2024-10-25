@@ -63,7 +63,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
               onPressed: () {
                 setLocation();
                 Navigator.pushNamed(context, '/selectStopScreen',
-                    arguments: ScreenArguments(widget.arguments.transport));
+                    arguments: widget.arguments);
               },
               child: Text("Next"),
             ),

@@ -74,6 +74,7 @@ git update-index --assume-unchanged flutter_project/assets/cfg/config.json
   - for Android --> Material
   - for Apple --> Cupertino
 - Show Disruptions from the Departures (expands=All) 
+- Figure out if package: imports are necessary, or if to use normal imports
 
 ### Testing
 - Mockito?

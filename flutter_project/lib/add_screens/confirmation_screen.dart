@@ -78,6 +78,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
         subtitle: Text("${widget.arguments.transport.stop?.name}\n" // Stop Name
             "Next Departure: ${getTime(widget.arguments.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
         onTap: () {
+          widget.arguments.callback();    // calls the screen arguments callback function
           Navigator.popUntil(context, ModalRoute.withName("/"));
         },
       ),

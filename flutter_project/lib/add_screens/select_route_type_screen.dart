@@ -79,7 +79,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
             onTap: () {
               setRouteType(index);
               Navigator.pushNamed(context, '/selectLocationScreen',
-                  arguments: ScreenArguments(widget.arguments.transport));
+                  arguments: widget.arguments);
             },
           );
         },

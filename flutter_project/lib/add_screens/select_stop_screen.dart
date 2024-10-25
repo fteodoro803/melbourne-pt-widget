@@ -97,7 +97,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
             onTap: () {
               setStopAndRoute(index);
               Navigator.pushNamed(context, '/selectDirectionScreen',
-                  arguments: ScreenArguments(widget.arguments.transport));
+                  arguments: widget.arguments);
             },
           );
         },

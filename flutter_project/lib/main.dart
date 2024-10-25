@@ -7,9 +7,9 @@ import "package:flutter_project/add_screens/select_stop_screen.dart";
 import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
 
-import "ptv_api_service.dart";
 import 'package:global_configuration/global_configuration.dart';
-import 'transport.dart';
+import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/file_service.dart';
 
 // void main() {
 void main() async {
@@ -23,10 +23,20 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   MyApp({super.key});
 
-  final List<Transport> transportList = [];
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // final List<Transport> transportList = [];
+
+  // // Updates the Main Page in response to changes in Confirmation screen
+  // void updateMainPage() {
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +50,8 @@ class MyApp extends StatelessWidget {
 
         // Pages/Screens
         routes: {
-          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(arguments: ScreenArguments(Transport())),
+          // '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(arguments: ScreenArguments(Transport())),
+          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectLocationScreen': (context) => SelectLocationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectStopScreen': (context) => SelectStopScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
           '/selectDirectionScreen': (context) => SelectDirectionScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
@@ -61,12 +72,25 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final requestController = TextEditingController();
   final locationController = TextEditingController();
-  PtvApiService ptv = PtvApiService();
+  String? _file;
 
-  void handleRouteTypes() {
+  @override
+  void initState() {
+    super.initState();
+    _loadFile(); // Call the method to load the file content
+  }
+
+  Future<void> _loadFile() async {
+    String? content = await read();
     setState(() {
-      ptv.routeTypes();
+      _file = content;
     });
+  }
+
+  // Updates the Main Page in response to changes in Confirmation screen
+  void _updateMainPage() async {
+    await append("updated - ${DateTime.now().toLocal()}\n");
+    await _loadFile();
   }
 
   @override
@@ -81,15 +105,35 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Center(
           child: Column(
             children: [
-              // TRANSPORT OPTIONS DISPLAY
-              // ListTiles of List<Transport>
-
               // ADD PAGE
               ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/selectRouteTypeScreen');
+                    Navigator.pushNamed(context, '/selectRouteTypeScreen', arguments: ScreenArguments(Transport(), _updateMainPage));
                   },
-                  child: Text("+")),
+                  child: Text("+")
+              ),
+
+              // TEST DISPLAY FILE CONTENTS
+              SizedBox(height: 20), // Add some spacing
+              // Display the contents of the text file
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  _file.toString() ?? "null",
+                  style: TextStyle(fontSize: 16.0),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              // TRANSPORT OPTIONS DISPLAY
+              // ListTiles of List<Transport>
+
+              ElevatedButton(
+                  onPressed: () {
+                    _updateMainPage();
+                  },
+                  child: Text("TEST BUTTON")
+              ),
             ],
           ),
         ),

@@ -1,14 +1,11 @@
-/*
-Arguments for the addScreens
- */
+// Arguments for the AddScreens
 
+import 'dart:ui';
 import 'package:flutter_project/transport.dart';
 
 class ScreenArguments {
-  // List<Transport> transportList;
-  Transport transport;
+  Transport transport;    // data for new Transport option
+  VoidCallback callback;  // function to be called from child screen
 
-  // ScreenArguments(this.transportList, this.transport);
-  ScreenArguments(this.transport);
-
+  ScreenArguments(this.transport, this.callback);
 }
