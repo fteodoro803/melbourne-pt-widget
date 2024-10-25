@@ -1,3 +1,5 @@
+// idk if this needs to be stored~
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'departure_info.g.dart';
