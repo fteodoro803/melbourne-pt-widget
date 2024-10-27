@@ -81,8 +81,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
         subtitle: Text("${widget.arguments.transport.stop?.name}\n" // Stop Name
             "Next Departure: ${getTime(widget.arguments.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
         onTap: () async {
-          await append("=== update - ${DateTime.now().toLocal()}: ===\n");
-          await append(jsonEncode(widget.arguments.transport));
+          await append(widget.arguments.transport);
           widget.arguments.callback();    // calls the screen arguments callback function
           Navigator.popUntil(context, ModalRoute.withName("/"));
         },

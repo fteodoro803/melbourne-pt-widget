@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_project/transport.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<String> getLocalPath() async {
@@ -16,21 +18,29 @@ Future<void> save(String data) async {
 
 // add delete functionality
 
-Future<void> append(String data) async {
+Future<void> append(Transport newTransport) async {
   try {
     // Get the path to the application documents directory
     final path = await getLocalPath();
     final file = File('$path/transport_data.json');
 
+    List<Map<String, dynamic>> transports = [];
+
     // Open the file for appending
     if (await file.exists()) {
-      // Append the new data to the file
-      await file.writeAsString(data, mode: FileMode.append);
+      String content = await file.readAsString();
+      // Decode content to json
+      if (content.isNotEmpty) {
+        transports = List<Map<String, dynamic>>.from(jsonDecode(content));
+      }
     }
-    else {
-      // If the file doesn't exist, create it and write the new data
-      await file.writeAsString(data);
-    }
+
+    // Add new transport to JSON Map
+    transports.add(newTransport.toJson());
+
+    // Save updated list to File
+    await file.writeAsString(jsonEncode(transports));
+
   } catch (e) {
     if (kDebugMode) {
       print('Error appending to file: $e');
@@ -38,7 +48,7 @@ Future<void> append(String data) async {
   }
 }
 
-// Read JSON File
+// Read JSON File as String
 Future<String?> read() async {
   try {
     final path = await getLocalPath();
