@@ -1,5 +1,3 @@
-// idk if this needs to be stored~
-
 import 'package:json_annotation/json_annotation.dart';
 
 part 'departure_info.g.dart';
@@ -20,16 +18,15 @@ class Departure {
   // Constructor
   Departure({required this.scheduledDepartureUTC, required this.estimatedDepartureUTC}) {
 
+    // Adds and converts Departure to local Melbourne Time
     if (scheduledDepartureUTC != null){
-    scheduledDeparture = scheduledDepartureUTC!.toLocal();
+      scheduledDeparture = scheduledDepartureUTC!.toLocal();
     }
 
     if (estimatedDepartureUTC != null) {
       estimatedDeparture = estimatedDepartureUTC!.toLocal();
     }
   }
-
-  // Add an Update Departure Function
 
   @override
   String toString() {

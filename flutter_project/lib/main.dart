@@ -12,6 +12,8 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/file_service.dart';
 
+import 'utilities.dart' as utilities;
+
 // void main() {
 void main() async {
   // Ensures Flutter bindings are initialised
@@ -86,7 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // Loads transport file and Converts JSON to list of Transport objects
-  // I DONT LIKE HOW I DID THIS, FIND A WAY TO MAKE IT SIMPLER
   Future<void> _updateMainPage() async {
     String? stringContent = await read(formatted: true);
 
@@ -96,7 +97,13 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _file = stringContent;
         _transportList = transportList;
+
+        // Updates Departures
+        for (var transport in _transportList) {
+          transport.updateDepartures();
+        }
       });
+
     } else {
       setState(() {
         _file = stringContent;
@@ -133,11 +140,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: _transportList.length,
                 itemBuilder: (context, index) {
                   final transport = _transportList[index];
+                  final routeTypeName = transport.routeType?.name ?? "Null RouteTypeName";
+                  final routeNumber = transport.route?.number ?? "Null RouteNumber";
+                  final directionName = transport.direction?.name ?? "Null DirectionName";
+                  final stopName = transport.stop?.name ?? "Null StopName";
+                  final departure1 = utilities.getTime(transport.departures?[0].estimatedDeparture) ?? utilities.getTime(transport.departures?[0].scheduledDeparture) ?? "Null 1st Departure";
+                  final departure2 = utilities.getTime(transport.departures?[1].estimatedDeparture) ?? utilities.getTime(transport.departures?[1].scheduledDeparture) ?? "Null 2nd Departure";
+                  final departure3 = utilities.getTime(transport.departures?[2].estimatedDeparture) ?? utilities.getTime(transport.departures?[2].scheduledDeparture) ?? "Null 3rd Departure";
+
                   return ListTile(
-                    title: Text("${transport.routeType?.name} ${transport.route?.number} to ${transport.direction?.name}"),
                     isThreeLine: true,
-                    subtitle: Text("from ${transport.stop?.name}\n"
-                        "Next Departure: ${transport.departures?[0].estimatedDeparture ?? transport.departures?[0].scheduledDeparture}"),
+                    title: Text("$routeTypeName $routeNumber to $directionName"),
+                    subtitle: Text("from $stopName\n"
+                        "$departure1 | $departure2 | $departure3"),
                     onTap: () => {},
                   );
                 },
@@ -147,19 +162,19 @@ class _MyHomePageState extends State<MyHomePage> {
             // SPACER
             SizedBox(height: 10),
 
-            // TEST DISPLAY FILE CONTENTS (Scrollable Text Box)
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  "FILE TOSTRING:\n${_file != null
-                      ? _file.toString()
-                      : "null"}",
-                  style: TextStyle(fontSize: 16.0),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-            ),
+            // // TEST DISPLAY FILE CONTENTS (Scrollable Text Box)
+            // Expanded(
+            //   child: SingleChildScrollView(
+            //     padding: const EdgeInsets.all(16.0),
+            //     child: Text(
+            //       "FILE TOSTRING:\n${_file != null
+            //           ? _file.toString()
+            //           : "null"}",
+            //       style: TextStyle(fontSize: 16.0),
+            //       textAlign: TextAlign.left,
+            //     ),
+            //   ),
+            // ),
 
             // REFRESH BUTTON
             ElevatedButton(

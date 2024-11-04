@@ -9,6 +9,7 @@ class DepartureService {
       {String maxResults = "3", String expands = "All"}) async {
     List<Departure> departures = [];
 
+    // Fetches departure data via PTV API
     Data data = await PtvApiService().departures(
         routeType, stopId, directionId: directionId,
         routeId: routeId,
@@ -16,11 +17,13 @@ class DepartureService {
         expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 
+    // Empty JSON Response
     if (jsonResponse == null) {
       print("NULL DATA RESPONSE --> Improper Location Data");
       return departures;
     }
 
+    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
     for (var departure in jsonResponse["departures"]) {
       DateTime? scheduledDepartureUTC = departure["scheduled_departure_utc"] !=
           null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
@@ -33,6 +36,4 @@ class DepartureService {
 
     return departures;
   }
-
-  // update Departure function
 }

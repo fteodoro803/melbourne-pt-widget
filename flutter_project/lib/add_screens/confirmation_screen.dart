@@ -12,6 +12,8 @@ import 'package:flutter_project/departure_service.dart';
 
 import 'package:flutter_project/custom_list_tile.dart';
 
+import 'package:flutter_project/utilities.dart' as utilities;
+
 class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key, required this.arguments});
 
@@ -29,44 +31,29 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   @override
   void initState() {
     super.initState();
-    fetchDepartures();
+    _initialiseDepartures();
 
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
   }
 
-  // NEW FETCH DEPARTURES
-  Future<void> fetchDepartures() async {
-    String routeType = widget.arguments.transport.routeType!.type;
-    String stopId = widget.arguments.transport.stop!.id;
-    String directionId = widget.arguments.transport.direction!.id;
-    String routeId = widget.arguments.transport.route!.id;
-
-    // Gets Departures
-    DepartureService departureService = DepartureService();
-    List<Departure> fetchedDepartures = await departureService.fetchDepartures(
-        routeType, stopId, directionId, routeId);
-
-    setState(() {
-      widget.arguments.transport.departures = fetchedDepartures;
-    });
-  }
-
-  // Returns the Time from a DateTime variable
-  String? getTime(DateTime? dateTime) {
-    if (dateTime == null) {
-      return null;
-    }
-
-    // Adds a '0' to the left, if Single digit time (ex: 7 becomes 07)
-    String hour = dateTime.hour.toString().padLeft(2, "0");
-    String minute = dateTime.minute.toString().padLeft(2, "0");
-
-    return "$hour:$minute";
-  }
+  // Updates UI as a result of Update Departures
+  Future<void> _initialiseDepartures() async {
+    await widget.arguments.transport.updateDepartures();    // Updates the Transport's departures
+    setState(() {});
+}
 
   @override
   Widget build(BuildContext context) {
+    final transport = widget.arguments.transport;
+    final routeTypeName = transport.routeType?.name ?? "Null RouteType";
+    final routeNumber = transport.route?.number ?? "Null RouteNumber";
+    final directionName = transport.direction?.name ?? "Null DirectionName";
+    final stopName = transport.stop?.name ?? "Null StopName";
+    final departure1 = utilities.getTime(transport.departures?[0].estimatedDeparture) ?? utilities.getTime(transport.departures?[0].scheduledDeparture) ?? "Null 1st Departure";
+    final departure2 = utilities.getTime(transport.departures?[1].estimatedDeparture) ?? utilities.getTime(transport.departures?[1].scheduledDeparture) ?? "Null 2nd Departure";
+    final departure3 = utilities.getTime(transport.departures?[2].estimatedDeparture) ?? utilities.getTime(transport.departures?[2].scheduledDeparture) ?? "Null 3rd Departure";
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Confirmation"),
@@ -76,10 +63,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       // Generates List of Stops
       body: ListTile(
         isThreeLine: true,
-        title: Text(
-            "${widget.arguments.transport.routeType?.name} ${widget.arguments.transport.route?.number} - ${widget.arguments.transport.direction?.name}"),
-        subtitle: Text("${widget.arguments.transport.stop?.name}\n" // Stop Name
-            "Next Departure: ${getTime(widget.arguments.transport.departures?[0].scheduledDeparture)}\n"), // Next Departure
+        title: Text("$routeTypeName $routeNumber to $directionName"),
+        subtitle: Text("from $stopName\n"
+            "$departure1 | $departure2 | $departure3"),
         onTap: () async {
           await append(widget.arguments.transport);
           widget.arguments.callback();    // calls the screen arguments callback function
