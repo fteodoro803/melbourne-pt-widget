@@ -49,21 +49,44 @@ Future<void> append(Transport newTransport) async {
 }
 
 // Read JSON File as String
-Future<String?> read() async {
+Future<String?> read({bool formatted = false}) async {
   try {
     final path = await getLocalPath();
     final file = File('$path/transport_data.json');
     String string = await file.readAsString();
-    String jsonString = string;   // convert to jsonstring (IMPLEMENT THIS)
 
     //test printing~
     if (kDebugMode) {
       print("Reading from Path: $path");
     }
 
-    return jsonString;
+    // Conversion to Pretty JSON String
+    if (string.isNotEmpty && formatted == true) {
+      final jsonObject = jsonDecode(string);
+      final prettyString = JsonEncoder.withIndent('   ').convert(jsonObject);
+      return prettyString;
+    }
+
+    return string;
   } catch (e) {
     // Handle error (file not found, etc.)
     return null;
   }
+}
+
+// Convert JSON String to Transport objects
+Future<List<Transport>> parseTransportJSON(String jsonString) async {
+  // Decode the JSON string into a list of dynamic maps
+  List<dynamic> jsonList = jsonDecode(jsonString);
+
+  // Convert each JSON map to a Transport instance
+  List<Transport> transports = [];
+
+  for (var json in jsonList) {
+    Transport transport = Transport.fromJson(json);
+    print("testParseJSON: ${transport.toString()}\n");
+    transports.add(transport);
+  }
+
+  return transports;
 }

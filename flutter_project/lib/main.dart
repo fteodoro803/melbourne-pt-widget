@@ -4,6 +4,7 @@ import "package:flutter_project/add_screens/select_location_screen.dart";
 import "package:flutter_project/add_screens/select_direction_screen.dart";
 import "package:flutter_project/add_screens/select_route_type_screen.dart";
 import "package:flutter_project/add_screens/select_stop_screen.dart";
+import "package:flutter_project/dev/test_screen.dart";
 import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
 
@@ -31,7 +32,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -41,16 +41,26 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: true,
         ),
         home: const MyHomePage(title: 'Demo Home Page'),
+        // home: const TestScreen(),       // Test Screen for Devs
 
         // Pages/Screens
         routes: {
-          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
-          '/selectLocationScreen': (context) => SelectLocationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
-          '/selectStopScreen': (context) => SelectStopScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
-          '/selectDirectionScreen': (context) => SelectDirectionScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
-          '/confirmationScreen': (context) => ConfirmationScreen(arguments: ModalRoute.of(context)!.settings.arguments as ScreenArguments),
-        }
-    );
+          '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(
+              arguments: ModalRoute.of(context)!.settings.arguments
+                  as ScreenArguments),
+          '/selectLocationScreen': (context) => SelectLocationScreen(
+              arguments: ModalRoute.of(context)!.settings.arguments
+                  as ScreenArguments),
+          '/selectStopScreen': (context) => SelectStopScreen(
+              arguments: ModalRoute.of(context)!.settings.arguments
+                  as ScreenArguments),
+          '/selectDirectionScreen': (context) => SelectDirectionScreen(
+              arguments: ModalRoute.of(context)!.settings.arguments
+                  as ScreenArguments),
+          '/confirmationScreen': (context) => ConfirmationScreen(
+              arguments: ModalRoute.of(context)!.settings.arguments
+                  as ScreenArguments),
+        });
   }
 }
 
@@ -67,23 +77,32 @@ class _MyHomePageState extends State<MyHomePage> {
   final requestController = TextEditingController();
   final locationController = TextEditingController();
   String? _file;
+  List<Transport> _transportList = [];
 
   @override
   void initState() {
     super.initState();
-    _loadFile();
+    _updateMainPage();
   }
 
-  Future<void> _loadFile() async {
-    String? content = await read();
-    setState(() {
-      _file = content;
-    });
-  }
+  // Loads transport file and Converts JSON to list of Transport objects
+  // I DONT LIKE HOW I DID THIS, FIND A WAY TO MAKE IT SIMPLER
+  Future<void> _updateMainPage() async {
+    String? stringContent = await read(formatted: true);
 
-  // Updates the Main Page in response to changes in Confirmation screen
-  void _updateMainPage() async {
-    await _loadFile();
+    if (stringContent != null) {
+      List<Transport> transportList = await parseTransportJSON(stringContent);
+
+      setState(() {
+        _file = stringContent;
+        _transportList = transportList;
+      });
+    } else {
+      setState(() {
+        _file = stringContent;
+        _transportList = [];
+      });
+    }
   }
 
   @override
@@ -94,41 +113,70 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
       ),
       body: SafeArea(
-        // Safe area is so the UI elements are below the notch
-        child: Center(
-          child: Column(
-            children: [
-              // ADD PAGE
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/selectRouteTypeScreen', arguments: ScreenArguments(Transport(), _updateMainPage));
-                  },
-                  child: Text("+")
-              ),
+        child: Column(
+          children: [
+            // ADD PAGE BUTTON
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  '/selectRouteTypeScreen',
+                  arguments: ScreenArguments(Transport(), _updateMainPage),
+                );
+              },
+              child: Text("+"),
+            ),
 
-              // TEST DISPLAY FILE CONTENTS
-              SizedBox(height: 20), // Add some spacing
-              // Display the contents of the text file
-              Padding(
+            // TEST LIST TILE BUILDER (Scrollable ListView)
+            Expanded(
+              child: ListView.builder(
+                itemCount: _transportList.length,
+                itemBuilder: (context, index) {
+                  final transport = _transportList[index];
+                  return ListTile(
+                    title: Text("${transport.routeType?.name} ${transport.route?.number} to ${transport.direction?.name}"),
+                    isThreeLine: true,
+                    subtitle: Text("from ${transport.stop?.name}\n"
+                        "Next Departure: ${transport.departures?[0].estimatedDeparture ?? transport.departures?[0].scheduledDeparture}"),
+                    onTap: () => {},
+                  );
+                },
+              ),
+            ),
+
+            // SPACER
+            SizedBox(height: 10),
+
+            // TEST DISPLAY FILE CONTENTS (Scrollable Text Box)
+            Expanded(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  _file.toString() ?? "null",
+                  "FILE TOSTRING:\n${_file != null
+                      ? _file.toString()
+                      : "null"}",
                   style: TextStyle(fontSize: 16.0),
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                 ),
               ),
+            ),
 
-              // TRANSPORT OPTIONS DISPLAY
-              // ListTiles of List<Transport>
+            // REFRESH BUTTON
+            ElevatedButton(
+              onPressed: () {
+                _updateMainPage();
+              },
+              child: Icon(Icons.refresh),
+            ),
 
-              ElevatedButton(
-                  onPressed: () {
-                    _updateMainPage();
-                  },
-                  child: Text("TEST BUTTON")
-              ),
-            ],
-          ),
+            // TEST BUTTON
+            ElevatedButton(
+              onPressed: () {
+                _updateMainPage();
+              },
+              child: Text("TEST BUTTON"),
+            ),
+          ],
         ),
       ),
     );
