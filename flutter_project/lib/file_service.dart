@@ -12,7 +12,6 @@ Future<String> getLocalPath() async {
 Future<void> save(String data) async {
   final path = await getLocalPath();
   final file = File('$path/transport_data.json');
-  // String jsonString = json.encode(userData.toJson());
   await file.writeAsString(data);
 }
 
@@ -38,8 +37,12 @@ Future<void> append(Transport newTransport) async {
     // Add new transport to JSON Map
     transports.add(newTransport.toJson());
 
+    // Convert to prettified JSON String
+    const encoder = JsonEncoder.withIndent('  ');
+    String prettyString = encoder.convert(transports);
+
     // Save updated list to File
-    await file.writeAsString(jsonEncode(transports));
+    await file.writeAsString(prettyString);
 
   } catch (e) {
     if (kDebugMode) {
