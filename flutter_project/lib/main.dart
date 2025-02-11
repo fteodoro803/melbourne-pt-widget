@@ -144,9 +144,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   final routeNumber = transport.route?.number ?? "Null RouteNumber";
                   final directionName = transport.direction?.name ?? "Null DirectionName";
                   final stopName = transport.stop?.name ?? "Null StopName";
-                  final departure1 = utilities.getTime(transport.departures?[0].estimatedDeparture) ?? utilities.getTime(transport.departures?[0].scheduledDeparture) ?? "Null 1st Departure";
-                  final departure2 = utilities.getTime(transport.departures?[1].estimatedDeparture) ?? utilities.getTime(transport.departures?[1].scheduledDeparture) ?? "Null 2nd Departure";
-                  final departure3 = utilities.getTime(transport.departures?[2].estimatedDeparture) ?? utilities.getTime(transport.departures?[2].scheduledDeparture) ?? "Null 3rd Departure";
+                  var departure1 = "Null 1st Departure (INITIALISED)";
+                  var departure2 = "Null 2nd Departure (INITIALISED)";
+                  var departure3 = "Null 3rd Departure (INITIALISED)";
+
+                  if (transport.departures != null && transport.departures!.length == 3) {
+                    departure1 = utilities.getTime(transport.departures?[0].estimatedDeparture) ?? utilities.getTime(transport.departures?[0].scheduledDeparture) ?? "Null 1st Departure";
+                    departure2 = utilities.getTime(transport.departures?[1].estimatedDeparture) ?? utilities.getTime(transport.departures?[1].scheduledDeparture) ?? "Null 2nd Departure";
+                    departure3 = utilities.getTime(transport.departures?[2].estimatedDeparture) ?? utilities.getTime(transport.departures?[2].scheduledDeparture) ?? "Null 3rd Departure";
+                  }
 
                   return ListTile(
                     isThreeLine: true,

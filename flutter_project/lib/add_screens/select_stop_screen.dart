@@ -36,9 +36,10 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   Future<void> fetchStops() async {
     String? location = widget.arguments.transport.location?.location;
     String? routeType = widget.arguments.transport.routeType?.type;
+    String? maxDistance = "300";
 
     // Fetching Data and converting to JSON
-    Data data = await PtvApiService().stops(location!, routeTypes: routeType);
+    Data data = await PtvApiService().stops(location!, routeTypes: routeType, maxDistance: maxDistance);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
@@ -91,9 +92,13 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         // old
         itemCount: _stops.length,
         itemBuilder: (context, index) {
+          final stopName = _stops[index].name ?? "Null stopName";
+          final routeNumber = _routes[index].number ?? "Null routeNumber";
+          final routeName = _routes[index].name ?? "Unknown routeName";
+
           return ListTile(
-            title: Text("${_stops[index].name}: (${_routes[index].number})"),
-            subtitle: Text(_routes[index].name),
+            title: Text("$stopName: ($routeNumber)"),
+            subtitle: Text(routeName),
             onTap: () {
               setStopAndRoute(index);
               Navigator.pushNamed(context, '/selectDirectionScreen',

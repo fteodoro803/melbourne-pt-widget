@@ -76,9 +76,12 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
         // old
         itemCount: _directions.length,
         itemBuilder: (context, index) {
+          final directionName = _directions[index].name ?? "Null directionName";
+          final directionId = _directions[index].id ?? "Null directionId";
+
           return ListTile(
             title:
-                Text("${_directions[index].name} (${_directions[index].id})"),
+                Text("$directionName ($directionId)"),
             onTap: () {
               setDirection(index);
               Navigator.pushNamed(context, '/confirmationScreen',

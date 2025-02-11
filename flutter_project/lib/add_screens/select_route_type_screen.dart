@@ -19,7 +19,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   // PtvApiService apiService = PtvApiService();
 
   final String _screenName = "SelectRouteType";
-  final List<RouteType> _routeTypesClass = [];
+  final List<RouteType> _routeTypes = [];
   DevTools tools = DevTools();
 
   // Initialising State
@@ -50,14 +50,14 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
       String type = entry["route_type"].toString();
       RouteType newRouteType = RouteType(name: name, type: type);
 
-      _routeTypesClass.add(newRouteType);
+      _routeTypes.add(newRouteType);
     }
 
     setState(() {});
   }
 
   void setRouteType(int index) {
-    widget.arguments.transport.routeType = _routeTypesClass[index];
+    widget.arguments.transport.routeType = _routeTypes[index];
   }
 
   // Rendering
@@ -72,10 +72,12 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
       // Generates List of Options
       body: ListView.builder(
         // old
-        itemCount: _routeTypesClass.length,
+        itemCount: _routeTypes.length,
         itemBuilder: (context, index) {
+          final routeTypeName = _routeTypes[index].name ?? "Unknown RouteType";
+
           return ListTile(
-            title: Text(_routeTypesClass[index].name),
+            title: Text(routeTypeName),
             onTap: () {
               setRouteType(index);
               Navigator.pushNamed(context, '/selectLocationScreen',
