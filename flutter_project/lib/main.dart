@@ -87,24 +87,29 @@ class _MyHomePageState extends State<MyHomePage> {
     _updateMainPage();
   }
 
-  // Loads transport file and Converts JSON to list of Transport objects
+  // Reads the saved transport data from a file and converts it into a list of Transport objects.
+  // If the file is empty or doesn't exist, initializes an empty transport list.
   Future<void> _updateMainPage() async {
     String? stringContent = await read(formatted: true);
 
+    // Case: Populated transport File
+    // Updates the Displayed Transport
     if (stringContent != null) {
       List<Transport> transportList = await parseTransportJSON(stringContent);
+
+      // Updates Departures
+      for (var transport in transportList) {
+        await transport.updateDepartures();
+      }
 
       setState(() {
         _file = stringContent;
         _transportList = transportList;
-
-        // Updates Departures
-        for (var transport in _transportList) {
-          transport.updateDepartures();
-        }
       });
+    }
 
-    } else {
+    // Case: No transport File
+    else {
       setState(() {
         _file = stringContent;
         _transportList = [];
