@@ -18,7 +18,7 @@ class CustomListTile extends StatelessWidget {
 
   return ListTile(
       isThreeLine: true,
-      title: Text("CUSTOM $routeTypeName $routeNumber to $directionName"),
+      title: Text("$routeTypeName $routeNumber to $directionName"),
       subtitle: Text("from $stopName\n"
           "$departure1 | $departure2 | $departure3"),
       onTap: () => {},
