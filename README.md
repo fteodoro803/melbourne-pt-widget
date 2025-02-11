@@ -42,7 +42,7 @@ Copy-paste these commands to
 
 ### To-Do
 - Priority: 
-  - Trams based on Location, and Direction
+  - Make a function to get Departures and save it to Class, and handle null cases in each display/screen
   - Selecting 1 form of PTV and getting information on that to Widget:
     1. Big Widget (saving a stop)
        1. ![tram_sample_screen.jpg](images%2Ftram_sample_screen.jpg)
@@ -73,6 +73,8 @@ Copy-paste these commands to
   - for Apple --> Cupertino
 - Show Disruptions from the Departures (expands=All) 
 - Figure out if package: imports are necessary, or if to use normal imports
+- Deleting a Transport
+  - On the trailing of the Tile, let the user delete it from the transportList, then save to File
 
 ### Testing
 - Mockito?
@@ -81,6 +83,23 @@ Copy-paste these commands to
 
 ### Decisions
 - Every variable will be of String type, because the API handles the numbers in strings
+
+### Bugs
+- Buses just seem kinda iffy
+  - Maybe remove them for now?
+  - The 907 Mitcham bus, for example, returns no data when going towards Mitcham, but does when towards the city
+  - But there is data on the PTV Planner and on Google Maps
+    - this might be because they get the bus departure times from their database and/or is hardcoded according to the schedule
+- Crash when if a Route has a null departure time (may be solved with new Confirmation screen)
+  - Example 1:
+    - Bus 
+    - Location: -37.811359153253406,144.96215876061984
+    - Route: 907 Mitcham
+- Crash when Selecting a null Bus Route, then going back and selecting another
+  - Example 1
+    - Bus
+    - Location: -37.761665989492705,144.9422826877412
+    - Route: 509 Melville Road/Hope Street
 
 <details>
   <summary><h2><b>Python/Template</b></h2></summary>

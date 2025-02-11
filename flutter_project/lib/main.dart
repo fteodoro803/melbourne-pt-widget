@@ -4,6 +4,7 @@ import "package:flutter_project/add_screens/select_location_screen.dart";
 import "package:flutter_project/add_screens/select_direction_screen.dart";
 import "package:flutter_project/add_screens/select_route_type_screen.dart";
 import "package:flutter_project/add_screens/select_stop_screen.dart";
+import "package:flutter_project/custom_list_tile.dart";
 import "package:flutter_project/dev/test_screen.dart";
 import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
@@ -142,53 +143,19 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text("+"),
             ),
 
-            // TEST LIST TILE BUILDER (Scrollable ListView)
+
+            // INFORMATION TILES AS LIST
             Expanded(
               child: ListView.builder(
                 itemCount: _transportList.length,
                 itemBuilder: (context, index) {
                   final transport = _transportList[index];
-                  final routeTypeName = transport.routeType?.name ?? "Null RouteTypeName";
-                  final routeNumber = transport.route?.number ?? "Null RouteNumber";
-                  final directionName = transport.direction?.name ?? "Null DirectionName";
-                  final stopName = transport.stop?.name ?? "Null StopName";
-                  var departure1 = "Null 1st Departure (INITIALISED)";
-                  var departure2 = "Null 2nd Departure (INITIALISED)";
-                  var departure3 = "Null 3rd Departure (INITIALISED)";
-
-                  if (transport.departures != null && transport.departures!.length == 3) {
-                    departure1 = utilities.getTime(transport.departures?[0].estimatedDeparture) ?? utilities.getTime(transport.departures?[0].scheduledDeparture) ?? "Null 1st Departure";
-                    departure2 = utilities.getTime(transport.departures?[1].estimatedDeparture) ?? utilities.getTime(transport.departures?[1].scheduledDeparture) ?? "Null 2nd Departure";
-                    departure3 = utilities.getTime(transport.departures?[2].estimatedDeparture) ?? utilities.getTime(transport.departures?[2].scheduledDeparture) ?? "Null 3rd Departure";
-                  }
-
-                  return ListTile(
-                    isThreeLine: true,
-                    title: Text("$routeTypeName $routeNumber to $directionName"),
-                    subtitle: Text("from $stopName\n"
-                        "$departure1 | $departure2 | $departure3"),
-                    onTap: () => {},
-                  );
+                  return CustomListTile(transport: transport);
                 },
               ),
             ),
 
-            // SPACER
-            SizedBox(height: 10),
-
-            // // TEST DISPLAY FILE CONTENTS (Scrollable Text Box)
-            // Expanded(
-            //   child: SingleChildScrollView(
-            //     padding: const EdgeInsets.all(16.0),
-            //     child: Text(
-            //       "FILE TOSTRING:\n${_file != null
-            //           ? _file.toString()
-            //           : "null"}",
-            //       style: TextStyle(fontSize: 16.0),
-            //       textAlign: TextAlign.left,
-            //     ),
-            //   ),
-            // ),
+            Divider(),
 
             // REFRESH BUTTON
             ElevatedButton(
