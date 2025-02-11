@@ -102,6 +102,9 @@ class _MyHomePageState extends State<MyHomePage> {
         await transport.updateDepartures();
       }
 
+      // Saves updated Departures to File
+      save(transportList);
+
       setState(() {
         _file = stringContent;
         _transportList = transportList;

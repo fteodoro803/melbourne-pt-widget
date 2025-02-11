@@ -9,10 +9,30 @@ Future<String> getLocalPath() async {
   return directory.path;
 }
 
-Future<void> save(String data) async {
-  final path = await getLocalPath();
-  final file = File('$path/transport_data.json');
-  await file.writeAsString(data);
+Future<void> save(List<Transport> transportList) async {
+  try {
+    final path = await getLocalPath();
+    final file = File('$path/transport_data.json');
+
+    List<Map<String, dynamic>> transports = [];
+
+    // Convert each Transport to JSON
+    for (var transport in transportList) {
+      transports.add(transport.toJson());
+    }
+
+    // Convert to prettified JSON String
+    const encoder = JsonEncoder.withIndent('  ');
+    String prettyString = encoder.convert(transports);
+
+    // Save updated list to File
+    await file.writeAsString(prettyString);
+
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error saving to file: $e');
+    } // Log the error
+  }
 }
 
 // add delete functionality
@@ -87,7 +107,7 @@ Future<List<Transport>> parseTransportJSON(String jsonString) async {
 
   for (var json in jsonList) {
     Transport transport = Transport.fromJson(json);
-    print("testParseJSON: ${transport.toString()}\n");
+    // print("testParseJSON: ${transport.toString()}\n");
     transports.add(transport);
   }
 
