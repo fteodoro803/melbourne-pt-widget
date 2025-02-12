@@ -12,6 +12,10 @@ class Departure {
   DateTime? scheduledDeparture;
   DateTime? estimatedDeparture;
 
+  // Departures as a formatted String
+  String? scheduledDepartureTime;
+  String? estimatedDepartureTime;
+
   String? runId;
   String? runRef;
 
@@ -21,11 +25,40 @@ class Departure {
     // Adds and converts Departure to local Melbourne Time
     if (scheduledDepartureUTC != null){
       scheduledDeparture = scheduledDepartureUTC!.toLocal();
+      scheduledDepartureTime = getTime(scheduledDeparture);
     }
 
     if (estimatedDepartureUTC != null) {
       estimatedDeparture = estimatedDepartureUTC!.toLocal();
+      estimatedDepartureTime = getTime(estimatedDeparture);
     }
+  }
+
+  // Returns the formatted Time String from a DateTime variable
+  String? getTime(DateTime? dateTime) {
+    if (dateTime == null) {
+      return null;
+    }
+
+    // Converts 24 hour time to 12
+    String hour;
+    String minute = dateTime.minute.toString();
+    String meridiem;
+
+    if (dateTime.hour > 12) {
+      hour = (dateTime.hour - 12).toString();
+      meridiem = "pm";
+    }
+    else {
+      hour = dateTime.hour.toString();
+      meridiem = "am";
+    }
+
+    // Adds a '0' to the left, if Single digit time (ex: 7 becomes 07)
+    hour = hour.padLeft(2, "0");
+    minute = minute.padLeft(2, "0");
+
+    return "$hour:$minute$meridiem";
   }
 
   @override

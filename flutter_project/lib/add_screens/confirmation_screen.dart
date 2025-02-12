@@ -1,18 +1,11 @@
 // Shows a Sample of what the Transit Departure Screen will display
 // Also is a confirmation, which leads back to the home page
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/file_service.dart';
-import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/departure_service.dart';
-
 import 'package:flutter_project/custom_list_tile.dart';
-
-import 'package:flutter_project/utilities.dart' as utilities;
 
 class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key, required this.arguments});
@@ -56,9 +49,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     var departure3 = "Null 3rd Departure (INITIALISED)";
 
     if (transport.departures != null && transport.departures!.length == 3) {
-      departure1 = utilities.getTime(transport.departures?[0].estimatedDeparture) ?? utilities.getTime(transport.departures?[0].scheduledDeparture) ?? "Null 1st Departure (SET)";
-      departure2 = utilities.getTime(transport.departures?[1].estimatedDeparture) ?? utilities.getTime(transport.departures?[1].scheduledDeparture) ?? "Null 2nd Departure (SET)";
-      departure3 = utilities.getTime(transport.departures?[2].estimatedDeparture) ?? utilities.getTime(transport.departures?[2].scheduledDeparture) ?? "Null 3rd Departure (SET)";
+      departure1 = transport.departures?[0].estimatedDepartureTime ?? transport.departures?[0].scheduledDepartureTime ?? "Null 1st Departure (SET)";
+      departure2 = transport.departures?[1].estimatedDepartureTime ?? transport.departures?[1].scheduledDepartureTime ?? "Null 2nd Departure (SET)";
+      departure3 = transport.departures?[2].estimatedDepartureTime ?? transport.departures?[2].scheduledDepartureTime ?? "Null 3rd Departure (SET)";
     }
 
     return Scaffold(
