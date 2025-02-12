@@ -14,8 +14,8 @@ class SelectLocationScreen extends StatefulWidget {
 }
 
 class _SelectLocationScreenState extends State<SelectLocationScreen> {
-  String _screenName = "SelectLocation";
-  TextEditingController _locationController =
+  final String _screenName = "SelectLocation";
+  final TextEditingController _locationController =
       TextEditingController(); // Placeholder until map api is implemented
   DevTools tools = DevTools();
 

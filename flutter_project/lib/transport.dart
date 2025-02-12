@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
@@ -27,19 +28,25 @@ class Transport {
   // Update Departures
   Future<void> updateDepartures() async {
     String? routeType = this.routeType?.type;
-    String? stopId = this.stop?.id;
-    String? directionId = this.direction?.id;
-    String? routeId = this.route?.id;
+    String? stopId = stop?.id;
+    String? directionId = direction?.id;
+    String? routeId = route?.id;
 
     // Early exit if any of the prerequisites are null
     if (routeType == null || stopId == null || directionId == null || routeId == null) {
+      if (kDebugMode) {
+        print("~test: updatedDepartures(): Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
+      }
       return;
     }
 
     // Gets Departures and saves to instance
     DepartureService departureService = DepartureService();
-    this.departures = await departureService.fetchDepartures(
+    departures = await departureService.fetchDepartures(
         routeType, stopId, directionId, routeId);
+    if (kDebugMode) {
+      print("~test: updatedDepartures(): Updated Departures: \n $departures");
+    }
   }
 
   // Make the toString for list representation???~

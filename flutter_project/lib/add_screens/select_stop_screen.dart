@@ -17,9 +17,9 @@ class SelectStopScreen extends StatefulWidget {
 }
 
 class _SelectStopScreenState extends State<SelectStopScreen> {
-  String _screenName = "SelectStop";
-  List<Stop> _stops = [];
-  List<PTRoute.Route> _routes = [];
+  final String _screenName = "SelectStop";
+  final List<Stop> _stops = [];
+  final List<PTRoute.Route> _routes = [];
   DevTools tools = DevTools();
 
   // Initialising State

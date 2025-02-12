@@ -5,7 +5,6 @@ import "package:flutter_project/add_screens/select_direction_screen.dart";
 import "package:flutter_project/add_screens/select_route_type_screen.dart";
 import "package:flutter_project/add_screens/select_stop_screen.dart";
 import "package:flutter_project/custom_list_tile.dart";
-import "package:flutter_project/dev/test_screen.dart";
 import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
 
@@ -13,7 +12,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/file_service.dart';
 
-import 'utilities.dart' as utilities;
 
 // void main() {
 void main() async {
@@ -28,7 +26,7 @@ void main() async {
 }
 
 class MyApp extends StatefulWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -142,7 +140,6 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: Text("+"),
             ),
-
 
             // INFORMATION TILES AS LIST
             Expanded(

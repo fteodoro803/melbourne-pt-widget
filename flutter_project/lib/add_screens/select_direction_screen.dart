@@ -15,8 +15,8 @@ class SelectDirectionScreen extends StatefulWidget {
 }
 
 class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
-  String _screenName = "selectDirection";
-  List<RouteDirection> _directions = [];
+  final String _screenName = "selectDirection";
+  final List<RouteDirection> _directions = [];
   DevTools tools = DevTools();
 
   // Initialising State
