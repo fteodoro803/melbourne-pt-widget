@@ -12,6 +12,9 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/file_service.dart';
 
+import 'package:flutter_project/dev/test_screen.dart';
+
+
 
 // void main() {
 void main() async {
@@ -61,6 +64,7 @@ class _MyAppState extends State<MyApp> {
           '/confirmationScreen': (context) => ConfirmationScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
+          '/testScreen': (context) => const TestScreen(),
         });
   }
 }
@@ -165,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // TEST BUTTON
             ElevatedButton(
               onPressed: () {
-                _updateMainPage();
+                Navigator.pushNamed(context, '/testScreen');
               },
               child: Text("TEST BUTTON"),
             ),
