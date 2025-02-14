@@ -39,6 +39,8 @@ Copy-paste these commands to
 - If modifying Transport or any -info class, make sure to run either:
   - Once: ```dart run build_runner build --delete-conflicting-outputs```
   - Continuously: ```dart run build_runner watch --delete-conflicting-outputs```
+- If on Android Studio Ladybug with Gradle Error, get Java JDK 17 and run this on terminal:
+  - flutter config --jdk-dir "C:\Program Files\Java\jdk-17"
 
 ### To-Do
 - Priority: 
@@ -75,6 +77,10 @@ Copy-paste these commands to
 - Figure out if package: imports are necessary, or if to use normal imports
 - Deleting a Transport
   - On the trailing of the Tile, let the user delete it from the transportList, then save to File
+- Widget sorts Stops based on closest one
+  - If location is always on, if not just keep it custom
+- Google Maps
+  - [Secure the API Keys](https://github.com/google/secrets-gradle-plugin)
 
 ### Testing
 - Mockito?

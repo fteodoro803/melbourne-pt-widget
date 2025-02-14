@@ -39,6 +39,7 @@ dependencies:
   global_configuration: ^2.0.0
   path_provider: ^2.1.4
   json_annotation: ^4.9.0
+  google_maps_flutter: ^2.10.0
 
 dev_dependencies:
   flutter_test:
