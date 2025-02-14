@@ -125,5 +125,7 @@ Copy-paste these commands to
 </details>
 
 ### References
+- [PTV API](https://timetableapi.ptv.vic.gov.au/swagger/ui/index)
 - [Sending Data across Screens](https://docs.flutter.dev/cookbook/navigation/passing-data]=)
+- [Google Maps API](https://developers.google.com/maps/flutter-package/config#groovy_2)
 
