@@ -128,14 +128,14 @@ class PtvApiService {
     if (maxResults != null && maxResults.isNotEmpty) {
       parameters['max_results'] = maxResults;
     }
-    print('expand: $expand');
+    // print('(ptv_api_service.dart): expand: $expand');
     if (expand != null && expand.isNotEmpty) {
       List<String> expandList = expand.split(',');
-      print('expandList: $expandList');
+      // print('(ptv_api_service.dart): expandList: $expandList');
       for (int i=0; i<expandList.length; i++) {
         parameters['expand'] = expandList[i];   // NOTE :::: SO FAR THIS IS WRONG BC IT OVERWRITES THE PREVIOUS EXPAND, BC THERE ARE NO DUPLICATE KEYS IN MAP
       }
-      print('parameters: $parameters');
+      // print('(ptv_api_service.dart): parameters: $parameters');
     }
 
     Uri url = getURL(request, parameters: parameters);

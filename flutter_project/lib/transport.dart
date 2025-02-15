@@ -34,9 +34,9 @@ class Transport {
 
     // Early exit if any of the prerequisites are null
     if (routeType == null || stopId == null || directionId == null || routeId == null) {
-      if (kDebugMode) {
-        print("~test: updatedDepartures(): Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
-      }
+      // if (kDebugMode) {
+      //   print("( transport.dart -> updatedDepartures() ): Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
+      // }
       return;
     }
 
@@ -44,9 +44,9 @@ class Transport {
     DepartureService departureService = DepartureService();
     departures = await departureService.fetchDepartures(
         routeType, stopId, directionId, routeId);
-    if (kDebugMode) {
-      print("~test: updatedDepartures(): Updated Departures: \n $departures");
-    }
+    // if (kDebugMode) {
+    //   print("( transport.dart -> updatedDepartures() ): Updated Departures: \n $departures");
+    // }
   }
 
   // Make the toString for list representation???~
