@@ -43,13 +43,6 @@ Copy-paste these commands to
   - flutter config --jdk-dir "C:\Program Files\Java\jdk-17"
 
 ### To-Do
-- Priority: 
-  - Make a function to get Departures and save it to Class, and handle null cases in each display/screen
-  - Selecting 1 form of PTV and getting information on that to Widget:
-    1. Big Widget (saving a stop)
-       1. ![tram_sample_screen.jpg](images%2Ftram_sample_screen.jpg)
-    2. Small Widget (saving a tram)
-       1. just one of the above
 - Continuous Integration and Development
   - Github Actions
     - https://www.youtube.com/watch?v=scEDHsr3APg
@@ -64,6 +57,9 @@ Copy-paste these commands to
     - Get unique PTV Numbers (Tram Numbers, Train, Etc)
   - If I do multiple calls, such as looping to get directions for each Tram Route, does that count as spamming the API? Any way I can minimise calls?
     - Maybe I can create a little text file storing directions for routes, like a cache
+- Sort/Reorganise Stop screen
+  - maybe add dividers between different stops?
+
 - Ideas
   - For direction, maybe something like "Flinders -> North Coburg"
   - Notification for Disruptions?
