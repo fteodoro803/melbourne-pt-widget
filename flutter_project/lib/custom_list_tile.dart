@@ -4,7 +4,8 @@ import 'package:flutter_project/transport.dart';
 class CustomListTile extends StatelessWidget {
   final Transport transport;
   final VoidCallback onTap;
-  const CustomListTile({super.key, required this.transport, this.onTap = _emptyFunction});
+  final bool? hasOptionsButton;
+  const CustomListTile({super.key, required this.transport, this.onTap = _emptyFunction, this.hasOptionsButton});
 
   // Empty function for default OnTap
   static void _emptyFunction() {}
@@ -27,9 +28,9 @@ class CustomListTile extends StatelessWidget {
       departure3 = transport.departures?[2].estimatedDepartureTime ?? transport.departures?[2].scheduledDepartureTime ?? "Null 3rd Departure";
     }
     else {
-      departure1 = "Null Departures";
-      departure2 = "Null Departures";
-      departure3 = "Null Departures";
+      departure1 = "No Data";
+      departure2 = "No Data";
+      departure3 = "No Data";
     }
 
   return ListTile(
@@ -39,7 +40,8 @@ class CustomListTile extends StatelessWidget {
           "$departure1 | $departure2 | $departure3"),
       
       leading: Icon(Icons.tram, size: 50,),
-      trailing: Icon(Icons.settings, size: 50),
+      trailing: hasOptionsButton == true? Icon(Icons.settings, size: 50) : null,
       onTap: onTap,
+
     );  }
 }

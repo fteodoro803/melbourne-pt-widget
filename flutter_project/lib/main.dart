@@ -151,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: _transportList.length,
                 itemBuilder: (context, index) {
                   final transport = _transportList[index];
-                  return CustomListTile(transport: transport);
+                  return CustomListTile(transport: transport, hasOptionsButton: true,);
                 },
               ),
             ),
