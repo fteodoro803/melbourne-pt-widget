@@ -44,6 +44,7 @@ Copy-paste these commands to
   - flutter config --jdk-dir "C:\Program Files\Java\jdk-17"
 
 ### To-Do
+- Change the package name (in flutter and android manifest)
 - Continuous Integration and Development
   - Github Actions
     - https://www.youtube.com/watch?v=scEDHsr3APg
@@ -62,18 +63,13 @@ Copy-paste these commands to
   - maybe add dividers between different stops?
 
 - Ideas
-  - For direction, maybe something like "Flinders -> North Coburg"
   - Notification for Disruptions?
     - A way of notifying that a Tram is going to the depot/stops early
     - Cancellation?
   - A setting filtering for PTV with specific descriptors (low floor, aircon, etc)
-- Appearance
-  - for Android --> Material
-  - for Apple --> Cupertino
 - Show Disruptions from the Departures (expands=All) 
 - Figure out if package: imports are necessary, or if to use normal imports
-- Deleting a Transport
-  - On the trailing of the Tile, let the user delete it from the transportList, then save to File
+- On the Widget itself, swipe down to change displayed transport (if small widget)
 - Widget sorts Stops based on closest one
   - If location is always on, if not just keep it custom
 - Google Maps
