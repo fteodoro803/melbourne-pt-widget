@@ -123,6 +123,16 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // Dismiss a Transport item from List
+  void removeTransport(Transport transport) async {
+    setState(() {
+      _transportList.remove(transport);
+    });
+
+    await save(_transportList);   // Updates the save file
+    print("( main.dart -> removeTransport() ) : TransportListCount=${_transportList.length}");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: _transportList.length,
                 itemBuilder: (context, index) {
                   final transport = _transportList[index];
-                  return CustomListTile(transport: transport);
+                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => removeTransport(transport),);
                 },
               ),
             ),

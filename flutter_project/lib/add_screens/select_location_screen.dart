@@ -77,7 +77,6 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
         centerTitle: true,
       ),
       body: Stack(children: [
-
         // Google Map
         Positioned.fill(
           child: GoogleMap(
@@ -94,6 +93,23 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
               markers: markers),
         ),
 
+        // Manual Location (~test)
+        Positioned(
+          left: 20,
+          right: 20,
+          bottom: 80,
+          child: SizedBox(
+            width: 300,
+            child: TextField(
+              controller: _locationController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Latitude,Longitude',
+              ),
+            ),
+          ),
+        ),
+
         // Button
         Positioned(
           bottom: 20,
@@ -101,7 +117,9 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
           right: 100,
           child: ElevatedButton(
               onPressed: () {
-                setMapLocation();
+                _locationController.text.isNotEmpty? setLocation() : setMapLocation(); // ~test, for when manual location is on
+
+                // setMapLocation();
                 Navigator.pushNamed(context, '/selectStopScreen',
                     arguments: widget.arguments);
               },
