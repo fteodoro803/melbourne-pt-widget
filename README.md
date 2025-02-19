@@ -61,6 +61,7 @@ Copy-paste these commands to
     - Maybe I can create a little text file storing directions for routes, like a cache
 - Sort/Reorganise Stop screen
   - maybe add dividers between different stops?
+- Refresh periodically
 
 - Ideas
   - Notification for Disruptions?
