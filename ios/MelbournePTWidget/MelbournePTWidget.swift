@@ -9,26 +9,28 @@ import WidgetKit
 import SwiftUI
 
 struct Provider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
-    }
-
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+    // Retrieves data from Flutter app
+    private func getDataFromFlutter() -> SimpleEntry {
+        let userDefaults = UserDefaults(suiteName: "group.melbournePTWidget")
+        let textFromFlutterApp = userDefaults?.string(forKey: "text_from_flutter_app") ?? "No Text from Flutter"
+        return SimpleEntry(date: Date(), text: textFromFlutterApp)
     }
     
+    // Preview in Widget Gallery
+    func placeholder(in context: Context) -> SimpleEntry {
+        SimpleEntry(date: Date(), text: "Preview in Widget Gallery")
+    }
+
+    // Widget Gallery/Selection preview
+    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
+            SimpleEntry(date: Date(), text: "Widget Gallery/Selection")
+    }
+    
+    // Actual Widget on Home Screen
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
+        let entry = getDataFromFlutter()
 
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
-        }
-
-        return Timeline(entries: entries, policy: .atEnd)
+        return Timeline(entries: [entry], policy: .atEnd)
     }
 
 //    func relevances() async -> WidgetRelevances<ConfigurationAppIntent> {
@@ -36,25 +38,25 @@ struct Provider: AppIntentTimelineProvider {
 //    }
 }
 
+// Widget Data Structure
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let configuration: ConfigurationAppIntent
+    let text: String
 }
 
+// Appearance of Widget
 struct MelbournePTWidgetEntryView : View {
     var entry: Provider.Entry
 
     var body: some View {
         VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
-
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
+            Text("Text:")
+            Text(entry.text)
         }
     }
 }
 
+// Main Widget Configuration
 struct MelbournePTWidget: Widget {
     let kind: String = "MelbournePTWidget"
 
@@ -66,23 +68,9 @@ struct MelbournePTWidget: Widget {
     }
 }
 
-extension ConfigurationAppIntent {
-    fileprivate static var smiley: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "😀"
-        return intent
-    }
-    
-    fileprivate static var starEyes: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "🤩"
-        return intent
-    }
-}
-
 #Preview(as: .systemSmall) {
     MelbournePTWidget()
 } timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
+    SimpleEntry(date: .now, text: "Preview1")
+    SimpleEntry(date: .now, text: "Preview2")
 }

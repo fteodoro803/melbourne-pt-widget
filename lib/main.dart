@@ -13,6 +13,7 @@ import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
+import "package:home_widget/home_widget.dart";
 
 
 
@@ -84,10 +85,36 @@ class _MyHomePageState extends State<MyHomePage> {
   String? _file;
   List<Transport> _transportList = [];
 
+  // Home Widget
+  String appGroupId = "group.melbournePTWidget";
+  String iosWidgetName = "MelbournePTWidget";
+  String androidWidgetName = "MelbournePTWidget";
+  String dataKey = "text_from_flutter_app";
+
+  int num = 0;
+  void increment() async {
+    setState(() {
+      num++;
+    });
+
+    // save widget data
+    String data = "Count = $num";
+    await HomeWidget.saveWidgetData(dataKey, data);
+
+    // Update widget after saving data
+    await HomeWidget.updateWidget(
+      iOSName: iosWidgetName,
+      androidName: androidWidgetName,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _updateMainPage();
+
+    // Initialise home widgets
+    HomeWidget.setAppGroupId(appGroupId);
   }
 
   // Reads the saved transport data from a file and converts it into a list of Transport objects.
@@ -165,6 +192,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
             ),
+
+            Divider(),
+
+            Text("Num: $num"),
+            ElevatedButton(onPressed: increment, child: Text("Increment")),
 
             Divider(),
 
