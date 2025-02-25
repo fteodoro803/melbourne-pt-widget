@@ -13,6 +13,7 @@ Copy-paste these commands to
   2. Ensure developer credential files don't get tracked by Git 
      - ```git update-index --assume-unchanged assets/cfg/config.json```
      - ```git update-index --assume-unchanged android/secrets.properties```
+     - ```git update-index --assume-unchanged ios/Runner/AppDelegate.swift```
   3. [Build JSON Serializable files](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility)
      - ```dart run build_runner build --delete-conflicting-outputs```
 
