@@ -43,8 +43,6 @@ Copy-paste these commands to
   - Continuously: ```dart run build_runner watch --delete-conflicting-outputs```
 - If on Android Studio Ladybug with Gradle Error, get Java JDK 17 and run this on terminal:
   - flutter config --jdk-dir "C:\Program Files\Java\jdk-17"
-  - Podfile iOS Version is set to 14.0
-    - 18.0 didnt work for some reason, even though the rest of the min requirements are set to iOS 18
 
 ### To-Do
 - Change the package name (in flutter and android manifest)
