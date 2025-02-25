@@ -11,8 +11,8 @@ Copy-paste these commands to
   1. Get dependencies 
      - ```flutter pub get```
   2. Ensure developer credential files don't get tracked by Git 
-     - ```git update-index --assume-unchanged flutter_project/assets/cfg/config.json```
-     - ```git update-index --assume-unchanged flutter_project/android/secrets.properties```
+     - ```git update-index --assume-unchanged assets/cfg/config.json```
+     - ```git update-index --assume-unchanged android/secrets.properties```
   3. [Build JSON Serializable files](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility)
      - ```dart run build_runner build --delete-conflicting-outputs```
 
