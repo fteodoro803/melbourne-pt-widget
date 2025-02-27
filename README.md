@@ -84,6 +84,7 @@ Copy-paste these commands to
 
 ### Decisions
 - Every variable will be of String type, because the API handles the numbers in strings
+- HomeWidget vs Shared Preferences for sending data??
 
 ### Bugs
 - Buses just seem kinda iffy

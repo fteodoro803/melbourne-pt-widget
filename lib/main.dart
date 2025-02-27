@@ -89,16 +89,11 @@ class _MyHomePageState extends State<MyHomePage> {
   String appGroupId = "group.melbournePTWidget";
   String iosWidgetName = "MelbournePTWidget";
   String androidWidgetName = "MelbournePTWidget";
-  String dataKey = "text_from_flutter_app";
+  String dataKey = "data_from_flutter";
 
-  int num = 0;
-  void increment() async {
-    setState(() {
-      num++;
-    });
-
+  void sendWidgetData() async {
     // save widget data
-    String data = "Count = $num";
+    String data = _file ?? "sendWidgetData() -> no file";
     await HomeWidget.saveWidgetData(dataKey, data);
 
     // Update widget after saving data
@@ -127,10 +122,13 @@ class _MyHomePageState extends State<MyHomePage> {
     if (stringContent != null) {
       List<Transport> transportList = await parseTransportJSON(stringContent);
 
-      // Updates Departures
+      // Updates all Departures
       for (var transport in transportList) {
         await transport.updateDepartures();
       }
+
+      // // Send Data to Widget
+      // sendWidgetData();
 
       // Saves updated Departures to File
       save(transportList);
@@ -139,6 +137,9 @@ class _MyHomePageState extends State<MyHomePage> {
         _file = stringContent;
         _transportList = transportList;
       });
+
+      // Send Data to Widget
+      sendWidgetData();
     }
 
     // Case: No transport File
@@ -188,15 +189,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: _transportList.length,
                 itemBuilder: (context, index) {
                   final transport = _transportList[index];
-                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => removeTransport(transport),);
+                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => {removeTransport(transport), _updateMainPage()},);
                 },
               ),
             ),
-
-            Divider(),
-
-            Text("Num: $num"),
-            ElevatedButton(onPressed: increment, child: Text("Increment")),
 
             Divider(),
 

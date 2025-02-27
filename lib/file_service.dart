@@ -87,8 +87,19 @@ Future<String?> read({bool formatted = false}) async {
     if (string.isNotEmpty && formatted == true) {
       final jsonObject = jsonDecode(string);
       final prettyString = JsonEncoder.withIndent('   ').convert(jsonObject);
+
+      // // Print the pretty string
+      // if (kDebugMode) {
+      //   print("( file_service.dart -> read() ): Pretty JSONString: $string");
+      // }
+
       return prettyString;
     }
+
+    // // test
+    // if (kDebugMode) {
+    //   print("( file_service.dart -> read() ): JSONString: $string");
+    // }
 
     return string;
   } catch (e) {
