@@ -13,6 +13,7 @@ struct Provider: AppIntentTimelineProvider {
     private func getDataFromFlutter() -> SimpleEntry {
         let userDefaults = UserDefaults(suiteName: "group.melbournePTWidget")
         let flutterData = userDefaults?.string(forKey: "data_from_flutter") ?? "No Data from Flutter"
+        var transportsList: [Transport] = []
         
         // Parse JSON Data
         let data = Data(flutterData.utf8)
@@ -28,39 +29,40 @@ struct Provider: AppIntentTimelineProvider {
                 print("Direction ID: \(transport.direction.name)")
                 for departure in transport.departures {
                     print("Scheduled Departure Time: \(departure.scheduledDepartureTime ?? "No scheduled departure")")
-                    print("Estimated Departure Time: \(departure.estimatedDepartureTime ?? "No estimated departure")")
+//                    print("Estimated Departure Time: \(departure.estimatedDepartureTime ?? "No estimated departure")")
                 }
-                return SimpleEntry(date: Date(), jsonData: flutterData, transport: transport)   // idk if i need to store jsonData since it's already in the transport
-
+                transportsList.append(transport)
+                
             }
         }
         catch {
             print("Error decoding JSON: \(error)")
         }
         
-        return SimpleEntry(date: Date(), jsonData: flutterData, transport: nil)
+        return SimpleEntry(date: Date(), transports: transportsList)
     }
     
     // Preview in Widget Gallery
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), jsonData: "1", transport: Transport(
+        SimpleEntry(date: Date(), transports: [Transport(
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
             route: Route(number: "19"),
             direction: Direction(name: "Flinders"),
             departures: []  // Empty array of Departures
-            ))
+            )]
+        )
     }
 
     // Widget Gallery/Selection preview
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), jsonData: "2", transport: Transport(
+        SimpleEntry(date: Date(), transports: [Transport(
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
             route: Route(number: "19"),
             direction: Direction(name: "Flinders"),
             departures: []  // Empty array of Departures
-            ))
+            )])
     }
     
     // Actual Widget on Home Screen
@@ -78,30 +80,26 @@ struct Provider: AppIntentTimelineProvider {
 // Widget Data Structure
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let jsonData: String
-    let transport: Transport?
+    let transports: [Transport]
 }
 	
 // Appearance of Widget
 struct MelbournePTWidgetEntryView : View {
     var entry: Provider.Entry
-
+    
     var body: some View {
-        HStack {
-            Image(systemName: "tram.fill")
-                .resizable(capInsets: EdgeInsets(top: 30.0, leading: 30.0, bottom: 30.0, trailing: 30.0))
-                .aspectRatio(contentMode: .fit)
-                .frame(width: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/)
+        ForEach(entry.transports, id: \.uniqueID) { transport in
             
-            Spacer()
-            
-            VStack {
-                //Text("\(entry.transport!.routeType.name) \(entry.transport!.route.number) to \(entry.transport!.direction.name)")
-                //Text("from \(entry.transport!.stop.name)")
-                // Text("\(entry.transport!.departures[0].scheduledDeparture ?? "Null") | \(entry.transport!.departures[1].scheduledDeparture ?? "Null") | \(entry.transport!.departures[2].scheduledDeparture ?? "Null")")
+            HStack {
+                Image(systemName: "tram.fill")
+                    .resizable(capInsets: EdgeInsets(top: 30.0, leading: 30.0, bottom: 30.0, trailing: 30.0))
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/)
                 
-                // Transport Information
-                if let transport = entry.transport {
+                Spacer()
+                
+                VStack {
+                    // Transport Information
                     Text("\(transport.routeType.name) \(transport.route.number) to \(transport.direction.name)")
                     Text("from \(transport.stop.name)")
                     
@@ -110,13 +108,8 @@ struct MelbournePTWidgetEntryView : View {
                     let departureString = departureText.joined(separator: " | ")
                     Text(departureString)
                 }
-                else {
-                    Text("No transport Data available")
-                }
             }
         }
-        
-//        Text("Transport?: \(entry.transport != nil ? "yes" : "no"); jsonData: \(entry.jsonData)")
     }
 }
 
@@ -135,8 +128,8 @@ struct MelbournePTWidget: Widget {
 #Preview(as: .systemMedium) {
     MelbournePTWidget()
 } timeline: {
-    SimpleEntry(date: .now, jsonData: "jsonString1",
-                transport: Transport(
+    SimpleEntry(date: .now,
+                transports: [Transport(
                     routeType: RouteType(name: "Tram"),
                     stop: Stop(name: "Melb Central"),
                     route: Route(number: "19"),
@@ -155,10 +148,10 @@ struct MelbournePTWidget: Widget {
                             scheduledDepartureTime: "14:50"
                         )
                     ]  // array of Departures
-                )
+                )]
     )
-    SimpleEntry(date: .now, jsonData: "jsonString2",
-                transport: Transport(
+    SimpleEntry(date: .now,
+                transports: [Transport(
                     routeType: RouteType(name: "Bus"),
                     stop: Stop(name: "Melb Central"),
                     route: Route(number: "1"),
@@ -177,6 +170,6 @@ struct MelbournePTWidget: Widget {
                             scheduledDepartureTime: "14:50"
                         )
                     ]  // array of Departures
-                )
+                )]
     )
 }

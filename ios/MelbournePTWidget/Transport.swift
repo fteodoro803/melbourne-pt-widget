@@ -24,12 +24,14 @@ struct Departure: Codable {
 }
 
 struct Transport: Codable, CustomStringConvertible {
+    let uniqueID = UUID()       // Generated unique ID
+
     let routeType: RouteType
     let stop: Stop
     let route: Route
     let direction: Direction
     let departures: [Departure]
-    
+        
     var description: String {
             return """
             Route Type: \(routeType.name)
