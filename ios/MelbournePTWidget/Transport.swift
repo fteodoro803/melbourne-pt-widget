@@ -15,18 +15,31 @@ struct Route: Codable {
 }
 
 struct Direction: Codable {
-    let direction: String
+    let name: String
 }
 
 struct Departure: Codable {
-    let estimatedDeparture: String?
-    let scheduledDeparture: String?
+    let estimatedDepartureTime: String?
+    let scheduledDepartureTime: String?
 }
 
-struct Transport: Codable {
+struct Transport: Codable, CustomStringConvertible {
     let routeType: RouteType
     let stop: Stop
     let route: Route
     let direction: Direction
-    let departure: [Departure]
+    let departures: [Departure]
+    
+    var description: String {
+            return """
+            Route Type: \(routeType.name)
+            Stop: \(stop.name)
+            Route Number: \(route.number)
+            Direction: \(direction.name)
+            Departures:
+            \(departures.map { departure in
+                "Scheduled: \(departure.scheduledDepartureTime ?? "N/A"), Estimated: \(departure.estimatedDepartureTime ?? "N/A")"
+            }.joined(separator: "\n"))
+            """
+        }
 }
