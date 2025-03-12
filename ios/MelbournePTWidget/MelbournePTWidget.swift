@@ -15,15 +15,26 @@ struct Provider: AppIntentTimelineProvider {
         let flutterData = userDefaults?.string(forKey: "data_from_flutter") ?? "No Data from Flutter"
         var transportsList: [Transport] = []
         
+        // Print raw data for debugging
+        print(flutterData)
+        
+        // No data case
+        if flutterData == "No Data from Flutter" {
+            return SimpleEntry(date: Date(), transports: [])
+        }
+        
         // Parse JSON Data
-        let data = Data(flutterData.utf8)
-//        print("Data: \(flutterData)")
+        guard let data = flutterData.data(using: .utf8) else {
+            print("Could not convert string to data")
+            return SimpleEntry(date: Date(), transports: [])
+        }
         
         let decoder = JSONDecoder()
         do {
-            let transports = try decoder.decode([Transport].self, from: data)
+            transportsList = try decoder.decode([Transport].self, from: data)
+            print("Transports JSON:")
             
-            for transport in transports {
+            for transport in transportsList {
                 print("ID: \(transport.uniqueID)")
                 print("Route Type Name: \(transport.routeType.name)")
                 print("Stop Name: \(transport.stop.name)")
@@ -32,12 +43,17 @@ struct Provider: AppIntentTimelineProvider {
                     print("Scheduled Departure Time: \(departure.scheduledDepartureTime ?? "No scheduled departure")")
 //                    print("Estimated Departure Time: \(departure.estimatedDepartureTime ?? "No estimated departure")")
                 }
-                transportsList.append(transport)
                 
             }
         }
         catch {
             print("Error decoding JSON: \(error)")
+            // Detailed error logging
+            if let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []),
+               let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted]),
+               let prettyPrintedString = String(data: jsonData, encoding: .utf8) {
+                print("JSON structure received: \(prettyPrintedString)")
+            }
         }
         
         return SimpleEntry(date: Date(), transports: transportsList)
