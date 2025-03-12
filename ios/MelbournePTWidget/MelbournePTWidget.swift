@@ -88,6 +88,10 @@ struct MelbournePTWidgetEntryView : View {
     var entry: Provider.Entry
     
     var body: some View {
+        if entry.transports.isEmpty {
+            Text("Empty Transports")
+        }
+        
         ForEach(entry.transports, id: \.uniqueID) { transport in
             
             HStack {
