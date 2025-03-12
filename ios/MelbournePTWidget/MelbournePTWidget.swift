@@ -24,6 +24,7 @@ struct Provider: AppIntentTimelineProvider {
             let transports = try decoder.decode([Transport].self, from: data)
             
             for transport in transports {
+                print("ID: \(transport.uniqueID)")
                 print("Route Type Name: \(transport.routeType.name)")
                 print("Stop Name: \(transport.stop.name)")
                 print("Direction ID: \(transport.direction.name)")
@@ -45,6 +46,7 @@ struct Provider: AppIntentTimelineProvider {
     // Preview in Widget Gallery
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), transports: [Transport(
+            uniqueID: "placeholder",
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
             route: Route(number: "19"),
@@ -57,6 +59,7 @@ struct Provider: AppIntentTimelineProvider {
     // Widget Gallery/Selection preview
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
         SimpleEntry(date: Date(), transports: [Transport(
+            uniqueID: "snapshot",
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
             route: Route(number: "19"),
@@ -130,6 +133,7 @@ struct MelbournePTWidget: Widget {
 } timeline: {
     SimpleEntry(date: .now,
                 transports: [Transport(
+                    uniqueID: "id1",
                     routeType: RouteType(name: "Tram"),
                     stop: Stop(name: "Melb Central"),
                     route: Route(number: "19"),
@@ -152,6 +156,7 @@ struct MelbournePTWidget: Widget {
     )
     SimpleEntry(date: .now,
                 transports: [Transport(
+                    uniqueID: "id2",
                     routeType: RouteType(name: "Bus"),
                     stop: Stop(name: "Melb Central"),
                     route: Route(number: "1"),
