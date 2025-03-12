@@ -87,6 +87,7 @@ Copy-paste these commands to
 - HomeWidget vs Shared Preferences for sending data??
 
 ### Bugs
+- Some docklands trams glitch out
 - Buses just seem kinda iffy
   - Maybe remove them for now?
   - The 907 Mitcham bus, for example, returns no data when going towards Mitcham, but does when towards the city

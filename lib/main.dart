@@ -1,5 +1,3 @@
-import "dart:convert";
-
 import 'package:flutter/material.dart';
 import "package:flutter_project/add_screens/confirmation_screen.dart";
 import "package:flutter_project/add_screens/select_location_screen.dart";
@@ -15,7 +13,8 @@ import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
-import "package:home_widget/home_widget.dart";
+
+import "home_widget_service.dart";
 
 
 
@@ -87,63 +86,13 @@ class _MyHomePageState extends State<MyHomePage> {
   String? _file;
   List<Transport> _transportList = [];
 
-  // Home Widget
-  String appGroupId = "group.melbournePTWidget";
-  String iosWidgetName = "MelbournePTWidget";
-  String androidWidgetName = "MelbournePTWidget";
-  String dataKey = "data_from_flutter";
-
-  // Send necessary JSON Data to Widget
-  void sendWidgetData() async {
-    try {
-
-      final optimisedData = _transportList.map((transport) {
-        // Includes fields needed by the Swift Transport class
-        return {
-          'uniqueID': transport.uniqueID ?? "No uniqueID",
-          'routeType': {
-            'name': transport.routeType?.name ?? "No routeType"
-          },
-          'stop': {
-            'name': transport.stop?.name ?? "No stop"
-          },
-          'route': {
-            'number': transport.route?.number ?? "No route"
-          },
-          'direction': {
-            'name': transport.direction?.name ?? "No direction"
-          },
-          'departures': transport.departures?.map((d) => {
-            'scheduledDepartureTime': d.scheduledDepartureTime,
-            'estimatedDepartureTime': d.estimatedDepartureTime
-          }).toList() ?? []
-        };
-      }).toList();
-
-      final data = JsonEncoder.withIndent('  ').convert(optimisedData);
-
-      print("( main.dart -> sendWidgetData() ) -- Sending JSON Data:\n $data");
-
-      await HomeWidget.saveWidgetData(dataKey, data);
-
-      // Update widget after saving data
-      await HomeWidget.updateWidget(
-        iOSName: iosWidgetName,
-        androidName: androidWidgetName,
-      );
-    }
-    catch (e) {
-      print("( main.dart -> sendWidgetData() ) -- Error sending widget data");
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     _updateMainPage();
 
     // Initialise home widgets
-    HomeWidget.setAppGroupId(appGroupId);
+    HomeWidgetService().initialiseHomeWidget();
   }
 
   // Reads the saved transport data from a file and converts it into a list of Transport objects.
@@ -161,9 +110,6 @@ class _MyHomePageState extends State<MyHomePage> {
         await transport.updateDepartures();
       }
 
-      // // Send Data to Widget
-      // sendWidgetData();
-
       // Saves updated Departures to File
       save(transportList);
 
@@ -172,8 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
         _transportList = transportList;
       });
 
-      // Send Data to Widget
-      sendWidgetData();
+      // Send Transport Data to Widget
+      HomeWidgetService().sendWidgetData(_transportList);
     }
 
     // Case: No transport File
