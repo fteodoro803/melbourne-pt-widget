@@ -14,6 +14,8 @@ import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
 
+import "home_widget_service.dart";
+
 
 
 // void main() {
@@ -88,6 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _updateMainPage();
+
+    // Initialise home widgets
+    HomeWidgetService().initialiseHomeWidget();
   }
 
   // Reads the saved transport data from a file and converts it into a list of Transport objects.
@@ -100,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (stringContent != null) {
       List<Transport> transportList = await parseTransportJSON(stringContent);
 
-      // Updates Departures
+      // Updates all Departures
       for (var transport in transportList) {
         await transport.updateDepartures();
       }
@@ -112,6 +117,9 @@ class _MyHomePageState extends State<MyHomePage> {
         _file = stringContent;
         _transportList = transportList;
       });
+
+      // Send Transport Data to Widget
+      HomeWidgetService().sendWidgetData(_transportList);
     }
 
     // Case: No transport File
@@ -161,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: _transportList.length,
                 itemBuilder: (context, index) {
                   final transport = _transportList[index];
-                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => removeTransport(transport),);
+                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => {removeTransport(transport), _updateMainPage()},);
                 },
               ),
             ),

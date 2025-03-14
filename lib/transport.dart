@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
@@ -18,6 +17,7 @@ class Transport {
   Stop? stop;
   Route? route;
   RouteDirection? direction;
+  String? uniqueID; // unique ID for the widget timeline
 
   // Constructor
   Transport();
@@ -35,7 +35,7 @@ class Transport {
     // Early exit if any of the prerequisites are null
     if (routeType == null || stopId == null || directionId == null || routeId == null) {
       // if (kDebugMode) {
-      //   print("( transport.dart -> updatedDepartures() ): Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
+      //   print("( transport.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
       // }
       return;
     }
@@ -45,8 +45,16 @@ class Transport {
     departures = await departureService.fetchDepartures(
         routeType, stopId, directionId, routeId);
     // if (kDebugMode) {
-    //   print("( transport.dart -> updatedDepartures() ): Updated Departures: \n $departures");
+    //   print("( transport.dart -> updatedDepartures() ) -- Updated Departures: \n $departures");
     // }
+
+    generateUniqueID();
+  }
+
+  void generateUniqueID() {
+    if (routeType != null && stop != null && route != null && direction != null) {
+      uniqueID = "${routeType?.type}-${stop?.id}-${route?.id}-${direction?.id}";
+    }
   }
 
   // Make the toString for list representation???~
