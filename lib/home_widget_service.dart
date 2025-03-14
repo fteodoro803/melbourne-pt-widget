@@ -40,7 +40,7 @@ class HomeWidgetService {
 
       final data = JsonEncoder.withIndent('  ').convert(optimisedData);
 
-      print("( main.dart -> sendWidgetData() ) -- Sending JSON Data:\n $data");
+      print("( home_widget_service.dart -> sendWidgetData() ) -- Sending JSON Data:\n $data");
 
       await HomeWidget.saveWidgetData(dataKey, data);
 
@@ -51,7 +51,7 @@ class HomeWidgetService {
       );
     }
     catch (e) {
-      print("( main.dart -> sendWidgetData() ) -- Error sending widget data");
+      print("( home_widget_service.dart -> sendWidgetData() ) -- Error sending widget data");
     }
   }
 
