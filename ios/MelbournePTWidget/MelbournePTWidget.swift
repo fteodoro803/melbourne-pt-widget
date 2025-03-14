@@ -109,17 +109,35 @@ struct MelbournePTWidgetEntryView : View {
     var body: some View {
         ForEach(entry.transports, id: \.uniqueID) { transport in
             
+//            // DESIGN 1
+//            HStack {
+//                Image(systemName: "tram.fill")
+//                    .resizable(resizingMode: .tile)
+//                    .frame(width: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/)
+//                
+//                Spacer()
+//                
+//                VStack {
+//                    // Transport Information
+//                    Text("\(transport.routeType.name) \(transport.route.number) to \(transport.direction.name)")
+//                    Text("from \(transport.stop.name)")
+//                    
+//                    let departures = transport.departures.prefix(3) // First 3 departures
+//                    let departureText = departures.map{$0.scheduledDepartureTime ?? "Null"}
+//                    let departureString = departureText.joined(separator: " | ")
+//                    Text(departureString)
+//                }
+//            }
+            
+            // DESIGN 2
             HStack {
-                Image(systemName: "tram.fill")
-                    .resizable(capInsets: EdgeInsets(top: 30.0, leading: 30.0, bottom: 30.0, trailing: 30.0))
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/)
+                Text("\(transport.routeType.name)\n\(transport.route.number)")
                 
                 Spacer()
                 
                 VStack {
                     // Transport Information
-                    Text("\(transport.routeType.name) \(transport.route.number) to \(transport.direction.name)")
+                    Text("to \(transport.direction.name)")
                     Text("from \(transport.stop.name)")
                     
                     let departures = transport.departures.prefix(3) // First 3 departures
@@ -128,6 +146,8 @@ struct MelbournePTWidgetEntryView : View {
                     Text(departureString)
                 }
             }
+            
+            Divider()
         }
     }
 }
@@ -148,49 +168,74 @@ struct MelbournePTWidget: Widget {
     MelbournePTWidget()
 } timeline: {
     SimpleEntry(date: .now,
-                transports: [Transport(
-                    uniqueID: "id1",
-                    routeType: RouteType(name: "Tram"),
-                    stop: Stop(name: "Melb Central"),
-                    route: Route(number: "19"),
-                    direction: Direction(name: "Flinders"),
-                    departures: [
-                        Departure(
-                            estimatedDepartureTime: "14:15",
-                            scheduledDepartureTime: "14:16"
-                        ),
-                        Departure(
-                            estimatedDepartureTime: "14:30",
-                            scheduledDepartureTime: "14:35"
-                        ),
-                        Departure(
-                            estimatedDepartureTime: nil,
-                            scheduledDepartureTime: "14:50"
-                        )
-                    ]  // array of Departures
-                )]
+                transports: [
+                    Transport(
+                        uniqueID: "id1",
+                        routeType: RouteType(name: "Tram"),
+                        stop: Stop(name: "Melb Central"),
+                        route: Route(number: "19"),
+                        direction: Direction(name: "Flinders Street Station"),
+                        departures: [
+                            Departure(
+                                estimatedDepartureTime: "14:15pm",
+                                scheduledDepartureTime: "14:16pm"
+                            ),
+                            Departure(
+                                estimatedDepartureTime: "14:30pm",
+                                scheduledDepartureTime: "14:35pm"
+                            ),
+                            Departure(
+                                estimatedDepartureTime: nil,
+                                scheduledDepartureTime: "14:50pm"
+                            )
+                        ]
+                    ),
+                    Transport(
+                        uniqueID: "id1",
+                        routeType: RouteType(name: "Tram"),
+                        stop: Stop(name: "Melb Central"),
+                        route: Route(number: "19"),
+                        direction: Direction(name: "Flinders Street Station"),
+                        departures: [
+                            Departure(
+                                estimatedDepartureTime: "14:15pm",
+                                scheduledDepartureTime: "14:16pm"
+                            ),
+                            Departure(
+                                estimatedDepartureTime: "14:30pm",
+                                scheduledDepartureTime: "14:35pm"
+                            ),
+                            Departure(
+                                estimatedDepartureTime: nil,
+                                scheduledDepartureTime: "14:50pm"
+                            )
+                        ]
+                    )
+                ] // array of Departures
     )
     SimpleEntry(date: .now,
-                transports: [Transport(
-                    uniqueID: "id2",
-                    routeType: RouteType(name: "Bus"),
-                    stop: Stop(name: "Melb Central"),
-                    route: Route(number: "1"),
-                    direction: Direction(name: "Toorak"),
-                    departures: [
-                        Departure(
-                            estimatedDepartureTime: "14:15",
-                            scheduledDepartureTime: "14:16"
-                        ),
-                        Departure(
-                            estimatedDepartureTime: "14:30",
-                            scheduledDepartureTime: "14:35"
-                        ),
-                        Departure(
-                            estimatedDepartureTime: nil,
-                            scheduledDepartureTime: "14:50"
-                        )
-                    ]  // array of Departures
-                )]
+                transports: [
+                    Transport(
+                        uniqueID: "id2",
+                        routeType: RouteType(name: "Bus"),
+                        stop: Stop(name: "Melb Central"),
+                        route: Route(number: "1"),
+                        direction: Direction(name: "Toorak"),
+                        departures: [
+                            Departure(
+                                estimatedDepartureTime: "14:15",
+                                scheduledDepartureTime: "14:16"
+                            ),
+                            Departure(
+                                estimatedDepartureTime: "14:30",
+                                scheduledDepartureTime: "14:35"
+                            ),
+                            Departure(
+                                estimatedDepartureTime: nil,
+                                scheduledDepartureTime: "14:50"
+                            )
+                        ]
+                    )
+                ] // array of Departures
     )
 }
