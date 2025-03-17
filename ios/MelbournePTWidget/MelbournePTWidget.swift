@@ -106,20 +106,52 @@ struct SimpleEntry: TimelineEntry {
 struct MelbournePTWidgetEntryView : View {
     var entry: Provider.Entry
     
+    @Environment(\.widgetFamily) var family
+    
+    @ViewBuilder
     var body: some View {
-        ForEach(entry.transports, id: \.uniqueID) { transport in
-            
-//            // DESIGN 1
+        switch family {
+        case .systemSmall:
+            SystemSmallWidgetView(entry: entry)
+        case .systemMedium:
+            SystemMediumWidgetView(entry: entry)
+        case .accessoryRectangular:
+            AccessoryRectangularWidgetView(entry: entry)
+        default:
+            Text("Default")
+        }
+//    var body: some View {
+//        ForEach(entry.transports, id: \.uniqueID) { transport in
+//            
+////            // DESIGN 1
+////            HStack {
+////                Image(systemName: "tram.fill")
+////                    .resizable(resizingMode: .tile)
+////                    .frame(width: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/)
+////                
+////                Spacer()
+////                
+////                VStack {
+////                    // Transport Information
+////                    Text("\(transport.routeType.name) \(transport.route.number) to \(transport.direction.name)")
+////                    Text("from \(transport.stop.name)")
+////                    
+////                    let departures = transport.departures.prefix(3) // First 3 departures
+////                    let departureText = departures.map{$0.scheduledDepartureTime ?? "Null"}
+////                    let departureString = departureText.joined(separator: " | ")
+////                    Text(departureString)
+////                }
+////            }
+//            
+//            // DESIGN 2
 //            HStack {
-//                Image(systemName: "tram.fill")
-//                    .resizable(resizingMode: .tile)
-//                    .frame(width: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/30.0/*@END_MENU_TOKEN@*/)
+//                Text("\(transport.routeType.name)\n\(transport.route.number)")
 //                
 //                Spacer()
 //                
 //                VStack {
 //                    // Transport Information
-//                    Text("\(transport.routeType.name) \(transport.route.number) to \(transport.direction.name)")
+//                    Text("to \(transport.direction.name)")
 //                    Text("from \(transport.stop.name)")
 //                    
 //                    let departures = transport.departures.prefix(3) // First 3 departures
@@ -128,27 +160,9 @@ struct MelbournePTWidgetEntryView : View {
 //                    Text(departureString)
 //                }
 //            }
-            
-            // DESIGN 2
-            HStack {
-                Text("\(transport.routeType.name)\n\(transport.route.number)")
-                
-                Spacer()
-                
-                VStack {
-                    // Transport Information
-                    Text("to \(transport.direction.name)")
-                    Text("from \(transport.stop.name)")
-                    
-                    let departures = transport.departures.prefix(3) // First 3 departures
-                    let departureText = departures.map{$0.scheduledDepartureTime ?? "Null"}
-                    let departureString = departureText.joined(separator: " | ")
-                    Text(departureString)
-                }
-            }
-            
-            Divider()
-        }
+//            
+//            Divider()
+//        }
     }
 }
 
@@ -177,37 +191,37 @@ struct MelbournePTWidget: Widget {
                         direction: Direction(name: "Flinders Street Station"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "14:15pm",
-                                scheduledDepartureTime: "14:16pm"
+                                estimatedDepartureTime: "4:15pm",
+                                scheduledDepartureTime: "4:16pm"
                             ),
                             Departure(
-                                estimatedDepartureTime: "14:30pm",
-                                scheduledDepartureTime: "14:35pm"
+                                estimatedDepartureTime: "4:30pm",
+                                scheduledDepartureTime: "4:35pm"
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "14:50pm"
+                                scheduledDepartureTime: "4:50pm"
                             )
                         ]
                     ),
                     Transport(
-                        uniqueID: "id1",
+                        uniqueID: "id2",
                         routeType: RouteType(name: "Tram"),
                         stop: Stop(name: "Melb Central"),
                         route: Route(number: "19"),
                         direction: Direction(name: "Flinders Street Station"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "14:15pm",
-                                scheduledDepartureTime: "14:16pm"
+                                estimatedDepartureTime: "4:15pm",
+                                scheduledDepartureTime: "4:16pm"
                             ),
                             Departure(
-                                estimatedDepartureTime: "14:30pm",
-                                scheduledDepartureTime: "14:35pm"
+                                estimatedDepartureTime: "4:30pm",
+                                scheduledDepartureTime: "4:35pm"
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "14:50pm"
+                                scheduledDepartureTime: "4:50pm"
                             )
                         ]
                     )
