@@ -63,6 +63,8 @@ Copy-paste these commands to
 - Sort/Reorganise Stop screen
   - maybe add dividers between different stops?
 - Refresh periodically
+- Optimisations
+  - Remove description from route direction
 
 - Ideas
   - Notification for Disruptions?

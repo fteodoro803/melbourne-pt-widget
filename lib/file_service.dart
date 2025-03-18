@@ -110,11 +110,16 @@ Future<String?> read({bool formatted = false}) async {
 
 // Convert JSON String to Transport objects
 Future<List<Transport>> parseTransportJSON(String jsonString) async {
-  // Decode the JSON string into a list of dynamic maps
-  List<dynamic> jsonList = jsonDecode(jsonString);
-
   // Convert each JSON map to a Transport instance
   List<Transport> transports = [];
+
+  // Checks if jsonString is empty, and returns empty List if it is
+  if (jsonString.isEmpty) {
+    return [];
+  }
+
+  // Decode the JSON string into a list of dynamic maps
+  List<dynamic> jsonList = jsonDecode(jsonString);
 
   for (var json in jsonList) {
     Transport transport = Transport.fromJson(json);
