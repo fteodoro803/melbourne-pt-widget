@@ -31,7 +31,9 @@ class HomeWidgetService {
             'uniqueID': transport.uniqueID ?? "No uniqueID",
             'routeType': {'name': transport.routeType?.name ?? "No routeType"},
             'stop': {'name': transport.stop?.name ?? "No stop"},
-            'route': {'number': transport.route?.number ?? "No route"},
+            'route': {
+              'number': transport.route?.number ?? "No route",
+              'colour': transport.route?.colour},
             'direction': {'name': transport.direction?.name ?? "No direction"},
             'departures': transport.departures
                     ?.map((d) => {
