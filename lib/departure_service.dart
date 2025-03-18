@@ -17,6 +17,8 @@ class DepartureService {
         expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 
+    // print(" ( departure_service.dart -> fetchDepartures() ) -- fetched departures response: ${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
+
     // Empty JSON Response
     if (jsonResponse == null) {
       print("NULL DATA RESPONSE --> Improper Location Data");
@@ -29,9 +31,22 @@ class DepartureService {
           null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
       DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
+      String? runId = departure["run_id"]?.toString();
+      String? runRef = departure["run_ref"]?.toString();
 
-      departures.add(Departure(scheduledDepartureUTC: scheduledDepartureUTC,
-          estimatedDepartureUTC: estimatedDepartureUTC));
+      Departure newDeparture = Departure(scheduledDepartureUTC: scheduledDepartureUTC,
+          estimatedDepartureUTC: estimatedDepartureUTC, runId: runId, runRef: runRef);
+
+      // Get Vehicle descriptors per Departure
+      var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"];    // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
+      if (vehicleDescriptors != null && vehicleDescriptors.toString().isNotEmpty) {
+        // print("( departure_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
+
+        newDeparture.hasLowFloor = vehicleDescriptors["low_floor"];
+      }
+      else { print("( departure_service.dart -> fetchDepartures() ) -- runs for runId $runId is empty )");}
+
+      departures.add(newDeparture);
     }
 
     return departures;

@@ -36,7 +36,8 @@ class HomeWidgetService {
             'departures': transport.departures
                     ?.map((d) => {
                           'scheduledDepartureTime': d.scheduledDepartureTime,
-                          'estimatedDepartureTime': d.estimatedDepartureTime
+                          'estimatedDepartureTime': d.estimatedDepartureTime,
+                          'hasLowFloor': d.hasLowFloor,
                         })
                     .toList() ??
                 []
