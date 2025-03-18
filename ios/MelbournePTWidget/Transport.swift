@@ -21,6 +21,7 @@ struct Direction: Codable {
 struct Departure: Codable {
     let estimatedDepartureTime: String?
     let scheduledDepartureTime: String?
+    let hasLowFloor: Bool?
 }
 
 struct Transport: Codable, CustomStringConvertible {

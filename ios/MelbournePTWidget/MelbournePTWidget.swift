@@ -150,16 +150,19 @@ struct MelbournePTWidget: Widget {
                         direction: Direction(name: "Airport West"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "4:15pm",
-                                scheduledDepartureTime: "4:16pm"
+                                estimatedDepartureTime: "7:45pm",
+                                scheduledDepartureTime: "7:46pm",
+                                hasLowFloor: nil
                             ),
                             Departure(
-                                estimatedDepartureTime: "4:30pm",
-                                scheduledDepartureTime: "4:35pm"
+                                estimatedDepartureTime: "7:49pm",
+                                scheduledDepartureTime: "7:49pm",
+                                hasLowFloor: true
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "4:50pm"
+                                scheduledDepartureTime: "6:53pm",
+                                hasLowFloor: false
                             )
                         ]
                     ),
@@ -172,15 +175,18 @@ struct MelbournePTWidget: Widget {
                         departures: [
                             Departure(
                                 estimatedDepartureTime: "3:15pm",
-                                scheduledDepartureTime: "3:16pm"
+                                scheduledDepartureTime: "3:16pm",
+                                hasLowFloor: true
                             ),
                             Departure(
                                 estimatedDepartureTime: "3:30pm",
-                                scheduledDepartureTime: "3:35pm"
+                                scheduledDepartureTime: "3:35pm",
+                                hasLowFloor: false
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "3:50pm"
+                                scheduledDepartureTime: "3:50pm",
+                                hasLowFloor: true
                             )
                         ]
                     ),
@@ -193,15 +199,18 @@ struct MelbournePTWidget: Widget {
                         departures: [
                             Departure(
                                 estimatedDepartureTime: "4:15pm",
-                                scheduledDepartureTime: "4:16pm"
+                                scheduledDepartureTime: "4:16pm",
+                                hasLowFloor: false
                             ),
                             Departure(
                                 estimatedDepartureTime: "4:30pm",
-                                scheduledDepartureTime: "4:35pm"
+                                scheduledDepartureTime: "4:35pm",
+                                hasLowFloor: false
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "4:50pm"
+                                scheduledDepartureTime: "4:50pm",
+                                hasLowFloor: true
                             )
                         ]
                     ),
@@ -214,15 +223,18 @@ struct MelbournePTWidget: Widget {
                         departures: [
                             Departure(
                                 estimatedDepartureTime: "3:15pm",
-                                scheduledDepartureTime: "3:16pm"
+                                scheduledDepartureTime: "3:16pm",
+                                hasLowFloor: true
                             ),
                             Departure(
                                 estimatedDepartureTime: "3:30pm",
-                                scheduledDepartureTime: "3:35pm"
+                                scheduledDepartureTime: "3:35pm",
+                                hasLowFloor: true
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "3:50pm"
+                                scheduledDepartureTime: "3:50pm",
+                                hasLowFloor: false
                             )
                         ]
                     )
@@ -239,15 +251,18 @@ struct MelbournePTWidget: Widget {
                         departures: [
                             Departure(
                                 estimatedDepartureTime: "5:47pm",
-                                scheduledDepartureTime: "5:47pm"
+                                scheduledDepartureTime: "5:47pm",
+                                hasLowFloor: true
                             ),
                             Departure(
                                 estimatedDepartureTime: "8:30pm",
-                                scheduledDepartureTime: "8:35pm"
+                                scheduledDepartureTime: "8:35pm",
+                                hasLowFloor: true
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "9:50pm"
+                                scheduledDepartureTime: "9:50pm",
+                                hasLowFloor: true
                             )
                         ]
                     )

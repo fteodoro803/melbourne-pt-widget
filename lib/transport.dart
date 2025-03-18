@@ -18,7 +18,6 @@ class Transport {
   Stop? stop;
   Route? route;
   RouteDirection? direction;
-  String? uniqueID; // unique ID for the widget timeline
 
   // Constructor
   Transport();

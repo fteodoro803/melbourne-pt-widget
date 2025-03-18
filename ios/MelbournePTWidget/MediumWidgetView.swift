@@ -14,11 +14,15 @@ struct SystemMediumWidgetView: View {
     var body: some View {
         let transportsToShow = showFirstFourEntries ? entry.transports.prefix(4) : entry.transports.prefix(2)
         
+        if transportsToShow.isEmpty {
+            Text("No transport routes to show.")
+                .fontWeight(.semibold)
+                .font(.title3)
+                .multilineTextAlignment(.center)
+        }
         ForEach(Array(transportsToShow.enumerated()), id: \.element.uniqueID) { index, transport in
             VStack(alignment: .leading, spacing: 3) {
                 let departures = transport.departures.prefix(3) // First 3 departures
-                let departureList = departures.map { $0.scheduledDepartureTime ?? "Null" }
-                let departureText = departureList.joined(separator: " | ")
                 
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
@@ -47,38 +51,68 @@ struct SystemMediumWidgetView: View {
                             // Train and V Line design
                             if transport.routeType.name == "Train" || transport.routeType.name == "V Line" {
                                 Text("\(transport.direction.name)")
-                                    .font(.title3)
+                                    .font(.headline)
                                     .fontWeight(.medium)
                                     .foregroundColor(routeTextColor)
                                     .padding(.horizontal, 7.0)
+                                    .padding(.vertical, 1.0)
                                     .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
                                     .lineLimit(1)
                             }
                             
                             // Tram, bus, and skybus design
                             else {
-                                Text("\(transport.route.number)")
-                                    .font(.title3)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(routeTextColor)
-                                    .padding(.horizontal, 7.0)
-                                    .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
-                                    .lineLimit(1)
+                                if transport.routeType.name == "Skybus" {
+                                    Text("\(transport.route.number)")
+                                        .font(.headline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(routeTextColor)
+                                        .padding(.horizontal, 7.0)
+                                        .padding(.vertical, 1.0)
+                                        .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                                        .lineLimit(1)
+                                }
+                                else {
+                                    Text("\(transport.route.number)")
+                                        .font(.title3)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(routeTextColor)
+                                        .padding(.horizontal, 7.0)
+                                        .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                                        .lineLimit(1)
+                                }
                                 Text("To \(transport.direction.name)")
                                     .font(.caption2)
                                     .multilineTextAlignment(.leading)
                             }
                         }
                         
-                        // First 3 departures
-                        Text(departureText)
-                            .font(.footnote)
-                            .fontWeight(.medium)
-                            .multilineTextAlignment(.leading)
+                        HStack(spacing: 2) {
+                            ForEach(departures.indices, id: \.self) { index in
+                                let departure = departures[index]
+                                Text(departure.scheduledDepartureTime ?? "Unknown")
+                                    .font(.footnote)
+                                    .fontWeight(.medium)
+                                    .multilineTextAlignment(.leading)
+                                if departure.hasLowFloor == true {
+                                    Image("Low Floor Tram")
+                                        .resizable()
+                                        .frame(width: 12.0, height: 12.0)
+                                        .padding(.trailing, 2)
+                                }
+                                if index < 2 {
+                                    Text("⎥")
+                                        .font(.footnote)
+                                        .fontWeight(.medium)
+                                        .multilineTextAlignment(.leading)
+                                }
+                            }
+                        }
                     }
                     Spacer()
+                    
                     // Time until first departure
-                    if !departureList.isEmpty, let firstDeparture = departureList.first, let timeDifference = TimeUtils.timeDifference(from: firstDeparture) {
+                    if !departures.isEmpty, let firstDeparture = departures.first, let timeDifference = TimeUtils.timeDifference(from: firstDeparture.scheduledDepartureTime!) {
                         
                         // Arriving in the next hour
                         if timeDifference.minutes > 0 && timeDifference.minutes < 60 {

@@ -11,6 +11,13 @@ struct SystemSmallWidgetView: View {
     var entry: Provider.Entry
     
     var body: some View {
+        if entry.transports.isEmpty {
+            Text("No transport routes to show.")
+                .fontWeight(.semibold)
+                .font(.title3)
+                .multilineTextAlignment(.center)
+        }
+        
         if let firstTransport = entry.transports.first {
             // Design for systemSmall
             VStack(alignment: .leading, spacing: 3) {
@@ -81,37 +88,47 @@ struct SystemSmallWidgetView: View {
                         .font(.caption2)
                         .multilineTextAlignment(.leading)
                         .lineLimit(1)
+                    Divider()
                 }
+                else {
+                    Spacer().frame(height: 3)
+                    Divider()
+                    Spacer().frame(height: 2)
+                }
+                
 
-                Divider()
-
+//                firstTransport.departures.first.hasLowFloor
                 let departures = firstTransport.departures.prefix(3) // First 3 departures
-                let departureText = departures.map { $0.scheduledDepartureTime ?? "Null" }
                 
                 // Information about first 3 departures
-                ForEach(departureText, id: \.self) { departure in
-                    HStack {
+                ForEach(departures.indices, id: \.self) { index in
+                    let departure = departures[index]
+                    
+                    HStack(spacing: 0) {
                         
                         // Time of departure
-                        Text(departure)
-                            .font(.footnote)
+                        Text(departure.scheduledDepartureTime ?? "Unknown")
+                            .font(.callout)
                             .fontWeight(.medium)
                             .multilineTextAlignment(.leading)
-                            .padding(.trailing, -4)
+                            .padding(.trailing, 1)
                         
                         // Low Floor Tram icon (if applicable)
-                        Image("Low Floor Tram")
-                            .resizable()
-                            .frame(width: 12.0, height: 12.0)
-                            .padding(.trailing, -4)
+                        if departure.hasLowFloor == true {
+                            Image("Low Floor Tram")
+                                .resizable()
+                                .frame(width: 12.0, height: 12.0)
+                                
+                        }
                         
                         Spacer()
                         
                         // Minutes until departure
-                        if let timeDifference = TimeUtils.timeDifference(from: departure) {
+
+                        if let departureTime = departure.scheduledDepartureTime, let timeDifference = TimeUtils.timeDifference(from: departureTime) {
                             if timeDifference.minutes > 0 && timeDifference.minutes < 60 {
                                 Text("\(timeDifference.minutes) min")
-                                    .font(.footnote)
+                                    .font(.caption)
                                     .fontWeight(.regular)
                                     .foregroundColor(.black)
                                     .multilineTextAlignment(.trailing)
@@ -121,7 +138,7 @@ struct SystemSmallWidgetView: View {
                             }
                             else if timeDifference.minutes == 0 {
                                 Text("Now")
-                                    .font(.footnote)
+                                    .font(.caption)
                                     .fontWeight(.regular)
                                     .foregroundColor(Color(hue: 0.324, saturation: 0.671, brightness: 0.656))
                                     .multilineTextAlignment(.trailing)

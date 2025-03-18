@@ -11,6 +11,13 @@ struct AccessoryRectangularWidgetView: View {
     var entry: Provider.Entry
         
     var body: some View {
+        
+        if entry.transports.isEmpty {
+            Text("No transport routes to show.")
+                .fontWeight(.semibold)
+                .font(.caption2)
+        }
+        
         if let firstTransport = entry.transports.first {
             
             // Design for accessoryRectangular
