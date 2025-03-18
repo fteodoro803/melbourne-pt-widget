@@ -12,48 +12,102 @@ struct SystemSmallWidgetView: View {
     
     var body: some View {
         if let firstTransport = entry.transports.first {
-            // DESIGN for systemSmall
+            // Design for systemSmall
             VStack(alignment: .leading, spacing: 3) {
-                Spacer()
+                
+                // Location of stop
                 HStack {
                     Image(systemName: "location")
                         .resizable()
                         .frame(width: 9.0, height: 9.0)
                         .padding(.trailing, -4)
-                    
                     Text("\(firstTransport.stop.name)")
                         .font(.caption2)
                         .multilineTextAlignment(.leading)
+                        .lineLimit(1)
                 }
+                
+                // Route number
                 HStack {
-                    Image("Melbourne_tram_logo.svg")
-                        .resizable()
-                        .frame(width: 35.0, height: 35.0)
-                    Text("\(firstTransport.route.number)")
-                        .font(.title)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 7.0)
-                        .background(RoundedRectangle(cornerRadius: 3).fill(Color.gray))
+                    let imageString = TransportTypeUtils.transportType(from: firstTransport.routeType.name)
+                    let (routeColor, routeTextColor) = TransportTypeUtils.routeColor(from: firstTransport.routeType.name)
+                    
+                    // Train and V Line design
+                    if firstTransport.routeType.name == "Train" || firstTransport.routeType.name == "V Line" {
+                        Image("\(imageString)")
+                            .resizable()
+                            .frame(width: 25.0, height: 25.0)
+                        Text("\(firstTransport.direction.name)")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .foregroundColor(routeTextColor)
+                            .padding(.horizontal, 7.0)
+                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                            .lineLimit(1)
+                    }
+                    
+                    // Skybus design
+                    else if firstTransport.routeType.name == "Skybus" {
+                        Image("\(imageString)")
+                            .resizable()
+                            .frame(width: 25.0, height: 25.0)
+                        Text("\(firstTransport.route.number)")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .foregroundColor(routeTextColor)
+                            .padding(.horizontal, 7.0)
+                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                            .lineLimit(1)
+                    }
+                    
+                    // Tram and bus designs
+                    else {
+                        Image("\(imageString)")
+                            .resizable()
+                            .frame(width: 38.0, height: 38.0)
+                        Text("\(firstTransport.route.number)")
+                            .font(.title)
+                            .fontWeight(.medium)
+                            .foregroundColor(routeTextColor)
+                            .padding(.horizontal, 7.0)
+                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                            .lineLimit(1)
+                    }
                 }
                 
-                Text("To \(firstTransport.direction.name)")
-                    .font(.caption2)
-                    .multilineTextAlignment(.leading)
-                
+                // Route direction for tram, bus, and skybus
+                if firstTransport.routeType.name != "Train" && firstTransport.routeType.name != "V Line"{
+                    Text("To \(firstTransport.direction.name)")
+                        .font(.caption2)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(1)
+                }
+
                 Divider()
-                
+
                 let departures = firstTransport.departures.prefix(3) // First 3 departures
                 let departureText = departures.map { $0.scheduledDepartureTime ?? "Null" }
                 
+                // Information about first 3 departures
                 ForEach(departureText, id: \.self) { departure in
                     HStack {
+                        
+                        // Time of departure
                         Text(departure)
-                            .font(.callout)
+                            .font(.footnote)
                             .fontWeight(.medium)
                             .multilineTextAlignment(.leading)
+                            .padding(.trailing, -4)
+                        
+                        // Low Floor Tram icon (if applicable)
+                        Image("Low Floor Tram")
+                            .resizable()
+                            .frame(width: 12.0, height: 12.0)
+                            .padding(.trailing, -4)
                         
                         Spacer()
                         
+                        // Minutes until departure
                         if let timeDifference = TimeUtils.timeDifference(from: departure) {
                             if timeDifference.minutes > 0 && timeDifference.minutes < 60 {
                                 Text("\(timeDifference.minutes) min")
@@ -79,11 +133,6 @@ struct SystemSmallWidgetView: View {
                     }
                 }
             }
-//            .padding(.trailing, 9)
-//            .padding(.leading, 9)
-//            .padding(.top, 9)
-//            .padding(.bottom, 9)
-            Spacer()
         }
     }
 }

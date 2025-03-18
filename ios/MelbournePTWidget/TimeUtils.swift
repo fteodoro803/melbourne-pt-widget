@@ -8,6 +8,8 @@
 import Foundation
 
 struct TimeUtils {
+    
+    // Finds time difference in days and minutes between system time and given departure time
     static func timeDifference(from inputTime: String) -> (days: Int, minutes: Int)? {
         let formatter = DateFormatter()
         formatter.dateFormat = "hh:mma"
