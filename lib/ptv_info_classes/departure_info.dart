@@ -16,11 +16,13 @@ class Departure {
   String? scheduledDepartureTime;
   String? estimatedDepartureTime;
 
+  // Vehicle Descriptions
   String? runId;
   String? runRef;
+  bool? hasLowFloor;
 
   // Constructor
-  Departure({required this.scheduledDepartureUTC, required this.estimatedDepartureUTC}) {
+  Departure({required this.scheduledDepartureUTC, required this.estimatedDepartureUTC, required this.runId, required this.runRef}) {
 
     // Adds and converts Departure to local Melbourne Time
     if (scheduledDepartureUTC != null){
@@ -64,8 +66,11 @@ class Departure {
   @override
   String toString() {
     return "Departures:\n"
-        "\tScheduled Departure: $scheduledDeparture\n"
-        "\tEstimated Departure: $estimatedDeparture\n";
+      "\tScheduled Departure: $scheduledDeparture\n"
+      "\tEstimated Departure: $estimatedDeparture\n"
+      "\tRun ID, Ref: $runId, $runRef\n"
+      "\tLow Floor: $hasLowFloor\n"
+    ;
   }
 
   // Methods for JSON Serialization

@@ -12,12 +12,12 @@ part 'transport.g.dart';
 
 @JsonSerializable()
 class Transport {
+  String? uniqueID; // unique ID for the widget timeline
   RouteType? routeType;
   Location? location;
   Stop? stop;
   Route? route;
   RouteDirection? direction;
-  String? uniqueID; // unique ID for the widget timeline
 
   // Constructor
   Transport();
