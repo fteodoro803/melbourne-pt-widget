@@ -63,6 +63,8 @@ Copy-paste these commands to
 - Sort/Reorganise Stop screen
   - maybe add dividers between different stops?
 - Refresh periodically
+- get xCode .gitignore
+- Find way to remove old/removed routes that no longer exist/have no data
 - Optimisations
   - Remove description from route direction
 

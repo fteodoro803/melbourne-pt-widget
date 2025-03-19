@@ -66,6 +66,10 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         PTRoute.Route newRoute =
             PTRoute.Route(name: routeName, number: routeNumber, id: routeId);
 
+
+        // Gets the Colour of Route
+        newRoute.getRouteColour(widget.arguments.transport.routeType!.name);
+
         _stops.add(newStop);
         _routes.add(newRoute);
       }
