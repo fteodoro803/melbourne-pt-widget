@@ -10,6 +10,7 @@ class Route {
   String name;
   String number;
   String? colour;
+  String? textColour;
 
   RouteDirection? direction;
 
@@ -21,7 +22,7 @@ class Route {
         "\tID: $id\n"
         "\tName: $name \n"
         "\tNumber: $number\n"
-        "\tColour: $colour\n"
+        "\tColour, TextColour: $colour, $textColour\n"
     ;
 
     if (direction != null) {
@@ -47,10 +48,14 @@ class Route {
           (route) => route.name == routeId,
           orElse: () => TramPalette.routeDefault
       ).colour;
+      this.textColour = TramPalette.values.firstWhere(
+              (route) => route.name == routeId,
+          orElse: () => TramPalette.routeDefault
+      ).textColour.colour;
     }
 
     // Train
-    if (routeType == "Train") {
+    else if (routeType == "Train") {
       String routeName = name.replaceAll(" ", "").toLowerCase();
       print("( route_info.dart -> getRouteColour() ) -- routeName conversion: $name -> $routeName");
 
@@ -59,11 +64,28 @@ class Route {
               (route) => route.name == routeName,
           orElse: () => TrainPalette.routeDefault
       ).colour;
+      this.textColour = TrainPalette.values.firstWhere(
+              (route) => route.name == routeName,
+          orElse: () => TrainPalette.routeDefault
+      ).textColour.colour;
     }
 
-    // Bus
-    if (routeType == "Bus") {
+    // Bus and Night Bus
+    else if (routeType == "Bus" || routeType == "Night Bus") {
       this.colour = BusPalette.routeDefault.colour;
+      this.textColour = BusPalette.routeDefault.textColour.colour;
+    }
+
+    // VLine
+    else if (routeType == "Vline") {
+      this.colour = VLine.routeDefault.colour;
+      this.textColour = VLine.routeDefault.textColour.colour;
+    }
+
+    else {
+      print("( route_info.dart -> getRouteColour() ) -- Fallback colour used");
+      this.colour = FallbackColour.routeDefault.colour;
+      this.textColour = FallbackColour.routeDefault.textColour.colour;
     }
   }
 
