@@ -44,7 +44,7 @@ struct AccessoryRectangularWidgetView: View {
                         .padding(.trailing, 2)
                     
                     // Train and V Line direction => "To [destination]"
-                    if firstTransport.routeType.name == "Train" || firstTransport.routeType.name == "V Line" {
+                    if firstTransport.routeType.name == "Train" || firstTransport.routeType.name == "VLine" {
                         Text("To")
                             .font(.caption2)
                             .lineLimit(1)
@@ -54,7 +54,7 @@ struct AccessoryRectangularWidgetView: View {
                             .lineLimit(1)
                     }
                     
-                    // Tram, bus, and skybus route number and direction => "[#] to [Direction]
+                    // Tram and bus route number and direction => "[#] to [Direction]
                     else {
                         Text("\(firstTransport.route.number)")
                             .font(.caption2)

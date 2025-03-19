@@ -12,6 +12,8 @@ struct Stop: Codable {
 
 struct Route: Codable {
     let number: String
+    let colour: String
+    let textColour: String
 }
 
 struct Direction: Codable {

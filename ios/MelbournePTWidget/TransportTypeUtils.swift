@@ -8,68 +8,41 @@
 import SwiftUI
 import Foundation
 
+extension Color {
+    init(hex: String) {
+        let hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let scanner = Scanner(string: hexSanitized)
+        scanner.charactersToBeSkipped = CharacterSet.alphanumerics.inverted
+        
+        var rgb: UInt64 = 0
+        scanner.scanHexInt64(&rgb)
+        
+        let red = Double((rgb & 0xFF0000) >> 16) / 255.0
+        let green = Double((rgb & 0x00FF00) >> 8) / 255.0
+        let blue = Double(rgb & 0x0000FF) / 255.0
+        
+        self.init(red: red, green: green, blue: blue)
+    }
+}
+
 struct TransportTypeUtils {
+    
+    private static let validTransportTypes = ["Tram", "Bus", "Train", "VLine", "Night Bus"]
     
     // Returns image name for icon of given transport type
     static func transportType(from inputType: String) -> String {
-        if inputType == "Tram" {
-            return "PTV Tram"
-        }
-        else if inputType == "Bus" {
-            return "PTV Bus"
-        }
-        else if inputType == "Train" {
-            return "PTV Train"
-        }
-        else if inputType == "V Line" {
-            return "PTV VLine"
-        }
-        else if inputType == "Sky Bus" {
-            return "PTV Skybus"
-        } else {
-            return "PTV Tram"
-        }
+        let type = validTransportTypes.contains(inputType) ? inputType : "Bus"
+        return "PTV \(type)"
     }
     
     // Returns image name for icon of a given transport type (small, no colour)
     static func transportTypeSmall(from inputType: String) -> String {
-        if inputType == "Tram" {
-            return "PTV Tram Small"
-        }
-        else if inputType == "Bus" {
-            return "PTV Bus Small"
-        }
-        else if inputType == "Train" {
-            return "PTV Train Small"
-        }
-        else if inputType == "V Line" {
-            return "PTV Train Small"
-        }
-        else if inputType == "Skybus" {
-            return "PTV Bus Small"
-        } else {
-            return "PTV Tram Small"
-        }
+        let type = validTransportTypes.contains(inputType) ? inputType : "Bus"
+        return "PTV \(type) Small"
     }
     
     // Returns color code of given route type and/or route number, as well as text color
-    static func routeColor(from inputType: String, routeNumber: String? = nil) -> (Color, Color?) {
-        if inputType == "Bus" {
-            return (Color.orange, Color.white)
-        }
-        else if inputType == "Train" {
-            return (Color.yellow, Color.black)
-        }
-        else if inputType == "Tram" {
-            return (Color.gray, Color.white)
-        }
-        else if inputType == "V Line" {
-            return (Color.purple, Color.white)
-        }
-        else if inputType == "Skybus" {
-            return (Color.red, Color.white)
-        } else {
-            return (Color.gray, Color.white)
-        }
+    static func routeColour(routeColour: String, textColour: String) -> (Color, Color?) {
+        return (Color(hex: routeColour), Color(hex: textColour))
     }
 }

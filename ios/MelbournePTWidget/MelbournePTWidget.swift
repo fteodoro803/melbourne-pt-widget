@@ -65,7 +65,7 @@ struct Provider: AppIntentTimelineProvider {
             uniqueID: "placeholder",
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
-            route: Route(number: "19"),
+            route: Route(number: "19", colour: "FBD872", textColour: "FFFFFF"),
             direction: Direction(name: "Flinders"),
             departures: []  // Empty array of Departures
             )]
@@ -78,7 +78,7 @@ struct Provider: AppIntentTimelineProvider {
             uniqueID: "snapshot",
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
-            route: Route(number: "19"),
+            route: Route(number: "19", colour: "FBD872", textColour: "FFFFFF"),
             direction: Direction(name: "Flinders"),
             departures: []  // Empty array of Departures
             )])
@@ -146,7 +146,7 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id1",
                         routeType: RouteType(name: "Tram"),
                         stop: Stop(name: "Melbourne Central Station"),
-                        route: Route(number: "59"),
+                        route: Route(number: "59", colour: "00653A", textColour: "FFFFFF"),
                         direction: Direction(name: "Airport West"),
                         departures: [
                             Departure(
@@ -170,7 +170,7 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id2",
                         routeType: RouteType(name: "Bus"),
                         stop: Stop(name: "Hope St/Melville Rd"),
-                        route: Route(number: "517"),
+                        route: Route(number: "517", colour: "FF8200", textColour: "FFFFFF"),
                         direction: Direction(name: "Mooney Ponds"),
                         departures: [
                             Departure(
@@ -192,10 +192,10 @@ struct MelbournePTWidget: Widget {
                     ),
                     Transport(
                         uniqueID: "id3",
-                        routeType: RouteType(name: "Skybus"),
-                        stop: Stop(name: "Melbourne Airport T1 Skybus"),
-                        route: Route(number: "Melbourne City Express"),
-                        direction: Direction(name: "City"),
+                        routeType: RouteType(name: "VLine"),
+                        stop: Stop(name: "Southern Cross Station"),
+                        route: Route(number: "", colour: "D92B26", textColour: "FFFFFF"),
+                        direction: Direction(name: "Geelong"),
                         departures: [
                             Departure(
                                 estimatedDepartureTime: "4:15pm",
@@ -218,7 +218,7 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id4",
                         routeType: RouteType(name: "Train"),
                         stop: Stop(name: "Royal Park Station"),
-                        route: Route(number: ""),
+                        route: Route(number: "", colour: "FFBE00", textColour: "000000"),
                         direction: Direction(name: "Upfield"),
                         departures: [
                             Departure(
@@ -246,7 +246,7 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id1",
                         routeType: RouteType(name: "Train"),
                         stop: Stop(name: "Melbourne Central Station"),
-                        route: Route(number: ""),
+                        route: Route(number: "", colour: "FFBE00", textColour: "FFFFFF"),
                         direction: Direction(name: "Upfield"),
                         departures: [
                             Departure(

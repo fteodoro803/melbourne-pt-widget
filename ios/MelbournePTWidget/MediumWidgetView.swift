@@ -42,45 +42,33 @@ struct SystemMediumWidgetView: View {
                         // Route number and direction
                         HStack {
                             let imageString = TransportTypeUtils.transportType(from: transport.routeType.name)
-                            let (routeColor, routeTextColor) = TransportTypeUtils.routeColor(from: transport.routeType.name)
+                            let (routeColour, routeTextColour) = TransportTypeUtils.routeColour(routeColour: transport.route.colour, textColour: transport.route.textColour)
                             
                             Image("\(imageString)")
                                 .resizable()
                                 .frame(width: 24.0, height: 24.0)
                             
                             // Train and V Line design
-                            if transport.routeType.name == "Train" || transport.routeType.name == "V Line" {
+                            if transport.routeType.name == "Train" || transport.routeType.name == "VLine" {
                                 Text("\(transport.direction.name)")
                                     .font(.headline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(routeTextColor)
+                                    .foregroundColor(routeTextColour)
                                     .padding(.horizontal, 7.0)
                                     .padding(.vertical, 1.0)
-                                    .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                                    .background(RoundedRectangle(cornerRadius: 3).fill(routeColour))
                                     .lineLimit(1)
                             }
                             
-                            // Tram, bus, and skybus design
+                            // Tram and bus design
                             else {
-                                if transport.routeType.name == "Skybus" {
-                                    Text("\(transport.route.number)")
-                                        .font(.headline)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(routeTextColor)
-                                        .padding(.horizontal, 7.0)
-                                        .padding(.vertical, 1.0)
-                                        .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
-                                        .lineLimit(1)
-                                }
-                                else {
-                                    Text("\(transport.route.number)")
-                                        .font(.title3)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(routeTextColor)
-                                        .padding(.horizontal, 7.0)
-                                        .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
-                                        .lineLimit(1)
-                                }
+                                Text("\(transport.route.number)")
+                                    .font(.title3)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(routeTextColour)
+                                    .padding(.horizontal, 7.0)
+                                    .background(RoundedRectangle(cornerRadius: 3).fill(routeColour))
+                                    .lineLimit(1)
                                 Text("To \(transport.direction.name)")
                                     .font(.caption2)
                                     .multilineTextAlignment(.leading)

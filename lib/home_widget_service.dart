@@ -33,8 +33,8 @@ class HomeWidgetService {
             'stop': {'name': transport.stop?.name ?? "No stop"},
             'route': {
               'number': transport.route?.number ?? "No route",
-              'colour': transport.route?.colour,
-              'textColour': transport.route?.textColour,
+              'colour': transport.route?.colour ?? "No colour",
+              'textColour': transport.route?.textColour ?? "No text colour",
             },
             'direction': {'name': transport.direction?.name ?? "No direction"},
             'departures': transport.departures

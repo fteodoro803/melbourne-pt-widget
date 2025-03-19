@@ -37,33 +37,19 @@ struct SystemSmallWidgetView: View {
                 // Route number
                 HStack {
                     let imageString = TransportTypeUtils.transportType(from: firstTransport.routeType.name)
-                    let (routeColor, routeTextColor) = TransportTypeUtils.routeColor(from: firstTransport.routeType.name)
+                    let (routeColour, routeTextColour) = TransportTypeUtils.routeColour(routeColour: firstTransport.route.colour, textColour: firstTransport.route.textColour)
                     
                     // Train and V Line design
-                    if firstTransport.routeType.name == "Train" || firstTransport.routeType.name == "V Line" {
+                    if firstTransport.routeType.name == "Train" || firstTransport.routeType.name == "VLine" {
                         Image("\(imageString)")
                             .resizable()
                             .frame(width: 25.0, height: 25.0)
                         Text("\(firstTransport.direction.name)")
                             .font(.title3)
                             .fontWeight(.medium)
-                            .foregroundColor(routeTextColor)
+                            .foregroundColor(routeTextColour)
                             .padding(.horizontal, 7.0)
-                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
-                            .lineLimit(1)
-                    }
-                    
-                    // Skybus design
-                    else if firstTransport.routeType.name == "Skybus" {
-                        Image("\(imageString)")
-                            .resizable()
-                            .frame(width: 25.0, height: 25.0)
-                        Text("\(firstTransport.route.number)")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .foregroundColor(routeTextColor)
-                            .padding(.horizontal, 7.0)
-                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColour))
                             .lineLimit(1)
                     }
                     
@@ -75,15 +61,15 @@ struct SystemSmallWidgetView: View {
                         Text("\(firstTransport.route.number)")
                             .font(.title)
                             .fontWeight(.medium)
-                            .foregroundColor(routeTextColor)
+                            .foregroundColor(routeTextColour)
                             .padding(.horizontal, 7.0)
-                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColor))
+                            .background(RoundedRectangle(cornerRadius: 3).fill(routeColour))
                             .lineLimit(1)
                     }
                 }
                 
                 // Route direction for tram, bus, and skybus
-                if firstTransport.routeType.name != "Train" && firstTransport.routeType.name != "V Line"{
+                if firstTransport.routeType.name != "Train" && firstTransport.routeType.name != "VLine"{
                     Text("To \(firstTransport.direction.name)")
                         .font(.caption2)
                         .multilineTextAlignment(.leading)
