@@ -33,7 +33,9 @@ class HomeWidgetService {
             'stop': {'name': transport.stop?.name ?? "No stop"},
             'route': {
               'number': transport.route?.number ?? "No route",
-              'colour': transport.route?.colour},
+              'colour': transport.route?.colour,
+              'textColour': transport.route?.textColour,
+            },
             'direction': {'name': transport.direction?.name ?? "No direction"},
             'departures': transport.departures
                     ?.map((d) => {
