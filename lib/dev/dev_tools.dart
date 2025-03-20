@@ -3,10 +3,12 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 
 class DevTools {
+  bool isEnabled = false;
 
   // Prints the current Screen State
   void printScreenState(String screenName, ScreenArguments arguments) {
-    if (kDebugMode) {
+
+    if (kDebugMode && isEnabled) {
       String transportDetails = arguments.transport.toString(); // Get the transport details as a string
 
       // Format transport details to indent each line
