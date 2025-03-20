@@ -16,10 +16,18 @@ struct Provider: AppIntentTimelineProvider {
         var transportsList: [Transport] = []
         
         // Print raw data for debugging
+        print("Raw Flutter Data:")
         print(flutterData)
         
-        // No data case
-        if flutterData == "No Data from Flutter" {
+        // No data retrieved case
+        if flutterData == "No Data retrieved from Flutter" {
+            print("No Data retrieved from Flutter")
+            return SimpleEntry(date: Date(), transports: [])
+        }
+        
+        // Empty JSON Case
+        if flutterData == "[]" {
+            print("flutter data == []")
             return SimpleEntry(date: Date(), transports: [])
         }
         

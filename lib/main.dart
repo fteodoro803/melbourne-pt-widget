@@ -86,14 +86,24 @@ class _MyHomePageState extends State<MyHomePage> {
   String? _file;
   List<Transport> _transportList = [];
 
+  HomeWidgetService homeWidgetService = HomeWidgetService();
+
   @override
   void initState() {
     super.initState();
-    _updateMainPage();
+    // _updateMainPage();
 
     // Initialise home widgets
-    HomeWidgetService().initialiseHomeWidget();
+    //_initializeHomeWidgetAsync();
+    homeWidgetService.initialiseHomeWidget();
+
+    _updateMainPage();
   }
+
+  // // Maybe no longer needed to be async??
+  // Future<void> _initializeHomeWidgetAsync() async {
+  //   await homeWidgetService.initialiseHomeWidget();
+  // }
 
   // Reads the saved transport data from a file and converts it into a list of Transport objects.
   // If the file is empty or doesn't exist, initializes an empty transport list.
@@ -118,8 +128,10 @@ class _MyHomePageState extends State<MyHomePage> {
         _transportList = transportList;
       });
 
+      print("( main.dart ) -- preparing to send Widget Data");
       // Send Transport Data to Widget
-      HomeWidgetService().sendWidgetData(_transportList);
+      await homeWidgetService.sendWidgetData(_transportList);
+      print("( main.dart ) -- Widget Data finishing sending");
     }
 
     // Case: No transport File
