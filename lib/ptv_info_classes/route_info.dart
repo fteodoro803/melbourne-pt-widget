@@ -35,13 +35,13 @@ class Route {
   // Only for trams for now
   // For testing, ensure that all the routes go to the right things
   void getRouteColour(String routeType) {
-    print("( route_info.dart -> getRouteColour() ) -- routeType: $routeType");
+    // print("( route_info.dart -> getRouteColour() ) -- routeType: $routeType");
 
     // Tram
     if (routeType == "Tram") {
       String routeId = "route$number";
 
-      print("( route_info.dart -> getRouteColour() ) -- Tram routeId: $routeId");
+      // print("( route_info.dart -> getRouteColour() ) -- Tram routeId: $routeId");
 
       // Matches Transport route number to Palette route Name
       this.colour = TramPalette.values.firstWhere(
