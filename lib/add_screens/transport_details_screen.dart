@@ -78,6 +78,10 @@ class TransportDetailsScreen extends StatelessWidget {
                     departure?.scheduledDepartureTime,
                   );
                   final bool hasLowFloor = departure?.hasLowFloor ?? false;
+                  String minutesUntilNextDeparture = (TimeUtils.timeDifference(departureTime) != null)
+                      ? (TimeUtils.timeDifference(departureTime)?['minutes'] ?? 0).toString()
+                      : "";
+                  String minutesUntilNextDepartureString = TimeUtils.minutesToString(minutesUntilNextDeparture);
 
                   return ListTile(
                     title: Text("${transport.direction?.name}"),
@@ -101,16 +105,13 @@ class TransportDetailsScreen extends StatelessWidget {
                     ),
                     trailing:
                       Text(
-                        "${(TimeUtils.timeDifference(departureTime) != null)
-                          ? (TimeUtils.timeDifference(departureTime)?['minutes'] ?? 0).toString()
-                          : "No data"} min",
+                        minutesUntilNextDepartureString,
                         style: TextStyle(
                           fontSize: 15,
                           color: TransportUtils.getColorForStatus(status),
                         ),
                       ),
                     onTap: () {
-                      // Handle tap, for example, navigate to a detailed departure screen
                       print("Tapped on departure at $departureTime");
                     },
                   );

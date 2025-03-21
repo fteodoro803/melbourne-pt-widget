@@ -80,7 +80,7 @@ class TimeUtils {
   static String minutesToString(String minutes) {
     if (minutes == "0") {
       return "Now";
-    } else if (minutes != "" && int.parse(minutes) > 0 && int.parse(minutes) > 60) {
+    } else if (minutes != "" && int.parse(minutes) > 0 && int.parse(minutes) < 60) {
       return "$minutes min";  // Display nothing if more than 60 minutes
     } else {
       return "";

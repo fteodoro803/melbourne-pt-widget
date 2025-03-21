@@ -38,6 +38,7 @@ class CustomListTile extends StatelessWidget {
     );
 
     String minutesUntilNextDeparture;
+    String minutesUntilNextDepartureText;
 
     // Gets the first departure information
     if (transport.departures != null) {
@@ -45,22 +46,14 @@ class CustomListTile extends StatelessWidget {
 
       minutesUntilNextDeparture = (TimeUtils.timeDifference(departure1) != null)
           ? (TimeUtils.timeDifference(departure1)?['minutes'] ?? 0).toString()
-          : "No data";
+          : "";
+
+      minutesUntilNextDepartureText = TimeUtils.minutesToString(minutesUntilNextDeparture);
     }
     else {
       departure1 = "No Data";
-      minutesUntilNextDeparture = "No data";
-    }
-
-    // Set up the minutesUntilNextDepartureText
-    String minutesUntilNextDepartureText = "";
-
-    if (minutesUntilNextDeparture == "0") {
-      minutesUntilNextDepartureText = "Now";
-    } else if (minutesUntilNextDeparture != "No data" && int.parse(minutesUntilNextDeparture) > 60) {
-      minutesUntilNextDepartureText = "";  // Display nothing if more than 60 minutes
-    } else {
-      minutesUntilNextDepartureText = "$minutesUntilNextDeparture min";
+      minutesUntilNextDeparture = "";
+      minutesUntilNextDepartureText = "";
     }
 
   // Enables the Widget to be Deleted/Dismissed by Swiping
