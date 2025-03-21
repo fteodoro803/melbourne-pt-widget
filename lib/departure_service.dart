@@ -6,7 +6,7 @@ import 'package:flutter_project/ptv_api_service.dart';
 class DepartureService {
   Future<List<Departure>> fetchDepartures(String routeType, String stopId,
       String directionId, String routeId,
-      {String maxResults = "3", String expands = "All"}) async {
+      {String maxResults = "20", String expands = "All"}) async {
     List<Departure> departures = [];
 
     // Fetches departure data via PTV API

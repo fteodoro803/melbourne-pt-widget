@@ -17,11 +17,11 @@ class TransportUtils {
 
       // Compare the times
       if (estimatedTime.isAfter(scheduledTime)) {
-        return "Late"; // Estimated departure is later than scheduled, so it's late
+        return "Departed late"; // Estimated departure is later than scheduled, so it's late
       } else if (estimatedTime.isBefore(scheduledTime)) {
-        return "Early"; // Estimated departure is earlier than scheduled, so it's early
+        return "Departed early"; // Estimated departure is earlier than scheduled, so it's early
       } else {
-        return "On-time"; // Both times are the same, so it's on-time
+        return "On time"; // Both times are the same, so it's on-time
       }
     } catch (e) {
       return "Scheduled"; // Default to "On-time" if there is any error in parsing the time
@@ -31,12 +31,12 @@ class TransportUtils {
   // Function to return color based on departure status
   static Color getColorForStatus(String status) {
     switch (status) {
-      case "Late":
-        return Colors.red; // Red for late
-      case "Early":
-        return Colors.yellow; // Yellow for early
-      case "On-time":
-        return Colors.green; // Yellow for early
+      case "Departed late":
+        return Color(0xFF8A0000); // Red for late
+      case "Departed early":
+        return Color(0xFFA39541); // Yellow for early
+      case "On time":
+        return Color(0xFF138800); // Yellow for early
       case "Scheduled":
       default:
         return Colors.black; // Green for on-time or default
@@ -44,7 +44,7 @@ class TransportUtils {
   }
 }
 
-class TimeDifference {
+class TimeUtils {
   // Finds time difference in days and minutes between system time and given departure time
   static Map<String, int>? timeDifference(String inputTime) {
     try {
@@ -75,5 +75,31 @@ class TimeDifference {
     } catch (e) {
       return null; // If the input format is incorrect or other errors
     }
+  }
+
+  static String minutesToString(String minutes) {
+    if (minutes == "0") {
+      return "Now";
+    } else if (minutes != "" && int.parse(minutes) > 0 && int.parse(minutes) > 60) {
+      return "$minutes min";  // Display nothing if more than 60 minutes
+    } else {
+      return "";
+    }
+  }
+}
+
+class ColourUtils {
+  // Function to convert hex string to Color
+  static Color hexToColour(String hexColour) {
+    // Remove the '#' if it's there, just in case
+    hexColour = hexColour.replaceAll('#', '');
+
+    // Add the alpha value to the hex code if it's missing
+    if (hexColour.length == 6) {
+      hexColour = 'FF' + hexColour; // Default alpha value (FF for full opacity)
+    }
+
+    // Convert hex string to integer and create Color object
+    return Color(int.parse('0x$hexColour'));
   }
 }

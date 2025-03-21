@@ -157,23 +157,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("PTV App"),
+        title: Text("Saved Routes"),
         centerTitle: true,
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // ADD PAGE BUTTON
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  '/selectRouteTypeScreen',
-                  arguments: ScreenArguments(Transport(), _updateMainPage),
-                );
-              },
-              child: Text("+"),
-            ),
+            Divider(),
 
             // INFORMATION TILES AS LIST
             Expanded(
@@ -184,6 +174,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   return CustomListTile(transport: transport, dismissible: true, onDismiss: () => {removeTransport(transport), _updateMainPage()}, onTap: () => print(_transportList[index].toString()),);
                 },
               ),
+            ),
+
+            // ADD PAGE BUTTON
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  '/selectRouteTypeScreen',
+                  arguments: ScreenArguments(Transport(), _updateMainPage),
+                );
+              },
+              child: Text("+"),
             ),
 
             Divider(),
