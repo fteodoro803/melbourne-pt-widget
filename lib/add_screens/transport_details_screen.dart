@@ -73,26 +73,37 @@ class TransportDetailsScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final departure = transport.departures?[index];
                   final String departureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
-                  final String status = TransportUtils.getDepartureStatus(
+                  final DepartureStatus status = TransportUtils.getDepartureStatus(
                     departure?.estimatedDepartureTime,
                     departure?.scheduledDepartureTime,
                   );
                   final bool hasLowFloor = departure?.hasLowFloor ?? false;
-                  String minutesUntilNextDeparture = (TimeUtils.timeDifference(departureTime) != null)
-                      ? (TimeUtils.timeDifference(departureTime)?['minutes'] ?? 0).toString()
-                      : "";
-                  String minutesUntilNextDepartureString = TimeUtils.minutesToString(minutesUntilNextDeparture);
+                  String minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
 
                   return ListTile(
                     title: Text("${transport.direction?.name}"),
                     subtitle: Row(
                       children: [
                         Text(
-                          "$status • $departureTime",
+                          "${status.status} ",
                           style: TextStyle(
-                            color: TransportUtils.getColorForStatus(status),
+                            color: TransportUtils.getColorForStatus(status.status),
                           ),
                         ),
+                        Text(
+                          status.timeDifference != null ? "${status.timeDifference} min • $departureTime" : "• $departureTime",
+                          style: TextStyle(
+                            color: TransportUtils.getColorForStatus(status.status),
+                          ),
+                        ),
+                        // Text(
+                        //   "$departureTime",
+                        //   style: TextStyle(
+                        //     color: TransportUtils.getColorForStatus(status.status),
+                        //     // decoration: (status.status == "Delayed") ? TextDecoration.lineThrough : TextDecoration.none,
+                        //     // decorationColor: TransportUtils.getColorForStatus(status.status),
+                        //   ),
+                        // ),
                         if (hasLowFloor) ...[
                           SizedBox(width: 4),  // Space before icon
                           Image.asset(
@@ -108,7 +119,7 @@ class TransportDetailsScreen extends StatelessWidget {
                         minutesUntilNextDepartureString,
                         style: TextStyle(
                           fontSize: 15,
-                          color: TransportUtils.getColorForStatus(status),
+                          color: TransportUtils.getColorForStatus(status.status),
                         ),
                       ),
                     onTap: () {

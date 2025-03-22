@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+class DepartureStatus {
+  final String status;
+  final int? timeDifference;
+
+  DepartureStatus(this.status, this.timeDifference);
+}
+
 class TransportUtils {
   // Function to compare estimated and scheduled departure times for a transport departure
-  static String getDepartureStatus(String? estimatedDepartureTime, String? scheduledDepartureTime) {
+  static DepartureStatus getDepartureStatus(String? estimatedDepartureTime, String? scheduledDepartureTime) {
     if (estimatedDepartureTime == null || scheduledDepartureTime == null) {
-      return "Scheduled"; // Default to On-time if either value is null
+      return DepartureStatus("Scheduled", null); // Default to On-time if either value is null
     }
 
     // Convert the time strings to DateTime objects for comparison
@@ -17,23 +24,25 @@ class TransportUtils {
 
       // Compare the times
       if (estimatedTime.isAfter(scheduledTime)) {
-        return "Departed late"; // Estimated departure is later than scheduled, so it's late
+        int? timeDelayed = TimeUtils.timeDifference(scheduledDepartureTime, estimatedDepartureTime)?['minutes'];
+        return DepartureStatus("Delayed", timeDelayed); // Estimated departure is later than scheduled, so it's late
       } else if (estimatedTime.isBefore(scheduledTime)) {
-        return "Departed early"; // Estimated departure is earlier than scheduled, so it's early
+        int? timeEarly = TimeUtils.timeDifference(estimatedDepartureTime, scheduledDepartureTime)?['minutes'];
+        return DepartureStatus("Early", timeEarly); // Estimated departure is earlier than scheduled, so it's early
       } else {
-        return "On time"; // Both times are the same, so it's on-time
+        return DepartureStatus("On time", null); // Both times are the same, so it's on-time
       }
     } catch (e) {
-      return "Scheduled"; // Default to "On-time" if there is any error in parsing the time
+      return DepartureStatus("Scheduled", null); // Default to "On-time" if there is any error in parsing the time
     }
   }
 
   // Function to return color based on departure status
   static Color getColorForStatus(String status) {
     switch (status) {
-      case "Departed late":
+      case "Delayed":
         return Color(0xFF8A0000); // Red for late
-      case "Departed early":
+      case "Early":
         return Color(0xFFA39541); // Yellow for early
       case "On time":
         return Color(0xFF138800); // Yellow for early
@@ -46,42 +55,72 @@ class TransportUtils {
 
 class TimeUtils {
   // Finds time difference in days and minutes between system time and given departure time
-  static Map<String, int>? timeDifference(String inputTime) {
+  static Map<String, int>? timeDifference(String inputTime1, [String? inputTime2]) {
     try {
-      // Convert the input time to uppercase to handle lowercase am/pm
-      inputTime = inputTime.toUpperCase();
+      // Convert both input times to uppercase to handle lowercase am/pm
+      inputTime1 = inputTime1.toUpperCase();
+      inputTime2 = inputTime2?.toUpperCase();
 
       // Set the input time format
       var formatter = DateFormat('hh:mma');
 
-      // Parse the input time string into a DateTime object
-      DateTime inputDate = formatter.parse(inputTime);
+      // Parse the first input time string into a DateTime object
+      DateTime inputDate1 = formatter.parse(inputTime1);
 
-      // Get current system time
-      DateTime currentDate = DateTime.now();
+      DateTime fullInputDate1 = DateTime.now().copyWith(
+          hour: inputDate1.hour,
+          minute: inputDate1.minute,
+          second: 0,
+          millisecond: 0
+      );
 
-      // Set the same date for the input time (same year, month, day as the current system time)
-      DateTime fullInputDate = DateTime(currentDate.year, currentDate.month, currentDate.day,
-          inputDate.hour, inputDate.minute);
+      // If a second input time is provided, compute the difference between them
+      if (inputTime2 != null) {
+        DateTime inputDate2 = formatter.parse(inputTime2);
 
-      // Find the difference between current time and the input time
-      Duration difference = fullInputDate.difference(currentDate);
+        DateTime fullInputDate2 = DateTime.now().copyWith(
+            hour: inputDate2.hour,
+            minute: inputDate2.minute,
+            second: 0,
+            millisecond: 0
+        );
 
-      // Get the days and minutes from the difference
-      int days = difference.inDays;
-      int minutes = difference.inMinutes % 60; // Get the remaining minutes
+        // Find the difference between the two input times
+        Duration difference = fullInputDate2.difference(fullInputDate1);
 
-      return {'days': days, 'minutes': minutes};
+        int days = difference.inDays;
+        int hours = difference.inHours % 24;
+        int minutes = difference.inMinutes % 60;
+
+        return {'days': days, 'hours': hours, 'minutes': minutes};
+      } else {
+        // If only one time is provided, calculate the difference between input time and current system time
+        DateTime currentDate = DateTime.now();
+
+        // Find the difference between current time and the input time
+        Duration difference = fullInputDate1.difference(currentDate);
+
+        // Get the days and minutes from the difference
+        int days = difference.inDays;
+        int hours = difference.inHours % 24;
+        int minutes = difference.inMinutes % 60;
+
+        return {'days': days, 'hours': hours, 'minutes': minutes};
+      }
     } catch (e) {
       return null; // If the input format is incorrect or other errors
     }
   }
 
-  static String minutesToString(String minutes) {
-    if (minutes == "0") {
-      return "Now";
-    } else if (minutes != "" && int.parse(minutes) > 0 && int.parse(minutes) < 60) {
-      return "$minutes min";  // Display nothing if more than 60 minutes
+  static String minutesToString(Map<String, int>? timeMap) {
+    if (timeMap?['days'] == 0 && timeMap?['hours'] == 0) {
+      if (timeMap?['minutes'] == 0) {
+        return "Now";
+      }
+      else {
+        String minutes = timeMap?['minutes'].toString() ?? "";
+        return "$minutes min";
+      }
     } else {
       return "";
     }

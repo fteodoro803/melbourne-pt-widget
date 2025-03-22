@@ -32,27 +32,21 @@ class CustomListTile extends StatelessWidget {
 
     String departure1;
 
-    String departure1Status = TransportUtils.getDepartureStatus(
+    DepartureStatus departure1Status = TransportUtils.getDepartureStatus(
       transport.departures?[0].estimatedDepartureTime,
       transport.departures?[0].scheduledDepartureTime,
     );
 
-    String minutesUntilNextDeparture;
     String minutesUntilNextDepartureText;
 
     // Gets the first departure information
     if (transport.departures != null) {
       departure1 = transport.departures?[0].estimatedDepartureTime ?? transport.departures?[0].scheduledDepartureTime ?? "Null 1st Departure";
 
-      minutesUntilNextDeparture = (TimeUtils.timeDifference(departure1) != null)
-          ? (TimeUtils.timeDifference(departure1)?['minutes'] ?? 0).toString()
-          : "";
-
-      minutesUntilNextDepartureText = TimeUtils.minutesToString(minutesUntilNextDeparture);
+      minutesUntilNextDepartureText = TimeUtils.minutesToString(TimeUtils.timeDifference(departure1));
     }
     else {
       departure1 = "No Data";
-      minutesUntilNextDeparture = "";
       minutesUntilNextDepartureText = "";
     }
 
@@ -72,7 +66,42 @@ class CustomListTile extends StatelessWidget {
 
     // Information Tile
     child: ListTile(
-      // Title and subtitle are structured with Row and Column for formatting
+      trailing: Container(
+        child: Column(
+          children: [
+            if (minutesUntilNextDepartureText == "Now")
+              Text(
+                minutesUntilNextDepartureText,
+                style: TextStyle(
+                  fontSize: 16, // Smaller font size for "Now"
+                  fontWeight: FontWeight.w600,
+                  color: TransportUtils.getColorForStatus(departure1Status.status),
+                  height: 1.1,
+                ),
+              )
+            else ...[
+              Text(
+                minutesUntilNextDepartureText.split(' ').first,
+                style: TextStyle(
+                  fontSize: 20, // Larger font size for the first word
+                  fontWeight: FontWeight.w600,
+                  color: TransportUtils.getColorForStatus(departure1Status.status),
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                minutesUntilNextDepartureText.split(' ').skip(1).join(' '),
+                style: TextStyle(
+                  fontSize: 14, // Smaller font size for the remaining text
+                  fontWeight: FontWeight.w600,
+                  color: TransportUtils.getColorForStatus(departure1Status.status),
+                  height: 1.1,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
       title: Row(
         children: [
           Expanded(
@@ -100,48 +129,46 @@ class CustomListTile extends StatelessWidget {
                 Row(
                   children: [
                     Image.asset(
-                      "assets/icons/PTV ${transport.routeType?.name} Logo.png", // Image for transport type
+                      "assets/icons/PTV ${transport.routeType?.name} Logo.png",
                       width: 40,
                       height: 40,
                     ),
-                    SizedBox(width: 8), // Space between image and text
-                    // Route number with bigger text and colored background
+                    SizedBox(width: 8),
+
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: ColourUtils.hexToColour(routeColour), // Background color
-                        borderRadius: BorderRadius.circular(8), // Rounded corners for background
+                        color: ColourUtils.hexToColour(routeColour),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        transport.route?.number ?? "No Data", // Route number text
+                        transport.route?.number ?? "No Data",
                         style: TextStyle(
                           fontSize: 20, // Bigger text size
-                          fontWeight: FontWeight.bold, // Bold text
-                          color: ColourUtils.hexToColour(routeTextColour), // White text color on blue background
+                          fontWeight: FontWeight.bold,
+                          color: ColourUtils.hexToColour(routeTextColour),
                         ),
                       ),
                     ),
-                    SizedBox(width: 8), // Space between route number and direction
+                    SizedBox(width: 8),
                     Text(
-                      transport.direction?.name ?? "No Data", // Direction name
-                      style: TextStyle(fontSize: 16), // Adjust text size if needed
-                      overflow: TextOverflow.ellipsis,  // Apply ellipsis if text overflows
-                      maxLines: 1,  // Limit to 1 line
+                      transport.direction?.name ?? "No Data",
+                      style: TextStyle(fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ],
                 ),
-                SizedBox(height: 4), // Space between lines
+                SizedBox(height: 4),
 
                 Row(
                   children: [
-                    // Check if departures is null or empty
                     if (transport.departures == null || transport.departures!.isEmpty)
                       Text(
                         "No times to show.",
                         style: TextStyle(height: 1.1),
                       )
                     else
-                    // Iterate through the departures (up to 3)
                       ...List.generate(
                           transport.departures!.length > 3 ? 3 : transport.departures!.length,
                               (index) {
@@ -157,15 +184,14 @@ class CustomListTile extends StatelessWidget {
                                   style: TextStyle(height: 1.1),
                                 ),
                                 if (hasLowFloor) ...[
-                                  SizedBox(width: 3), // Space before icon
+                                  SizedBox(width: 3),
                                   Image.asset(
-                                    "assets/icons/Low Floor Icon.png", // Image for low floor
+                                    "assets/icons/Low Floor Icon.png",
                                     width: 14,
                                     height: 14,
                                   ),
                                 ],
-                                if (index < (transport.departures!.length - 1)) ...[
-                                  // If it's not the last departure, display a separator
+                                if (index < ((transport.departures!.length > 3 ? 3 : transport.departures!.length) - 1)) ...[
                                   Text(
                                     "⎥",
                                     style: TextStyle(height: 1.1),
@@ -180,48 +206,6 @@ class CustomListTile extends StatelessWidget {
               ],
             ),
           ),
-
-          Container(
-            constraints: BoxConstraints(maxWidth: 50),  // Adjust maxWidth to control when wrapping happens
-            alignment: Alignment.center,  // Center the text
-            child: Column(
-              children: [
-                // Check if the text is "Now"
-                if (minutesUntilNextDepartureText == "Now")
-                  Text(
-                    minutesUntilNextDepartureText,
-                    style: TextStyle(
-                      fontSize: 16, // Smaller font size for "Now"
-                      fontWeight: FontWeight.w600,
-                      color: TransportUtils.getColorForStatus(departure1Status),
-                      height: 1.1,
-                    ),
-                  )
-                else ...[
-                  // Display first part (first word) bigger for other cases
-                  Text(
-                    minutesUntilNextDepartureText.split(' ').first,
-                    style: TextStyle(
-                      fontSize: 20, // Larger font size for the first word
-                      fontWeight: FontWeight.w600,
-                      color: TransportUtils.getColorForStatus(departure1Status),
-                      height: 1.1,
-                    ),
-                  ),
-                  // Display the second part (remaining words)
-                  Text(
-                    minutesUntilNextDepartureText.split(' ').skip(1).join(' '),
-                    style: TextStyle(
-                      fontSize: 14, // Smaller font size for the remaining text
-                      fontWeight: FontWeight.w600,
-                      color: TransportUtils.getColorForStatus(departure1Status),
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          )
         ],
       ),
       onTap: () {
