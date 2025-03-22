@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/time_utils.dart';
 
-import 'add_screens/transport_details_screen.dart';
-
 class CustomListTile extends StatelessWidget {
   final Transport transport;
   final VoidCallback onTap;
@@ -208,15 +206,7 @@ class CustomListTile extends StatelessWidget {
           ),
         ],
       ),
-      onTap: () {
-        // Navigate to TransportDetailsScreen with transport data
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TransportDetailsScreen(transport: transport),
-          ),
-        );
-      },
+      onTap: onTap,
     ),
   );  }
 }

@@ -1,11 +1,67 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import '../departure_service.dart';
+import '../ptv_info_classes/departure_info.dart';
 import '../time_utils.dart';
 import '../transport.dart';
 
-class TransportDetailsScreen extends StatelessWidget {
+class TransportDetailsScreen extends StatefulWidget {
   final Transport transport;
 
   TransportDetailsScreen({required this.transport});
+
+  @override
+  _TransportDetailsScreenState createState() => _TransportDetailsScreenState();
+}
+
+class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
+  late Transport transport;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    transport = widget.transport;
+
+    // Update departures when the screen is initialized
+    updateDepartures();
+
+    // Set up a timer to update departures every 30 seconds (30,000 milliseconds)
+    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+      updateDepartures();
+    });
+  }
+
+  // Update Departures
+  Future<void> updateDepartures() async {
+    String? routeType = transport.routeType?.type;
+    String? stopId = transport.stop?.id;
+    String? directionId = transport.direction?.id;
+    String? routeId = transport.route?.id;
+
+    // Early exit if any of the prerequisites are null
+    if (routeType == null || stopId == null || directionId == null || routeId == null) {
+      return;
+    }
+
+    // Gets Departures and saves to instance
+    DepartureService departureService = DepartureService();
+    List<Departure>? updatedDepartures = await departureService.fetchDepartures(
+        routeType, stopId, directionId, routeId
+    );
+
+    setState(() {
+      transport.departures = updatedDepartures;
+    });
+    }
+
+  @override
+  void dispose() {
+    // Cancel the timer when the screen is disposed
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

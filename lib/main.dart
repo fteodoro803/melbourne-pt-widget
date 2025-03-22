@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:flutter_project/add_screens/confirmation_screen.dart";
 import "package:flutter_project/add_screens/select_location_screen.dart";
@@ -14,6 +16,7 @@ import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
 
+import "add_screens/transport_details_screen.dart";
 import "home_widget_service.dart";
 
 
@@ -23,11 +26,17 @@ void main() async {
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Loads Config
-  await GlobalConfiguration().loadFromAsset("config");
-
-  // Runs app
-  runApp(MyApp());
+  // // Loads Config
+  // await GlobalConfiguration().loadFromAsset("config");
+  //
+  // // Runs app
+  // runApp(MyApp());
+  try {
+    await GlobalConfiguration().loadFromAsset("config");
+    runApp(MyApp());
+  } catch (e) {
+    print("Error during initialization: $e");
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -87,10 +96,12 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Transport> _transportList = [];
 
   HomeWidgetService homeWidgetService = HomeWidgetService();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    print("initState called");
     // _updateMainPage();
 
     // Initialise home widgets
@@ -98,6 +109,12 @@ class _MyHomePageState extends State<MyHomePage> {
     homeWidgetService.initialiseHomeWidget();
 
     _updateMainPage();
+
+    // Set up a timer to update the transport list every 30 seconds
+    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+      print("Timer triggered");
+      _updateMainPage();
+    });
   }
 
   // // Maybe no longer needed to be async??
@@ -108,6 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Reads the saved transport data from a file and converts it into a list of Transport objects.
   // If the file is empty or doesn't exist, initializes an empty transport list.
   Future<void> _updateMainPage() async {
+    print("updating main page");
     String? stringContent = await read(formatted: true);
 
     // Case: Populated transport File
@@ -154,6 +172,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void dispose() {
+    // Cancel the timer when the screen is disposed
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -171,7 +196,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: _transportList.length,
                 itemBuilder: (context, index) {
                   final transport = _transportList[index];
-                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => {removeTransport(transport), _updateMainPage()}, onTap: () => print(_transportList[index].toString()),);
+                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => {removeTransport(transport), _updateMainPage()},
+                  onTap: () =>
+                    // Navigate to TransportDetailsScreen with transport data
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TransportDetailsScreen(transport: transport),
+                      ),
+                    )
+                  );
                 },
               ),
             ),
