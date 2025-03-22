@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../departure_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../time_utils.dart';
@@ -19,17 +20,41 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
   late Transport transport;
   Timer? _timer;
 
+  // Google Maps controller and center position
+  late GoogleMapController mapController;
+  late LatLng _center;
+
+  Set<Marker> _markers = {};
+
   @override
   void initState() {
     super.initState();
     transport = widget.transport;
 
+    if (transport.stop?.latitude != null && transport.stop?.longitude != null) {
+      _center = LatLng(transport.stop!.latitude! as double, transport.stop!.longitude as double);
+    } else {
+      _center = const LatLng(-37.813812122509205, 144.96358311072478);
+    }
+
+    _addMarker();
+
     // Update departures when the screen is initialized
     updateDepartures();
 
-    // Set up a timer to update departures every 30 seconds (30,000 milliseconds)
+    // Set up a timer to update departures every 30 seconds
     _timer = Timer.periodic(Duration(seconds: 30), (timer) {
       updateDepartures();
+    });
+  }
+
+  void _addMarker() {
+    setState(() {
+      _markers.add(Marker(
+        markerId: MarkerId('center_marker'),
+        position: _center, // The position where the dot will appear
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed), // Set the color of the dot (red in this case)
+      ));
     });
   }
 
@@ -58,135 +83,221 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
 
   @override
   void dispose() {
-    // Cancel the timer when the screen is disposed
     _timer?.cancel();
     super.dispose();
   }
 
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Transport Details'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // First line: [location_pin] [stopName]
-            Row(
-              children: [
-                Icon(Icons.location_pin, size: 16), // Icon for location
-                SizedBox(width: 3), // Space between icon and text
-                Flexible(
-                  child: Text(
-                    transport.stop?.name ?? "No Data",
-                    style: TextStyle(fontSize: 16), // Adjust stopName font size
-                    overflow: TextOverflow.ellipsis,  // Apply ellipsis if text overflows
-                    maxLines: 1,  // Limit to 1 line
-                  ),
-                ),
-              ],
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: GoogleMap(
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: CameraPosition(target: _center, zoom: 16),
+              mapType: MapType.normal,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              markers: _markers,
             ),
-            SizedBox(height: 4), // Space between lines
+          ),
 
-            // Second line: [transportTypeImage] [routeNumber] to [directionName]
-            Row(
-              children: [
-                Image.asset(
-                  "assets/icons/PTV ${transport.routeType?.name} Logo.png", // Image for transport type
-                  width: 40,
-                  height: 40,
-                ),
-                SizedBox(width: 8), // Space between image and text
-                // Route number with bigger text and colored background
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: ColourUtils.hexToColour(transport.route!.colour ?? "Null RouteColour"), // Background color
-                    borderRadius: BorderRadius.circular(8), // Rounded corners for background
-                  ),
-                  child: Text(
-                    transport.route?.number ?? "No Data", // Route number text
-                    style: TextStyle(
-                      fontSize: 20, // Bigger text size
-                      fontWeight: FontWeight.bold, // Bold text
-                      color: ColourUtils.hexToColour(transport.route?.textColour ?? "Null RouteTextColour"), // White text color on blue background
+          Positioned(
+            top: 40,
+            left: 15,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            SizedBox(height: 4), // Space between lines
-            Divider(),
-
-            Text("Upcoming Departures"),
-            Expanded(
-              child: ListView.builder(
-                itemCount: transport.departures!.length > 50 ? 50 : transport.departures!.length,  // Only show next 50 departures
-                itemBuilder: (context, index) {
-                  final departure = transport.departures?[index];
-                  final String departureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
-                  final DepartureStatus status = TransportUtils.getDepartureStatus(
-                    departure?.estimatedDepartureTime,
-                    departure?.scheduledDepartureTime,
-                  );
-                  final bool hasLowFloor = departure?.hasLowFloor ?? false;
-                  String minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
-
-                  return ListTile(
-                    title: Text("${transport.direction?.name}"),
-                    subtitle: Row(
-                      children: [
-                        Text(
-                          "${status.status} ",
-                          style: TextStyle(
-                            color: TransportUtils.getColorForStatus(status.status),
-                          ),
-                        ),
-                        Text(
-                          status.timeDifference != null ? "${status.timeDifference} min • $departureTime" : "• $departureTime",
-                          style: TextStyle(
-                            color: TransportUtils.getColorForStatus(status.status),
-                          ),
-                        ),
-                        // Text(
-                        //   "$departureTime",
-                        //   style: TextStyle(
-                        //     color: TransportUtils.getColorForStatus(status.status),
-                        //     // decoration: (status.status == "Delayed") ? TextDecoration.lineThrough : TextDecoration.none,
-                        //     // decorationColor: TransportUtils.getColorForStatus(status.status),
-                        //   ),
-                        // ),
-                        if (hasLowFloor) ...[
-                          SizedBox(width: 4),  // Space before icon
-                          Image.asset(
-                            "assets/icons/Low Floor Icon.png", // Image for low floor
-                            width: 14,
-                            height: 14,
-                          ),
-                        ],
-                      ],
-                    ),
-                    trailing:
-                      Text(
-                        minutesUntilNextDepartureString,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: TransportUtils.getColorForStatus(status.status),
-                        ),
-                      ),
-                    onTap: () {
-                      print("Tapped on departure at $departureTime");
-                    },
-                  );
-                },
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                  size: 30,
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+
+          DraggableScrollableSheet(
+            initialChildSize: 0.3,
+            minChildSize: 0.2,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        red: 0,
+                        green: 0,
+                        blue: 0,
+                        alpha: 0.1,
+                      ),
+                      spreadRadius: 1,
+                      blurRadius: 7,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Container(
+                        height: 5,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.grey,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      controller: scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.location_pin, size: 16),
+                              SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  transport.stop?.name ?? "No Data",
+                                  style: TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 4),
+
+                          Row(
+                            children: [
+                              Image.asset(
+                                "assets/icons/PTV ${transport.routeType?.name} Logo.png",
+                                width: 40,
+                                height: 40,
+                              ),
+                              SizedBox(width: 8),
+
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: transport.route?.colour != null
+                                      ? ColourUtils.hexToColour(transport.route!.colour!)
+                                      : Colors.grey,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  transport.route?.number ?? "No Data",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: transport.route?.textColour != null
+                                        ? ColourUtils.hexToColour(transport.route!.textColour!)
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 4),
+                          Divider(),
+                          Text("Upcoming Departures"),
+                        ],
+                      ),
+                    ),
+
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.only(
+                          top: 0.0,
+                          right: 16.0,
+                          bottom: 0.0,
+                          left: 16.0,
+                        ),
+                        itemCount: transport.departures!.length > 50 ? 50 : transport.departures!.length,
+                        itemBuilder: (context, index) {
+                          final departure = transport.departures?[index];
+                          final String departureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
+                          final DepartureStatus status = TransportUtils.getDepartureStatus(
+                            departure?.estimatedDepartureTime,
+                            departure?.scheduledDepartureTime,
+                          );
+                          final bool hasLowFloor = departure?.hasLowFloor ?? false;
+                          String minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
+
+                          return ListTile(
+                            title: Text("${transport.direction?.name}"),
+                            subtitle: Row(
+                              children: [
+                                Text(
+                                  "${status.status} ",
+                                  style: TextStyle(
+                                    color: TransportUtils.getColorForStatus(status.status),
+                                  ),
+                                ),
+                                Text(
+                                  status.timeDifference != null ? "${status.timeDifference} min • $departureTime" : "• $departureTime",
+                                  style: TextStyle(
+                                    color: TransportUtils.getColorForStatus(status.status),
+                                  ),
+                                ),
+                                if (hasLowFloor) ...[
+                                  SizedBox(width: 4),
+                                  Image.asset(
+                                    "assets/icons/Low Floor Icon.png",
+                                    width: 14,
+                                    height: 14,
+                                  ),
+                                ],
+                              ],
+                            ),
+                            trailing:
+                            Text(
+                              minutesUntilNextDepartureString,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: TransportUtils.getColorForStatus(status.status),
+                              ),
+                            ),
+                            onTap: () {
+                              print("Tapped on departure at $departureTime");
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
