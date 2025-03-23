@@ -87,13 +87,13 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
   }
 
   // Handling tap on an item in NearbyStopsSheet
-  void _onStopTapped(Stop stop, PTRoute.Route route) {
+  void _onStopTapped(Stop stop, PTRoute.Route route) async {
     setState(() {
       _selectedStop = stop;
       _selectedRoute = route;
       _isStopDirectionsVisible = true;  // Switch to StopDirectionsSheet
-      fetchRouteDirections();
     });
+    await fetchRouteDirections();
   }
 
   // Initialising State
@@ -185,7 +185,7 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
     }
   }
 
-  void fetchRouteDirections() async {
+  Future<void> fetchRouteDirections() async {
     String? routeId =
         _selectedRoute?.id;
 
