@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
@@ -86,7 +87,7 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
 
     try {
       // Fetch stops from the API
-      Data data = await PtvApiService().stops(location, routeTypes: widget.arguments.transportType, maxDistance: maxDistance);
+      ApiData data = await PtvApiService().stops(location, routeTypes: widget.arguments.transportType, maxDistance: maxDistance);
       Map<String, dynamic>? jsonResponse = data.response;
 
       if (jsonResponse == null) {

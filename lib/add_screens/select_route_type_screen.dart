@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
@@ -35,7 +36,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   // Fetches Routes and generates Map/Dictionary of PT Options               // I dont like how this logic is in the same file as the frontend rendering, find a way to split this
   Future<void> fetchRouteTypes() async {
     // Fetching Data and converting to JSON
-    Data data = await PtvApiService().routeTypes();
+    ApiData data = await PtvApiService().routeTypes();
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit     // Make it display on screen if there is no data

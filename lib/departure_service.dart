@@ -1,5 +1,6 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
+import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 
@@ -10,7 +11,7 @@ class DepartureService {
     List<Departure> departures = [];
 
     // Fetches departure data via PTV API
-    Data data = await PtvApiService().departures(
+    ApiData data = await PtvApiService().departures(
         routeType, stopId, directionId: directionId,
         routeId: routeId,
         maxResults: maxResults,

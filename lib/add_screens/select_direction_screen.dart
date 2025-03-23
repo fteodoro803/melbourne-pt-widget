@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
@@ -34,7 +35,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
         widget.arguments.transport.route?.id; // this seems a bit convoluted
 
     // Fetching Data and converting to JSON
-    Data data = await PtvApiService().routeDirections(routeId!);
+    ApiData data = await PtvApiService().routeDirections(routeId!);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit

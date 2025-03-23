@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
@@ -41,7 +42,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String? maxDistance = "300";
 
     // Fetching Data and converting to JSON
-    Data data = await PtvApiService().stops(location!, routeTypes: routeType, maxDistance: maxDistance);
+    ApiData data = await PtvApiService().stops(location!, routeTypes: routeType, maxDistance: maxDistance);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
