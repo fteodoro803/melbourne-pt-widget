@@ -35,7 +35,9 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   // Fetch Stops            -- do tests to see if not null
   Future<void> fetchStops() async {
     String? location = widget.arguments.transport.location?.location;
+    print(location);
     String? routeType = widget.arguments.transport.routeType?.type;
+    print(routeType);
     String? maxDistance = "300";
 
     // Fetching Data and converting to JSON
@@ -96,9 +98,9 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         // old
         itemCount: _stops.length,
         itemBuilder: (context, index) {
-          final stopName = _stops[index].name ?? "Null stopName";
-          final routeNumber = _routes[index].number ?? "Null routeNumber";
-          final routeName = _routes[index].name ?? "Unknown routeName";
+          final stopName = _stops[index].name;
+          final routeNumber = _routes[index].number;
+          final routeName = _routes[index].name;
 
           return ListTile(
             title: Text("$stopName: ($routeNumber)"),

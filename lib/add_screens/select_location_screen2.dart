@@ -3,8 +3,12 @@ import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_project/toggle_buttons_row.dart';
+import 'package:flutter_project/draggable_scrollable_sheet_widget.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
+
+import '../ptv_api_service.dart';
+import '../ptv_info_classes/route_info.dart' as PTRoute;
+import '../ptv_info_classes/stop_info.dart';
 
 class SelectLocationScreen2 extends StatefulWidget {
   const SelectLocationScreen2({super.key, required this.arguments});
@@ -20,6 +24,10 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
   final String _screenName = "SelectLocation";
   final TextEditingController _locationController =
       TextEditingController(); // Placeholder until map api is implemented
+
+  final List<Stop> _stops = [];
+  final List<PTRoute.Route> _routes = [];
+
   DevTools tools = DevTools();
 
   // Map
@@ -28,6 +36,8 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
   final LatLng _initialPosition =
       const LatLng(-37.813812122509205, 144.96358311072478);
   LatLng? currentPosition;
+
+  bool _hasDroppedPin = false;
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -45,7 +55,10 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
     // Update the state with the new address
     setState(() {
       _locationController.text = address; // Set the address in the text field
+      _hasDroppedPin = true;
     });
+
+    await fetchStops(position);
   }
 
   Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
@@ -60,6 +73,61 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
       print("Error getting address: $e");
     }
     return "Address not found"; // Return a default message if something goes wrong
+  }
+
+  Future<void> fetchStops(LatLng position) async {
+    String location = "${position.latitude},${position.longitude}";
+    if (location.isEmpty) {
+      print("Location is empty, unable to fetch stops.");
+      return;
+    }
+
+    String maxDistance = "300"; // Default to "300" if null
+
+    try {
+      // Fetch stops from the API
+      Data data = await PtvApiService().stops(location, routeTypes: widget.arguments.transportType, maxDistance: maxDistance);
+      Map<String, dynamic>? jsonResponse = data.response;
+
+      if (jsonResponse == null) {
+        print("NULL DATA RESPONSE --> Improper Location Data");
+        return;
+      }
+      print("DATA RESPONSE PENDING");
+      print("ROUTE TYPE: ${widget.arguments.transportType}");
+
+      // Clear previous stops and routes
+      _stops.clear();
+      _routes.clear();
+
+      // Iterate over the stops and routes to populate them
+      for (var stop in jsonResponse["stops"]) {
+        for (var route in stop["routes"]) {
+          if (route["route_type"].toString() != widget.arguments.transportType && widget.arguments.transportType != "all") {
+            continue;
+          }
+          String stopId = stop["stop_id"].toString();
+          String stopName = stop["stop_name"];
+          Stop newStop = Stop(id: stopId, name: stopName);
+
+          String routeName = route["route_name"];
+          String routeNumber = route["route_number"].toString();
+          String routeId = route["route_id"].toString();
+          PTRoute.Route newRoute = PTRoute.Route(name: routeName, number: routeNumber, id: routeId);
+
+          // newRoute.getRouteColour(widget.arguments.transport.routeType!.name);
+
+          _stops.add(newStop);
+          _routes.add(newRoute);
+        }
+      }
+
+      // Call setState() to refresh the UI
+      setState(() {});
+    } catch (e) {
+      // Handle any errors that might occur during the fetch
+      print("Error fetching stops: $e");
+    }
   }
 
   // Initialising State
@@ -89,6 +157,19 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
     widget.arguments.transport.location = newLocation;
   }
 
+  void _onTransportTypeChanged(String newTransportType) {
+    setState(() {
+      widget.arguments.transportType = newTransportType;
+    });
+    _fetchStopsForTransportType();
+  }
+
+  Future<void> _fetchStopsForTransportType() async {
+    if (currentPosition != null) {
+      await fetchStops(currentPosition!);
+    }
+  }
+
   // Rendering
   @override
   Widget build(BuildContext context) {
@@ -114,6 +195,16 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
             markers: markers,
           ),
         ),
+        if (_hasDroppedPin)
+          DraggableScrollableSheetWidget(
+              scrollController: ScrollController(),
+              locationController: _locationController,
+              routes: _routes,
+              stops: _stops,
+              arguments: widget.arguments,
+              onTransportTypeChanged: _onTransportTypeChanged, // Pass callback here
+          ),
+
         Positioned(
           top: 40,
           left: 15,
@@ -184,81 +275,6 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
               ],
             ),
           ),
-        ),
-        DraggableScrollableSheet(
-          initialChildSize: 0.3,
-          minChildSize: 0.2,
-          maxChildSize: 0.85,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      red: 0,
-                      green: 0,
-                      blue: 0,
-                      alpha: 0.1,
-                    ),
-                    spreadRadius: 1,
-                    blurRadius: 7,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Container(
-                      height: 5,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(16.0),
-                    controller: scrollController,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.location_pin, size: 16),
-                            SizedBox(width: 3),
-                            Flexible(
-                              // child: Text(
-                              //   "Address",
-                              //   style: TextStyle(fontSize: 16),
-                              //   overflow: TextOverflow.ellipsis,
-                              //   maxLines: 1,
-                              // ),
-                              child: TextField(
-                                controller: _locationController,
-                                readOnly: true,
-                                style: TextStyle(fontSize: 16),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "Address",
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        ToggleButtonsRow(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
         ),
       ]),
     );

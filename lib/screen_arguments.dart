@@ -6,6 +6,7 @@ import 'package:flutter_project/transport.dart';
 class ScreenArguments {
   Transport transport;    // data for new Transport option
   VoidCallback callback;  // function to be called from child screen
+  String transportType;
 
-  ScreenArguments(this.transport, this.callback);
+  ScreenArguments(this.transport, this.callback, this.transportType);
 }

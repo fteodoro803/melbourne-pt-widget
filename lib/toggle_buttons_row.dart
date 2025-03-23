@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/screen_arguments.dart';
 
 class ToggleButtonsRow extends StatefulWidget {
+
+  // Constructor
+  const ToggleButtonsRow({super.key, required this.arguments, required this.onTransportTypeChanged});
+
+  final ScreenArguments arguments;
+  final Function(String) onTransportTypeChanged; // Callback for parent widget
+
   @override
   _ToggleButtonsRowState createState() => _ToggleButtonsRowState();
 }
@@ -22,6 +30,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
         ElevatedButton(
           onPressed: () {
             setState(() {
+              print("All selected");
               isAllSelected = !isAllSelected; // Toggle state
               if (isAllSelected) {
                 isTramSelected = false;
@@ -30,6 +39,8 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
+            widget.arguments.transportType = "all";
+            widget.onTransportTypeChanged("all");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 14),
@@ -46,6 +57,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
         ElevatedButton(
           onPressed: () {
             setState(() {
+              print("Tram selected");
               isTramSelected = !isTramSelected; // Toggle state
               if (isTramSelected) {
                 isAllSelected = false;
@@ -54,6 +66,8 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
+            widget.arguments.transportType = "1";
+            widget.onTransportTypeChanged("1");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isTramSelected ? Colors.grey : Color(0xFFD6D6D6), // Remove internal padding
@@ -74,6 +88,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
         ElevatedButton(
           onPressed: () {
             setState(() {
+              print("Train selected");
               isTrainSelected = !isTrainSelected; // Toggle state
               if (isTrainSelected) {
                 isTramSelected = false;
@@ -82,6 +97,8 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
+            widget.arguments.transportType = "0";
+            widget.onTransportTypeChanged("0");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isTrainSelected ? Colors.grey : Color(0xFFD6D6D6),
@@ -102,6 +119,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
         ElevatedButton(
           onPressed: () {
             setState(() {
+              print("Bus selected");
               isBusSelected = !isBusSelected; // Toggle state
               if (isBusSelected) {
                 isTramSelected = false;
@@ -110,6 +128,8 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
+            widget.arguments.transportType = "2";
+            widget.onTransportTypeChanged("2");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isBusSelected ? Colors.grey : Color(0xFFD6D6D6),
@@ -130,6 +150,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
         ElevatedButton(
           onPressed: () {
             setState(() {
+              print("VLine selected");
               isVLineSelected = !isVLineSelected; // Toggle state
               if (isVLineSelected) {
                 isTramSelected = false;
@@ -138,6 +159,8 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
+            widget.arguments.transportType = "3";
+            widget.onTransportTypeChanged("3");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isVLineSelected ? Colors.grey : Color(0xFFD6D6D6),

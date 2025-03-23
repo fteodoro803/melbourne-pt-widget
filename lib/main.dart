@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _updateMainPage();
 
     // Set up a timer to update the transport list every 30 seconds
-    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 60), (timer) {
       print("Timer triggered");
       _updateMainPage();
     });
@@ -218,15 +218,24 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(
-                  // context,
-                  // '/selectRouteTypeScreen',
-                  // arguments: ScreenArguments(Transport(), _updateMainPage),
                   context,
-                  '/selectLocationScreen2',
-                  arguments: ScreenArguments(Transport(), _updateMainPage),
+                  // '/selectLocationScreen2',
+                  '/selectRouteTypeScreen',
+                  arguments: ScreenArguments(Transport(), _updateMainPage, "all"),
                 );
               },
               child: Text("+"),
+            ),
+            // ADD PAGE BUTTON
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  '/selectLocationScreen2',
+                  arguments: ScreenArguments(Transport(), _updateMainPage, "all"),
+                );
+              },
+              child: Text("Test+"),
             ),
 
             Divider(),
