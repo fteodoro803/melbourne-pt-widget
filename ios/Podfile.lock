@@ -1,5 +1,7 @@
 PODS:
   - Flutter (1.0.0)
+  - geocoding_ios (1.0.5):
+    - Flutter
   - Google-Maps-iOS-Utils (5.0.0):
     - GoogleMaps (~> 8.0)
   - google_maps_flutter_ios (0.0.1):
@@ -19,6 +21,7 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -31,6 +34,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  geocoding_ios:
+    :path: ".symlinks/plugins/geocoding_ios/ios"
   google_maps_flutter_ios:
     :path: ".symlinks/plugins/google_maps_flutter_ios/ios"
   home_widget:
@@ -40,6 +45,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  geocoding_ios: bcbdaa6bddd7d3129c9bcb8acddc5d8778689768
   Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
   google_maps_flutter_ios: 0291eb2aa252298a769b04d075e4a9d747ff7264
   GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d

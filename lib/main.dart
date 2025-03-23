@@ -16,6 +16,7 @@ import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
 
+import "add_screens/select_location_screen2.dart";
 import "add_screens/transport_details_screen.dart";
 import "home_widget_service.dart";
 
@@ -66,6 +67,9 @@ class _MyAppState extends State<MyApp> {
           '/selectLocationScreen': (context) => SelectLocationScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
+          '/selectLocationScreen2': (context) => SelectLocationScreen2(
+              arguments: ModalRoute.of(context)!.settings.arguments
+              as ScreenArguments),
           '/selectStopScreen': (context) => SelectStopScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
@@ -214,8 +218,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(
+                  // context,
+                  // '/selectRouteTypeScreen',
+                  // arguments: ScreenArguments(Transport(), _updateMainPage),
                   context,
-                  '/selectRouteTypeScreen',
+                  '/selectLocationScreen2',
                   arguments: ScreenArguments(Transport(), _updateMainPage),
                 );
               },

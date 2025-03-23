@@ -28,24 +28,23 @@ class CustomListTile extends StatelessWidget {
     final String routeColour = transport.route?.colour ?? "Null RouteColour";
     final String routeTextColour = transport.route?.textColour ?? "Null RouteTextColour";
 
-    String departure1;
-
-    DepartureStatus departure1Status = TransportUtils.getDepartureStatus(
-      transport.departures?[0].estimatedDepartureTime,
-      transport.departures?[0].scheduledDepartureTime,
-    );
+    DepartureStatus departure1Status;
 
     String minutesUntilNextDepartureText;
 
     // Gets the first departure information
     if (transport.departures != null) {
-      departure1 = transport.departures?[0].estimatedDepartureTime ?? transport.departures?[0].scheduledDepartureTime ?? "Null 1st Departure";
+      departure1Status = TransportUtils.getDepartureStatus(
+        transport.departures?[0].estimatedDepartureTime,
+        transport.departures?[0].scheduledDepartureTime,
+      );
+      String departure1 = transport.departures?[0].estimatedDepartureTime ?? transport.departures?[0].scheduledDepartureTime ?? "Null 1st Departure";
 
       minutesUntilNextDepartureText = TimeUtils.minutesToString(TimeUtils.timeDifference(departure1));
     }
     else {
-      departure1 = "No Data";
       minutesUntilNextDepartureText = "";
+      departure1Status = DepartureStatus("Scheduled", null);
     }
 
   // Enables the Widget to be Deleted/Dismissed by Swiping
