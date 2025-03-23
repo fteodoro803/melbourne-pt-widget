@@ -1,11 +1,11 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
-import "package:flutter_project/add_screens/confirmation_screen.dart";
-import "package:flutter_project/add_screens/select_location_screen.dart";
-import "package:flutter_project/add_screens/select_direction_screen.dart";
-import "package:flutter_project/add_screens/select_route_type_screen.dart";
-import "package:flutter_project/add_screens/select_stop_screen.dart";
+import "package:flutter_project/add_screens_old/confirmation_screen.dart";
+import "package:flutter_project/add_screens_old/select_location_screen.dart";
+import "package:flutter_project/add_screens_old/select_direction_screen.dart";
+import "package:flutter_project/add_screens_old/select_route_type_screen.dart";
+import "package:flutter_project/add_screens_old/select_stop_screen.dart";
 import "package:flutter_project/custom_list_tile.dart";
 import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
@@ -15,8 +15,9 @@ import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
+import "package:google_maps_flutter/google_maps_flutter.dart";
 
-import "add_screens/select_location_screen2.dart";
+import "add_screens/search_screen.dart";
 import "add_screens/transport_details_screen.dart";
 import "home_widget_service.dart";
 
@@ -221,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   context,
                   // '/selectLocationScreen2',
                   '/selectRouteTypeScreen',
-                  arguments: ScreenArguments(Transport(), _updateMainPage, "all"),
+                  arguments: ScreenArguments(Transport(), _updateMainPage, "all", LatLng(-37.813812122509205, 144.96358311072478)),
                 );
               },
               child: Text("+"),
@@ -232,7 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushNamed(
                   context,
                   '/selectLocationScreen2',
-                  arguments: ScreenArguments(Transport(), _updateMainPage, "all"),
+                  arguments: ScreenArguments(Transport(), _updateMainPage, "all", LatLng(-37.813812122509205, 144.96358311072478)),
                 );
               },
               child: Text("Test+"),

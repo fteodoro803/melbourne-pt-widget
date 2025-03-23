@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../departure_service.dart';
+import '../departures_list.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../time_utils.dart';
 import '../transport.dart';
@@ -231,67 +232,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                       ),
                     ),
 
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        padding: const EdgeInsets.only(
-                          top: 0.0,
-                          right: 16.0,
-                          bottom: 0.0,
-                          left: 16.0,
-                        ),
-                        itemCount: transport.departures!.length > 50 ? 50 : transport.departures!.length,
-                        itemBuilder: (context, index) {
-                          final departure = transport.departures?[index];
-                          final String departureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
-                          final DepartureStatus status = TransportUtils.getDepartureStatus(
-                            departure?.estimatedDepartureTime,
-                            departure?.scheduledDepartureTime,
-                          );
-                          final bool hasLowFloor = departure?.hasLowFloor ?? false;
-                          String minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
-
-                          return ListTile(
-                            title: Text("${transport.direction?.name}"),
-                            subtitle: Row(
-                              children: [
-                                Text(
-                                  "${status.status} ",
-                                  style: TextStyle(
-                                    color: TransportUtils.getColorForStatus(status.status),
-                                  ),
-                                ),
-                                Text(
-                                  status.timeDifference != null ? "${status.timeDifference} min • $departureTime" : "• $departureTime",
-                                  style: TextStyle(
-                                    color: TransportUtils.getColorForStatus(status.status),
-                                  ),
-                                ),
-                                if (hasLowFloor) ...[
-                                  SizedBox(width: 4),
-                                  Image.asset(
-                                    "assets/icons/Low Floor Icon.png",
-                                    width: 14,
-                                    height: 14,
-                                  ),
-                                ],
-                              ],
-                            ),
-                            trailing:
-                            Text(
-                              minutesUntilNextDepartureString,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: TransportUtils.getColorForStatus(status.status),
-                              ),
-                            ),
-                            onTap: () {
-                              print("Tapped on departure at $departureTime");
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                    DeparturesList(scrollController: scrollController, departuresLength: 30, transport: transport),
                   ],
                 ),
               );

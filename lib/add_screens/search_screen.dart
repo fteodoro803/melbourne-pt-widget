@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/stop_directions.dart';
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
@@ -8,8 +9,11 @@ import 'package:flutter_project/draggable_scrollable_sheet_widget.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 
 import '../ptv_api_service.dart';
+import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/route_info.dart' as PTRoute;
+import '../ptv_info_classes/route_type_info.dart';
 import '../ptv_info_classes/stop_info.dart';
+import 'nearby_stops.dart';
 
 class SelectLocationScreen2 extends StatefulWidget {
   const SelectLocationScreen2({super.key, required this.arguments});
@@ -28,6 +32,12 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
 
   final List<Stop> _stops = [];
   final List<PTRoute.Route> _routes = [];
+  final List<RouteDirection> _directions = [];
+  final List<RouteType> _routeTypes = [];
+
+  bool _isStopDirectionsVisible = false;
+  Stop? _selectedStop;
+  PTRoute.Route? _selectedRoute;
 
   DevTools tools = DevTools();
 
@@ -74,6 +84,50 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
       print("Error getting address: $e");
     }
     return "Address not found"; // Return a default message if something goes wrong
+  }
+
+  // Handling tap on an item in NearbyStopsSheet
+  void _onStopTapped(Stop stop, PTRoute.Route route) {
+    setState(() {
+      _selectedStop = stop;
+      _selectedRoute = route;
+      _isStopDirectionsVisible = true;  // Switch to StopDirectionsSheet
+      fetchRouteDirections();
+    });
+  }
+
+  // Initialising State
+  @override
+  void initState() {
+    super.initState();
+
+    // Debug Printing
+    tools.printScreenState(_screenName, widget.arguments);
+  }
+
+  void setLocation() {
+    Location newLocation = Location(location: _locationController.text);
+
+    // Normalize the location input by removing spaces
+    newLocation.location = newLocation.location.replaceAll(' ', '');
+
+    widget.arguments.transport.location = newLocation;
+  }
+
+  void setMapLocation() {
+    String? latitude = currentPosition?.latitude.toString();
+    String? longitude = currentPosition?.longitude.toString();
+    String? location = "$latitude,$longitude";
+
+    Location newLocation = Location(location: location);
+    widget.arguments.transport.location = newLocation;
+  }
+
+  void _onTransportTypeChanged(String newTransportType) {
+    setState(() {
+      widget.arguments.transportType = newTransportType;
+    });
+    _fetchStopsForTransportType();
   }
 
   Future<void> fetchStops(LatLng position) async {
@@ -131,44 +185,64 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
     }
   }
 
-  // Initialising State
-  @override
-  void initState() {
-    super.initState();
+  void fetchRouteDirections() async {
+    String? routeId =
+        _selectedRoute?.id;
 
-    // Debug Printing
-    tools.printScreenState(_screenName, widget.arguments);
-  }
+    // Fetching Data and converting to JSON
+    ApiData data = await PtvApiService().routeDirections(routeId!);
+    Map<String, dynamic>? jsonResponse = data.response;
 
-  void setLocation() {
-    Location newLocation = Location(location: _locationController.text);
+    // Early Exit
+    if (data.response == null) {
+      print("NULL DATA RESPONSE --> Improper Location Data");
+      return;
+    }
 
-    // Normalize the location input by removing spaces
-    newLocation.location = newLocation.location.replaceAll(' ', '');
+    // Populating Stops List
+    for (var direction in jsonResponse!["directions"]) {
+      // if (direction["route_id"] != widget.userSelections.stop?.route.id) {continue;}
 
-    widget.arguments.transport.location = newLocation;
-  }
+      String id = direction["direction_id"].toString();
+      String name = direction["direction_name"];
+      String description = direction["route_direction_description"];
+      RouteDirection newDirection =
+      RouteDirection(id: id, name: name, description: description);
 
-  void setMapLocation() {
-    String? latitude = currentPosition?.latitude.toString();
-    String? longitude = currentPosition?.longitude.toString();
-    String? location = "$latitude,$longitude";
+      _directions.add(newDirection);
+    }
 
-    Location newLocation = Location(location: location);
-    widget.arguments.transport.location = newLocation;
-  }
-
-  void _onTransportTypeChanged(String newTransportType) {
-    setState(() {
-      widget.arguments.transportType = newTransportType;
-    });
-    _fetchStopsForTransportType();
+    setState(() {});
   }
 
   Future<void> _fetchStopsForTransportType() async {
     if (currentPosition != null) {
       await fetchStops(currentPosition!);
     }
+  }
+
+  // Fetches Routes and generates Map/Dictionary of PT Options               // I dont like how this logic is in the same file as the frontend rendering, find a way to split this
+  Future<void> fetchRouteTypes() async {
+    // Fetching Data and converting to JSON
+    ApiData data = await PtvApiService().routeTypes();
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Early Exit     // Make it display on screen if there is no data
+    if (data.response == null) {
+      print("NULL DATA RESPONSE --> Improper Location Data");
+      return;
+    }
+
+    // Populating RouteTypes List                                                         // add case for if 0
+    for (var entry in jsonResponse!["route_types"]) {
+      String name = entry["route_type_name"];
+      String type = entry["route_type"].toString();
+      RouteType newRouteType = RouteType(name: name, type: type);
+
+      _routeTypes.add(newRouteType);
+    }
+
+    setState(() {});
   }
 
   // Rendering
@@ -187,9 +261,12 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
             },
             onMapCreated: _onMapCreated,
             onLongPress: (LatLng position) {
-              setState(() {
-                setMarker(position); // Drop marker on long press
-              });
+              if (!_isStopDirectionsVisible) {  // Only create marker if StopDirectionsSheet is not visible
+                setState(() {
+                  setMarker(position);  // Drop marker on long press
+                });
+                widget.arguments.markerPosition = position; // Store the marker position
+              }
             },
             initialCameraPosition: CameraPosition(
                 target: _initialPosition, zoom: 15), // No initial marker
@@ -198,12 +275,24 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
         ),
         if (_hasDroppedPin)
           DraggableScrollableSheetWidget(
+            scrollController: ScrollController(),
+            child: _isStopDirectionsVisible
+                ? StopDirectionsSheet(
+              scrollController: ScrollController(),
+              route: _selectedRoute!,
+              stop: _selectedStop!,
+              directions: _directions,
+              arguments: widget.arguments,
+            )
+                : NearbyStopsSheet(
               scrollController: ScrollController(),
               locationController: _locationController,
-              routes: _routes,
-              stops: _stops,
               arguments: widget.arguments,
-              onTransportTypeChanged: _onTransportTypeChanged, // Pass callback here
+              stops: _stops,
+              routes: _routes,
+              onTransportTypeChanged: _onTransportTypeChanged,
+              onStopTapped: _onStopTapped,
+            ),
           ),
 
         Positioned(
@@ -216,7 +305,15 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    // If we're on the StopDirectionsSheet, go back to NearbyStopsSheet
+                    if (_isStopDirectionsVisible) {
+                      setState(() {
+                        _isStopDirectionsVisible = false;  // Go back to NearbyStopsSheet
+                      });
+                    } else {
+                      // Default back navigation behavior if not on StopDirectionsSheet
+                      Navigator.pop(context);
+                    }
                   },
                   child: Container(
                     padding: EdgeInsets.all(10),
@@ -239,40 +336,43 @@ class _SelectLocationScreen2State extends State<SelectLocationScreen2> {
                   ),
                 ),
 
-                SizedBox(width: 10),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: SearchAnchor(
-                    builder: (BuildContext context, SearchController controller) {
-                      return SearchBar(
-                        controller: controller,
-                        padding: const WidgetStatePropertyAll<EdgeInsets>(
-                          EdgeInsets.symmetric(horizontal: 16.0),
-                        ),
-                        onTap: () {
-                          controller.openView();
-                        },
-                        onChanged: (_) {
-                          controller.openView();
-                        },
-                        leading: const Icon(Icons.search),
-                      );
-                    },
-                    suggestionsBuilder: (BuildContext context, SearchController controller) {
-                      return List<ListTile>.generate(5, (int index) {
-                        final String item = 'item $index';
-                        return ListTile(
-                          title: Text(item),
+                // Conditionally hide the search bar if `_isStopDirectionsVisible` is true
+                if (!_isStopDirectionsVisible) ...[
+                  SizedBox(width: 10),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: SearchAnchor(
+                      builder: (BuildContext context, SearchController controller) {
+                        return SearchBar(
+                          controller: controller,
+                          padding: const WidgetStatePropertyAll<EdgeInsets>(
+                            EdgeInsets.symmetric(horizontal: 16.0),
+                          ),
                           onTap: () {
-                            setState(() {
-                              controller.closeView(item);
-                            });
+                            controller.openView();
                           },
+                          onChanged: (_) {
+                            controller.openView();
+                          },
+                          leading: const Icon(Icons.search),
                         );
-                      });
-                    },
+                      },
+                      suggestionsBuilder: (BuildContext context, SearchController controller) {
+                        return List<ListTile>.generate(5, (int index) {
+                          final String item = 'item $index';
+                          return ListTile(
+                            title: Text(item),
+                            onTap: () {
+                              setState(() {
+                                controller.closeView(item);
+                              });
+                            },
+                          );
+                        });
+                      },
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

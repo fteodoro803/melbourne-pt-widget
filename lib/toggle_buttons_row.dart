@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
 class ToggleButtonsRow extends StatefulWidget {
@@ -161,6 +162,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
             });
             widget.arguments.transportType = "3";
             widget.onTransportTypeChanged("3");
+            widget.arguments.transport.routeType = "3" as RouteType?;
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isVLineSelected ? Colors.grey : Color(0xFFD6D6D6),
