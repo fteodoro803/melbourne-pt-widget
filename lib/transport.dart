@@ -23,6 +23,13 @@ class Transport {
 
   // Constructor
   Transport();    // Empty Transport
+
+  Transport.withStopRoute(Stop stop, Route route, RouteDirection direction) {
+    this.stop;
+    this.route;
+    this.direction;
+  }
+
   Transport.withAttributes(RouteType? routeType, Location? location, Stop? stop, Route? route, RouteDirection? direction) {
     this.routeType = routeType;
     this.location = location;
@@ -66,6 +73,7 @@ class Transport {
     }
   }
 
+  // DELETE LATER ITS BEING USED IN OLD SCREENS
   Future<List<Transport>> splitByDirection() async {
 
     // Get the two directions a route can go, and set each new transport to one of them

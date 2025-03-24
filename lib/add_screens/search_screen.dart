@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
+import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../api_data.dart';
+import '../ptv_api_service.dart';
+import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import 'nearby_stops_sheet.dart';
 
@@ -99,6 +103,44 @@ class _SearchScreenState extends State<SearchScreen> {
     // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.DIRECTIONS
   }
 
+  Future<List<Transport>> splitDirection(Stop stop, PTRoute.Route route) async {
+    String? routeId = route.id;
+    List<RouteDirection> directions = [];
+    List<Transport> transportList = [];
+
+    // Fetching Data and converting to JSON
+    ApiData data = await PtvApiService().routeDirections(routeId);
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Early Exit
+    if (data.response == null) {
+      print(
+          "( search_screen.dart -> splitDirection ) -- Null Data response Improper Data");
+      return [];
+    }
+
+    // Populating Stops List
+    for (var direction in jsonResponse!["directions"]) {
+      String id = direction["direction_id"].toString();
+      String name = direction["direction_name"];
+      String description = direction["route_direction_description"];
+      RouteDirection newDirection =
+      RouteDirection(id: id, name: name, description: description);
+
+      directions.add(newDirection);
+    }
+
+    print("( search_screen.dart -> splitDirection ) -- Direction");
+
+    // New Transports
+    Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
+    transportList.add(transport1);
+    Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
+    transportList.add(transport2);
+
+    return transportList;
+  }
+
   // Handling choosing a new transport type in ToggleButtonsRow
   void _onTransportTypeChanged(String newTransportType) {
     setState(() {
@@ -114,6 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
     // DONE!!!!
     //    Future<StopRouteLists> fetchStopRoutePairs(LatLng location, {String routeTypes = "all", int maxResults = 3, int maxDistance = 300})
     //    in ptv_service.dart; there is an example in select_stop_screen.dart
+
   }
 
   // Rendering
