@@ -5,20 +5,20 @@ import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 
 class DepartureService {
-  Future<List<Departure>> fetchDepartures(String routeType, String stopId,
-      String directionId, String routeId,
-      {String maxResults = "20", String expands = "All"}) async {
+  Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId,
+      {String? directionId, String maxResults = "3", String expands = "All"}) async {
     List<Departure> departures = [];
 
     // Fetches departure data via PTV API
     ApiData data = await PtvApiService().departures(
-        routeType, stopId, directionId: directionId,
+        routeType, stopId,
+        directionId: directionId,
         routeId: routeId,
         maxResults: maxResults,
         expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 
-    // print(" ( departure_service.dart -> fetchDepartures() ) -- fetched departures response: ${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
+    // print(" ( departure_service.dart -> fetchDepartures() ) -- fetched departures response for routeType=$routeType, directionId=$directionId, routeId=$routeId: ${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
 
     // Empty JSON Response
     if (jsonResponse == null) {

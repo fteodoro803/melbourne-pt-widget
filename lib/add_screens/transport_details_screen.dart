@@ -74,7 +74,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
     // Gets Departures and saves to instance
     DepartureService departureService = DepartureService();
     List<Departure>? updatedDepartures = await departureService.fetchDepartures(
-        routeType, stopId, directionId, routeId
+        routeType, stopId, routeId, directionId: directionId
     );
 
     setState(() {
