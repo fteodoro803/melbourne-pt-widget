@@ -11,9 +11,9 @@ import '../ptv_info_classes/stop_info.dart';
 import 'nearby_stops_sheet.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key, required this.arguments});
 
   final ScreenArguments arguments;
+  const SearchScreen({super.key, required this.arguments});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -143,18 +143,18 @@ class _SearchScreenState extends State<SearchScreen> {
 
         // Create DraggableScrollableSheet with nearby stop information if user has dropped pin
         if (_hasDroppedPin)
-          DraggableScrollableSheetWidget(
-            // If user has selected a stop, show the stop details screen
-            child: _isStopSelected
-                ? StopDetailsSheet(arguments: widget.arguments)
 
-            // Otherwise, show nearby stops sheet
-                : NearbyStopsSheet(
+          // Show all nearby stops to dropped pin of a given transport type
+          if (!_isStopSelected)
+            NearbyStopsSheet(
               arguments: widget.arguments,
               onTransportTypeChanged: _onTransportTypeChanged,
               onStopTapped: _onStopTapped,
             ),
-          ),
+
+        // If user has selected a stop, show the stop details screen instead
+        if (_isStopSelected)
+            StopDetailsSheet(arguments: widget.arguments),
 
         // Back button and search bar
         Positioned(
