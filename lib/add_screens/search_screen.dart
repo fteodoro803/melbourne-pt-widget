@@ -3,12 +3,12 @@ import 'package:flutter_project/add_screens/stop_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_project/widgets/draggable_scrollable_sheet_widget.dart';
-import 'package:geocoding/geocoding.dart' as geocoding;
-
-import '../ptv_info_classes/route_info.dart' as PTRoute;
 import '../ptv_info_classes/stop_info.dart';
 import 'nearby_stops_sheet.dart';
+
+import 'package:geocoding/geocoding.dart' as geocoding;
+import '../ptv_info_classes/route_info.dart' as PTRoute;
+
 
 class SearchScreen extends StatefulWidget {
 
@@ -224,6 +224,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             controller.openView();
                           },
                           leading: const Icon(Icons.search),
+                          hintText: "Search here",
                         );
                       },
                       // Renders list of suggestions

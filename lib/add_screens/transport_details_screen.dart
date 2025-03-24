@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../widgets/departures_list.dart';
 import '../ptv_service.dart';
-import '../departures_list.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../time_utils.dart';
 import '../transport.dart';
@@ -47,7 +47,29 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
     _timer = Timer.periodic(Duration(seconds: 30), (timer) {
       updateDepartures();
     });
+
+    // Load the route polyline
+    // _loadRoutePolyline();
   }
+
+  // Function to load the route polyline
+  // void _loadRoutePolyline() {
+  //   // Example list of coordinates representing the route
+  //   List<LatLng> routeCoordinates = [
+  //     LatLng(-37.813612, 144.963058),
+  //     LatLng(-37.814612, 144.964058),
+  //     LatLng(-37.815612, 144.965058),
+  //   ];
+  //
+  //   setState(() {
+  //     _polylines.add(Polyline(
+  //       polylineId: PolylineId('route_polyline'),
+  //       color: Colors.blue,
+  //       width: 5,
+  //       points: routeCoordinates,
+  //     ));
+  //   });
+  // }
 
   void _addMarker() {
     setState(() {
@@ -105,6 +127,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
               markers: _markers,
+              // polylines: _polylines,
             ),
           ),
 
@@ -213,7 +236,11 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  transport.route?.number ?? "No Data",
+                                  // transport.route?.number ?? "No Data",
+                                  transport.routeType?.name == "Train" ||
+                                      transport.routeType?.name == "VLine"
+                                      ? transport.direction?.name ?? "No Data"
+                                      : transport.route?.number ?? "No Data",
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -231,7 +258,6 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                         ],
                       ),
                     ),
-
                     DeparturesList(departuresLength: 30, transport: transport),
                   ],
                 ),

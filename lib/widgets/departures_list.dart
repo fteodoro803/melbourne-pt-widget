@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
-import '../time_utils.dart';
+import '../../time_utils.dart';
 
 // Widget for the Address input section with transport type toggle
 class DeparturesList extends StatelessWidget {
@@ -35,42 +35,45 @@ class DeparturesList extends StatelessWidget {
           final bool hasLowFloor = departure?.hasLowFloor ?? false;
           String minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
 
-          return ListTile(
-            title: Text("${transport.direction?.name}"),
-            subtitle: Row(
-              children: [
-                Text(
-                  "${status.status} ",
-                  style: TextStyle(
-                    color: TransportUtils.getColorForStatus(status.status),
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 2.0),
+            elevation: 1,
+            child: ListTile(
+              title: Text("${transport.direction?.name}"),
+              subtitle: Row(
+                children: [
+                  Text(
+                    "${status.status} ",
+                    style: TextStyle(
+                      color: TransportUtils.getColorForStatus(status.status),
+                    ),
                   ),
-                ),
-                Text(
-                  status.timeDifference != null ? "${status.timeDifference} min • $departureTime" : "• $departureTime",
-                  style: TextStyle(
-                    color: TransportUtils.getColorForStatus(status.status),
+                  Text(
+                    status.timeDifference != null ? "${status.timeDifference} min • $departureTime" : "• $departureTime",
+                    style: TextStyle(
+                      color: TransportUtils.getColorForStatus(status.status),
+                    ),
                   ),
-                ),
-                if (hasLowFloor) ...[
-                  SizedBox(width: 4),
-                  Image.asset(
-                    "assets/icons/Low Floor Icon.png",
-                    width: 14,
-                    height: 14,
-                  ),
+                  if (hasLowFloor) ...[
+                    SizedBox(width: 4),
+                    Image.asset(
+                      "assets/icons/Low Floor Icon.png",
+                      width: 14,
+                      height: 14,
+                    ),
+                  ],
                 ],
-              ],
-            ),
-            trailing:
-            Text(
-              minutesUntilNextDepartureString,
-              style: TextStyle(
-                fontSize: 15,
-                color: TransportUtils.getColorForStatus(status.status),
               ),
+              trailing:
+                Text(
+                  minutesUntilNextDepartureString,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: TransportUtils.getColorForStatus(status.status),
+                  ),
+                ),
+                onTap: () {},
             ),
-            onTap: () {
-            },
           );
         },
       ),

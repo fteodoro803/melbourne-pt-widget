@@ -11,7 +11,7 @@ class ToggleButtonsRow extends StatefulWidget {
 
 class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
   // Track the selected state of each button
-  bool isAllSelected = false;
+  bool isAllSelected = true;
   bool isTramSelected = false;
   bool isTrainSelected = false;
   bool isBusSelected = false;

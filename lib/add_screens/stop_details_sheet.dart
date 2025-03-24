@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
+import '../widgets/departures_list.dart';
 
-import '../departures_list.dart';
-
-// Widget for the Address input section with transport type toggle
 class StopDetailsSheet extends StatefulWidget {
 
   final ScreenArguments arguments;
@@ -106,20 +104,17 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                       ],
                     ),
                     Divider(),
+
+                    Text("Towards ${widget.arguments.searchDetails.directions[0].route?.direction}"),
+
+                    DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
+
+                    Text("Towards ${widget.arguments.searchDetails.directions[1].route?.direction}"),
+
+                    DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
                   ],
                 ),
               ),
-
-              // First 2 departures for each direction
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Towards ${widget.arguments.searchDetails.directions[0].route?.direction}"),
-                    DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
-                    Text("Towards ${widget.arguments.searchDetails.directions[1].route?.direction}"),
-                    DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
-                  ]
-              )
             ],
           ),
         );

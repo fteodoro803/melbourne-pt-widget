@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/toggle_buttons_row.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../ptv_info_classes/route_info.dart' as PTRoute;
 
@@ -22,6 +24,17 @@ class NearbyStopsSheet extends StatefulWidget {
 }
 
 class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
+
+  double calculateDistance(LatLng from, LatLng to) {
+    // Using geolocator to calculate the distance in meters
+    double distanceInMeters = Geolocator.distanceBetween(
+      from.latitude, from.longitude,
+      to.latitude, to.longitude,
+    );
+
+    return distanceInMeters;
+  }
+
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -77,7 +90,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                           child: TextField(
                             controller: widget.arguments.searchDetails.locationController,
                             readOnly: true,
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 18),
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: "Address",
@@ -114,6 +127,9 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
                     final stopName = widget.arguments.searchDetails.stops[index].name;
                     final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
+                    final distanceInMeters = calculateDistance(widget.arguments.searchDetails.markerPosition!,
+                        LatLng(widget.arguments.searchDetails.stop?.latitude as double,
+                            widget.arguments.searchDetails.stop?.longitude as double));
 
                     return ListTile(
                       title: Column(
@@ -149,7 +165,10 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  routeNumber,
+                                  widget.arguments.searchDetails.transportType == "Train" ||
+                                      widget.arguments.searchDetails.transportType == "VLine"
+                                      ? ""
+                                      : routeNumber,
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -159,6 +178,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                               ),
                             ],
                           ),
+                          Text("${distanceInMeters}m")
                         ],
                       ),
 
