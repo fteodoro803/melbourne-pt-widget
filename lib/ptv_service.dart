@@ -4,7 +4,7 @@ import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 
-class DepartureService {
+class PtvService {
   Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId,
       {String? directionId, String maxResults = "3", String expands = "All"}) async {
     List<Departure> departures = [];
@@ -18,7 +18,7 @@ class DepartureService {
         expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 
-    // print(" ( departure_service.dart -> fetchDepartures() ) -- fetched departures response for routeType=$routeType, directionId=$directionId, routeId=$routeId: ${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
+    // print(" ( ptv_service.dart -> fetchDepartures() ) -- fetched departures response for routeType=$routeType, directionId=$directionId, routeId=$routeId: ${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
 
     // Empty JSON Response
     if (jsonResponse == null) {
@@ -41,11 +41,11 @@ class DepartureService {
       // Get Vehicle descriptors per Departure
       var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"];    // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
       if (vehicleDescriptors != null && vehicleDescriptors.toString().isNotEmpty) {
-        // print("( departure_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
+        // print("( ptv_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
 
         newDeparture.hasLowFloor = vehicleDescriptors["low_floor"];
       }
-      else { print("( departure_service.dart -> fetchDepartures() ) -- runs for runId $runId is empty )");}
+      else { print("( ptv_service.dart -> fetchDepartures() ) -- runs for runId $runId is empty )");}
 
       departures.add(newDeparture);
     }

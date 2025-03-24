@@ -8,7 +8,7 @@ import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'departure_service.dart';
+import 'ptv_service.dart';
 
 part 'transport.g.dart';
 
@@ -51,8 +51,8 @@ class Transport {
     }
 
     // Gets Departures and saves to instance
-    DepartureService departureService = DepartureService();
-    departures = await departureService.fetchDepartures(
+    PtvService ptvService = PtvService();
+    departures = await ptvService.fetchDepartures(
         routeType, stopId, routeId, directionId: directionId);
 
     // print("( transport.dart -> updatedDepartures() ) -- Updated Departures: \n $departures");
