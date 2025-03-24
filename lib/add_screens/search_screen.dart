@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -112,12 +113,16 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails.stop = stop;
       widget.arguments.searchDetails.route = route;
       _isStopSelected = true;  // Switch to StopDirectionsSheet
-      widget.arguments.searchDetails.directions.add(listTransport[0]);
-      widget.arguments.searchDetails.directions.add(listTransport[1]);
-      print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
-      print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
 
-      print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
+      (widget.arguments.searchDetails.directions).add(listTransport[0]);
+      (widget.arguments.searchDetails.directions).add(listTransport[1]);
+
+      // Added delay to check if data is fully updated before printing
+      Future.delayed(Duration(milliseconds: 100), () {
+        print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
+        print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
+        print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
+      });
     });
 
     // TO DO (BACKEND):

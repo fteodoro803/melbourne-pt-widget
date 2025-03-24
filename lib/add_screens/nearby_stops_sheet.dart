@@ -193,8 +193,6 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
                         onTap: () {
                           // Render stop details sheet if stop is tapped
-                          print("(nearby_stops_screen.dart -> Stops ) -- ${(widget.arguments.searchDetails.stops[index])}");
-                          print("(nearby_stops_screen.dart -> Routes ) -- ${(widget.arguments.searchDetails.routes[index])}");
                           widget.onStopTapped(widget.arguments.searchDetails.stops[index], widget.arguments.searchDetails.routes[index]);
                         },
                       ),
