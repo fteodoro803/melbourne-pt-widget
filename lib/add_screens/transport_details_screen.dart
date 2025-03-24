@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../departure_service.dart';
+import '../ptv_service.dart';
 import '../departures_list.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../time_utils.dart';
@@ -72,8 +72,8 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
     }
 
     // Gets Departures and saves to instance
-    DepartureService departureService = DepartureService();
-    List<Departure>? updatedDepartures = await departureService.fetchDepartures(
+    PtvService ptvService = PtvService();
+    List<Departure>? updatedDepartures = await ptvService.fetchDepartures(
         routeType, stopId, routeId, directionId: directionId
     );
 
