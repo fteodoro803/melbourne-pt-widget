@@ -99,7 +99,7 @@ class PtvApiService {
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
-    // print("(ptv_api_service -> stops): response: $response"); //*test
+    print("(ptv_api_service -> stops): response: $response"); //*test
     return ApiData(url, response);
   }
 

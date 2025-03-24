@@ -30,7 +30,7 @@ class Location {
   @override
   String toString() {
     return "Location: $location\t"
-        "Latitude, Longitude = $latitude, $longitude";
+        "Latitude, Longitude = $latitude, $longitude\n";
   }
 
   LatLng toLatLng() {
