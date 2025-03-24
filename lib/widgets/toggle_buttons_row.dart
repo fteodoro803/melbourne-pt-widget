@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 
 class ToggleButtonsRow extends StatefulWidget {
 
-  // Constructor
-  const ToggleButtonsRow({super.key, required this.onTransportTypeChanged});
-
   final Function(String) onTransportTypeChanged; // Callback for parent widget
+  const ToggleButtonsRow({super.key, required this.onTransportTypeChanged});
 
   @override
   _ToggleButtonsRowState createState() => _ToggleButtonsRowState();
@@ -22,9 +20,9 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start, // Align buttons to the start of the row
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        // "All" button
+        // "All transport" button
         ElevatedButton(
           onPressed: () {
             setState(() {
@@ -37,11 +35,11 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
-            widget.onTransportTypeChanged("all");
+            widget.onTransportTypeChanged("All");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            backgroundColor: isAllSelected ? Colors.grey : Color(0xFFD6D6D6), // Remove internal padding
+            backgroundColor: isAllSelected ? Colors.grey : Color(0xFFD6D6D6),
             minimumSize: Size(50, 50),
           ),
           child: Text(
@@ -49,7 +47,8 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
             style: TextStyle(color: isAllSelected ? Colors.black : Colors.black),
           ),
         ),
-        SizedBox(width: 8), // Space between buttons
+        SizedBox(width: 8),
+
         // Tram button
         ElevatedButton(
           onPressed: () {
@@ -63,12 +62,12 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
-            widget.onTransportTypeChanged("1");
+            widget.onTransportTypeChanged("Tram");
           },
           style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.zero, backgroundColor: isTramSelected ? Colors.grey : Color(0xFFD6D6D6), // Remove internal padding
-            minimumSize: Size(50, 50), // Set the size of the button
-            shape: CircleBorder(), // Change color when selected
+            padding: EdgeInsets.zero, backgroundColor: isTramSelected ? Colors.grey : Color(0xFFD6D6D6),
+            minimumSize: Size(50, 50),
+            shape: CircleBorder(),
           ),
           child: ClipOval(
             child: Image.asset(
@@ -80,12 +79,13 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
           ),
         ),
         SizedBox(width: 8),
+
         // Train button
         ElevatedButton(
           onPressed: () {
             setState(() {
               print("Train selected");
-              isTrainSelected = !isTrainSelected; // Toggle state
+              isTrainSelected = !isTrainSelected;
               if (isTrainSelected) {
                 isTramSelected = false;
                 isBusSelected = false;
@@ -93,7 +93,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.onTransportTypeChanged("0");
+            widget.onTransportTypeChanged("Train");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isTrainSelected ? Colors.grey : Color(0xFFD6D6D6),
@@ -110,6 +110,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
           ),
         ),
         SizedBox(width: 8),
+
         // Bus button
         ElevatedButton(
           onPressed: () {
@@ -123,7 +124,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.onTransportTypeChanged("2");
+            widget.onTransportTypeChanged("Bus");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isBusSelected ? Colors.grey : Color(0xFFD6D6D6),
@@ -140,6 +141,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
           ),
         ),
         SizedBox(width: 8),
+
         // VLine button
         ElevatedButton(
           onPressed: () {
@@ -153,7 +155,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.onTransportTypeChanged("3");
+            widget.onTransportTypeChanged("VLine");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isVLineSelected ? Colors.grey : Color(0xFFD6D6D6),

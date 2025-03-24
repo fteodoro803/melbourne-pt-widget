@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 
 class DraggableScrollableSheetWidget extends StatefulWidget {
-  final Widget child;
 
-  const DraggableScrollableSheetWidget({
-    super.key,
-    required this.child,
-  });
+  final Widget child;
+  const DraggableScrollableSheetWidget({super.key, required this.child});
 
   @override
   State<DraggableScrollableSheetWidget> createState() => _DraggableScrollableSheetWidgetState();

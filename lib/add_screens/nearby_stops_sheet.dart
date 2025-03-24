@@ -5,7 +5,6 @@ import 'package:flutter_project/widgets/toggle_buttons_row.dart';
 
 import '../ptv_info_classes/route_info.dart' as PTRoute;
 
-// Widget for the Address input section with transport type toggle
 class NearbyStopsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final Function(String) onTransportTypeChanged;
@@ -25,126 +24,156 @@ class NearbyStopsSheet extends StatefulWidget {
 class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Container(
-            height: 5,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
-        SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          controller: ScrollController(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.location_pin, size: 16),
-                  SizedBox(width: 3),
-                  Flexible(
-                    child: TextField(
-                      controller: widget.arguments.searchDetails.locationController,
-                      readOnly: true,
-                      style: TextStyle(fontSize: 16),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Address",
-                      ),
-                    ),
-                  ),
-                ],
+    return DraggableScrollableSheet(
+      initialChildSize: 0.3,
+      minChildSize: 0.2,
+      maxChildSize: 0.85,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(
+                  red: 0,
+                  green: 0,
+                  blue: 0,
+                  alpha: 0.1,
+                ),
+                spreadRadius: 1,
+                blurRadius: 7,
+                offset: Offset(0, -2),
               ),
-              SizedBox(height: 4),
-              ToggleButtonsRow(
-                onTransportTypeChanged: widget
-                    .onTransportTypeChanged,
-              ),
-              Divider(),
             ],
           ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.only(
-              top: 0.0,
-              right: 16.0,
-              bottom: 0.0,
-              left: 16.0,
-            ),
-            itemCount: widget.arguments.searchDetails.stops.length,
-            itemBuilder: (context, index) {
+          child: Column(
+            children: [
+              // Draggable Scrollable Sheet Handle
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Container(
+                  height: 5,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
 
-              if (index >= widget.arguments.searchDetails.routes.length) {
-                return Container();
-              }
-
-              // Safely access data in stops and routes
-              final stopName = widget.arguments.searchDetails.stops[index].name;
-              final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
-
-              return ListTile(
-                title: Column(
+              // Address and toggleable transport type buttons
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Icon(Icons.location_pin, size: 16),
                         SizedBox(width: 3),
                         Flexible(
-                          child: Text(
-                            stopName,
+                          child: TextField(
+                            controller: widget.arguments.searchDetails.locationController,
+                            readOnly: true,
                             style: TextStyle(fontSize: 16),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Image.asset(
-                          "assets/icons/PTV Tram Logo.png",
-                          width: 40,
-                          height: 40,
-                        ),
-                        SizedBox(width: 8),
-
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            routeNumber,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Address",
                             ),
                           ),
                         ),
                       ],
                     ),
+                    SizedBox(height: 4),
+                    ToggleButtonsRow(
+                      onTransportTypeChanged: widget
+                          .onTransportTypeChanged,
+                    ),
+                    Divider(),
                   ],
                 ),
+              ),
 
-                onTap: () {
-                  // Stop rendering this information
-                  widget.onStopTapped(widget.arguments.searchDetails.stops[index], widget.arguments.searchDetails.routes[index]);
-                },
-              );
-            },
+              // List of stops
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(
+                    top: 0.0,
+                    right: 16.0,
+                    bottom: 0.0,
+                    left: 16.0,
+                  ),
+                  itemCount: widget.arguments.searchDetails.stops.length,
+                  itemBuilder: (context, index) {
+
+                    if (index >= widget.arguments.searchDetails.routes.length) {
+                      return Container();
+                    }
+
+                    final stopName = widget.arguments.searchDetails.stops[index].name;
+                    final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
+
+                    return ListTile(
+                      title: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.location_pin, size: 16),
+                              SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  stopName,
+                                  style: TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Image.asset(
+                                "assets/icons/PTV Tram Logo.png",
+                                width: 40,
+                                height: 40,
+                              ),
+                              SizedBox(width: 8),
+
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  routeNumber,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      onTap: () {
+                        // Render stop details sheet if stop is tapped
+                        widget.onStopTapped(widget.arguments.searchDetails.stops[index], widget.arguments.searchDetails.routes[index]);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
