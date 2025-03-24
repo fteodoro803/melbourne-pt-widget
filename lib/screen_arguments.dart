@@ -12,7 +12,6 @@ class SearchDetails {
   String? transportType;
   Stop? stop;
   PTRoute.Route? route;
-  String? address;
   TextEditingController locationController;
 
   List<Stop> stops;

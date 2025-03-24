@@ -65,6 +65,7 @@ class CustomListTile extends StatelessWidget {
     child: ListTile(
       trailing: Container(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (minutesUntilNextDepartureText == "Now")
               Text(
@@ -107,15 +108,16 @@ class CustomListTile extends StatelessWidget {
               children: [
                 // First line: [location_pin] [stopName]
                 Row(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    Icon(Icons.location_pin, size: 16), // Icon for location
-                    SizedBox(width: 3), // Space between icon and text
+                    Icon(Icons.location_pin, size: 16),
+                    SizedBox(width: 3),
                     Flexible(
                       child: Text(
                         transport.stop?.name ?? "No Data",
-                        style: TextStyle(fontSize: 16), // Adjust stopName font size
-                        overflow: TextOverflow.ellipsis,  // Apply ellipsis if text overflows
-                        maxLines: 1,  // Limit to 1 line
+                        style: TextStyle(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                   ],
@@ -139,7 +141,12 @@ class CustomListTile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        transport.route?.number ?? "No Data",
+                        // transport.route?.number ?? "No Data",
+                        transport.routeType?.name == "Train" ||
+                            transport.routeType?.name == "VLine"
+                            ? transport.direction?.name ?? "No Data"
+                            : transport.route?.number ?? "No Data",
+
                         style: TextStyle(
                           fontSize: 20, // Bigger text size
                           fontWeight: FontWeight.bold,
@@ -148,17 +155,24 @@ class CustomListTile extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 8),
-                    Text(
-                      transport.direction?.name ?? "No Data",
-                      style: TextStyle(fontSize: 16),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                    Flexible(
+                      child: Text(
+                        // transport.direction?.name ?? "No Data",
+                        transport.routeType?.name != "Train" &&
+                            transport.routeType?.name != "VLine"
+                            ? transport.direction?.name ?? "No Data"
+                            : "",
+                        style: TextStyle(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
                     ),
                   ],
                 ),
                 SizedBox(height: 4),
 
                 Row(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     if (transport.departures == null || transport.departures!.isEmpty)
                       Text(
@@ -188,11 +202,13 @@ class CustomListTile extends StatelessWidget {
                                     height: 14,
                                   ),
                                 ],
+                                SizedBox(width: 4),
                                 if (index < ((transport.departures!.length > 3 ? 3 : transport.departures!.length) - 1)) ...[
                                   Text(
-                                    "⎥",
+                                    "•",
                                     style: TextStyle(height: 1.1),
                                   ),
+                                  SizedBox(width: 4),
                                 ],
                               ],
                             );

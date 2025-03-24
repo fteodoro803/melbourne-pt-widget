@@ -182,6 +182,20 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  // Function to handle the reorder action
+  void onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final Transport item = _transportList.removeAt(oldIndex);
+      _transportList.insert(newIndex, item);
+    });
+
+    // Save the updated list after reordering
+    save(_transportList);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,65 +210,90 @@ class _MyHomePageState extends State<MyHomePage> {
 
             // INFORMATION TILES AS LIST
             Expanded(
-              child: ListView.builder(
-                itemCount: _transportList.length,
-                itemBuilder: (context, index) {
-                  final transport = _transportList[index];
-                  return CustomListTile(transport: transport, dismissible: true, onDismiss: () => {removeTransport(transport), _updateMainPage()},
-                  onTap: () =>
-                    // Navigate to TransportDetailsScreen with transport data
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransportDetailsScreen(transport: transport),
+              child: RefreshIndicator(
+                onRefresh: _updateMainPage,
+                child: ReorderableListView(
+                  onReorder: onReorder,
+                  children: [
+                    for (int index = 0; index < _transportList.length; index++)
+                      Card(
+                        key: ValueKey(_transportList[index].hashCode),
+                        margin: const EdgeInsets.symmetric(vertical: 1.0),
+                        elevation: 1,
+                        child: CustomListTile(
+                          transport: _transportList[index],
+                          dismissible: true,
+                          onDismiss: () => {removeTransport(_transportList[index]), _updateMainPage()},
+                          onTap: () =>
+                          // Navigate to TransportDetailsScreen with transport data
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TransportDetailsScreen(transport: _transportList[index]),
+                              ),
+                            )
+                        ),
                       ),
-                    )
-                  );
-                },
+                    ],
+                  ),
+                ),
               ),
-            ),
 
-            // ADD PAGE BUTTON
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  // '/selectLocationScreen2',
-                  '/selectRouteTypeScreen',
-                  arguments: ScreenArguments(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController())),
-                );
-              },
-              child: Text("+"),
-            ),
-            // ADD PAGE BUTTON
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  '/selectLocationScreen2',
-                  arguments: ScreenArguments(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController())),
-                );
-              },
-              child: Text("Test+"),
-            ),
 
             Divider(),
 
-            // REFRESH BUTTON
-            ElevatedButton(
-              onPressed: () {
-                _updateMainPage();
-              },
-              child: Icon(Icons.refresh),
+            // ADD PAGE BUTTON
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      // '/selectLocationScreen2',
+                      '/selectRouteTypeScreen',
+                      arguments: ScreenArguments(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController())),
+                    );
+                  },
+                  child: Text("+"),
+                ),
+                SizedBox(width: 8),
+
+                // ADD PAGE BUTTON
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/selectLocationScreen2',
+                      arguments: ScreenArguments(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController())),
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      Icon(Icons.search),
+                      // Text("Search"),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8),
+
+                // REFRESH BUTTON
+                ElevatedButton(
+                  onPressed: () {
+                    _updateMainPage();
+                  },
+                  child: Icon(Icons.refresh),
+                ),
+              ],
             ),
 
-            // TEST BUTTON
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/testScreen');
-              },
-              child: Text("TEST BUTTON"),
-            ),
+            // // TEST BUTTON
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.pushNamed(context, '/testScreen');
+            //   },
+            //   child: Text("TEST BUTTON"),
+            // ),
           ],
         ),
       ),
