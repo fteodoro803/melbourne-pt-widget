@@ -19,10 +19,11 @@ class Route {
   @override
   String toString() {
     String str = "Route:\n"
-        "\tID: $id\n"
-        "\tName: $name \n"
+        "\tID: $id\t"
+        "\tName: $name\t"
         "\tNumber: $number\n"
-        "\tColour, TextColour: $colour, $textColour\n"
+        "\tColour: $colour\t"
+        "\tTextColour: $textColour\n"
     ;
 
     if (direction != null) {

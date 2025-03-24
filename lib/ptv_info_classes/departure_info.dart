@@ -66,9 +66,9 @@ class Departure {
   @override
   String toString() {
     return "Departures:\n"
-      "\tScheduled Departure: $scheduledDeparture\n"
+      "\tScheduled Departure: $scheduledDeparture\t"
       "\tEstimated Departure: $estimatedDeparture\n"
-      "\tRun ID, Ref: $runId, $runRef\n"
+      "\tRun ID, Ref: $runId, $runRef\t"
       "\tLow Floor: $hasLowFloor\n"
     ;
   }
