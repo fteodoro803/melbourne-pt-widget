@@ -35,7 +35,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
-            widget.onTransportTypeChanged("All");
+            widget.onTransportTypeChanged("all");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 14),
@@ -62,7 +62,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
-            widget.onTransportTypeChanged("Tram");
+            widget.onTransportTypeChanged("tram");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isTramSelected ? Colors.grey : Color(0xFFD6D6D6),
@@ -93,7 +93,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.onTransportTypeChanged("Train");
+            widget.onTransportTypeChanged("train");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isTrainSelected ? Colors.grey : Color(0xFFD6D6D6),
@@ -124,7 +124,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.onTransportTypeChanged("Bus");
+            widget.onTransportTypeChanged("bus");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isBusSelected ? Colors.grey : Color(0xFFD6D6D6),
@@ -155,7 +155,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.onTransportTypeChanged("VLine");
+            widget.onTransportTypeChanged("vLine");
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isVLineSelected ? Colors.grey : Color(0xFFD6D6D6),

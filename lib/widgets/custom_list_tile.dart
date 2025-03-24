@@ -128,7 +128,7 @@ class CustomListTile extends StatelessWidget {
                 Row(
                   children: [
                     Image.asset(
-                      "assets/icons/PTV ${transport.routeType?.name} Logo.png",
+                      "assets/icons/PTV ${transport.routeType?.type.name} Logo.png",
                       width: 40,
                       height: 40,
                     ),
@@ -142,8 +142,8 @@ class CustomListTile extends StatelessWidget {
                       ),
                       child: Text(
                         // transport.route?.number ?? "No Data",
-                        transport.routeType?.name == "Train" ||
-                            transport.routeType?.name == "VLine"
+                        transport.routeType?.type.name == "train" ||
+                            transport.routeType?.type.name == "vLine"
                             ? transport.direction?.name ?? "No Data"
                             : transport.route?.number ?? "No Data",
 
@@ -158,8 +158,8 @@ class CustomListTile extends StatelessWidget {
                     Flexible(
                       child: Text(
                         // transport.direction?.name ?? "No Data",
-                        transport.routeType?.name != "Train" &&
-                            transport.routeType?.name != "VLine"
+                        transport.routeType?.type.name != "train" &&
+                            transport.routeType?.type.name != "vLine"
                             ? transport.direction?.name ?? "No Data"
                             : "",
                         style: TextStyle(fontSize: 16),

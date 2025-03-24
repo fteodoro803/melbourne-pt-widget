@@ -2,19 +2,34 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'route_type_info.g.dart';
 
+
+enum RouteTypeEnum {
+  train(0, "train"),
+  tram(1, "tram"),
+  bus(2, "bus"),
+  vLine(3, "vLine"),
+  nightBus(4, "night bus");
+
+  final int id;
+  final String name;
+
+  const RouteTypeEnum(this.id, this.name);
+}
+
 @JsonSerializable()
 class RouteType {
-  String name;      // consider changing the ? to late
-  String type;   // 0 - train, 1 - tram, etc
+  RouteTypeEnum type;
 
-  RouteType({required this.name, required this.type});
+  RouteType({required this.type});
 
   @override
   String toString() {
     return "RouteType:\n"
-        "\tType: $type\t"
-        "\tName: $name\n";
+        "\tType: ${type.id}\t"
+        "\tName: ${type.name}\n";
   }
+
+  // Convert RouteType name to type, and vice versa
 
   // Methods for JSON Serialization
   factory RouteType.fromJson(Map<String, dynamic> json) => _$RouteTypeFromJson(json);

@@ -49,10 +49,23 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
     for (var entry in jsonResponse!["route_types"]) {
       String name = entry["route_type_name"];
       String type = entry["route_type"].toString();
-      RouteType newRouteType = RouteType(name: name, type: type);
+      // RouteType newRouteType = RouteType(name: name, type: type);
 
-      _routeTypes.add(newRouteType);
-    }
+      switch (name.toLowerCase()) {
+        case "train":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.train));
+        case "tram":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.tram));
+        case "bus":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.bus));
+        case "vline":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.vLine));
+        case "night bus":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.nightBus));
+      }
+
+      print("TEST ${RouteType(type: RouteTypeEnum.tram)}");
+     }
 
     setState(() {});
   }
@@ -75,7 +88,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
         // old
         itemCount: _routeTypes.length,
         itemBuilder: (context, index) {
-          final routeTypeName = _routeTypes[index].name ?? "Unknown RouteType";
+          final routeTypeName = _routeTypes[index].type.name ?? "Unknown RouteType";
 
           return ListTile(
             title: Text(routeTypeName),

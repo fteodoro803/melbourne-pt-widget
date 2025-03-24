@@ -34,14 +34,13 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
-    testFetchStopRoutePairs(widget.arguments.transport.location!.toLatLng());
   }
 
   // Fetch Stops            -- do tests to see if not null
   Future<void> fetchStops() async {
     String? location = widget.arguments.transport.location?.location;
     print(location);
-    String? routeType = widget.arguments.transport.routeType?.type;
+    String? routeType = widget.arguments.transport.routeType?.type.id.toString();
     print(routeType);
     String? maxDistance = "300";
 
@@ -58,8 +57,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     // Populating Stops List
     for (var stop in jsonResponse!["stops"]) {
       for (var route in stop["routes"]) {
-        if (route["route_type"].toString() !=
-            widget.arguments.transport.routeType!.type) {
+        if (route["route_type"] !=
+            widget.arguments.transport.routeType!.type.id) {
           continue;
         }
 
@@ -75,7 +74,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
 
         // Gets the Colour of Route
-        newRoute.getRouteColour(widget.arguments.transport.routeType!.name);
+        newRoute.getRouteColour(widget.arguments.transport.routeType!.type.name);
 
         _stops.add(newStop);
         _routes.add(newRoute);
@@ -92,8 +91,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
   Future<void> testFetchStopRoutePairs(LatLng location) async {
     StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(location);
-    print("stopRouteLists.routes (${stopRouteLists.routes.length}) = ${stopRouteLists.routes}");
-    print("stopRouteLists.stops (${stopRouteLists.stops.length}) = ${stopRouteLists.stops}");
+    print("stopRouteLists.routes (${stopRouteLists.routes.length}) = \n${stopRouteLists.routes}");
+    print("stopRouteLists.stops (${stopRouteLists.stops.length}) = \n${stopRouteLists.stops}");
 
   }
 

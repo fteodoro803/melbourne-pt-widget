@@ -83,7 +83,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
 
   // Update Departures
   Future<void> updateDepartures() async {
-    String? routeType = transport.routeType?.type;
+    String? routeType = transport.routeType?.type.id.toString();
     String? stopId = transport.stop?.id;
     String? directionId = transport.direction?.id;
     String? routeId = transport.route?.id;
@@ -221,7 +221,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                           Row(
                             children: [
                               Image.asset(
-                                "assets/icons/PTV ${transport.routeType?.name} Logo.png",
+                                "assets/icons/PTV ${transport.routeType?.type.name} Logo.png",
                                 width: 40,
                                 height: 40,
                               ),
@@ -237,8 +237,8 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                                 ),
                                 child: Text(
                                   // transport.route?.number ?? "No Data",
-                                  transport.routeType?.name == "Train" ||
-                                      transport.routeType?.name == "VLine"
+                                  transport.routeType?.type.name == "train" ||
+                                      transport.routeType?.type.name == "vLine"
                                       ? transport.direction?.name ?? "No Data"
                                       : transport.route?.number ?? "No Data",
                                   style: TextStyle(

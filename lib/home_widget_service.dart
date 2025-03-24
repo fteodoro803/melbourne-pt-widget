@@ -57,7 +57,7 @@ class HomeWidgetService {
     return transportList.map((transport) {
       return {
         'uniqueID': transport.uniqueID ?? "No uniqueID",
-        'routeType': {'name': transport.routeType?.name ?? "No routeType"},
+        'routeType': {'name': transport.routeType?.type.name ?? "No routeType"},
         'stop': {'name': transport.stop?.name ?? "No stop"},
         'route': {
           'number': transport.route?.number ?? "No route",

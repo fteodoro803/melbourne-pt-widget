@@ -163,13 +163,15 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // New Transports
     Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
-    transport1.routeType = RouteType(name: "Tram", type: "1");
+    // transport1.routeType = RouteType(name: "Tram", type: "1");
+    transport1.routeType = RouteType(type: RouteTypeEnum.tram);
     // print("( search_screen.dart -> splitDirection ) -- Transport1: ${transport1}");
     await transport1.updateDepartures();
     transportList.add(transport1);
 
     Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
-    transport2.routeType = RouteType(name: "Tram", type: "1");
+    // transport2.routeType = RouteType(name: "Tram", type: "1");
+    transport1.routeType = RouteType(type: RouteTypeEnum.tram);
     await transport2.updateDepartures();
     // print("( search_screen.dart -> splitDirection ) -- Transport2: ${transport2}");
     transportList.add(transport2);
@@ -181,8 +183,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Handling choosing a new transport type in ToggleButtonsRow
   void _onTransportTypeChanged(String newTransportType) async {
-    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
-
+    StopRouteLists stopRouteLists;
+    if (newTransportType == "all") {
+      stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+    } else {
+      stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!, routeTypes: widget.arguments.searchDetails.transportType!);
+    }
 
     setState(() {
       widget.arguments.searchDetails.transportType = newTransportType;
