@@ -64,7 +64,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // TO DO (BACKEND):
     // INPUT: LatLng position, "all", Double range
-    // OUTPUT: List<Stop> stops -> list of all stops (regardless of transport type) within some range of marker
+    // OUTPUT: List<Stop> stops ->
+    // DESCRIPTION: list of all stops (regardless of transport type) within some range of marker
     // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.STOPS
   }
 
@@ -93,7 +94,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // TO DO (BACKEND):
     // INPUT: Stop stop, Route route
-    // OUTPUT: [Transport transport1, Transport transport2] -> Transport info for both directions for given stop and route
+    // OUTPUT: [Transport transport1, Transport transport2]:
+    // DESCRIPTION: Transports for both directions for given stop and route
     // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.DIRECTIONS
   }
 
@@ -103,10 +105,15 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails.transportType = newTransportType;
     });
 
+    // fetchStops(widget.arguments.searchDetails.markerPosition, widget.arguments.searchDetails.transportType, 300)
     // TO DO (BACKEND):
     // INPUT: LatLng position, String routeTypeName, Double range -> If routeTypeName is "all", show all stops regardless of transport type
-    // OUTPUT: List<Stop> stops -> list of stops of a given transport type within some range of marker
+    // OUTPUT: List<Stop,Routes> stopsAndRoutes ->
+    // DESCRIPTION: list of stops of a given transport type within some range of marker
     // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.STOPS
+    // DONE!!!!
+    //    Future<StopRouteLists> fetchStopRoutePairs(LatLng location, {String routeTypes = "all", int maxResults = 3, int maxDistance = 300})
+    //    in ptv_service.dart; there is an example in select_stop_screen.dart
   }
 
   // Rendering

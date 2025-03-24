@@ -3,9 +3,11 @@ import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
+import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart'
-    as PTRoute; // to avoid conflict with material's "Route"
+    as PTRoute;
+import 'package:google_maps_flutter/google_maps_flutter.dart'; // to avoid conflict with material's "Route"
 
 class SelectStopScreen extends StatefulWidget {
   const SelectStopScreen({super.key, required this.arguments});
@@ -22,6 +24,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   final List<Stop> _stops = [];
   final List<PTRoute.Route> _routes = [];
   DevTools tools = DevTools();
+  PtvService ptvService = PtvService();
 
   // Initialising State
   @override
@@ -31,6 +34,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
+    testFetchStopRoutePairs(widget.arguments.transport.location!.toLatLng());
   }
 
   // Fetch Stops            -- do tests to see if not null
@@ -84,6 +88,13 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   void setStopAndRoute(index) {
     widget.arguments.transport.stop = _stops[index];
     widget.arguments.transport.route = _routes[index];
+  }
+
+  Future<void> testFetchStopRoutePairs(LatLng location) async {
+    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(location);
+    print("stopRouteLists.routes (${stopRouteLists.routes.length}) = ${stopRouteLists.routes}");
+    print("stopRouteLists.stops (${stopRouteLists.stops.length}) = ${stopRouteLists.stops}");
+
   }
 
   @override
