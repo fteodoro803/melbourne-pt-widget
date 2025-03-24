@@ -232,7 +232,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                       ),
                     ),
 
-                    DeparturesList(scrollController: scrollController, departuresLength: 30, transport: transport),
+                    DeparturesList(departuresLength: 30, transport: transport),
                   ],
                 ),
               );

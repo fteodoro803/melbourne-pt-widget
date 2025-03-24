@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/toggle_buttons_row.dart';
+import 'package:flutter_project/widgets/toggle_buttons_row.dart';
 
-import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/route_info.dart' as PTRoute;
-import '../time_utils.dart';
 
 // Widget for the Address input section with transport type toggle
 class NearbyStopsSheet extends StatefulWidget {
-  final ScrollController scrollController;
-  final TextEditingController locationController;
-  final List<Stop> stops;
-  final List<PTRoute.Route> routes;
   final ScreenArguments arguments;
   final Function(String) onTransportTypeChanged;
   final Function(Stop, PTRoute.Route) onStopTapped;
 
   const NearbyStopsSheet({
     super.key,
-    required this.scrollController,
-    required this.locationController,
     required this.arguments,
-    required this.stops,
-    required this.routes,
     required this.onTransportTypeChanged,
     required this.onStopTapped,
   });
@@ -50,7 +40,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
         ),
         SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          controller: widget.scrollController,
+          controller: ScrollController(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -60,7 +50,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                   SizedBox(width: 3),
                   Flexible(
                     child: TextField(
-                      controller: widget.locationController,
+                      controller: widget.arguments.searchDetails.locationController,
                       readOnly: true,
                       style: TextStyle(fontSize: 16),
                       decoration: InputDecoration(
@@ -73,16 +63,10 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
               ),
               SizedBox(height: 4),
               ToggleButtonsRow(
-                arguments: widget.arguments,
                 onTransportTypeChanged: widget
-                    .onTransportTypeChanged, // Pass callback
+                    .onTransportTypeChanged,
               ),
               Divider(),
-
-              // CustomListTile(
-              //   transport: sampleTransport,  // Pass in your transport data here
-              // ),
-
             ],
           ),
         ),
@@ -94,36 +78,35 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
               bottom: 0.0,
               left: 16.0,
             ),
-            itemCount: widget.stops.length, // The length of the _stops list
+            itemCount: widget.arguments.searchDetails.stops.length,
             itemBuilder: (context, index) {
-              // Ensure the lists are of equal length
-              if (index >= widget.routes.length) {
-                return Container(); // Return an empty container if there is no route data
+
+              if (index >= widget.arguments.searchDetails.routes.length) {
+                return Container();
               }
 
               // Safely access data in stops and routes
-              final stopName = widget.stops[index].name;
-              final routeNumber = widget.routes[index].number.toString();
-              final routeName = widget.routes[index].name;
+              final stopName = widget.arguments.searchDetails.stops[index].name;
+              final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
 
               return ListTile(
                 title: Column(
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.location_pin, size: 16), // Icon for location
-                        SizedBox(width: 3), // Space between icon and text
+                        Icon(Icons.location_pin, size: 16),
+                        SizedBox(width: 3),
                         Flexible(
                           child: Text(
                             stopName,
-                            style: TextStyle(fontSize: 16), // Adjust stopName font size
-                            overflow: TextOverflow.ellipsis,  // Apply ellipsis if text overflows
-                            maxLines: 1,  // Limit to 1 line
+                            style: TextStyle(fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 4), // Space between lines
+                    SizedBox(height: 4),
                     Row(
                       children: [
                         Image.asset(
@@ -142,7 +125,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                           child: Text(
                             routeNumber,
                             style: TextStyle(
-                              fontSize: 20, // Bigger text size
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -155,9 +138,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
                 onTap: () {
                   // Stop rendering this information
-                  widget.arguments.transport.stop = widget.stops[index];
-                  widget.arguments.transport.route = widget.routes[index];
-                  widget.onStopTapped(widget.stops[index], widget.routes[index]);
+                  widget.onStopTapped(widget.arguments.searchDetails.stops[index], widget.arguments.searchDetails.routes[index]);
                 },
               );
             },

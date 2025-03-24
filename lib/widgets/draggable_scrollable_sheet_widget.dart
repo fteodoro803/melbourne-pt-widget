@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 class DraggableScrollableSheetWidget extends StatefulWidget {
-  final ScrollController scrollController;
   final Widget child;
 
   const DraggableScrollableSheetWidget({
     super.key,
-    required this.scrollController,
     required this.child,
   });
 

@@ -4,13 +4,11 @@ import '../time_utils.dart';
 
 // Widget for the Address input section with transport type toggle
 class DeparturesList extends StatelessWidget {
-  final ScrollController scrollController;
   final int departuresLength;
   final Transport transport;
 
   const DeparturesList({
     super.key,
-    required this.scrollController,
     required this.departuresLength,
     required this.transport,
   });
@@ -19,7 +17,7 @@ class DeparturesList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.builder(
-        controller: scrollController,
+        controller: ScrollController(),
         padding: const EdgeInsets.only(
           top: 0.0,
           right: 16.0,

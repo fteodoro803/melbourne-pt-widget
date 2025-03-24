@@ -1,35 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/toggle_buttons_row.dart';
 
 import '../departures_list.dart';
-import '../ptv_info_classes/route_direction_info.dart';
-import '../ptv_info_classes/route_info.dart' as PTRoute;
-import '../transport.dart';
 
 // Widget for the Address input section with transport type toggle
-class StopDirectionsSheet extends StatefulWidget {
-  final ScrollController scrollController;
-  final PTRoute.Route route;
-  final Stop stop;
-  final List<RouteDirection> directions;
+class StopDetailsSheet extends StatefulWidget {
+
   final ScreenArguments arguments;
 
-  const StopDirectionsSheet({
+  const StopDetailsSheet({
     super.key,
-    required this.scrollController,
-    required this.route,
-    required this.stop,
-    required this.directions,
     required this.arguments,
   });
 
   @override
-  State<StopDirectionsSheet> createState() => _StopDirectionsSheetState();
+  State<StopDetailsSheet> createState() => _StopDetailsSheetState();
 }
 
-class _StopDirectionsSheetState extends State<StopDirectionsSheet> {
+class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +36,7 @@ class _StopDirectionsSheetState extends State<StopDirectionsSheet> {
         ),
         SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          controller: widget.scrollController,
+          controller: ScrollController(),
           child: Column(
             children: [
               Row(
@@ -57,7 +45,7 @@ class _StopDirectionsSheetState extends State<StopDirectionsSheet> {
                   SizedBox(width: 3), // Space between icon and text
                   Flexible(
                     child: Text(
-                      widget.stop.name,
+                      widget.arguments.searchDetails.stop!.name,
                       style: TextStyle(fontSize: 16), // Adjust stopName font size
                       overflow: TextOverflow.ellipsis,  // Apply ellipsis if text overflows
                       maxLines: 1,  // Limit to 1 line
@@ -82,7 +70,7 @@ class _StopDirectionsSheetState extends State<StopDirectionsSheet> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      widget.route.number,
+                      widget.arguments.searchDetails.route!.number,
                       style: TextStyle(
                         fontSize: 20, // Bigger text size
                         fontWeight: FontWeight.bold,
@@ -97,11 +85,12 @@ class _StopDirectionsSheetState extends State<StopDirectionsSheet> {
           ),
         ),
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Towards ${widget.directions[0].name}"),
-            // DeparturesList(scrollController: widget.scrollController, departuresLength: 2, transport: transport),
-            Text("Towards ${widget.directions[1].name}"),
-            // DeparturesList(scrollController: widget.scrollController, departuresLength: 2, transport: transport),
+            Text("Towards ${widget.arguments.searchDetails.directions[0].route?.direction}"),
+            DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
+            Text("Towards ${widget.arguments.searchDetails.directions[1].route?.direction}"),
+            DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
           ]
         )
       ],

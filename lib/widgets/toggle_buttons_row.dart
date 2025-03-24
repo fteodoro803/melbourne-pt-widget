@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
-import 'package:flutter_project/screen_arguments.dart';
 
 class ToggleButtonsRow extends StatefulWidget {
 
   // Constructor
-  const ToggleButtonsRow({super.key, required this.arguments, required this.onTransportTypeChanged});
+  const ToggleButtonsRow({super.key, required this.onTransportTypeChanged});
 
-  final ScreenArguments arguments;
   final Function(String) onTransportTypeChanged; // Callback for parent widget
 
   @override
@@ -40,7 +37,6 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
-            widget.arguments.transportType = "all";
             widget.onTransportTypeChanged("all");
           },
           style: ElevatedButton.styleFrom(
@@ -67,7 +63,6 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
               }
             });
-            widget.arguments.transportType = "1";
             widget.onTransportTypeChanged("1");
           },
           style: ElevatedButton.styleFrom(
@@ -98,7 +93,6 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.arguments.transportType = "0";
             widget.onTransportTypeChanged("0");
           },
           style: ElevatedButton.styleFrom(
@@ -129,7 +123,6 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.arguments.transportType = "2";
             widget.onTransportTypeChanged("2");
           },
           style: ElevatedButton.styleFrom(
@@ -160,9 +153,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isAllSelected = false;
               }
             });
-            widget.arguments.transportType = "3";
             widget.onTransportTypeChanged("3");
-            widget.arguments.transport.routeType = "3" as RouteType?;
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero, backgroundColor: isVLineSelected ? Colors.grey : Color(0xFFD6D6D6),
