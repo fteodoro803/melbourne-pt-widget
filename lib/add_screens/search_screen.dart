@@ -9,7 +9,7 @@ import '../ptv_api_service.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import 'nearby_stops_sheet.dart';
-
+import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import '../ptv_info_classes/route_info.dart' as PTRoute;
 
@@ -30,6 +30,7 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _hasDroppedPin = false;
 
   DevTools tools = DevTools();
+  PtvService ptvService = PtvService();
 
   // Map
   late GoogleMapController mapController;
@@ -71,6 +72,11 @@ class _SearchScreenState extends State<SearchScreen> {
     // OUTPUT: List<Stop> stops ->
     // DESCRIPTION: list of all stops (regardless of transport type) within some range of marker
     // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.STOPS
+
+    print("MARKER POSITION: ${widget.arguments.searchDetails.markerPosition}");
+    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+    widget.arguments.searchDetails.routes = stopRouteLists.routes;
+    widget.arguments.searchDetails.stops = stopRouteLists.stops;
   }
 
   // Retrieves address from coordinates of dropped pin
@@ -90,10 +96,21 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Handling tap on an item in NearbyStopsSheet
   void _onStopTapped(Stop stop, PTRoute.Route route) async {
+
+    // print("(search_screen.dart -> Stops ) -- ${stop}");
+    // print("(search_screen.dart -> Routes ) -- ${route}");
+
+    List<Transport> listTransport = await splitDirection(stop, route);
+
+    print("(search_screen.dart -> _onStopTapped ) -- Transport List: ${listTransport}");
+    print("(search_screen.dart -> _onStopTapped ) -- Transport List Length: ${listTransport.length}");
+
     setState(() {
       widget.arguments.searchDetails.stop = stop;
       widget.arguments.searchDetails.route = route;
       _isStopSelected = true;  // Switch to StopDirectionsSheet
+      widget.arguments.searchDetails.directions.add(listTransport[0]);
+      widget.arguments.searchDetails.directions.add(listTransport[1]);
     });
 
     // TO DO (BACKEND):
@@ -130,21 +147,30 @@ class _SearchScreenState extends State<SearchScreen> {
       directions.add(newDirection);
     }
 
-    print("( search_screen.dart -> splitDirection ) -- Direction");
+    // print("( search_screen.dart -> splitDirection ) -- Direction: ${directions}");
 
     // New Transports
     Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
+    // print("( search_screen.dart -> splitDirection ) -- Transport1: ${transport1}");
     transportList.add(transport1);
     Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
+    // print("( search_screen.dart -> splitDirection ) -- Transport2: ${transport2}");
     transportList.add(transport2);
+
+    // print("( search_screen.dart -> splitDirection ) -- Transport List: ${transportList}");
 
     return transportList;
   }
 
   // Handling choosing a new transport type in ToggleButtonsRow
-  void _onTransportTypeChanged(String newTransportType) {
+  void _onTransportTypeChanged(String newTransportType) async {
+    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+
+
     setState(() {
       widget.arguments.searchDetails.transportType = newTransportType;
+      widget.arguments.searchDetails.routes = stopRouteLists.routes;
+      widget.arguments.searchDetails.stops = stopRouteLists.stops;
     });
 
     // fetchStops(widget.arguments.searchDetails.markerPosition, widget.arguments.searchDetails.transportType, 300)
@@ -154,7 +180,7 @@ class _SearchScreenState extends State<SearchScreen> {
     // DESCRIPTION: list of stops of a given transport type within some range of marker
     // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.STOPS
     // DONE!!!!
-    //    Future<StopRouteLists> fetchStopRoutePairs(LatLng location, {String routeTypes = "all", int maxResults = 3, int maxDistance = 300})
+
     //    in ptv_service.dart; there is an example in select_stop_screen.dart
 
   }

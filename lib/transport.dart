@@ -25,14 +25,14 @@ class Transport {
   Transport();    // Empty Transport
 
   Transport.withStopRoute(Stop stop, Route route, RouteDirection direction) {
-    this.stop;
-    this.route;
-    this.direction;
+    this.stop = stop;
+    this.route = route;
+    this.direction = direction;
   }
 
-  Transport.withAttributes(RouteType? routeType, Location? location, Stop? stop, Route? route, RouteDirection? direction) {
+  Transport.withAttributes(RouteType? routeType, Stop? stop, Route? route, RouteDirection? direction) {
     this.routeType = routeType;
-    this.location = location;
+    // this.location = location;
     this.stop = stop;
     this.route = route;
     this.direction = direction;
@@ -78,8 +78,8 @@ class Transport {
 
     // Get the two directions a route can go, and set each new transport to one of them
     List<RouteDirection> directions = await fetchRouteDirections();
-    Transport newTransport1 = Transport.withAttributes(routeType, location, stop, route, directions[0]);
-    Transport newTransport2 = Transport.withAttributes(routeType, location, stop, route, directions[1]);
+    Transport newTransport1 = Transport.withAttributes(routeType, stop, route, directions[0]);
+    Transport newTransport2 = Transport.withAttributes(routeType, stop, route, directions[1]);
 
     List<Transport> newTransportList = [newTransport1, newTransport2];
 

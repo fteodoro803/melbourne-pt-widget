@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
+import '../file_service.dart';
 import '../widgets/departures_list.dart';
 
 class StopDetailsSheet extends StatefulWidget {
@@ -15,6 +16,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    print("${widget.arguments.searchDetails.directions}");
+
     return DraggableScrollableSheet(
       initialChildSize: 0.3,
       minChildSize: 0.2,
@@ -104,14 +107,33 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                       ],
                     ),
                     Divider(),
+                    ListTile(
+                      title: Column(
+                        children: [
+                          Text("Towards ${widget.arguments.searchDetails.directions[0].direction?.name}"),
+                          // DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0])
+                        ],
+                      ),
+                      // onTap: () async {
+                      //   await append(widget.arguments.searchDetails.directions[0]);
+                      //   widget.arguments.callback(); // calls the screen arguments callback function
+                      //   Navigator.popUntil(context, ModalRoute.withName("/"));
+                      // }
+                    ),
 
-                    Text("Towards ${widget.arguments.searchDetails.directions[0].route?.direction}"),
-
-                    DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
-
-                    Text("Towards ${widget.arguments.searchDetails.directions[1].route?.direction}"),
-
-                    DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
+                    ListTile(
+                      title: Column(
+                        children: [
+                          Text("Towards ${widget.arguments.searchDetails.directions[1].direction?.name}"),
+                          // DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
+                        ],
+                      ),
+                      // onTap: () async {
+                      //   await append(widget.arguments.searchDetails.directions[1]);
+                      //   widget.arguments.callback(); // calls the screen arguments callback function
+                      //   Navigator.popUntil(context, ModalRoute.withName("/"));
+                      // }
+                    ),
                   ],
                 ),
               ),
