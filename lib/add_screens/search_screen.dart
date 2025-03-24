@@ -104,6 +104,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
     print("(search_screen.dart -> _onStopTapped ) -- Transport List: ${listTransport}");
     print("(search_screen.dart -> _onStopTapped ) -- Transport List Length: ${listTransport.length}");
+    print("(search_screen.dart -> _onStopTapped) -- Departures1: ${listTransport[0].departures}");
+    print("(search_screen.dart -> _onStopTapped) -- Departures2: ${listTransport[1].departures}");
+
 
     setState(() {
       widget.arguments.searchDetails.stop = stop;
@@ -111,6 +114,10 @@ class _SearchScreenState extends State<SearchScreen> {
       _isStopSelected = true;  // Switch to StopDirectionsSheet
       widget.arguments.searchDetails.directions.add(listTransport[0]);
       widget.arguments.searchDetails.directions.add(listTransport[1]);
+      print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
+      print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
+
+      print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
     });
 
     // TO DO (BACKEND):
@@ -151,9 +158,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // New Transports
     Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
+    transport1.routeType = RouteType(name: "Tram", type: "1");
     // print("( search_screen.dart -> splitDirection ) -- Transport1: ${transport1}");
+    await transport1.updateDepartures();
     transportList.add(transport1);
+
     Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
+    transport2.routeType = RouteType(name: "Tram", type: "1");
+    await transport2.updateDepartures();
     // print("( search_screen.dart -> splitDirection ) -- Transport2: ${transport2}");
     transportList.add(transport2);
 

@@ -111,7 +111,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                       title: Column(
                         children: [
                           Text("Towards ${widget.arguments.searchDetails.directions[0].direction?.name}"),
-                          // DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0])
+                          DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0])
                         ],
                       ),
                       // onTap: () async {
@@ -125,7 +125,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                       title: Column(
                         children: [
                           Text("Towards ${widget.arguments.searchDetails.directions[1].direction?.name}"),
-                          // DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
+                          DeparturesList(departuresLength: 2, transport: widget.arguments.searchDetails.directions[0]),
                         ],
                       ),
                       // onTap: () async {
