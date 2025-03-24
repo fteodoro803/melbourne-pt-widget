@@ -17,7 +17,7 @@ class Stop {
   @override
   String toString() {
     return "Stop:\n"
-        "\tID: $id\n"
+        "\tID: $id\t"
         "\tName: $name\n";
   }
 
