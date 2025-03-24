@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../departure_service.dart';
 import '../widgets/departures_list.dart';
 import '../ptv_service.dart';
-import '../departures_list.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../time_utils.dart';
 import '../transport.dart';
@@ -51,27 +49,27 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
     });
 
     // Load the route polyline
-    _loadRoutePolyline();
+    // _loadRoutePolyline();
   }
 
   // Function to load the route polyline
-  void _loadRoutePolyline() {
-    // Example list of coordinates representing the route
-    List<LatLng> routeCoordinates = [
-      LatLng(-37.813612, 144.963058),
-      LatLng(-37.814612, 144.964058),
-      LatLng(-37.815612, 144.965058),
-    ];
-
-    setState(() {
-      _polylines.add(Polyline(
-        polylineId: PolylineId('route_polyline'),
-        color: Colors.blue,
-        width: 5,
-        points: routeCoordinates,
-      ));
-    });
-  }
+  // void _loadRoutePolyline() {
+  //   // Example list of coordinates representing the route
+  //   List<LatLng> routeCoordinates = [
+  //     LatLng(-37.813612, 144.963058),
+  //     LatLng(-37.814612, 144.964058),
+  //     LatLng(-37.815612, 144.965058),
+  //   ];
+  //
+  //   setState(() {
+  //     _polylines.add(Polyline(
+  //       polylineId: PolylineId('route_polyline'),
+  //       color: Colors.blue,
+  //       width: 5,
+  //       points: routeCoordinates,
+  //     ));
+  //   });
+  // }
 
   void _addMarker() {
     setState(() {
