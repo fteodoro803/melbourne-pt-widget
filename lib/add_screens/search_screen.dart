@@ -136,6 +136,7 @@ class _SearchScreenState extends State<SearchScreen> {
     String? routeId = route.id;
     List<RouteDirection> directions = [];
     List<Transport> transportList = [];
+    int routeType;    // what if this is never set? this should probably have a callback
 
     // Fetching Data and converting to JSON
     ApiData data = await PtvApiService().routeDirections(routeId);
@@ -152,6 +153,7 @@ class _SearchScreenState extends State<SearchScreen> {
     for (var direction in jsonResponse!["directions"]) {
       String id = direction["direction_id"].toString();
       String name = direction["direction_name"];
+      routeType = direction["route_type"];
       String description = direction["route_direction_description"];
       RouteDirection newDirection =
       RouteDirection(id: id, name: name, description: description);
@@ -163,20 +165,18 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // New Transports
     Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
-    // transport1.routeType = RouteType(name: "Tram", type: "1");
     transport1.routeType = RouteType(type: RouteTypeEnum.tram);
-    // print("( search_screen.dart -> splitDirection ) -- Transport1: ${transport1}");
     await transport1.updateDepartures();
+    print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
     transportList.add(transport1);
 
     Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
-    // transport2.routeType = RouteType(name: "Tram", type: "1");
     transport1.routeType = RouteType(type: RouteTypeEnum.tram);
     await transport2.updateDepartures();
-    // print("( search_screen.dart -> splitDirection ) -- Transport2: ${transport2}");
+    print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
     transportList.add(transport2);
 
-    // print("( search_screen.dart -> splitDirection ) -- Transport List: ${transportList}");
+    // print("( search_screen.dart -> splitDirection() ) -- Transport List: ${transportList}");
 
     return transportList;
   }
