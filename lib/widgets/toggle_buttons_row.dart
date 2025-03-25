@@ -71,7 +71,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
           ),
           child: ClipOval(
             child: Image.asset(
-              "assets/icons/PTV Tram Logo.png",
+              "assets/icons/PTV tram Logo.png",
               width: 30,
               height: 30,
               fit: BoxFit.cover,
@@ -102,7 +102,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
           ),
           child: ClipOval(
             child: Image.asset(
-              "assets/icons/PTV Train Logo.png",
+              "assets/icons/PTV train Logo.png",
               width: 30,
               height: 30,
               fit: BoxFit.cover,
@@ -133,7 +133,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
           ),
           child: ClipOval(
             child: Image.asset(
-              "assets/icons/PTV Bus Logo.png",
+              "assets/icons/PTV bus Logo.png",
               width: 30,
               height: 30,
               fit: BoxFit.cover,
@@ -164,7 +164,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
           ),
           child: ClipOval(
             child: Image.asset(
-              "assets/icons/PTV VLine Logo.png",
+              "assets/icons/PTV vLine Logo.png",
               width: 30,
               height: 30,
               fit: BoxFit.cover,
