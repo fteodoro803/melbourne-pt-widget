@@ -116,6 +116,18 @@ class Transport {
     return directions;
   }
 
+  void setRouteType(int id) {
+    try {
+      RouteTypeEnum matchingEnum = RouteTypeEnum.values.firstWhere(
+            (e) => e.id == id,
+        orElse: () => throw FormatException("( transport.dart -> setRouteType() ) -- Unknown RouteType ID: $id"),
+      );
+      routeType = RouteType(type: matchingEnum);
+    } catch (e) {
+      print(e); // Logs unknown route type errors
+    }
+  }
+
   // Make the toString for list representation???~
   @override
   String toString() {
