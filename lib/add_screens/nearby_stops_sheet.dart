@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/toggle_buttons_row.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../ptv_info_classes/route_info.dart' as PTRoute;
 
@@ -36,15 +34,8 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
   Set<ResultsFilter> filters = <ResultsFilter>{};
 
-  double calculateDistance(LatLng from, LatLng to) {
-    // Using geolocator to calculate the distance in meters
-    double distanceInMeters = Geolocator.distanceBetween(
-      from.latitude, from.longitude,
-      to.latitude, to.longitude,
-    );
-
-    return distanceInMeters;
-  }
+  bool get lowFloorFilter => filters.contains(ResultsFilter.lowFloor);
+  bool get shelterFilter => filters.contains(ResultsFilter.shelter);
 
   @override
   Widget build(BuildContext context) {
@@ -155,14 +146,16 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     }
 
                     final stopName = widget.arguments.searchDetails.stops[index].name;
-                    print("Stop Location: ${widget.arguments.searchDetails.stops[index].latitude}, ${widget.arguments.searchDetails.stops[index].longitude}");
-                    // final stopLocation = LatLng(widget.arguments.searchDetails.stops[index].latitude, widget.arguments.searchDetails.stops[index].latitude);
                     final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
                     final routeName = widget.arguments.searchDetails.routes[index].name;
-                    // final distanceInMeters = calculateDistance(widget.arguments.searchDetails.markerPosition!, stopLocation);
+                    final distance = widget.arguments.searchDetails.stops[index].distance;
+                    // final routeColour = widget.arguments.searchDetails.routes[index].colour;
+                    // final routeTextColour = widget.arguments.searchDetails.routes[index].textColour;
+                    // final routeType = widget.arguments.searchDetails.routes[index].routeType;
 
                     return Card(
                       child: ListTile(
+                        trailing: Text("${distance?.round()}m", style: TextStyle(fontSize: 16)),
                         title: Column(
                           children: [
                             Row(
@@ -183,27 +176,34 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                             Row(
                               children: [
                                 Image.asset(
-                                  "assets/icons/PTV Tram Logo.png",
+                                  "assets/icons/PTV tram Logo.png",
+                                  // "assets/icons/PTV ${routeType} Logo.png",
                                   width: 40,
                                   height: 40,
                                 ),
                                 SizedBox(width: 8),
                       
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    widget.arguments.searchDetails.transportType == "Train" ||
-                                        widget.arguments.searchDetails.transportType == "VLine"
-                                        ? ""
-                                        : routeNumber,
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                Flexible(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey,
+                                      // color: ColourUtils.hexToColour(routeColour),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      widget.arguments.searchDetails.transportType == "train" ||
+                                          widget.arguments.searchDetails.transportType == "vLine"
+                                          ? ""
+                                          : routeNumber,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        // color: ColourUtils.hexToColour(routeTextColour),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ),
                                 ),
@@ -215,8 +215,6 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
-                      
-                            // Text("${distanceInMeters}m")
                           ],
                         ),
 
