@@ -48,7 +48,7 @@ class TransportUtils {
         return Color(0xFF71CA63); // Yellow for early
       case "Scheduled":
       default:
-        return Colors.black; // Green for on-time or default
+        return Colors.white; // Green for on-time or default
     }
   }
 }

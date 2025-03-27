@@ -152,17 +152,24 @@ class _SearchScreenState extends State<SearchScreen> {
     // print("( search_screen.dart -> splitDirection ) -- Direction: ${directions}");
 
     // New Transports
-    Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
-    transport1.routeType = RouteType(type: RouteTypeEnum.tram);
-    await transport1.updateDepartures();
-    // print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
-    transportList.add(transport1);
+    // Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
+    // // transport1.routeType = RouteType(type: RouteTypeEnum.tram);
+    // await transport1.updateDepartures();
+    // // print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
+    // transportList.add(transport1);
+    //
+    // Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
+    // // transport2.routeType = RouteType(type: RouteTypeEnum.tram);
+    // await transport2.updateDepartures();
+    // // print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
+    // transportList.add(transport2);
 
-    Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
-    transport2.routeType = RouteType(type: RouteTypeEnum.tram);
-    await transport2.updateDepartures();
-    // print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
-    transportList.add(transport2);
+    for (var direction in directions) {
+      Transport newTransport = Transport.withStopRoute(stop, route, direction);
+      newTransport.routeType = RouteType.withId(id: route.type.type.id);
+      await newTransport.updateDepartures();
+      transportList.add(newTransport);
+    }
 
     // print("( search_screen.dart -> splitDirection() ) -- Transport List: ${transportList}");
 

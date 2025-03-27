@@ -134,7 +134,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              widget.arguments.searchDetails.route!.number,
+                              transport1.routeType!.type.name == "train" || transport1.routeType!.type.name == "vLine" ? widget.arguments.searchDetails.route!.name : widget.arguments.searchDetails.route!.number,
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
