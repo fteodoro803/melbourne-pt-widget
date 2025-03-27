@@ -113,11 +113,11 @@ class _SearchScreenState extends State<SearchScreen> {
       (widget.arguments.searchDetails.directions).add(listTransport[1]);
 
       // Added delay to check if data is fully updated before printing
-      Future.delayed(Duration(milliseconds: 100), () {
-        print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
-        print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
-        print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
-      });
+      // Future.delayed(Duration(milliseconds: 100), () {
+      //   print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
+      //   print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
+      //   print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
+      // });
     });
   }
 
@@ -125,7 +125,6 @@ class _SearchScreenState extends State<SearchScreen> {
     String? routeId = route.id;
     List<RouteDirection> directions = [];
     List<Transport> transportList = [];
-    int routeType;    // what if this is never set? this should probably have a callback
 
     // Fetching Data and converting to JSON
     ApiData data = await PtvApiService().routeDirections(routeId);
@@ -142,7 +141,6 @@ class _SearchScreenState extends State<SearchScreen> {
     for (var direction in jsonResponse!["directions"]) {
       String id = direction["direction_id"].toString();
       String name = direction["direction_name"];
-      routeType = direction["route_type"];
       String description = direction["route_direction_description"];
       RouteDirection newDirection =
       RouteDirection(id: id, name: name, description: description);

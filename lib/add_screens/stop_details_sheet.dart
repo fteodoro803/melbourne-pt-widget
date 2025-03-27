@@ -17,8 +17,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    print("(stop_details_sheet.dart) -- Departures1: ${widget.arguments.searchDetails.directions[0].departures}");
-    print("(stop_details_sheet.dart) -- Departures2: ${widget.arguments.searchDetails.directions[1].departures}");
+
     final transport1 = widget.arguments.searchDetails.directions[0];
     final transport2 = widget.arguments.searchDetails.directions[1];
 
@@ -88,7 +87,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                       Row(
                         children: [
                           Image.asset(
-                            "assets/icons/PTV tram Logo.png",
+                            "assets/icons/PTV ${transport1.routeType?.type.name} Logo.png",
                             width: 40,
                             height: 40,
                           ),
@@ -97,7 +96,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.grey,
+                              color: ColourUtils.hexToColour(transport1.route!.colour!),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -105,43 +104,48 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: ColourUtils.hexToColour(transport1.route!.textColour!),
                               ),
                             ),
                           ),
                         ],
                       ),
                       Divider(),
-                      Card(
-                        color: Colors.white,
-                        margin: const EdgeInsets.all(0.0),
-                        elevation: 0,
-                        child: Column(
+                      ListTile(
+                        title: Column(
                           children: [
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: Text(
-                                  "Towards ${transport1.direction?.name}",
-                                  style: TextStyle(fontSize: 16),
+                              child: Row(
+                                children: [
+                                  Text(
+                                      "Towards ${transport1.direction?.name}",
+                                      style: TextStyle(fontSize: 16),
+                                  ),
+                                  Spacer(),
+                                  // ADD BUTTON HERE
+                                ],
                               ),
                             ),
-                            // if (widget.arguments.searchDetails.directions[1].departures?[0] != null)
-                            // DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![0], transport: transport1),
-                            // if (widget.arguments.searchDetails.directions[1].departures!.length >= 2)
-                            // DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![1], transport: transport1),
-                            // if (widget.arguments.searchDetails.directions[1].departures?[0] == null)
-                            //   Text("No departures to show."),
+                            DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![0], transport: transport1),
+                            DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![1], transport: transport1),
+                            if (widget.arguments.searchDetails.directions[0].departures == null)
+                              Card(color: Colors.white,
+                                  margin: const EdgeInsets.all(0.0),
+                                  elevation: 0,
+                                  child: Text("No departures to show.")),
                           ],
                         ),
+                        onTap: () async {
+                          await append(transport1);
+                          widget.arguments.callback(); // calls the screen arguments callback function
+                        },
                       ),
 
                       SizedBox(height: 12),
 
-                      Card(
-                        color: Colors.white,
-                        margin: const EdgeInsets.all(0.0),
-                        elevation: 0,
-                        child: Column(
+                      ListTile(
+                        title: Column(
                           children: [
                             Align(
                               alignment: Alignment.centerLeft,
@@ -151,11 +155,14 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                               ),
                             ),
                             // if (widget.arguments.searchDetails.directions[1].departures?[0] != null)
-                            // DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![0], transport: transport2),
+                            DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![0], transport: transport2),
                               // if (widget.arguments.searchDetails.directions[1].departures!.length >= 2)
-                            // DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![1], transport: transport2),
-                            // if (widget.arguments.searchDetails.directions[1].departures?[0] == null)
-                            //   Text("No departures to show."),
+                            DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![1], transport: transport2),
+                            if (widget.arguments.searchDetails.directions[1].departures == null)
+                              Card(color: Colors.white,
+                                  margin: const EdgeInsets.all(0.0),
+                                  elevation: 0,
+                                  child: Text("No departures to show.")),
                           ],
                         ),
                       ),

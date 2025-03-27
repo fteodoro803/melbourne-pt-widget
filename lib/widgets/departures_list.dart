@@ -21,7 +21,10 @@ class DeparturesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    List<Departure>? filteredDepartures = transport.departures?.where((departure) => departure.hasLowFloor == lowFloorFilter).toList();
+    List<Departure>? filteredDepartures = transport.departures;
+    if (lowFloorFilter) {
+      filteredDepartures = transport.departures?.where((departure) => departure.hasLowFloor == lowFloorFilter).toList();
+    }
 
     return Expanded(
       child: ListView.builder(
@@ -34,7 +37,7 @@ class DeparturesList extends StatelessWidget {
         ),
         itemCount: filteredDepartures!.length > departuresLength ? departuresLength : filteredDepartures.length,
         itemBuilder: (context, index) {
-          final departure = filteredDepartures[index];
+          final departure = filteredDepartures?[index];
           final String departureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
           final DepartureStatus status = TransportUtils.getDepartureStatus(
             departure?.estimatedDepartureTime,

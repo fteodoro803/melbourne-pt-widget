@@ -4,6 +4,7 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/toggle_buttons_row.dart';
 
 import '../ptv_info_classes/route_info.dart' as PTRoute;
+import '../time_utils.dart';
 
 enum ResultsFilter {
   lowFloor(name: "Low Floor"),
@@ -149,9 +150,9 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
                     final routeName = widget.arguments.searchDetails.routes[index].name;
                     final distance = widget.arguments.searchDetails.stops[index].distance;
-                    // final routeColour = widget.arguments.searchDetails.routes[index].colour;
-                    // final routeTextColour = widget.arguments.searchDetails.routes[index].textColour;
-                    // final routeType = widget.arguments.searchDetails.routes[index].routeType;
+                    final routeColour = widget.arguments.searchDetails.routes[index].colour;
+                    final routeTextColour = widget.arguments.searchDetails.routes[index].textColour;
+                    final routeType = widget.arguments.searchDetails.routes[index].type.type.name;
 
                     return Card(
                       child: ListTile(
@@ -176,8 +177,8 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                             Row(
                               children: [
                                 Image.asset(
-                                  "assets/icons/PTV tram Logo.png",
-                                  // "assets/icons/PTV ${routeType} Logo.png",
+                                  // "assets/icons/PTV tram Logo.png",
+                                  "assets/icons/PTV ${routeType} Logo.png",
                                   width: 40,
                                   height: 40,
                                 ),
@@ -187,8 +188,8 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                   child: Container(
                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey,
-                                      // color: ColourUtils.hexToColour(routeColour),
+                                      // color: Colors.grey,
+                                      color: ColourUtils.hexToColour(routeColour!),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -199,8 +200,8 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        // color: ColourUtils.hexToColour(routeTextColour),
+                                        // color: Colors.white,
+                                        color: ColourUtils.hexToColour(routeTextColour!),
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
