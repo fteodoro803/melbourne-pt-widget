@@ -100,8 +100,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     print("(search_screen.dart -> _onStopTapped ) -- Transport List: ${listTransport}");
     print("(search_screen.dart -> _onStopTapped ) -- Transport List Length: ${listTransport.length}");
-    print("(search_screen.dart -> _onStopTapped) -- Departures1: ${listTransport[0].departures}");
-    print("(search_screen.dart -> _onStopTapped) -- Departures2: ${listTransport[1].departures}");
+
 
 
     setState(() {
@@ -110,8 +109,9 @@ class _SearchScreenState extends State<SearchScreen> {
       _isStopSelected = true;  // Switch to StopDirectionsSheet
 
       widget.arguments.searchDetails.directions.clear();
-      (widget.arguments.searchDetails.directions).add(listTransport[0]);
-      (widget.arguments.searchDetails.directions).add(listTransport[1]);
+      for (var transport in listTransport) {
+        widget.arguments.searchDetails.directions.add(transport);
+      }
 
       // Added delay to check if data is fully updated before printing
       Future.delayed(Duration(milliseconds: 100), () {
