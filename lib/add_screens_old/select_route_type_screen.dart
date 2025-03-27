@@ -63,8 +63,6 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
         case "night bus":
           _routeTypes.add(RouteType(type: RouteTypeEnum.nightBus));
       }
-
-      print("TEST ${RouteType(type: RouteTypeEnum.tram)}");
      }
 
     setState(() {});

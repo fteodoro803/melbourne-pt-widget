@@ -1,4 +1,5 @@
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../palettes.dart';
 
@@ -13,8 +14,11 @@ class Route {
   String? textColour;
 
   RouteDirection? direction;
+  RouteType type;
 
-  Route({required this.id, required this.name, required this.number});
+  Route({required this.id, required this.name, required this.number, required this.type}) {
+    setRouteColour(type.type.name);
+  }
 
   @override
   String toString() {
@@ -33,13 +37,14 @@ class Route {
     return str;
   }
 
-  // Only for trams for now
+  // Sets this route's Colour according to Palette
   // For testing, ensure that all the routes go to the right things
-  void getRouteColour(String routeType) {
+  void setRouteColour(String routeType) {
+    routeType = routeType.toLowerCase();      // improve case matching
     // print("( route_info.dart -> getRouteColour() ) -- routeType: $routeType");
 
     // Tram
-    if (routeType == "Tram") {
+    if (routeType == "tram") {
       String routeId = "route$number";
 
       // print("( route_info.dart -> getRouteColour() ) -- Tram routeId: $routeId");
@@ -56,7 +61,7 @@ class Route {
     }
 
     // Train
-    else if (routeType == "Train") {
+    else if (routeType == "train") {
       String routeName = name.replaceAll(" ", "").toLowerCase();
       print("( route_info.dart -> getRouteColour() ) -- routeName conversion: $name -> $routeName");
 
@@ -72,13 +77,13 @@ class Route {
     }
 
     // Bus and Night Bus
-    else if (routeType == "Bus" || routeType == "Night Bus") {
+    else if (routeType == "bus" || routeType == "night bus") {
       this.colour = BusPalette.routeDefault.colour;
       this.textColour = BusPalette.routeDefault.textColour.colour;
     }
 
     // VLine
-    else if (routeType == "Vline") {
+    else if (routeType == "vline") {
       this.colour = VLine.routeDefault.colour;
       this.textColour = VLine.routeDefault.textColour.colour;
     }

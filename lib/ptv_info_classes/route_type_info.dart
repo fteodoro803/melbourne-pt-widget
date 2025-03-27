@@ -21,6 +21,12 @@ class RouteType {
   RouteTypeEnum type;
 
   RouteType({required this.type});
+  RouteType.withTypeId({required int id})
+    : type = RouteTypeEnum.values.firstWhere(
+            (routeType) => routeType.id == id,
+        orElse: () => throw ArgumentError('( route_type_info.dart -> RouteType.withId() ) -- No RouteTypeEnum found for id: $id')
+    );
+  // RouteType.withString
 
   @override
   String toString() {

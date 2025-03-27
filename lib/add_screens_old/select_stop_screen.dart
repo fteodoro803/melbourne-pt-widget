@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 import 'package:flutter_project/ptv_service.dart';
@@ -69,12 +70,9 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
         String routeId = route["route_id"].toString();
-        PTRoute.Route newRoute =
-            PTRoute.Route(name: routeName, number: routeNumber, id: routeId);
-
-
-        // Gets the Colour of Route
-        newRoute.getRouteColour(widget.arguments.transport.routeType!.type.name);
+        int routeTypeId = route["route_type"];
+        RouteType routeType = RouteType.withTypeId(id: routeTypeId);
+        PTRoute.Route newRoute = PTRoute.Route(name: routeName, number: routeNumber, id: routeId, type: routeType);
 
         _stops.add(newStop);
         _routes.add(newRoute);

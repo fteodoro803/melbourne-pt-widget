@@ -4,6 +4,7 @@ import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -97,13 +98,10 @@ class PtvService {
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
         String routeId = route["route_id"].toString();
-        Route newRoute = Route(
-            name: routeName, number: routeNumber, id: routeId);
+        int routeTypeId = route["route_type"];
+        RouteType routeType = RouteType.withTypeId(id: routeTypeId);
 
-
-        // Gets the Colour of Route
-        String routeType = stop["route_type"].toString();
-        // newRoute.getRouteColour(widget.arguments.transport.routeType!.name);      // expects something like, tram, bus, etc
+        Route newRoute = Route(name: routeName, number: routeNumber, id: routeId, type: routeType);
 
         stops.add(newStop);
         routes.add(newRoute);
