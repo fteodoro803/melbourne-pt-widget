@@ -67,6 +67,8 @@ Copy-paste these commands to
 - Find way to remove old/removed routes that no longer exist/have no data
 - Optimisations
   - Remove description from route direction
+- If Response Data is Null, maybe Refresh 3 times? Then after that, assume it's null
+  - Because sometimes, the responses just are null but suddenly work again after
 
 - Ideas
   - Notification for Disruptions?
