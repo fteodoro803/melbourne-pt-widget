@@ -40,9 +40,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
   // Updates UI as a result of Update Departures
   Future<void> _initialiseDepartures() async {
-    print("( confirmation_screen.dart -> _initialiseDepartures() ) -- transportList = $transportList");
+    // print("( confirmation_screen.dart -> _initialiseDepartures() ) -- transportList = $transportList");
     for (int i=0; i<transportList.length; i++) {
-      print("( confirmation_screen.dart -> _initialiseDepartures() ) -- transportList[$i] = ${transportList[i]}");
+      // print("( confirmation_screen.dart -> _initialiseDepartures() ) -- transportList[$i] = ${transportList[i]}");
       await transportList[i].updateDepartures();
     }
 
@@ -55,7 +55,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       final transport = widget.arguments.transport;
       transportList.add(transport);
     } else {
-      print("( confirmation_screen.dart -> _setTransportList() ) -- splitting transport by direction");
+      // print("( confirmation_screen.dart -> _setTransportList() ) -- splitting transport by direction");
       transportList = await widget.arguments.transport.splitByDirection();
       // print("( confirmation_screen.dart -> _setTransportList() ) -- done splitting transport by direction: $transportList");
     }
