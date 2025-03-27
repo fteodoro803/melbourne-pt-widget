@@ -9,16 +9,20 @@ class Stop {
 
   // idk if these are necessary
   String? suburb;
-  String? latitude;
-  String? longitude;
+  double latitude;
+  double longitude;
+  double? distance;
 
-  Stop({required this.id, required this.name});
+  Stop({required this.id, required this.name, required this.latitude, required this.longitude, required this.distance});
 
   @override
   String toString() {
     return "Stop:\n"
         "\tID: $id\t"
-        "\tName: $name\n";
+        "\tName: $name\n"
+        "\tLatitude: $latitude\n"
+        "\tLongitude: $longitude\n"
+        "\tDistance: $distance\n";
   }
 
   // Methods for JSON Serialization

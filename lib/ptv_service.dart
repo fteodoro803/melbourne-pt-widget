@@ -92,7 +92,10 @@ class PtvService {
 
         String stopId = stop["stop_id"].toString();
         String stopName = stop["stop_name"];
-        Stop newStop = Stop(id: stopId, name: stopName);
+        double latitude = stop["stop_latitude"];
+        double longitude = stop["stop_longitude"];
+        double? distance = stop["stop_distance"];
+        Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude, longitude: longitude, distance: distance);
 
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
