@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
+import 'package:flutter_project/widgets/departures_list.dart';
 import '../file_service.dart';
+
 import '../time_utils.dart';
 import '../widgets/departure_card.dart';
 
@@ -15,11 +17,43 @@ class StopDetailsSheet extends StatefulWidget {
 
 class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
+  // List<bool> savedList = [];
+  List<bool> savedList = [];
+
+  // Function to initialize the savedList
+  Future<void> initializeSavedList() async {
+    List<bool> tempSavedList = [];
+
+    for (var transport in widget.arguments.searchDetails.directions) {
+      // Check if the transport is already saved
+      bool isSaved = await isTransportSaved(transport);
+      tempSavedList.add(isSaved); // Add true if saved, false if not
+    }
+
+    setState(() {
+      savedList = tempSavedList; // Set the state with the updated list
+    });
+
+    print("SavedList: $savedList");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize savedList here, after widget is initialized
+    // savedList = List.generate(widget.arguments.searchDetails.directions.length, (index) => false);
+    initializeSavedList();
+
+  }
+
   @override
   Widget build(BuildContext context) {
 
+    if (savedList.isEmpty) {
+      return CircularProgressIndicator(); // Or any loading widget while waiting for savedList to initialize
+    }
+
     final transport1 = widget.arguments.searchDetails.directions[0];
-    final transport2 = widget.arguments.searchDetails.directions[1];
 
     return DraggableScrollableSheet(
       initialChildSize: 0.3,
@@ -28,7 +62,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
@@ -111,60 +145,86 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                         ],
                       ),
                       Divider(),
-                      ListTile(
-                        title: Column(
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                children: [
-                                  Text(
-                                      "Towards ${transport1.direction?.name}",
-                                      style: TextStyle(fontSize: 16),
+                      Column(
+                        children: widget.arguments.searchDetails.directions.map((transport) {
+                          var departures = transport.departures;
+                          var index = widget.arguments.searchDetails.directions.indexOf(transport);
+                          bool isSaved = savedList[index];
+                          // Now you can safely access savedList[index] based on the transport's index.
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Text(
+                                            "Towards ${transport.direction?.name}",
+                                            style: TextStyle(fontSize: 18),
+                                            // overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      // Spacer(),
+                                      GestureDetector(
+                                        child: SizedBox(
+                                          width: 45,
+                                          height: 40,
+                                          // decoration: BoxDecoration(
+                                          //   // color: savedList[index] ? Color(0xFFEA9CB7) : Colors.grey,
+                                          //   borderRadius: BorderRadius.circular(30),
+                                          // ),
+                                          child: Center(
+                                            child: Icon(
+                                              savedList[index] ? Icons.star : Icons.star_border,
+                                              size: 30,
+                                              color: savedList[index] ? Colors.yellow : null,
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: () async {
+                                          // Toggle the saved status
+                                          setState(() {
+                                            savedList[index] = !isSaved;
+                                          });
+
+                                          // Optionally handle adding/removing the transport
+                                          if (savedList[index]) {
+                                            await append(transport);  // Add transport to saved list
+                                            widget.arguments.callback();
+                                          } else {
+                                            await deleteMatchingTransport(transport);  // Remove transport from saved list
+                                            widget.arguments.callback();
+                                          }
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                  Spacer(),
-                                  // ADD BUTTON HERE
-                                ],
-                              ),
-                            ),
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![0], transport: transport1),
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![1], transport: transport1),
-                            if (widget.arguments.searchDetails.directions[0].departures == null)
-                              Card(color: Colors.white,
-                                  margin: const EdgeInsets.all(0.0),
-                                  elevation: 0,
-                                  child: Text("No departures to show.")),
-                          ],
-                        ),
-                        onTap: () async {
-                          await append(transport1);
-                          widget.arguments.callback(); // calls the screen arguments callback function
-                        },
-                      ),
+                                ),
 
-                      SizedBox(height: 12),
+                                // Display departures if they exist
+                                if (departures != null && departures.isNotEmpty)
+                                  DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false),
 
-                      ListTile(
-                        title: Column(
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "Towards ${transport2.direction?.name}",
-                                style: TextStyle(fontSize: 16),
-                              ),
+                                // Display a message if no departures
+                                if (departures == null || departures.isEmpty)
+                                  Card(
+                                    color: Colors.white,
+                                    margin: const EdgeInsets.all(0.0),
+                                    elevation: 0,
+                                    child: Text("No departures to show."),
+                                  ),
+                              ],
                             ),
-                            // if (widget.arguments.searchDetails.directions[1].departures?[0] != null)
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![0], transport: transport2),
-                              // if (widget.arguments.searchDetails.directions[1].departures!.length >= 2)
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![1], transport: transport2),
-                            if (widget.arguments.searchDetails.directions[1].departures == null)
-                              Card(color: Colors.white,
-                                  margin: const EdgeInsets.all(0.0),
-                                  elevation: 0,
-                                  child: Text("No departures to show.")),
-                          ],
-                        ),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
