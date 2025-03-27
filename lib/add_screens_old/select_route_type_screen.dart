@@ -60,8 +60,10 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
           _routeTypes.add(RouteType(type: RouteTypeEnum.bus));
         case "vline":
           _routeTypes.add(RouteType(type: RouteTypeEnum.vLine));
-        case "night bus":
-          _routeTypes.add(RouteType(type: RouteTypeEnum.nightBus));
+
+          // reenable night bus later
+        // case "night bus":
+        //   _routeTypes.add(RouteType(type: RouteTypeEnum.nightBus));
       }
      }
 

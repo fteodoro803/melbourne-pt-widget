@@ -84,7 +84,7 @@ class PtvApiService {
     Map<String, String> parameters = {};
 
     // Parameter handling
-    if (routeTypes != null && routeTypes.isNotEmpty) {
+    if (routeTypes != null && routeTypes.isNotEmpty) {      // Assumes routeTypes string is in the form "1,2,3,..."
       List<String> routeTypesList = routeTypes.split(',');
       for (int i=0; i<routeTypesList.length; i++) {
         parameters['route_types'] = routeTypesList[i];
@@ -136,4 +136,6 @@ class PtvApiService {
     // print("(ptv_api_service -> departures): response: $response"); //*test
     return ApiData(url, response);
   }
+
+  // Runs
 }

@@ -174,7 +174,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (newTransportType == "all") {
       stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
     } else {
-      stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!, routeTypes: widget.arguments.searchDetails.transportType!);
+      stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!, routeTypes: newTransportType);
     }
 
     setState(() {

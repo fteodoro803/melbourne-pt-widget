@@ -70,9 +70,21 @@ class PtvService {
 
     String locationString = "${location.latitude},${location.longitude}";
 
+    // Conversion of RouteTypes to proper String
+    String routeTypeString = "";
+    if (routeTypes == "all") {
+      routeTypeString = "";
+    }
+    else {
+      routeTypeString = routeTypes;
+    }
+
     // Fetches stop data via PTV API
     ApiData data = await PtvApiService().stops(
       locationString,
+      maxResults: maxResults.toString(),
+      maxDistance: maxDistance.toString(),
+      routeTypes: routeTypeString,
     );
     Map<String, dynamic>? jsonResponse = data.response;
 
@@ -102,7 +114,7 @@ class PtvService {
         String routeNumber = route["route_number"].toString();
         String routeId = route["route_id"].toString();
         int routeTypeId = route["route_type"];
-        RouteType routeType = RouteType.withTypeId(id: routeTypeId);
+        RouteType routeType = RouteType.withId(id: routeTypeId);
 
         Route newRoute = Route(name: routeName, number: routeNumber, id: routeId, type: routeType);
 
