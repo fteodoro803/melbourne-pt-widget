@@ -1,8 +1,10 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
+import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
@@ -16,7 +18,9 @@ class StopRouteLists {
 }
 
 class PtvService {
-  Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String maxResults = "3", String expands = "All"}) async {
+  Future<List<Departure>> fetchDepartures(String routeType, String stopId,
+      String routeId,
+      {String? directionId, String maxResults = "3", String expands = "All"}) async {
     List<Departure> departures = [];
 
     // Fetches departure data via PTV API
@@ -32,7 +36,8 @@ class PtvService {
 
     // Empty JSON Response
     if (jsonResponse == null) {
-      print("( ptv_service.dart -> fetchDepartures ) -- Null data response, Improper Location Data");
+      print(
+          "( ptv_service.dart -> fetchDepartures ) -- Null data response, Improper Location Data");
       return departures;
     }
 
@@ -45,17 +50,25 @@ class PtvService {
       String? runId = departure["run_id"]?.toString();
       String? runRef = departure["run_ref"]?.toString();
 
-      Departure newDeparture = Departure(scheduledDepartureUTC: scheduledDepartureUTC,
-          estimatedDepartureUTC: estimatedDepartureUTC, runId: runId, runRef: runRef);
+      Departure newDeparture = Departure(
+          scheduledDepartureUTC: scheduledDepartureUTC,
+          estimatedDepartureUTC: estimatedDepartureUTC,
+          runId: runId,
+          runRef: runRef);
 
       // Get Vehicle descriptors per Departure
-      var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"];    // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
-      if (vehicleDescriptors != null && vehicleDescriptors.toString().isNotEmpty) {
+      var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
+      if (vehicleDescriptors != null && vehicleDescriptors
+          .toString()
+          .isNotEmpty) {
         // print("( ptv_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
 
         newDeparture.hasLowFloor = vehicleDescriptors["low_floor"];
       }
-      else { print("( ptv_service.dart -> fetchDepartures() ) -- runs for runId $runId is empty )");}
+      else {
+        print(
+            "( ptv_service.dart -> fetchDepartures() ) -- runs for runId $runId is empty )");
+      }
 
       departures.add(newDeparture);
     }
@@ -108,7 +121,11 @@ class PtvService {
         double latitude = stop["stop_latitude"];
         double longitude = stop["stop_longitude"];
         double? distance = stop["stop_distance"];
-        Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude, longitude: longitude, distance: distance);
+        Stop newStop = Stop(id: stopId,
+            name: stopName,
+            latitude: latitude,
+            longitude: longitude,
+            distance: distance);
 
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
@@ -116,7 +133,8 @@ class PtvService {
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.withId(id: routeTypeId);
 
-        Route newRoute = Route(name: routeName, number: routeNumber, id: routeId, type: routeType);
+        Route newRoute = Route(
+            name: routeName, number: routeNumber, id: routeId, type: routeType);
 
         stops.add(newStop);
         routes.add(newRoute);
@@ -124,5 +142,65 @@ class PtvService {
     }
 
     return StopRouteLists(stops, routes);
+  }
+
+  // Fetch Stops along a Route
+  Future<List<Stop>> fetchStopsAlongDirection(Route route,
+      RouteDirection direction) async {
+    List<Stop> stopList = [];
+
+    // Fetches stops data via PTV API
+    ApiData data = await PtvApiService().stopsAlongRoute(
+        route.id, route.type.type.id.toString(), directionId: direction.id,
+        geoPath: true);
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // print(" (ptv_service.dart -> fetchStopsAlongDirection) -- fetched stops along direction:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
+
+    // Empty JSON Response
+    if (jsonResponse == null) {
+      print(
+          "(ptv_service.dart -> fetchStopsAlongDirection) -- Null data response, Improper Location Data");
+      return stopList;
+    }
+
+    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
+    for (var stop in jsonResponse["stops"]) {
+      String id = stop["stop_id"].toString();
+      String name = stop["stop_name"];
+      double latitude = stop["stop_latitude"];
+      double longitude = stop["stop_longitude"];
+
+      Stop newStop = Stop(
+          id: id, name: name, latitude: latitude, longitude: longitude);
+      stopList.add(newStop);
+    }
+
+    return stopList;
+  }
+
+  Future<List<LatLng>> fetchGeoPath(Route route) async {
+    List<LatLng> pathList = [];
+
+    // Fetches stops data via PTV API
+    ApiData data = await PtvApiService().stopsAlongRoute(
+        route.id, route.type.type.id.toString(), geoPath: true);
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // print(" (ptv_service.dart -> fetchGeoPath) -- fetched Geopath for route ${route.id}:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
+
+    // Empty JSON Response
+    if (jsonResponse == null) {
+      print(
+          "(ptv_service.dart -> fetchGeoPath) -- Null data response, Improper Location Data");
+      return pathList;
+    }
+
+    // Adding GeoPath to List
+    var paths = jsonResponse["geopath"][0]["paths"];
+    pathList = convertPolylineToLatLng(paths);
+    // convertPolylineToCsv(paths);     // test save to CSV, for rendering on https://kepler.gl/demo
+
+    return pathList;
   }
 }

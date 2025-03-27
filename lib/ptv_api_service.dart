@@ -78,8 +78,7 @@ class PtvApiService {
   }
 
   // Get Stops around a Location
-  Future<ApiData> stops(String location,
-      {String? routeTypes, String? maxResults, String? maxDistance}) async {
+  Future<ApiData> stops(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
     String request = "/v3/stops/location/$location";
     Map<String, String> parameters = {};
 
@@ -99,7 +98,25 @@ class PtvApiService {
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
-    print("(ptv_api_service -> stops): response: $response"); //*test
+    print("(ptv_api_service -> stops) -- response: $response"); //*test
+    return ApiData(url, response);
+  }
+
+  Future<ApiData> stopsAlongRoute(String routeId, String routeType, {String? directionId, bool? geoPath}) async {
+    String request = "/v3/stops/route/$routeId/route_type/$routeType";
+    Map<String, String> parameters = {};
+
+    // Parameter handling
+    if (directionId != null && directionId.isNotEmpty) {      // Assumes routeTypes string is in the form "1,2,3,..."
+        parameters['direction_id'] = directionId;
+    }
+    if (geoPath!= null && geoPath == true) {
+      parameters['include_geopath'] = "true";
+    }
+
+    Uri url = getURL(request, parameters: parameters);
+    Map<String, dynamic>? response = await getResponse(url);
+    // print("(ptv_api_service -> stopsAlongRoute) -- stops along route: \n$response");
     return ApiData(url, response);
   }
 

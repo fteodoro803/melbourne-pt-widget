@@ -129,3 +129,18 @@ Future<List<Transport>> parseTransportJSON(String jsonString) async {
 
   return transports;
 }
+
+// Save GeoPath CSV
+Future<void> saveGeoPath(String geoPath) async {
+  try {
+    final path = await getLocalPath();
+    final file = File('$path/transport_geopath.csv');
+    // Save updated list to File
+    await file.writeAsString(geoPath);
+
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error saving to file: $e');
+    } // Log the error
+  }
+}

@@ -4,16 +4,16 @@ part 'stop_info.g.dart';
 
 @JsonSerializable()
 class Stop {
-  String id;
-  String name;
+  String id;      // convert this to integer ~note
+  String name;      //~note what happens if in an api call, these are null?
 
   // idk if these are necessary
   String? suburb;
-  double latitude;
-  double longitude;
+  double? latitude;
+  double? longitude;
   double? distance;
 
-  Stop({required this.id, required this.name, required this.latitude, required this.longitude, required this.distance});
+  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance});
 
   @override
   String toString() {
