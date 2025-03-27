@@ -33,7 +33,7 @@ class CustomListTile extends StatelessWidget {
     String minutesUntilNextDepartureText;
 
     // Gets the first departure information
-    if (transport.departures != null) {
+    if (transport.departures != null && transport.departures!.isNotEmpty) {
       departure1Status = TransportUtils.getDepartureStatus(
         transport.departures?[0].estimatedDepartureTime,
         transport.departures?[0].scheduledDepartureTime,
