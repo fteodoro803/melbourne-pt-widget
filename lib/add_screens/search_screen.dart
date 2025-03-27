@@ -33,7 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
 
-  // Map
+// Map
   late GoogleMapController mapController;
   Set<Marker> markers = {};
   final LatLng _initialPosition =
@@ -109,6 +109,7 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails.route = route;
       _isStopSelected = true;  // Switch to StopDirectionsSheet
 
+      widget.arguments.searchDetails.directions.clear();
       (widget.arguments.searchDetails.directions).add(listTransport[0]);
       (widget.arguments.searchDetails.directions).add(listTransport[1]);
 
@@ -254,7 +255,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -266,7 +267,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                     child: Icon(
                       Icons.arrow_back,
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 30,
                     ),
                   ),

@@ -41,11 +41,11 @@ class TransportUtils {
   static Color getColorForStatus(String status) {
     switch (status) {
       case "Delayed":
-        return Color(0xFF8A0000); // Red for late
+        return Color(0xFFCA6868); // Red for late
       case "Early":
-        return Color(0xFFA39541); // Yellow for early
+        return Color(0xFFC5B972); // Yellow for early
       case "On time":
-        return Color(0xFF138800); // Yellow for early
+        return Color(0xFF71CA63); // Yellow for early
       case "Scheduled":
       default:
         return Colors.black; // Green for on-time or default

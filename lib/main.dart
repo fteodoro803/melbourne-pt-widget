@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
         title: 'PTV Widget App Demo',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey, brightness: Brightness.dark),
           useMaterial3: true,
         ),
         home: const MyHomePage(title: 'Demo Home Page'),

@@ -26,14 +26,14 @@ class DeparturesList extends StatelessWidget {
       filteredDepartures = transport.departures?.where((departure) => departure.hasLowFloor == lowFloorFilter).toList();
     }
 
-    return Expanded(
-      child: ListView.builder(
+    return ListView.builder(
+        shrinkWrap: true,
         controller: ScrollController(),
         padding: const EdgeInsets.only(
           top: 0.0,
-          right: 16.0,
+          // right: 8.0,
           bottom: 0.0,
-          left: 16.0,
+          // left: 8.0,
         ),
         itemCount: filteredDepartures!.length > departuresLength ? departuresLength : filteredDepartures.length,
         itemBuilder: (context, index) {
@@ -87,7 +87,6 @@ class DeparturesList extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
+      );
   }
 }
