@@ -38,6 +38,12 @@ class Transport {
     this.direction = direction;
   }
 
+  // isEqualTo method to compare all properties
+  bool isEqualTo(Transport other) {
+    return uniqueID == other.uniqueID;
+  }
+
+
   // Next 3 Departures, make a function to update this on selected intervals later
   List<Departure>? departures;
 

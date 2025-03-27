@@ -47,7 +47,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
@@ -149,7 +149,6 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     final stopName = widget.arguments.searchDetails.stops[index].name;
                     final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
                     final routeName = widget.arguments.searchDetails.routes[index].name;
-                    final routeDirection = widget.arguments.searchDetails.routes[index].direction;
                     final distance = widget.arguments.searchDetails.stops[index].distance;
                     final routeColour = widget.arguments.searchDetails.routes[index].colour;
                     final routeTextColour = widget.arguments.searchDetails.routes[index].textColour;

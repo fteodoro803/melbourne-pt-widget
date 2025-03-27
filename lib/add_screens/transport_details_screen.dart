@@ -156,7 +156,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
               child: Container(
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -168,7 +168,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                 ),
                 child: Icon(
                   Icons.arrow_back,
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   size: 30,
                 ),
               ),
@@ -182,7 +182,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   boxShadow: [
                     BoxShadow(

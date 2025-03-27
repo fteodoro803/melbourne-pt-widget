@@ -33,7 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
 
-  // Map
+// Map
   late GoogleMapController mapController;
   Set<Marker> markers = {};
   final LatLng _initialPosition =
@@ -100,8 +100,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     print("(search_screen.dart -> _onStopTapped ) -- Transport List: ${listTransport}");
     print("(search_screen.dart -> _onStopTapped ) -- Transport List Length: ${listTransport.length}");
-    print("(search_screen.dart -> _onStopTapped) -- Departures1: ${listTransport[0].departures}");
-    print("(search_screen.dart -> _onStopTapped) -- Departures2: ${listTransport[1].departures}");
+
 
 
     setState(() {
@@ -109,8 +108,10 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails.route = route;
       _isStopSelected = true;  // Switch to StopDirectionsSheet
 
-      (widget.arguments.searchDetails.directions).add(listTransport[0]);
-      (widget.arguments.searchDetails.directions).add(listTransport[1]);
+      widget.arguments.searchDetails.directions.clear();
+      for (var transport in listTransport) {
+        widget.arguments.searchDetails.directions.add(transport);
+      }
 
       // Added delay to check if data is fully updated before printing
       Future.delayed(Duration(milliseconds: 100), () {
@@ -151,17 +152,24 @@ class _SearchScreenState extends State<SearchScreen> {
     // print("( search_screen.dart -> splitDirection ) -- Direction: ${directions}");
 
     // New Transports
-    Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
-    transport1.routeType = RouteType(type: RouteTypeEnum.tram);
-    await transport1.updateDepartures();
-    // print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
-    transportList.add(transport1);
+    // Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
+    // // transport1.routeType = RouteType(type: RouteTypeEnum.tram);
+    // await transport1.updateDepartures();
+    // // print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
+    // transportList.add(transport1);
+    //
+    // Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
+    // // transport2.routeType = RouteType(type: RouteTypeEnum.tram);
+    // await transport2.updateDepartures();
+    // // print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
+    // transportList.add(transport2);
 
-    Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
-    transport2.routeType = RouteType(type: RouteTypeEnum.tram);
-    await transport2.updateDepartures();
-    // print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
-    transportList.add(transport2);
+    for (var direction in directions) {
+      Transport newTransport = Transport.withStopRoute(stop, route, direction);
+      newTransport.routeType = RouteType.withId(id: route.type.type.id);
+      await newTransport.updateDepartures();
+      transportList.add(newTransport);
+    }
 
     // print("( search_screen.dart -> splitDirection() ) -- Transport List: ${transportList}");
 
@@ -254,7 +262,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -266,7 +274,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                     child: Icon(
                       Icons.arrow_back,
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 30,
                     ),
                   ),
