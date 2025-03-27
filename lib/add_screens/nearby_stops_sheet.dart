@@ -7,6 +7,15 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../ptv_info_classes/route_info.dart' as PTRoute;
 
+enum ResultsFilter {
+  lowFloor(name: "Low Floor"),
+  shelter(name: "Shelter");
+
+  final String name;
+
+  const ResultsFilter({required this.name});
+}
+
 class NearbyStopsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final Function(String) onTransportTypeChanged;
@@ -24,6 +33,8 @@ class NearbyStopsSheet extends StatefulWidget {
 }
 
 class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
+
+  Set<ResultsFilter> filters = <ResultsFilter>{};
 
   double calculateDistance(LatLng from, LatLng to) {
     // Using geolocator to calculate the distance in meters
@@ -105,6 +116,24 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                           .onTransportTypeChanged,
                     ),
                     Divider(),
+                    Wrap(
+                      spacing: 5.0,
+                      children: ResultsFilter.values.map((ResultsFilter result) {
+                        return FilterChip(
+                            label: Text(result.name),
+                            selected: filters.contains(result),
+                            onSelected: (bool selected) {
+                              setState(() {
+                                if (selected) {
+                                  filters.add(result);
+                                } else {
+                                  filters.remove(result);
+                                }
+                              });
+                            }
+                        );
+                      }).toList(),
+                    ),
                   ],
                 ),
               ),
@@ -126,11 +155,11 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     }
 
                     final stopName = widget.arguments.searchDetails.stops[index].name;
+                    print("Stop Location: ${widget.arguments.searchDetails.stops[index].latitude}, ${widget.arguments.searchDetails.stops[index].longitude}");
+                    // final stopLocation = LatLng(widget.arguments.searchDetails.stops[index].latitude, widget.arguments.searchDetails.stops[index].latitude);
                     final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
                     final routeName = widget.arguments.searchDetails.routes[index].name;
-                    // final distanceInMeters = calculateDistance(widget.arguments.searchDetails.markerPosition!,
-                    //     LatLng(widget.arguments.searchDetails.stop?.latitude as double,
-                    //         widget.arguments.searchDetails.stop?.longitude as double));
+                    // final distanceInMeters = calculateDistance(widget.arguments.searchDetails.markerPosition!, stopLocation);
 
                     return Card(
                       child: ListTile(
@@ -182,7 +211,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                               ],
                             ),
                             Text(
-                              "$routeName",
+                              routeName,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),

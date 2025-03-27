@@ -8,6 +8,15 @@ import '../ptv_info_classes/departure_info.dart';
 import '../time_utils.dart';
 import '../transport.dart';
 
+enum ResultsFilter {
+  airConditioning(name: "Air Conditioning"),
+  lowFloor(name: "Low Floor");
+
+  final String name;
+
+  const ResultsFilter({required this.name});
+}
+
 class TransportDetailsScreen extends StatefulWidget {
   final Transport transport;
 
@@ -26,6 +35,8 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
   late LatLng _center;
 
   Set<Marker> _markers = {};
+
+  Set<ResultsFilter> filters = <ResultsFilter>{};
 
   @override
   void initState() {
@@ -116,6 +127,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Stack(
         children: [
@@ -254,7 +266,31 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                           ),
                           SizedBox(height: 4),
                           Divider(),
-                          Text("Upcoming Departures"),
+                          Wrap(
+                            spacing: 5.0,
+                            children: ResultsFilter.values.map((ResultsFilter result) {
+                              return FilterChip(
+                                label: Text(result.name),
+                                selected: filters.contains(result),
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    if (selected) {
+                                      filters.add(result);
+                                    } else {
+                                      filters.remove(result);
+                                    }
+                                  });
+                                }
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Upcoming Departures",
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                          ),
                         ],
                       ),
                     ),

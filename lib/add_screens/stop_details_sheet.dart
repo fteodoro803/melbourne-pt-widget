@@ -126,9 +126,9 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                               ),
                             ),
                             // if (widget.arguments.searchDetails.directions[1].departures?[0] != null)
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![0], transport: transport1),
+                            // DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![0], transport: transport1),
                             // if (widget.arguments.searchDetails.directions[1].departures!.length >= 2)
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![1], transport: transport1),
+                            // DepartureCard(departure: widget.arguments.searchDetails.directions[0].departures![1], transport: transport1),
                             // if (widget.arguments.searchDetails.directions[1].departures?[0] == null)
                             //   Text("No departures to show."),
                           ],
@@ -151,9 +151,9 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                               ),
                             ),
                             // if (widget.arguments.searchDetails.directions[1].departures?[0] != null)
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![0], transport: transport2),
+                            // DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![0], transport: transport2),
                               // if (widget.arguments.searchDetails.directions[1].departures!.length >= 2)
-                            DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![1], transport: transport2),
+                            // DepartureCard(departure: widget.arguments.searchDetails.directions[1].departures![1], transport: transport2),
                             // if (widget.arguments.searchDetails.directions[1].departures?[0] == null)
                             //   Text("No departures to show."),
                           ],

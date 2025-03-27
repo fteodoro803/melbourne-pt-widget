@@ -68,13 +68,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _hasDroppedPin = true;
     });
 
-    // TO DO (BACKEND):
-    // INPUT: LatLng position, "all", Double range
-    // OUTPUT: List<Stop> stops ->
-    // DESCRIPTION: list of all stops (regardless of transport type) within some range of marker
-    // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.STOPS
-
-    print("MARKER POSITION: ${widget.arguments.searchDetails.markerPosition}");
+    // print("MARKER POSITION: ${widget.arguments.searchDetails.markerPosition}");
     StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
     widget.arguments.searchDetails.routes = stopRouteLists.routes;
     widget.arguments.searchDetails.stops = stopRouteLists.stops;
@@ -124,12 +118,6 @@ class _SearchScreenState extends State<SearchScreen> {
         print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
       });
     });
-
-    // TO DO (BACKEND):
-    // INPUT: Stop stop, Route route
-    // OUTPUT: [Transport transport1, Transport transport2]:
-    // DESCRIPTION: Transports for both directions for given stop and route
-    // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.DIRECTIONS
   }
 
   Future<List<Transport>> splitDirection(Stop stop, PTRoute.Route route) async {
@@ -167,13 +155,13 @@ class _SearchScreenState extends State<SearchScreen> {
     Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
     transport1.routeType = RouteType(type: RouteTypeEnum.tram);
     await transport1.updateDepartures();
-    print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
+    // print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
     transportList.add(transport1);
 
     Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
-    transport1.routeType = RouteType(type: RouteTypeEnum.tram);
+    transport2.routeType = RouteType(type: RouteTypeEnum.tram);
     await transport2.updateDepartures();
-    print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
+    // print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
     transportList.add(transport2);
 
     // print("( search_screen.dart -> splitDirection() ) -- Transport List: ${transportList}");
@@ -195,17 +183,6 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails.routes = stopRouteLists.routes;
       widget.arguments.searchDetails.stops = stopRouteLists.stops;
     });
-
-    // fetchStops(widget.arguments.searchDetails.markerPosition, widget.arguments.searchDetails.transportType, 300)
-    // TO DO (BACKEND):
-    // INPUT: LatLng position, String routeTypeName, Double range -> If routeTypeName is "all", show all stops regardless of transport type
-    // OUTPUT: List<Stop,Routes> stopsAndRoutes ->
-    // DESCRIPTION: list of stops of a given transport type within some range of marker
-    // SAVE TO WIDGET.ARGUMENTS.SEARCHDETAILS.STOPS
-    // DONE!!!!
-
-    //    in ptv_service.dart; there is an example in select_stop_screen.dart
-
   }
 
   // Rendering
