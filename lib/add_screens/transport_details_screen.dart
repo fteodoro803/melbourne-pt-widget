@@ -125,6 +125,9 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
     mapController = controller;
   }
 
+  bool get lowFloorFilter => filters.contains(ResultsFilter.lowFloor);
+  bool get airConditionerFilter => filters.contains(ResultsFilter.airConditioning);
+
   @override
   Widget build(BuildContext context) {
 
@@ -294,7 +297,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
                         ],
                       ),
                     ),
-                    DeparturesList(departuresLength: 30, transport: transport),
+                    DeparturesList(departuresLength: 30, transport: transport, lowFloorFilter: lowFloorFilter, airConditionerFilter: airConditionerFilter,),
                   ],
                 ),
               );

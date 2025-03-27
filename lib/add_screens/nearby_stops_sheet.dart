@@ -34,6 +34,9 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
   Set<ResultsFilter> filters = <ResultsFilter>{};
 
+  bool get lowFloorFilter => filters.contains(ResultsFilter.lowFloor);
+  bool get shelterFilter => filters.contains(ResultsFilter.shelter);
+
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -146,6 +149,9 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
                     final routeName = widget.arguments.searchDetails.routes[index].name;
                     final distance = widget.arguments.searchDetails.stops[index].distance;
+                    // final routeColour = widget.arguments.searchDetails.routes[index].colour;
+                    // final routeTextColour = widget.arguments.searchDetails.routes[index].textColour;
+                    // final routeType = widget.arguments.searchDetails.routes[index].routeType;
 
                     return Card(
                       child: ListTile(
@@ -171,6 +177,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                               children: [
                                 Image.asset(
                                   "assets/icons/PTV tram Logo.png",
+                                  // "assets/icons/PTV ${routeType} Logo.png",
                                   width: 40,
                                   height: 40,
                                 ),
@@ -181,6 +188,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: Colors.grey,
+                                      // color: ColourUtils.hexToColour(routeColour),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -192,6 +200,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
+                                        // color: ColourUtils.hexToColour(routeTextColour),
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,

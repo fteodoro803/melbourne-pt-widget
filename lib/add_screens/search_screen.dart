@@ -61,6 +61,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Get the address for the dropped marker
     String address = await getAddressFromCoordinates(position.latitude, position.longitude);
+    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+    widget.arguments.searchDetails.routes = stopRouteLists.routes;
+    widget.arguments.searchDetails.stops = stopRouteLists.stops;
 
     // Update the state with the new address
     setState(() {
@@ -69,9 +72,7 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     // print("MARKER POSITION: ${widget.arguments.searchDetails.markerPosition}");
-    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
-    widget.arguments.searchDetails.routes = stopRouteLists.routes;
-    widget.arguments.searchDetails.stops = stopRouteLists.stops;
+
   }
 
   // Retrieves address from coordinates of dropped pin
