@@ -113,11 +113,11 @@ class _SearchScreenState extends State<SearchScreen> {
       (widget.arguments.searchDetails.directions).add(listTransport[1]);
 
       // Added delay to check if data is fully updated before printing
-      // Future.delayed(Duration(milliseconds: 100), () {
-      //   print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
-      //   print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
-      //   print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
-      // });
+      Future.delayed(Duration(milliseconds: 100), () {
+        print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
+        print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
+        print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
+      });
     });
   }
 
@@ -178,7 +178,6 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() {
-      widget.arguments.searchDetails.transportType = newTransportType;
       widget.arguments.searchDetails.routes = stopRouteLists.routes;
       widget.arguments.searchDetails.stops = stopRouteLists.stops;
     });

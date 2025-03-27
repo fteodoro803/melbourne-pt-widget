@@ -149,6 +149,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     final stopName = widget.arguments.searchDetails.stops[index].name;
                     final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
                     final routeName = widget.arguments.searchDetails.routes[index].name;
+                    final routeDirection = widget.arguments.searchDetails.routes[index].direction;
                     final distance = widget.arguments.searchDetails.stops[index].distance;
                     final routeColour = widget.arguments.searchDetails.routes[index].colour;
                     final routeTextColour = widget.arguments.searchDetails.routes[index].textColour;
@@ -193,9 +194,9 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      widget.arguments.searchDetails.transportType == "train" ||
-                                          widget.arguments.searchDetails.transportType == "vLine"
-                                          ? ""
+                                      routeType == "train" ||
+                                          routeType == "vLine"
+                                          ? routeName
                                           : routeNumber,
                                       style: TextStyle(
                                         fontSize: 20,
@@ -211,11 +212,13 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                       
                               ],
                             ),
-                            Text(
-                              routeName,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
+                            if (routeType != "train" &&
+                                routeType != "vLine")
+                              Text(
+                                routeName,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                           ],
                         ),
 
