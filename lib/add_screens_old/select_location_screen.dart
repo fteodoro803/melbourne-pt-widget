@@ -51,10 +51,10 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
   }
 
   void setLocation() {
-    Location newLocation = Location(location: _locationController.text);
+    Location newLocation = Location(coordinates: _locationController.text);
 
     // Normalize the location input by removing spaces
-    newLocation.location = newLocation.location.replaceAll(' ', '');
+    newLocation.coordinates = newLocation.coordinates.replaceAll(' ', '');
 
     widget.arguments.transport.location = newLocation;
   }
@@ -64,7 +64,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     String? longitude = currentPosition?.longitude.toString();
     String? location = "$latitude,$longitude";
 
-    Location newLocation = Location(location: location);
+    Location newLocation = Location(coordinates: location);
     widget.arguments.transport.location = newLocation;
   }
 
