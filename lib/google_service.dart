@@ -12,14 +12,18 @@ class GoogleService {
 
     // Empty JSON Response
     if (jsonResponse == null) {
-      print(
-          "(google_service.dart -> fetchSuggestions) -- Null data response");
+      print("(google_service.dart -> fetchSuggestions) -- Null data response");
       return suggestions;
     }
 
+    // Adds suggestions to list
     for (var suggestion in jsonResponse["suggestions"]) {
       String place = suggestion["placePrediction"]["text"]["text"];
-      suggestions.add(place);
+
+      // Contains suggestions to Victoria
+      if (place.contains("VIC")) {
+        suggestions.add(place);
+      }
     }
 
     return suggestions;
