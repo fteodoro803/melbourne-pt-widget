@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../geopath_utils.dart';
@@ -24,8 +23,6 @@ class TransportMap extends StatefulWidget {
 
 class _TransportMapState extends State<TransportMap> {
   late Transport transport;
-  late LatLng? initialMapCenter;
-  late double? initialMapZoom;
 
   // Google Maps controller and center position
   late GoogleMapController mapController;
@@ -48,18 +45,10 @@ class _TransportMapState extends State<TransportMap> {
     super.initState();
     transport = widget.arguments.transport;
 
-    initialMapCenter = widget.arguments.mapCenter;
-    initialMapZoom = widget.arguments.mapZoom;
-
-    if (initialMapCenter != null) {
-      _center = initialMapCenter!;
-    } else if (transport.stop?.latitude != null && transport.stop?.longitude != null) {
+    if (transport.stop?.latitude != null && transport.stop?.longitude != null) {
       _center = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
     }
 
-    if (initialMapZoom != null) {
-      _zoom = initialMapZoom!;
-    }
     loadTransportPath();
   }
 
