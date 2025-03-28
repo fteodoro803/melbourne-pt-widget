@@ -20,7 +20,7 @@ class StopRouteLists {
 class PtvService {
   Future<List<Departure>> fetchDepartures(String routeType, String stopId,
       String routeId,
-      {String? directionId, String maxResults = "20", String expands = "All"}) async {
+      {String? directionId, String maxResults = "3", String expands = "All"}) async {
     List<Departure> departures = [];
 
     // Fetches departure data via PTV API
