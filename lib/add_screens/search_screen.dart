@@ -70,9 +70,6 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails.locationController.text = address; // Set the address in the text field
       _hasDroppedPin = true;
     });
-
-    // print("MARKER POSITION: ${widget.arguments.searchDetails.markerPosition}");
-
   }
 
   // Retrieves address from coordinates of dropped pin
@@ -88,38 +85,6 @@ class _SearchScreenState extends State<SearchScreen> {
       print("Error getting address: $e");
     }
     return "Address not found"; // Return a default message if something goes wrong
-  }
-
-  // Handling tap on an item in NearbyStopsSheet
-  void _onStopTapped(Stop stop, PTRoute.Route route) async {
-
-    // print("(search_screen.dart -> Stops ) -- ${stop}");
-    // print("(search_screen.dart -> Routes ) -- ${route}");
-
-    List<Transport> listTransport = await splitDirection(stop, route);
-
-    print("(search_screen.dart -> _onStopTapped ) -- Transport List: ${listTransport}");
-    print("(search_screen.dart -> _onStopTapped ) -- Transport List Length: ${listTransport.length}");
-
-
-
-    setState(() {
-      widget.arguments.searchDetails.stop = stop;
-      widget.arguments.searchDetails.route = route;
-      _isStopSelected = true;  // Switch to StopDirectionsSheet
-
-      widget.arguments.searchDetails.directions.clear();
-      for (var transport in listTransport) {
-        widget.arguments.searchDetails.directions.add(transport);
-      }
-
-      // Added delay to check if data is fully updated before printing
-      Future.delayed(Duration(milliseconds: 100), () {
-        print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
-        print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
-        print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
-      });
-    });
   }
 
   Future<List<Transport>> splitDirection(Stop stop, PTRoute.Route route) async {
@@ -149,29 +114,12 @@ class _SearchScreenState extends State<SearchScreen> {
       directions.add(newDirection);
     }
 
-    // print("( search_screen.dart -> splitDirection ) -- Direction: ${directions}");
-
-    // New Transports
-    // Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
-    // // transport1.routeType = RouteType(type: RouteTypeEnum.tram);
-    // await transport1.updateDepartures();
-    // // print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
-    // transportList.add(transport1);
-    //
-    // Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
-    // // transport2.routeType = RouteType(type: RouteTypeEnum.tram);
-    // await transport2.updateDepartures();
-    // // print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
-    // transportList.add(transport2);
-
     for (var direction in directions) {
       Transport newTransport = Transport.withStopRoute(stop, route, direction);
       newTransport.routeType = RouteType.withId(id: route.type.type.id);
       await newTransport.updateDepartures();
       transportList.add(newTransport);
     }
-
-    // print("( search_screen.dart -> splitDirection() ) -- Transport List: ${transportList}");
 
     return transportList;
   }
@@ -188,6 +136,29 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       widget.arguments.searchDetails.routes = stopRouteLists.routes;
       widget.arguments.searchDetails.stops = stopRouteLists.stops;
+    });
+  }
+
+  // Handling tap on an item in NearbyStopsSheet
+  void _onStopTapped(Stop stop, PTRoute.Route route) async {
+
+    List<Transport> listTransport = await splitDirection(stop, route);
+
+    setState(() {
+      widget.arguments.searchDetails.stop = stop;
+      widget.arguments.searchDetails.route = route;
+      _isStopSelected = true;  // Switch to StopDirectionsSheet
+
+      widget.arguments.searchDetails.directions.clear();
+      for (var transport in listTransport) {
+        widget.arguments.searchDetails.directions.add(transport);
+      }
+
+      // Added delay to check if data is fully updated before printing
+      Future.delayed(Duration(milliseconds: 100), () {
+        print("(search_screen.dart -> _onStopTapped) -- Transports: ${widget.arguments.searchDetails.directions}");
+        print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
+      });
     });
   }
 
