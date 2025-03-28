@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
+import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
@@ -29,6 +30,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   bool _isStopSelected = false;
   bool _hasDroppedPin = false;
+  bool _isTransportSelected = false;
 
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
@@ -62,17 +64,17 @@ class _SearchScreenState extends State<SearchScreen> {
     // Get the address for the dropped marker
     String address = await getAddressFromCoordinates(position.latitude, position.longitude);
     StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
-    widget.arguments.searchDetails.routes = stopRouteLists.routes;
-    widget.arguments.searchDetails.stops = stopRouteLists.stops;
+    // widget.arguments.searchDetails.routes = stopRouteLists.routes;
+    // widget.arguments.searchDetails.stops = stopRouteLists.stops;
 
     // Update the state with the new address
     setState(() {
+      widget.arguments.searchDetails.markerPosition = position;
+      widget.arguments.searchDetails.routes = stopRouteLists.routes;
+      widget.arguments.searchDetails.stops = stopRouteLists.stops;
       widget.arguments.searchDetails.locationController.text = address; // Set the address in the text field
       _hasDroppedPin = true;
     });
-
-    // print("MARKER POSITION: ${widget.arguments.searchDetails.markerPosition}");
-
   }
 
   // Retrieves address from coordinates of dropped pin
@@ -88,38 +90,6 @@ class _SearchScreenState extends State<SearchScreen> {
       print("Error getting address: $e");
     }
     return "Address not found"; // Return a default message if something goes wrong
-  }
-
-  // Handling tap on an item in NearbyStopsSheet
-  void _onStopTapped(Stop stop, PTRoute.Route route) async {
-
-    // print("(search_screen.dart -> Stops ) -- ${stop}");
-    // print("(search_screen.dart -> Routes ) -- ${route}");
-
-    List<Transport> listTransport = await splitDirection(stop, route);
-
-    print("(search_screen.dart -> _onStopTapped ) -- Transport List: ${listTransport}");
-    print("(search_screen.dart -> _onStopTapped ) -- Transport List Length: ${listTransport.length}");
-
-
-
-    setState(() {
-      widget.arguments.searchDetails.stop = stop;
-      widget.arguments.searchDetails.route = route;
-      _isStopSelected = true;  // Switch to StopDirectionsSheet
-
-      widget.arguments.searchDetails.directions.clear();
-      for (var transport in listTransport) {
-        widget.arguments.searchDetails.directions.add(transport);
-      }
-
-      // Added delay to check if data is fully updated before printing
-      Future.delayed(Duration(milliseconds: 100), () {
-        print("(search_screen.dart -> _onStopTapped) -- Transport1: ${widget.arguments.searchDetails.directions[0]}");
-        print("(search_screen.dart -> _onStopTapped) -- Transport2: ${widget.arguments.searchDetails.directions[1]}");
-        print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
-      });
-    });
   }
 
   Future<List<Transport>> splitDirection(Stop stop, PTRoute.Route route) async {
@@ -149,29 +119,12 @@ class _SearchScreenState extends State<SearchScreen> {
       directions.add(newDirection);
     }
 
-    // print("( search_screen.dart -> splitDirection ) -- Direction: ${directions}");
-
-    // New Transports
-    // Transport transport1 = Transport.withStopRoute(stop, route, directions[0]);
-    // // transport1.routeType = RouteType(type: RouteTypeEnum.tram);
-    // await transport1.updateDepartures();
-    // // print("( search_screen.dart -> splitDirection() ) -- Transport1: ${transport1}");
-    // transportList.add(transport1);
-    //
-    // Transport transport2 = Transport.withStopRoute(stop, route, directions[1]);
-    // // transport2.routeType = RouteType(type: RouteTypeEnum.tram);
-    // await transport2.updateDepartures();
-    // // print("( search_screen.dart -> splitDirection() ) -- Transport2: ${transport2}");
-    // transportList.add(transport2);
-
     for (var direction in directions) {
       Transport newTransport = Transport.withStopRoute(stop, route, direction);
       newTransport.routeType = RouteType.withId(id: route.type.type.id);
       await newTransport.updateDepartures();
       transportList.add(newTransport);
     }
-
-    // print("( search_screen.dart -> splitDirection() ) -- Transport List: ${transportList}");
 
     return transportList;
   }
@@ -191,139 +144,205 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  // Handling tap on an item in NearbyStopsSheet
+  Future<void> _onStopTapped(Stop stop, PTRoute.Route route) async {
+
+    List<Transport> listTransport = await splitDirection(stop, route);
+
+    setState(() {
+      widget.arguments.searchDetails.stop = stop;
+      widget.arguments.searchDetails.route = route;
+      _isStopSelected = true;  // Switch to StopDirectionsSheet
+
+      widget.arguments.searchDetails.directions.clear();
+      for (var transport in listTransport) {
+        widget.arguments.searchDetails.directions.add(transport);
+      }
+
+    });
+  }
+
+  Future<void> _onTransportTapped(Transport transport) async {
+    setState(() {
+      widget.arguments.transport = transport;
+      _isTransportSelected = true;
+    });
+  }
+
   // Rendering
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body: Stack(children: [
+      body: Stack(
+        children: [
 
-        // Google Map
-        Positioned.fill(
-          child: GoogleMap(
-            onCameraMove: (position) {
-              setState(() {});
-            },
-            onMapCreated: _onMapCreated,
-            // Creates marker when user presses on screen
-            onLongPress: (LatLng position) {
-              if (!_isStopSelected) {
+          // Google Map
+          Positioned.fill(
+            child: GoogleMap(
+              onCameraMove: (position) {
                 setState(() {
-                  setMarker(position);
+                  widget.arguments.mapZoom = position.zoom;
+                  widget.arguments.mapCenter = position.target;
                 });
-                // Sets marker position and transport location
-                widget.arguments.searchDetails.markerPosition = position;
-              }
-            },
-            // Set initial position and zoom of map
-            initialCameraPosition: CameraPosition(
-                target: _initialPosition, zoom: 15
+              },
+              onMapCreated: _onMapCreated,
+              // Creates marker when user presses on screen
+              onLongPress: (LatLng position) {
+                if (!_isStopSelected) {
+                  setState(() {
+                    setMarker(position);
+                  });
+                  // Sets marker position and transport location
+                  widget.arguments.searchDetails.markerPosition = position;
+                }
+              },
+              // Set initial position and zoom of map
+              initialCameraPosition: CameraPosition(
+                  target: _initialPosition, zoom: 15
+              ),
+              markers: markers,
             ),
-            markers: markers,
           ),
-        ),
 
-        // Create DraggableScrollableSheet with nearby stop information if user has dropped pin
-        if (_hasDroppedPin)
-
-          // Show all nearby stops to dropped pin of a given transport type
-          if (!_isStopSelected)
-            NearbyStopsSheet(
-              arguments: widget.arguments,
-              onTransportTypeChanged: _onTransportTypeChanged,
-              onStopTapped: _onStopTapped,
-            ),
-
-        // If user has selected a stop, show the stop details screen instead
-        if (_isStopSelected)
-            StopDetailsSheet(arguments: widget.arguments),
-
-        // Back button and search bar
-        Positioned(
-          top: 40,
-          left: 15,
-          right: 15,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                // Back button rendering and functionality
-                GestureDetector(
-                  // Changes back button functionality depending on if stop has been selected
-                  onTap: () {
-                    if (_isStopSelected) {
-                      setState(() {
-                        _isStopSelected = false; // Return to list of stops
-                      });
-                    } else {
-                      Navigator.pop(context); // Return to home page
-                    }
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+          // Create DraggableScrollableSheet with nearby stop information if user has dropped pin
+          if (_hasDroppedPin)
+            DraggableScrollableSheet(
+              initialChildSize: 0.3,
+              minChildSize: 0.2,
+              maxChildSize: 0.85,
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          red: 0,
+                          green: 0,
+                          blue: 0,
+                          alpha: 0.1,
                         ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      size: 30,
-                    ),
+                        spreadRadius: 1,
+                        blurRadius: 7,
+                        offset: Offset(0, -2),
+                      ),
+                    ],
                   ),
-                ),
+                  child: _isStopSelected
+                      ? _isTransportSelected
+                      ? TransportDetailsSheet(
+                    arguments: widget.arguments,
+                    scrollController: scrollController,
+                  )
+                      : StopDetailsSheet(
+                    arguments: widget.arguments,
+                    scrollController: scrollController,
+                    onTransportTapped: _onTransportTapped,
+                  )
+                      : NearbyStopsSheet(
+                    arguments: widget.arguments,
+                    scrollController: scrollController,
+                    onTransportTypeChanged: _onTransportTypeChanged,
+                    onStopTapped: _onStopTapped,
+                  ),
+                );
+              },
+            ),
 
-                // Conditionally renders search bar if stop has not been selected
-                if (!_isStopSelected) ...[
-                  SizedBox(width: 10),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: SearchAnchor(
-                      builder: (BuildContext context, SearchController controller) {
-                        return SearchBar(
-                          controller: controller,
-                          padding: const WidgetStatePropertyAll<EdgeInsets>(
-                            EdgeInsets.symmetric(horizontal: 16.0),
-                          ),
-                          onTap: () {
-                            controller.openView();
-                          },
-                          onChanged: (_) {
-                            controller.openView();
-                          },
-                          leading: const Icon(Icons.search),
-                          hintText: "Search here",
-                        );
-                      },
-                      // Renders list of suggestions
-                      suggestionsBuilder: (BuildContext context, SearchController controller) {
-                        return List<ListTile>.generate(5, (int index) {
-                          final String item = 'item $index';
-                          return ListTile(
-                            title: Text(item),
-                            onTap: () {
-                              setState(() {
-                                controller.closeView(item);
-                              });
-                            },
-                          );
+          // Back button and search bar
+          Positioned(
+            top: 40,
+            left: 15,
+            right: 15,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  // Back button rendering and functionality
+                  GestureDetector(
+                    // Changes back button functionality depending on if stop has been selected
+                    onTap: () {
+                      if (_isStopSelected && !_isTransportSelected) {
+                        setState(() {
+                          _isStopSelected = false; // Return to list of stops
                         });
-                      },
+                      } else if (_isTransportSelected) {
+                        setState(() {
+                          _isTransportSelected = false; // Return to list of stops
+                        });
+                      }
+                      else {
+                        Navigator.pop(context); // Return to home page
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 30,
+                      ),
                     ),
                   ),
+
+                  // Conditionally renders search bar if stop has not been selected
+                  if (!_isStopSelected) ...[
+                    SizedBox(width: 10),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: SearchAnchor(
+                        builder: (BuildContext context, SearchController controller) {
+                          return SearchBar(
+                            controller: controller,
+                            padding: const WidgetStatePropertyAll<EdgeInsets>(
+                              EdgeInsets.symmetric(horizontal: 16.0),
+                            ),
+                            onTap: () {
+                              controller.openView();
+                            },
+                            onChanged: (_) {
+                              controller.openView();
+                            },
+                            leading: const Icon(Icons.search),
+                            hintText: "Search here",
+                          );
+                        },
+                        // Renders list of suggestions
+                        suggestionsBuilder: (BuildContext context, SearchController controller) {
+                          return List<ListTile>.generate(5, (int index) {
+                            final String item = 'item $index';
+                            return ListTile(
+                              title: Text(item),
+                              onTap: () {
+                                setState(() {
+                                  controller.closeView(item);
+                                });
+                              },
+                            );
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
