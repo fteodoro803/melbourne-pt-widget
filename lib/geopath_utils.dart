@@ -86,23 +86,24 @@ class GeopathAndStops {
 }
 
 class TransportPathUtils {
-  Future<Set<Polyline>> loadRoutePolyline(Transport transport, List<LatLng> geopath, LatLng stopPositionAlongGeopath) async {
+  Future<Set<Polyline>> loadRoutePolyline(Transport transport, List<LatLng> geopath, LatLng stopPositionAlongGeopath, bool isDirectionSpecified) async {
     Set<Polyline> _polylines = {};
 
     int closestIndex = geopath.indexOf(stopPositionAlongGeopath);
 
     // Separate the coordinates into previous and future journey                  ADD IMPLEMENTATION FOR REVERSE DIRECTION !!!
     List<LatLng> previousRoute = geopath.sublist(0, closestIndex + 1);
-    List<LatLng> futureRoute = geopath.sublist(closestIndex);
+    List<LatLng> futureRoute = isDirectionSpecified ? geopath.sublist(closestIndex) : geopath;
 
-
-    // Add polyline for previous journey
-    _polylines.add(Polyline(
-      polylineId: PolylineId('previous_route_polyline'),
-      color: Color(0xFFB6B6B6),
-      width: 6,
-      points: previousRoute,
-    ));
+    if (isDirectionSpecified) {
+      // Add polyline for previous journey
+      _polylines.add(Polyline(
+        polylineId: PolylineId('previous_route_polyline'),
+        color: Color(0xFFB6B6B6),
+        width: 6,
+        points: previousRoute,
+      ));
+    }
 
     // Add polyline for future journey
     _polylines.add(Polyline(
@@ -116,12 +117,12 @@ class TransportPathUtils {
 
   }
 
-  Future<Set<Marker>> setMarkers(List<LatLng> stopsAlongGeopath, LatLng stopPositionAlongGeopath, LatLng? redMarkerPosition) async {
+  Future<Set<Marker>> setMarkers(List<LatLng> stopsAlongGeopath, LatLng stopPositionAlongGeopath, LatLng? redMarkerPosition, bool isDirectionSpecified) async {
     Set<Marker> markers = {};
 
     BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 8, 8);
     BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 10, 10);
-    BitmapDescriptor? customMarkerIcon = customMarkerIconPrevious;
+    BitmapDescriptor? customMarkerIcon = isDirectionSpecified ? customMarkerIconFuture : customMarkerIconPrevious;
     BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 16, 16);
 
 

@@ -7,6 +7,7 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api_data.dart';
+import '../geopath_utils.dart';
 import '../ptv_api_service.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
@@ -34,10 +35,19 @@ class _SearchScreenState extends State<SearchScreen> {
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
   GoogleService googleService = GoogleService();
+  TransportPathUtils transportPathUtils = TransportPathUtils();
 
 // Map
   late GoogleMapController mapController;
   Set<Marker> markers = {};
+  Set<Polyline> _polylines = {};
+
+  late LatLng _stopPosition;
+  late LatLng _stopPositionAlongGeopath;
+  late List<LatLng> _geopath = [];
+  late List<Stop> _stops = [];
+  List<LatLng> _stopsAlongGeopath = [];
+
   final LatLng _initialPosition = const LatLng(-37.813812122509205,
       144.96358311072478); // Change based on user's location
 
@@ -134,6 +144,25 @@ class _SearchScreenState extends State<SearchScreen> {
     return transportList;
   }
 
+  Future<void> loadTransportPath(bool isDirectionSpecified) async {
+    _stopPosition = LatLng(widget.arguments.searchDetails.stop!.latitude!, widget.arguments.searchDetails.stop!.longitude!);
+    _stopPositionAlongGeopath = _stopPosition;
+
+    _geopath = await ptvService.fetchGeoPath(widget.arguments.searchDetails.route!);
+    _stops = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails.route!, widget.arguments.searchDetails.directions[0].direction!);
+    GeopathAndStops geopathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
+
+    _geopath = geopathAndStops.geopath;
+    _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;
+    _stopPositionAlongGeopath = geopathAndStops.stopPositionAlongGeopath;
+
+    markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition, isDirectionSpecified);
+    _polylines = await transportPathUtils.loadRoutePolyline(widget.arguments.searchDetails.directions[0], _geopath, _stopPositionAlongGeopath, isDirectionSpecified);
+
+    setState(() {
+    });
+  }
+
   // Handling choosing a new transport type in ToggleButtonsRow
   void _onTransportTypeChanged(String newTransportType) async {
     StopRouteLists stopRouteLists;
@@ -166,6 +195,7 @@ class _SearchScreenState extends State<SearchScreen> {
         widget.arguments.searchDetails.directions.add(transport);
       }
     });
+    loadTransportPath(false);
   }
 
   Future<void> _onTransportTapped(Transport transport) async {
@@ -173,6 +203,7 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.transport = transport;
       _isTransportSelected = true;
     });
+    loadTransportPath(true);
   }
 
   // Get Suggestions
@@ -217,6 +248,7 @@ class _SearchScreenState extends State<SearchScreen> {
               initialCameraPosition:
                   CameraPosition(target: _initialPosition, zoom: 15),
               markers: markers,
+              polylines: _polylines,
             ),
           ),
 
@@ -283,11 +315,14 @@ class _SearchScreenState extends State<SearchScreen> {
                       if (_isStopSelected && !_isTransportSelected) {
                         setState(() {
                           _isStopSelected = false; // Return to list of stops
+                          _polylines = {};
+                          setMarker(widget.arguments.searchDetails.markerPosition!);
                         });
                       } else if (_isTransportSelected) {
                         setState(() {
                           _isTransportSelected =
                               false; // Return to list of stops
+                          loadTransportPath(false);
                         });
                       } else {
                         Navigator.pop(context); // Return to home page

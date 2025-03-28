@@ -29,11 +29,11 @@ class _TransportMapState extends State<TransportMap> {
 
   // Google Maps controller and center position
   late GoogleMapController mapController;
-  late LatLng _stopPosition;
-  late LatLng _stopPositionAlongGeopath;
   late LatLng _center = const LatLng(-37.813812122509205, 144.96358311072478);
   late double _zoom = 13;
 
+  late LatLng _stopPosition;
+  late LatLng _stopPositionAlongGeopath;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   late List<LatLng> _geopath = [];
@@ -51,9 +51,6 @@ class _TransportMapState extends State<TransportMap> {
     initialMapCenter = widget.arguments.mapCenter;
     initialMapZoom = widget.arguments.mapZoom;
 
-    _stopPosition = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
-    _stopPositionAlongGeopath = _stopPosition;
-
     if (initialMapCenter != null) {
       _center = initialMapCenter!;
     } else if (transport.stop?.latitude != null && transport.stop?.longitude != null) {
@@ -67,6 +64,9 @@ class _TransportMapState extends State<TransportMap> {
   }
 
   Future<void> loadTransportPath() async {
+    _stopPosition = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
+    _stopPositionAlongGeopath = _stopPosition;
+
     _geopath = await ptvService.fetchGeoPath(transport.route!);
     _stops = await ptvService.fetchStopsAlongDirection(transport.route!, transport.direction!);
     GeopathAndStops geopathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
@@ -75,8 +75,8 @@ class _TransportMapState extends State<TransportMap> {
     _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;
     _stopPositionAlongGeopath = geopathAndStops.stopPositionAlongGeopath;
 
-    _markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition);
-    _polylines = await transportPathUtils.loadRoutePolyline(transport, _geopath, _stopPositionAlongGeopath);
+    _markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition, true);
+    _polylines = await transportPathUtils.loadRoutePolyline(transport, _geopath, _stopPositionAlongGeopath, true);
 
     setState(() {
     });
