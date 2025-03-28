@@ -39,7 +39,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
   // Fetch Stops            -- do tests to see if not null
   Future<void> fetchStops() async {
-    String? location = widget.arguments.transport.location?.location;
+    String? location = widget.arguments.transport.location?.coordinates;
     print(location);
     String? routeType = widget.arguments.transport.routeType?.type.id.toString();
     print(routeType);

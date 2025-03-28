@@ -7,13 +7,14 @@ part 'location_info.g.dart';
 
 @JsonSerializable()
 class Location {
-  String location;
+  String? name;
+  String coordinates;
   double latitude;
   double longitude;
 
-  Location({required this.location}) : latitude = 0, longitude = 0 {
+  Location({required this.coordinates, this.name}) : latitude = 0, longitude = 0 {
     // Split the location string by comma (assuming "latitude,longitude" format)
-    List<String> parts = location.split(',');
+    List<String> parts = coordinates.split(',');
 
     // Ensure there are exactly two parts (latitude and longitude)
     if (parts.length == 2) {
@@ -27,10 +28,16 @@ class Location {
     }
   }
 
+  Location.withLatLng(LatLng location, {this.name}) :
+    latitude = location.latitude,
+    longitude = location.longitude,
+    coordinates = "${location.latitude},${location.longitude}";
+
+
   @override
   String toString() {
-    return "Location: $location\t"
-        "Latitude, Longitude = $latitude, $longitude\n";
+    return "Location: $coordinates\t Name: $name\n"
+        "\tLatitude, Longitude = $latitude, $longitude\n";
   }
 
   LatLng toLatLng() {
