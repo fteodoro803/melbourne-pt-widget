@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../geopath_utils.dart';
 import '../ptv_info_classes/stop_info.dart';
+import '../screen_arguments.dart';
 import '../widgets/departures_list.dart';
 import '../ptv_service.dart';
 import '../ptv_info_classes/departure_info.dart';
@@ -22,9 +23,14 @@ enum ResultsFilter {
 }
 
 class TransportDetailsScreen extends StatefulWidget {
+  final ScreenArguments? arguments;
   final Transport transport;
 
-  TransportDetailsScreen({required this.transport});
+  TransportDetailsScreen({
+    super.key,
+    required this.transport,
+    this.arguments,
+  });
 
   @override
   _TransportDetailsScreenState createState() => _TransportDetailsScreenState();
@@ -32,14 +38,18 @@ class TransportDetailsScreen extends StatefulWidget {
 
 class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
   late Transport transport;
+  late LatLng? initialMapCenter;
+  late double? initialMapZoom;
   Timer? _timer;
 
   PtvService ptvService = PtvService();
 
   // Google Maps controller and center position
   late GoogleMapController mapController;
-  late LatLng _center;
-  late LatLng _centerAlongGeopath = _center;
+  late LatLng _stopPosition;
+  late LatLng _stopPositionAlongGeopath = _stopPosition;
+  late LatLng _center = const LatLng(-37.813812122509205, 144.96358311072478);
+  late double _zoom = 13;
 
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
@@ -59,13 +69,21 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
     super.initState();
     transport = widget.transport;
 
+    initialMapCenter = widget.arguments?.mapCenter;
+    initialMapZoom = widget.arguments?.mapZoom;
+
     print("Stop latitude: ${transport.stop!.latitude}");
     print("Stop longitude: ${transport.stop!.longitude}");
+    _stopPosition = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
 
-    if (transport.stop?.latitude != null && transport.stop?.longitude != null) {
+    if (initialMapCenter != null) {
+      _center = initialMapCenter!;
+    } else if (transport.stop?.latitude != null && transport.stop?.longitude != null) {
       _center = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
-    } else {
-      _center = const LatLng(-37.813812122509205, 144.96358311072478);
+    }
+
+    if (initialMapZoom != null) {
+      _zoom = initialMapZoom!;
     }
 
     // _setMarkers();
@@ -88,8 +106,8 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
         _stopsAlongGeopath.add(closestPoint);
 
         // Find the correct index to insert the closestPoint
-        if (!_geopath.contains(closestPoint) && stopPosition == _center) {
-          _centerAlongGeopath = closestPoint;
+        if (!_geopath.contains(closestPoint) && stopPosition == _stopPosition) {
+          _stopPositionAlongGeopath = closestPoint;
 
           // Find the two closest points in _geopath to insert between them
           int insertionIndex = 0;
@@ -115,7 +133,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
   Future<void> _loadRoutePolyline() async {
     await _setMarkers();
 
-    int closestIndex = _geopath.indexOf(_centerAlongGeopath);
+    int closestIndex = _geopath.indexOf(_stopPositionAlongGeopath);
 
     // Separate the coordinates into previous and future journey                  ADD IMPLEMENTATION FOR REVERSE DIRECTION !!!
     List<LatLng> previousRoute = _geopath.sublist(0, closestIndex + 1);
@@ -152,7 +170,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
 
     setState(() {
       for (var stop in _stopsAlongGeopath) {
-        if (stop == _centerAlongGeopath) {
+        if (stop == _stopPositionAlongGeopath) {
           _customMarkerIcon = _customMarkerIconFuture;
           continue;
         }
@@ -162,11 +180,24 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
           icon: _customMarkerIcon!,
         ));
       }
+      // for (var stop in _stops) {
+      //   _markers.add(Marker(
+      //     markerId: MarkerId(stop.id),
+      //     position: LatLng(stop.latitude!, stop.longitude!),
+      //     icon: _customMarkerIconPrevious!,
+      //   ));
+      // }
       _markers.add(Marker(
         markerId: MarkerId('center_marker'),
-        position: _centerAlongGeopath,
+        position: _stopPositionAlongGeopath,
         icon: _customStopMarkerIcon!,
       ));
+      if (widget.arguments?.searchDetails.markerPosition != null) {
+        _markers.add(Marker(
+          markerId: MarkerId('position'),
+          position: widget.arguments!.searchDetails.markerPosition!,
+      ));
+      }
     });
   }
 
@@ -241,7 +272,7 @@ class _TransportDetailsScreenState extends State<TransportDetailsScreen> {
           Positioned.fill(
             child: GoogleMap(
               onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(target: _center, zoom: 13),
+              initialCameraPosition: CameraPosition(target: _center, zoom: _zoom),
               mapType: MapType.normal,
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,

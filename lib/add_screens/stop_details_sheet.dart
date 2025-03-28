@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/transport_details_screen.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/departures_list.dart';
 import '../file_service.dart';
@@ -41,7 +42,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   void initState() {
     super.initState();
     // Initialize savedList here, after widget is initialized
-    // savedList = List.generate(widget.arguments.searchDetails.directions.length, (index) => false);
     initializeSavedList();
 
   }
@@ -50,7 +50,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   Widget build(BuildContext context) {
 
     if (savedList.isEmpty) {
-      return CircularProgressIndicator(); // Or any loading widget while waiting for savedList to initialize
+      return CircularProgressIndicator();
     }
 
     final transport1 = widget.arguments.searchDetails.directions[0];
@@ -216,11 +216,26 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                 // Display a message if no departures
                                 if (departures == null || departures.isEmpty)
                                   Card(
-                                    color: Colors.white,
                                     margin: const EdgeInsets.all(0.0),
                                     elevation: 0,
                                     child: Text("No departures to show."),
                                   ),
+                                GestureDetector(
+                                  child: Row(
+                                    children: [
+                                      SizedBox(width: 16),
+                                      Text("See more departures", style: TextStyle(fontSize: 14)),
+                                    ],
+                                  ),
+                                  onTap: () =>
+                                  // Navigate to TransportDetailsScreen with transport data
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => TransportDetailsScreen(transport: transport, arguments: widget.arguments),
+                                      ),
+                                    )
+                                ),
                               ],
                             ),
                           );
