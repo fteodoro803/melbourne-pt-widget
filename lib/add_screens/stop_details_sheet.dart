@@ -149,7 +149,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                         child: Text(
                                           "Towards ${transport.direction?.name}",
                                           style: TextStyle(fontSize: 18),
-                                          // overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                         ),
                                       ),
@@ -205,14 +204,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                     Text("See more departures", style: TextStyle(fontSize: 14)),
                                   ],
                                 ),
-                                // onTap: () =>
-                                // // Navigate to TransportDetailsScreen with transport data
-                                //   Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //       builder: (context) => TransportDetailsScreen(transport: transport, arguments: widget.arguments),
-                                //     ),
-                                //   )
                                 onTap: () async {
                                   setState(() {
                                     widget.onTransportTapped(transport);
