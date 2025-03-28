@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
@@ -34,6 +35,21 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     });
   }
 
+  String? _style;
+  // Loads Google Map Style from JSON
+  Future<String?> _loadMapStyle() async {
+    try {
+      String loadString = await rootBundle.loadString('assets/mapStyles/darkModeStyle.json');
+      return loadString;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void _setStyle() async {
+    _style = await _loadMapStyle();
+  }
+
   // Adds one marker on the map
   void setMarker(LatLng position) {
     markers.clear();
@@ -48,6 +64,10 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
 
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
+
+    // Loading in Style
+    _setStyle();
+    setState(() {});
   }
 
   void setLocation() {
@@ -68,6 +88,8 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     widget.arguments.transport.location = newLocation;
   }
 
+
+
   // Rendering
   @override
   Widget build(BuildContext context) {
@@ -80,6 +102,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
         // Google Map
         Positioned.fill(
           child: GoogleMap(
+              // style: _style,
               // Updates the center marker based on camera's position
               onCameraMove: (position) {
                 setState(() {
