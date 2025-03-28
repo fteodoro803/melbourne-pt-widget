@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
+import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
@@ -29,6 +30,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   bool _isStopSelected = false;
   bool _hasDroppedPin = false;
+  bool _isTransportSelected = false;
 
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
@@ -143,7 +145,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // Handling tap on an item in NearbyStopsSheet
-  void _onStopTapped(Stop stop, PTRoute.Route route) async {
+  Future<void> _onStopTapped(Stop stop, PTRoute.Route route) async {
 
     List<Transport> listTransport = await splitDirection(stop, route);
 
@@ -157,11 +159,13 @@ class _SearchScreenState extends State<SearchScreen> {
         widget.arguments.searchDetails.directions.add(transport);
       }
 
-      // Added delay to check if data is fully updated before printing
-      Future.delayed(Duration(milliseconds: 100), () {
-        print("(search_screen.dart -> _onStopTapped) -- Transports: ${widget.arguments.searchDetails.directions}");
-        print("(search_screen.dart -> _onStopTapped) -- Departures: ${widget.arguments.searchDetails.directions[0].departures}");
-      });
+    });
+  }
+
+  Future<void> _onTransportTapped(Transport transport) async {
+    setState(() {
+      widget.arguments.transport = transport;
+      _isTransportSelected = true;
     });
   }
 
@@ -227,30 +231,25 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                   child: _isStopSelected
-                      ? StopDetailsSheet(
-                          arguments: widget.arguments,
-                          scrollController: scrollController,
-                        )
+                      ? _isTransportSelected
+                      ? TransportDetailsSheet(
+                    arguments: widget.arguments,
+                    scrollController: scrollController,
+                  )
+                      : StopDetailsSheet(
+                    arguments: widget.arguments,
+                    scrollController: scrollController,
+                    onTransportTapped: _onTransportTapped,
+                  )
                       : NearbyStopsSheet(
-                          arguments: widget.arguments,
-                          scrollController: scrollController,
-                          onTransportTypeChanged: _onTransportTypeChanged,
-                          onStopTapped: _onStopTapped,
-                        ),
+                    arguments: widget.arguments,
+                    scrollController: scrollController,
+                    onTransportTypeChanged: _onTransportTypeChanged,
+                    onStopTapped: _onStopTapped,
+                  ),
                 );
               },
             ),
-
-            // Show all nearby stops to dropped pin of a given transport type
-            // if (!_isStopSelected)
-            //   NearbyStopsSheet(
-            //     arguments: widget.arguments,
-            //     onTransportTypeChanged: _onTransportTypeChanged,
-            //     onStopTapped: _onStopTapped,
-            //   ),
-            // // If user has selected a stop, show the stop details screen instead
-            // if (_isStopSelected)
-            //   StopDetailsSheet(arguments: widget.arguments),
 
           // Back button and search bar
           Positioned(
@@ -265,11 +264,16 @@ class _SearchScreenState extends State<SearchScreen> {
                   GestureDetector(
                     // Changes back button functionality depending on if stop has been selected
                     onTap: () {
-                      if (_isStopSelected) {
+                      if (_isStopSelected && !_isTransportSelected) {
                         setState(() {
                           _isStopSelected = false; // Return to list of stops
                         });
-                      } else {
+                      } else if (_isTransportSelected) {
+                        setState(() {
+                          _isTransportSelected = false; // Return to list of stops
+                        });
+                      }
+                      else {
                         Navigator.pop(context); // Return to home page
                       }
                     },

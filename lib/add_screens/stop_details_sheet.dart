@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/transport_details_screen.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/departures_list.dart';
 import '../file_service.dart';
 
 import '../time_utils.dart';
-import '../widgets/departure_card.dart';
+import '../transport.dart';
 
 class StopDetailsSheet extends StatefulWidget {
 
   final ScreenArguments arguments;
   final ScrollController scrollController;
+  final Function(Transport) onTransportTapped;
 
   const StopDetailsSheet({
     super.key,
     required this.arguments,
-    required this.scrollController
+    required this.scrollController,
+    required this.onTransportTapped
   });
 
   @override
@@ -24,7 +25,6 @@ class StopDetailsSheet extends StatefulWidget {
 
 class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
-  // List<bool> savedList = [];
   List<bool> savedList = [];
 
   // Function to initialize the savedList
@@ -47,7 +47,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    // Initialize savedList here, after widget is initialized
     initializeSavedList();
 
   }
@@ -160,10 +159,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                       child: SizedBox(
                                         width: 45,
                                         height: 40,
-                                        // decoration: BoxDecoration(
-                                        //   // color: savedList[index] ? Color(0xFFEA9CB7) : Colors.grey,
-                                        //   borderRadius: BorderRadius.circular(30),
-                                        // ),
                                         child: Center(
                                           child: Icon(
                                             savedList[index] ? Icons.star : Icons.star_border,
@@ -210,14 +205,19 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                     Text("See more departures", style: TextStyle(fontSize: 14)),
                                   ],
                                 ),
-                                onTap: () =>
-                                // Navigate to TransportDetailsScreen with transport data
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => TransportDetailsScreen(transport: transport, arguments: widget.arguments),
-                                    ),
-                                  )
+                                // onTap: () =>
+                                // // Navigate to TransportDetailsScreen with transport data
+                                //   Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (context) => TransportDetailsScreen(transport: transport, arguments: widget.arguments),
+                                //     ),
+                                //   )
+                                onTap: () async {
+                                  setState(() {
+                                    widget.onTransportTapped(transport);
+                                  });
+                                }
                               ),
                             ],
                           ),

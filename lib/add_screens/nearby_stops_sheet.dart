@@ -200,9 +200,9 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     ],
                   ),
 
-                  onTap: () {
+                  onTap: () async {
                     // Render stop details sheet if stop is tapped
-                    widget.onStopTapped(widget.arguments.searchDetails.stops[index], widget.arguments.searchDetails.routes[index]);
+                    await widget.onStopTapped(widget.arguments.searchDetails.stops[index], widget.arguments.searchDetails.routes[index]);
                   },
                 ),
               );
