@@ -203,18 +203,54 @@ class _SearchScreenState extends State<SearchScreen> {
 
           // Create DraggableScrollableSheet with nearby stop information if user has dropped pin
           if (_hasDroppedPin)
+            DraggableScrollableSheet(
+              initialChildSize: 0.3,
+              minChildSize: 0.2,
+              maxChildSize: 0.85,
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          red: 0,
+                          green: 0,
+                          blue: 0,
+                          alpha: 0.1,
+                        ),
+                        spreadRadius: 1,
+                        blurRadius: 7,
+                        offset: Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: _isStopSelected
+                      ? StopDetailsSheet(
+                          arguments: widget.arguments,
+                          scrollController: scrollController,
+                        )
+                      : NearbyStopsSheet(
+                          arguments: widget.arguments,
+                          scrollController: scrollController,
+                          onTransportTypeChanged: _onTransportTypeChanged,
+                          onStopTapped: _onStopTapped,
+                        ),
+                );
+              },
+            ),
 
             // Show all nearby stops to dropped pin of a given transport type
-            if (!_isStopSelected)
-              NearbyStopsSheet(
-                arguments: widget.arguments,
-                onTransportTypeChanged: _onTransportTypeChanged,
-                onStopTapped: _onStopTapped,
-              ),
-
-          // If user has selected a stop, show the stop details screen instead
-          if (_isStopSelected)
-              StopDetailsSheet(arguments: widget.arguments),
+            // if (!_isStopSelected)
+            //   NearbyStopsSheet(
+            //     arguments: widget.arguments,
+            //     onTransportTypeChanged: _onTransportTypeChanged,
+            //     onStopTapped: _onStopTapped,
+            //   ),
+            // // If user has selected a stop, show the stop details screen instead
+            // if (_isStopSelected)
+            //   StopDetailsSheet(arguments: widget.arguments),
 
           // Back button and search bar
           Positioned(
