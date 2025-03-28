@@ -1,6 +1,16 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
+import 'package:flutter/services.dart';
+import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/time_utils.dart';
+import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
 
 class GeoPathUtils {
   static LatLng findClosestPointOnLine(LatLng center, LatLng p1, LatLng p2) {
@@ -65,5 +75,147 @@ class GeoPathUtils {
     // If the sum of distances from point to pointA and pointB equals the distance from pointA to pointB
     return (distanceAClosest + distanceBClosest - distanceAB).abs() < 0.001;
   }
+}
 
+class GeopathAndStops {
+  final List<LatLng> geopath;
+  final List<LatLng> stopsAlongGeopath;
+  final LatLng stopPositionAlongGeopath;
+
+  GeopathAndStops(this.geopath, this.stopsAlongGeopath, this.stopPositionAlongGeopath);
+}
+
+class TransportPathUtils {
+  Future<Set<Polyline>> loadRoutePolyline(Transport transport, List<LatLng> geopath, LatLng stopPositionAlongGeopath) async {
+    Set<Polyline> _polylines = {};
+
+    int closestIndex = geopath.indexOf(stopPositionAlongGeopath);
+
+    // Separate the coordinates into previous and future journey                  ADD IMPLEMENTATION FOR REVERSE DIRECTION !!!
+    List<LatLng> previousRoute = geopath.sublist(0, closestIndex + 1);
+    List<LatLng> futureRoute = geopath.sublist(closestIndex);
+
+
+    // Add polyline for previous journey
+    _polylines.add(Polyline(
+      polylineId: PolylineId('previous_route_polyline'),
+      color: Color(0xFFB6B6B6),
+      width: 6,
+      points: previousRoute,
+    ));
+
+    // Add polyline for future journey
+    _polylines.add(Polyline(
+      polylineId: PolylineId('future_route_polyline'),
+      color: ColourUtils.hexToColour(transport.route!.colour!),
+      width: 9,
+      points: futureRoute,
+    ));
+
+    return _polylines;
+
+  }
+
+  Future<Set<Marker>> setMarkers(List<LatLng> stopsAlongGeopath, LatLng stopPositionAlongGeopath, LatLng? redMarkerPosition) async {
+    Set<Marker> markers = {};
+
+    BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 8, 8);
+    BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 10, 10);
+    BitmapDescriptor? customMarkerIcon = customMarkerIconPrevious;
+    BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 16, 16);
+
+
+    for (var stop in stopsAlongGeopath) {
+      if (stop == stopPositionAlongGeopath) {
+        customMarkerIcon = customMarkerIconFuture;
+        continue;
+      }
+      markers.add(Marker(
+        markerId: MarkerId("$stop"),
+        position: stop,
+        icon: customMarkerIcon!,
+      ));
+    }
+    // for (var stop in _stops) {
+    //   _markers.add(Marker(
+    //     markerId: MarkerId(stop.id),
+    //     position: LatLng(stop.latitude!, stop.longitude!),
+    //     icon: _customMarkerIconPrevious!,
+    //   ));
+    // }
+    markers.add(Marker(
+      markerId: MarkerId('center_marker'),
+      position: stopPositionAlongGeopath,
+      icon: customStopMarkerIcon,
+    ));
+    if (redMarkerPosition != null) {
+      markers.add(Marker(
+        markerId: MarkerId('position'),
+        position: redMarkerPosition,
+      ));
+    }
+
+    return markers;
+  }
+
+  Future<GeopathAndStops> addStopsToGeoPath(List<Stop> stops, List<LatLng> geopath, LatLng chosenStopPosition) async {
+    List<LatLng> stopsAlongGeopath = [];
+    LatLng stopPositionAlongGeopath = chosenStopPosition;
+
+    for (var stop in stops) {
+      var stopPosition = LatLng(stop.latitude!, stop.longitude!);
+      var closestPoint = GeoPathUtils.findClosestPoint(stopPosition, geopath);
+      stopsAlongGeopath.add(closestPoint);
+
+      // Find the correct index to insert the closestPoint
+      if (!geopath.contains(closestPoint) && stopPosition == chosenStopPosition) {
+        stopPositionAlongGeopath = closestPoint;
+
+        // Find the two closest points in _geopath to insert between them
+        int insertionIndex = 0;
+        for (int i = 0; i < geopath.length - 1; i++) {
+          LatLng pointA = geopath[i];
+          LatLng pointB = geopath[i + 1];
+
+          // If closestPoint is between pointA and pointB
+          if (GeoPathUtils.isBetween(closestPoint, pointA, pointB)) {
+            insertionIndex = i + 1;
+            break;
+          }
+        }
+
+        // Insert the closest point at the correct position
+        geopath.insert(insertionIndex, closestPoint);
+      }
+    }
+
+    return GeopathAndStops(geopath, stopsAlongGeopath, stopPositionAlongGeopath);
+  }
+
+  Future<BitmapDescriptor> getResizedImage(String assetPath, double width, double height) async {
+    // Load the image from assets
+    final ByteData data = await rootBundle.load(assetPath);
+    final List<int> bytes = data.buffer.asUint8List();
+
+    // Decode the image
+    final ui.Image image = await decodeImageFromList(Uint8List.fromList(bytes));
+
+    // Resize the image using a canvas
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder, Rect.fromPoints(Offset(0.0, 0.0), Offset(width, height)));
+    final Paint paint = Paint();
+
+    // Scale the image on the canvas
+    canvas.drawImageRect(image, Rect.fromLTRB(0, 0, image.width.toDouble(), image.height.toDouble()), Rect.fromLTRB(0, 0, width, height), paint);
+
+    // Convert to an image
+    final ui.Image resizedImage = await pictureRecorder.endRecording().toImage(width.toInt(), height.toInt());
+
+    // Convert to byte data
+    final ByteData? byteData = await resizedImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List resizedBytes = byteData!.buffer.asUint8List();
+
+    // Return the resized BitmapDescriptor
+    return BitmapDescriptor.bytes(resizedBytes);
+  }
 }

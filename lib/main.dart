@@ -17,7 +17,6 @@ import 'package:flutter_project/file_service.dart';
 import 'package:flutter_project/dev/test_screen.dart';
 
 import "add_screens/search_screen.dart";
-import "add_screens/transport_details_screen.dart";
 import "add_screens/transport_map.dart";
 import "home_widget_service.dart";
 
@@ -233,7 +232,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                // builder: (context) => TransportDetailsScreen(transport: _transportList[index]),
                                 builder: (context) => TransportMap(arguments: ScreenArguments(_transportList[index], _updateMainPage, SearchDetails([], [], [], TextEditingController())))
                               ),
                             )

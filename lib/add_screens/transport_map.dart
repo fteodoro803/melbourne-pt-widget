@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,10 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../geopath_utils.dart';
 import '../ptv_info_classes/stop_info.dart';
 import '../screen_arguments.dart';
-import '../widgets/departures_list.dart';
 import '../ptv_service.dart';
-import '../ptv_info_classes/departure_info.dart';
-import '../time_utils.dart';
 import '../transport.dart';
 
 class TransportMap extends StatefulWidget {
@@ -33,6 +29,8 @@ class _TransportMapState extends State<TransportMap> {
 
   // Google Maps controller and center position
   late GoogleMapController mapController;
+  late LatLng _stopPosition;
+  late LatLng _stopPositionAlongGeopath;
   late LatLng _center = const LatLng(-37.813812122509205, 144.96358311072478);
   late double _zoom = 13;
 
@@ -42,6 +40,9 @@ class _TransportMapState extends State<TransportMap> {
   late List<Stop> _stops = [];
   List<LatLng> _stopsAlongGeopath = [];
 
+  PtvService ptvService = PtvService();
+  TransportPathUtils transportPathUtils = TransportPathUtils();
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +50,9 @@ class _TransportMapState extends State<TransportMap> {
 
     initialMapCenter = widget.arguments.mapCenter;
     initialMapZoom = widget.arguments.mapZoom;
+
+    _stopPosition = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
+    _stopPositionAlongGeopath = _stopPosition;
 
     if (initialMapCenter != null) {
       _center = initialMapCenter!;
@@ -59,10 +63,23 @@ class _TransportMapState extends State<TransportMap> {
     if (initialMapZoom != null) {
       _zoom = initialMapZoom!;
     }
+    loadTransportPath();
   }
 
   Future<void> loadTransportPath() async {
+    _geopath = await ptvService.fetchGeoPath(transport.route!);
+    _stops = await ptvService.fetchStopsAlongDirection(transport.route!, transport.direction!);
+    GeopathAndStops geopathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
 
+    _geopath = geopathAndStops.geopath;
+    _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;
+    _stopPositionAlongGeopath = geopathAndStops.stopPositionAlongGeopath;
+
+    _markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition);
+    _polylines = await transportPathUtils.loadRoutePolyline(transport, _geopath, _stopPositionAlongGeopath);
+
+    setState(() {
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
