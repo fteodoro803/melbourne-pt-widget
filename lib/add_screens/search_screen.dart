@@ -208,13 +208,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Get Suggestions
   List<String> _suggestions = [];
-  Future<void> getSuggestions(String input) async {
-    print("search_screen.dart -> _onSearch");
+  Future<void> getSuggestions(String input, SearchController controller) async {
+    // print("search_screen.dart -> _onSearch");
     List<String> suggestions = await googleService.fetchSuggestions(input);
 
     setState(() {
       // Refreshes the suggestions list
       _suggestions = suggestions;
+      controller.openView();
     });
   }
 
@@ -360,23 +361,19 @@ class _SearchScreenState extends State<SearchScreen> {
                             SearchController controller) {
                           return SearchBar(
                             controller: controller,
-                            padding: const WidgetStatePropertyAll<EdgeInsets>(
-                              EdgeInsets.symmetric(horizontal: 16.0),
-                            ),
-                            onTap: () {
+                            padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0),),
+                            onSubmitted: (String value) {
                               // Gets and displays Suggestions on tap
-                              getSuggestions(controller.text);
-                              controller.openView();
+                              getSuggestions(controller.text, controller);
                             },
                             leading: const Icon(Icons.search),
                             hintText: "Search here",
                           );
                         },
+
                         // Renders list of suggestions
-                        suggestionsBuilder: (BuildContext context,
-                            SearchController controller) {
-                          return List<ListTile>.generate(_suggestions.length,
-                              (int index) {
+                        suggestionsBuilder: (BuildContext context, SearchController controller) {
+                          return List<ListTile>.generate(_suggestions.length, (int index) {
                             final String suggestion = _suggestions[index];
                             return ListTile(
                               title: Text(suggestion),
@@ -388,6 +385,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             );
                           });
                         },
+
                       ),
                     ),
                   ],
