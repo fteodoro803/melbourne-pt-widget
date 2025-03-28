@@ -14,10 +14,9 @@ import 'nearby_stops_sheet.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import '../ptv_info_classes/route_info.dart' as PTRoute;
-
+import 'package:flutter_project/google_service.dart';
 
 class SearchScreen extends StatefulWidget {
-
   final ScreenArguments arguments;
   const SearchScreen({super.key, required this.arguments});
 
@@ -34,12 +33,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
+  GoogleService googleService = GoogleService();
 
 // Map
   late GoogleMapController mapController;
   Set<Marker> markers = {};
-  final LatLng _initialPosition =
-      const LatLng(-37.813812122509205, 144.96358311072478); // Change based on user's location
+  final LatLng _initialPosition = const LatLng(-37.813812122509205,
+      144.96358311072478); // Change based on user's location
 
   // Initialises the state
   @override
@@ -57,13 +57,15 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Resets markers and creates new marker when pin is dropped by user
   Future<void> setMarker(LatLng position) async {
-    MarkerId id = MarkerId(position.toString());  // Unique ID based on position
+    MarkerId id = MarkerId(position.toString()); // Unique ID based on position
     markers.clear();
     markers.add(Marker(markerId: id, position: position));
 
     // Get the address for the dropped marker
-    String address = await getAddressFromCoordinates(position.latitude, position.longitude);
-    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+    String address =
+        await getAddressFromCoordinates(position.latitude, position.longitude);
+    StopRouteLists stopRouteLists = await ptvService
+        .fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
     // widget.arguments.searchDetails.routes = stopRouteLists.routes;
     // widget.arguments.searchDetails.stops = stopRouteLists.stops;
 
@@ -72,15 +74,18 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails.markerPosition = position;
       widget.arguments.searchDetails.routes = stopRouteLists.routes;
       widget.arguments.searchDetails.stops = stopRouteLists.stops;
-      widget.arguments.searchDetails.locationController.text = address; // Set the address in the text field
+      widget.arguments.searchDetails.locationController.text =
+          address; // Set the address in the text field
       _hasDroppedPin = true;
     });
   }
 
   // Retrieves address from coordinates of dropped pin
-  Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
+  Future<String> getAddressFromCoordinates(
+      double latitude, double longitude) async {
     try {
-      List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(latitude, longitude);
+      List<geocoding.Placemark> placemarks =
+          await geocoding.placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
         geocoding.Placemark place = placemarks[0];
         // Return a string with the address (you can adjust what part of the address you want)
@@ -114,7 +119,7 @@ class _SearchScreenState extends State<SearchScreen> {
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
       RouteDirection newDirection =
-      RouteDirection(id: id, name: name, description: description);
+          RouteDirection(id: id, name: name, description: description);
 
       directions.add(newDirection);
     }
@@ -133,9 +138,12 @@ class _SearchScreenState extends State<SearchScreen> {
   void _onTransportTypeChanged(String newTransportType) async {
     StopRouteLists stopRouteLists;
     if (newTransportType == "all") {
-      stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+      stopRouteLists = await ptvService
+          .fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
     } else {
-      stopRouteLists = await ptvService.fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!, routeTypes: newTransportType);
+      stopRouteLists = await ptvService.fetchStopRoutePairs(
+          widget.arguments.searchDetails.markerPosition!,
+          routeTypes: newTransportType);
     }
 
     setState(() {
@@ -146,19 +154,17 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Handling tap on an item in NearbyStopsSheet
   Future<void> _onStopTapped(Stop stop, PTRoute.Route route) async {
-
     List<Transport> listTransport = await splitDirection(stop, route);
 
     setState(() {
       widget.arguments.searchDetails.stop = stop;
       widget.arguments.searchDetails.route = route;
-      _isStopSelected = true;  // Switch to StopDirectionsSheet
+      _isStopSelected = true; // Switch to StopDirectionsSheet
 
       widget.arguments.searchDetails.directions.clear();
       for (var transport in listTransport) {
         widget.arguments.searchDetails.directions.add(transport);
       }
-
     });
   }
 
@@ -169,14 +175,24 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  // Get Suggestions
+  List<String> _suggestions = [];
+  Future<void> getSuggestions(String input) async {
+    print("search_screen.dart -> _onSearch");
+    List<String> suggestions = await googleService.fetchSuggestions(input);
+
+    setState(() {
+      // Refreshes the suggestions list
+      _suggestions = suggestions;
+    });
+  }
+
   // Rendering
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Stack(
         children: [
-
           // Google Map
           Positioned.fill(
             child: GoogleMap(
@@ -198,9 +214,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
               },
               // Set initial position and zoom of map
-              initialCameraPosition: CameraPosition(
-                  target: _initialPosition, zoom: 15
-              ),
+              initialCameraPosition:
+                  CameraPosition(target: _initialPosition, zoom: 15),
               markers: markers,
             ),
           ),
@@ -215,7 +230,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 return Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(
@@ -232,21 +248,21 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   child: _isStopSelected
                       ? _isTransportSelected
-                      ? TransportDetailsSheet(
-                    arguments: widget.arguments,
-                    scrollController: scrollController,
-                  )
-                      : StopDetailsSheet(
-                    arguments: widget.arguments,
-                    scrollController: scrollController,
-                    onTransportTapped: _onTransportTapped,
-                  )
+                          ? TransportDetailsSheet(
+                              arguments: widget.arguments,
+                              scrollController: scrollController,
+                            )
+                          : StopDetailsSheet(
+                              arguments: widget.arguments,
+                              scrollController: scrollController,
+                              onTransportTapped: _onTransportTapped,
+                            )
                       : NearbyStopsSheet(
-                    arguments: widget.arguments,
-                    scrollController: scrollController,
-                    onTransportTypeChanged: _onTransportTypeChanged,
-                    onStopTapped: _onStopTapped,
-                  ),
+                          arguments: widget.arguments,
+                          scrollController: scrollController,
+                          onTransportTypeChanged: _onTransportTypeChanged,
+                          onStopTapped: _onStopTapped,
+                        ),
                 );
               },
             ),
@@ -270,17 +286,18 @@ class _SearchScreenState extends State<SearchScreen> {
                         });
                       } else if (_isTransportSelected) {
                         setState(() {
-                          _isTransportSelected = false; // Return to list of stops
+                          _isTransportSelected =
+                              false; // Return to list of stops
                         });
-                      }
-                      else {
+                      } else {
                         Navigator.pop(context); // Return to home page
                       }
                     },
                     child: Container(
                       padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                        color:
+                            Theme.of(context).colorScheme.surfaceContainerHigh,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
@@ -304,16 +321,16 @@ class _SearchScreenState extends State<SearchScreen> {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.7,
                       child: SearchAnchor(
-                        builder: (BuildContext context, SearchController controller) {
+                        builder: (BuildContext context,
+                            SearchController controller) {
                           return SearchBar(
                             controller: controller,
                             padding: const WidgetStatePropertyAll<EdgeInsets>(
                               EdgeInsets.symmetric(horizontal: 16.0),
                             ),
                             onTap: () {
-                              controller.openView();
-                            },
-                            onChanged: (_) {
+                              // Gets and displays Suggestions on tap
+                              getSuggestions(controller.text);
                               controller.openView();
                             },
                             leading: const Icon(Icons.search),
@@ -321,14 +338,16 @@ class _SearchScreenState extends State<SearchScreen> {
                           );
                         },
                         // Renders list of suggestions
-                        suggestionsBuilder: (BuildContext context, SearchController controller) {
-                          return List<ListTile>.generate(5, (int index) {
-                            final String item = 'item $index';
+                        suggestionsBuilder: (BuildContext context,
+                            SearchController controller) {
+                          return List<ListTile>.generate(_suggestions.length,
+                              (int index) {
+                            final String suggestion = _suggestions[index];
                             return ListTile(
-                              title: Text(item),
+                              title: Text(suggestion),
                               onTap: () {
                                 setState(() {
-                                  controller.closeView(item);
+                                  controller.closeView(suggestion);
                                 });
                               },
                             );
