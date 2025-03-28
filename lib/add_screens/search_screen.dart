@@ -39,7 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
 // Map
   late GoogleMapController mapController;
-  Set<Marker> markers = {};
+  Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
 
   late LatLng _stopPosition;
@@ -68,8 +68,8 @@ class _SearchScreenState extends State<SearchScreen> {
   // Resets markers and creates new marker when pin is dropped by user
   Future<void> setMarker(LatLng position) async {
     MarkerId id = MarkerId(position.toString()); // Unique ID based on position
-    markers.clear();
-    markers.add(Marker(markerId: id, position: position));
+    _markers.clear();
+    _markers.add(Marker(markerId: id, position: position));
 
     // Get the address for the dropped marker
     String address =
@@ -156,7 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;
     _stopPositionAlongGeopath = geopathAndStops.stopPositionAlongGeopath;
 
-    markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition, isDirectionSpecified);
+    _markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition, isDirectionSpecified);
     _polylines = await transportPathUtils.loadRoutePolyline(widget.arguments.searchDetails.directions[0], _geopath, _stopPositionAlongGeopath, isDirectionSpecified);
 
     setState(() {
@@ -248,7 +248,7 @@ class _SearchScreenState extends State<SearchScreen> {
               // Set initial position and zoom of map
               initialCameraPosition:
                   CameraPosition(target: _initialPosition, zoom: 15),
-              markers: markers,
+              markers: _markers,
               polylines: _polylines,
             ),
           ),
