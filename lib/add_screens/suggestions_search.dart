@@ -60,6 +60,7 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
           debugPrint("(suggestion_search.dart) -- Selected $selection");
       },
 
+      // Appearance of the Searchbar
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return TextField(
           controller: controller,
@@ -77,7 +78,31 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
           // onSubmitted: ,
         );
       },
-    );
+
+      // Appearance of Suggestions Dropdown
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft, // Align it properly
+          child: Material(
+            elevation: 4.0,
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.grey.shade800,
+            child: SizedBox(
+              width: 300, // Adjust width as needed
+              child: ListView(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                children: options.map((String option) {
+                  return ListTile(
+                    title: Text(option, style: TextStyle(color: Colors.white)),
+                    onTap: () => onSelected(option),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+      },    );
   }
 }
 
