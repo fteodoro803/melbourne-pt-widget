@@ -16,6 +16,7 @@ import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import '../ptv_info_classes/route_info.dart' as PTRoute;
 import 'package:flutter_project/google_service.dart';
+import 'suggestions_search.dart';
 
 class SearchScreen extends StatefulWidget {
   final ScreenArguments arguments;
@@ -368,37 +369,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     SizedBox(width: 10),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.7,
-                      child: SearchAnchor(
-                        builder: (BuildContext context,
-                            SearchController controller) {
-                          return SearchBar(
-                            controller: controller,
-                            padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0),),
-                            onSubmitted: (String value) {
-                              // Gets and displays Suggestions on tap
-                              getSuggestions(controller.text, controller);
-                            },
-                            leading: const Icon(Icons.search),
-                            hintText: "Search here",
-                          );
-                        },
-
-                        // Renders list of suggestions
-                        suggestionsBuilder: (BuildContext context, SearchController controller) {
-                          return List<ListTile>.generate(_suggestions.length, (int index) {
-                            final String suggestion = _suggestions[index];
-                            return ListTile(
-                              title: Text(suggestion),
-                              onTap: () {
-                                setState(() {
-                                  controller.closeView(suggestion);
-                                });
-                              },
-                            );
-                          });
-                        },
-
-                      ),
+                      child: SuggestionsSearch(),
                     ),
                   ],
                 ],
