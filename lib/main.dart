@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
           '/selectLocationScreen': (context) => SelectLocationScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
-          '/selectLocationScreen2': (context) => SearchScreen(
+          '/searchScreen': (context) => SearchScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
               as ScreenArguments),
           '/selectStopScreen': (context) => SelectStopScreen(
@@ -232,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => TransportMap(arguments: ScreenArguments(_transportList[index], _updateMainPage, SearchDetails([], [], [], TextEditingController())))
+                                builder: (context) => TransportMap(arguments: ScreenArguments.withSearchDetails(_transportList[index], _updateMainPage, SearchDetails([], [], [], TextEditingController())))
                               ),
                             )
                         ),
@@ -255,7 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       context,
                       // '/selectLocationScreen2',
                       '/selectRouteTypeScreen',
-                      arguments: ScreenArguments(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController())),
+                      arguments: ScreenArguments(Transport(), _updateMainPage),
                     );
                   },
                   child: Text("+"),
@@ -267,8 +267,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
-                      '/selectLocationScreen2',
-                      arguments: ScreenArguments(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController())),
+                      '/searchScreen',
+                      arguments: ScreenArguments.withSearchDetails(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController()))
                     );
                   },
                   child: Column(
