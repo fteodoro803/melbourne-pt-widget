@@ -133,28 +133,29 @@ class TransportPathUtils {
   }
 
   Future<Set<Marker>> setMarkers(
+      Set<Marker> markers,
       List<LatLng> stopsAlongGeopath,
       LatLng stopPositionAlongGeopath,
-      LatLng? redMarkerPosition,
       bool isDirectionSpecified,
       bool isReverseDirection,
       ) async {
 
-    Set<Marker> markers = {};
+    Set<Marker> newMarkers = markers;
     List<LatLng> newStopsAlongGeopath = isReverseDirection ? stopsAlongGeopath.reversed.toList() : stopsAlongGeopath;
+    debugPrint("stops along geopath: $newStopsAlongGeopath");
 
-    BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 8, 8);
+    BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 8, 8); // this doesn't work - they're all the same size
     BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 10, 10);
     BitmapDescriptor? customMarkerIcon = isDirectionSpecified ? customMarkerIconFuture : customMarkerIconPrevious;
     BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 20, 20);
 
-
+    // for (var stop in newStopsAlongGeopath.sublist(1, newStopsAlongGeopath.length - 1)) {
     for (var stop in newStopsAlongGeopath) {
       if (stop == stopPositionAlongGeopath) {
         customMarkerIcon = customMarkerIconFuture;
         continue;
       }
-      markers.add(Marker(
+      newMarkers.add(Marker(
         markerId: MarkerId("$stop"),
         position: stop,
         icon: customMarkerIcon!,
@@ -167,19 +168,23 @@ class TransportPathUtils {
     //     icon: _customMarkerIconPrevious!,
     //   ));
     // }
-    markers.add(Marker(
+    newMarkers.add(Marker(
       markerId: MarkerId('center_marker'),
       position: stopPositionAlongGeopath,
       icon: customStopMarkerIcon,
     ));
-    if (redMarkerPosition != null) {
-      markers.add(Marker(
-        markerId: MarkerId('position'),
-        position: redMarkerPosition,
-      ));
-    }
+    // newMarkers.add(Marker(
+    //   markerId: MarkerId('first_marker'),
+    //   position: newStopsAlongGeopath[0],
+    //   icon: customStopMarkerIcon,
+    // ));
+    // newMarkers.add(Marker(
+    //   markerId: MarkerId('last_marker'),
+    //   position: newStopsAlongGeopath[newStopsAlongGeopath.length - 1],
+    //   icon: customStopMarkerIcon,
+    // ));
 
-    return markers;
+    return newMarkers;
   }
 
   Future<GeopathAndStops> addStopsToGeoPath(List<Stop> stops, List<LatLng> geopath, LatLng chosenStopPosition) async {

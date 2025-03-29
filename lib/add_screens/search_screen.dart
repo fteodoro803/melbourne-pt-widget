@@ -11,6 +11,7 @@ import '../geopath_utils.dart';
 import '../ptv_api_service.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
+import '../widgets/screen_widgets.dart';
 import 'nearby_stops_sheet.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -76,16 +77,16 @@ class _SearchScreenState extends State<SearchScreen> {
     String address =
         await getAddressFromCoordinates(position.latitude, position.longitude);
     StopRouteLists stopRouteLists = await ptvService
-        .fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+        .fetchStopRoutePairs(widget.arguments.searchDetails!.markerPosition!);
     // widget.arguments.searchDetails.routes = stopRouteLists.routes;
     // widget.arguments.searchDetails.stops = stopRouteLists.stops;
 
     // Update the state with the new address
     setState(() {
-      widget.arguments.searchDetails.markerPosition = position;
-      widget.arguments.searchDetails.routes = stopRouteLists.routes;
-      widget.arguments.searchDetails.stops = stopRouteLists.stops;
-      widget.arguments.searchDetails.locationController.text =
+      widget.arguments.searchDetails!.markerPosition = position;
+      widget.arguments.searchDetails!.routes = stopRouteLists.routes;
+      widget.arguments.searchDetails!.stops = stopRouteLists.stops;
+      widget.arguments.searchDetails!.locationController.text =
           address; // Set the address in the text field
       _hasDroppedPin = true;
     });
@@ -146,11 +147,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> loadTransportPath(bool isDirectionSpecified) async {
-    _stopPosition = LatLng(widget.arguments.searchDetails.stop!.latitude!, widget.arguments.searchDetails.stop!.longitude!);
+    _stopPosition = LatLng(widget.arguments.searchDetails!.stop!.latitude!, widget.arguments.searchDetails!.stop!.longitude!);
     _stopPositionAlongGeopath = _stopPosition;
 
-    _geopath = await ptvService.fetchGeoPath(widget.arguments.searchDetails.route!);
-    _stops = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails.route!, widget.arguments.transport.direction!);
+    _geopath = await ptvService.fetchGeoPath(widget.arguments.searchDetails!.route!);
+    _stops = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails!.route!, widget.arguments.transport.direction!);
     GeopathAndStops geopathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
 
     _geopath = geopathAndStops.geopath;
@@ -160,17 +161,19 @@ class _SearchScreenState extends State<SearchScreen> {
     bool isReverseDirection = GeoPathUtils.reverseDirection(_geopath, _stops);
 
     _markers = await transportPathUtils.setMarkers(
+        _markers,
         _stopsAlongGeopath,
         _stopPositionAlongGeopath,
-        widget.arguments.searchDetails.markerPosition,
         isDirectionSpecified,
-        isReverseDirection);
+        isReverseDirection
+    );
     _polylines = await transportPathUtils.loadRoutePolyline(
-        widget.arguments.searchDetails.directions[0],
+        widget.arguments.searchDetails!.directions[0],
         _geopath,
         _stopPositionAlongGeopath,
         isDirectionSpecified,
-        isReverseDirection);
+        isReverseDirection
+    );
 
     setState(() {
     });
@@ -181,16 +184,16 @@ class _SearchScreenState extends State<SearchScreen> {
     StopRouteLists stopRouteLists;
     if (newTransportType == "all") {
       stopRouteLists = await ptvService
-          .fetchStopRoutePairs(widget.arguments.searchDetails.markerPosition!);
+          .fetchStopRoutePairs(widget.arguments.searchDetails!.markerPosition!);
     } else {
       stopRouteLists = await ptvService.fetchStopRoutePairs(
-          widget.arguments.searchDetails.markerPosition!,
+          widget.arguments.searchDetails!.markerPosition!,
           routeTypes: newTransportType);
     }
 
     setState(() {
-      widget.arguments.searchDetails.routes = stopRouteLists.routes;
-      widget.arguments.searchDetails.stops = stopRouteLists.stops;
+      widget.arguments.searchDetails!.routes = stopRouteLists.routes;
+      widget.arguments.searchDetails!.stops = stopRouteLists.stops;
     });
   }
 
@@ -199,13 +202,13 @@ class _SearchScreenState extends State<SearchScreen> {
     List<Transport> listTransport = await splitDirection(stop, route);
 
     setState(() {
-      widget.arguments.searchDetails.stop = stop;
-      widget.arguments.searchDetails.route = route;
+      widget.arguments.searchDetails!.stop = stop;
+      widget.arguments.searchDetails!.route = route;
       _isStopSelected = true; // Switch to StopDirectionsSheet
 
-      widget.arguments.searchDetails.directions.clear();
+      widget.arguments.searchDetails!.directions.clear();
       for (var transport in listTransport) {
-        widget.arguments.searchDetails.directions.add(transport);
+        widget.arguments.searchDetails!.directions.add(transport);
       }
     });
     loadTransportPath(false);
@@ -240,10 +243,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Positioned.fill(
             child: GoogleMap(
               onCameraMove: (position) {
-                setState(() {
-                  widget.arguments.mapZoom = position.zoom;
-                  widget.arguments.mapCenter = position.target;
-                });
+                setState(() {});
               },
               onMapCreated: _onMapCreated,
               // Creates marker when user presses on screen
@@ -253,7 +253,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     setMarker(position);
                   });
                   // Sets marker position and transport location
-                  widget.arguments.searchDetails.markerPosition = position;
+                  widget.arguments.searchDetails!.markerPosition = position;
                 }
               },
               // Set initial position and zoom of map
@@ -327,39 +327,20 @@ class _SearchScreenState extends State<SearchScreen> {
                       if (_isStopSelected && !_isTransportSelected) {
                         setState(() {
                           _isStopSelected = false; // Return to list of stops
-                          _polylines = {};
-                          setMarker(widget.arguments.searchDetails.markerPosition!);
+                          _polylines.clear();
+                          setMarker(widget.arguments.searchDetails!.markerPosition!);
                         });
                       } else if (_isTransportSelected) {
                         setState(() {
-                          _isTransportSelected =
-                              false; // Return to list of stops
+                          _isTransportSelected = false;
+                          setMarker(widget.arguments.searchDetails!.markerPosition!);
                           loadTransportPath(false);
                         });
                       } else {
                         Navigator.pop(context); // Return to home page
                       }
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color:
-                            Theme.of(context).colorScheme.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Theme.of(context).colorScheme.onSurface,
-                        size: 30,
-                      ),
-                    ),
+                    child: BackButtonWidget(),
                   ),
 
                   // Conditionally renders search bar if stop has not been selected

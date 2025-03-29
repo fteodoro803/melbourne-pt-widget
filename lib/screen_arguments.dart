@@ -23,12 +23,10 @@ class SearchDetails {
 class ScreenArguments {
   Transport transport;    // data for new Transport option
   VoidCallback callback;  // function to be called from child screen
+  SearchDetails? searchDetails;
 
-  double? mapZoom;
-  int? childSize;
-  LatLng? mapCenter;
+  ScreenArguments(this.transport, this.callback);
+  ScreenArguments.withSearchDetails(this.transport, this.callback, this.searchDetails);
 
-  SearchDetails searchDetails;
-
-  ScreenArguments(this.transport, this.callback, this.searchDetails);
+  // ScreenArguments.withSearchDetails(this.searchDetails);
 }

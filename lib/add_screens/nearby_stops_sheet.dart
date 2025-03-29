@@ -3,8 +3,8 @@ import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/toggle_buttons_row.dart';
 
-import '../ptv_info_classes/route_info.dart' as PTRoute;
-import '../time_utils.dart';
+import '../ptv_info_classes/route_info.dart' as pt_route;
+import '../widgets/transport_widgets.dart';
 
 enum ResultsFilter {
   lowFloor(name: "Low Floor"),
@@ -19,7 +19,7 @@ class NearbyStopsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
   final Function(String) onTransportTypeChanged;
-  final Function(Stop, PTRoute.Route) onStopTapped;
+  final Function(Stop, pt_route.Route) onStopTapped;
 
   const NearbyStopsSheet({
     super.key,
@@ -40,8 +40,13 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
   bool get lowFloorFilter => filters.contains(ResultsFilter.lowFloor);
   bool get shelterFilter => filters.contains(ResultsFilter.shelter);
 
+
+
   @override
   Widget build(BuildContext context) {
+
+    String address = widget.arguments.searchDetails!.locationController.text;
+
     return Column(
       children: [
         // Draggable Scrollable Sheet Handle
@@ -64,28 +69,12 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.location_pin, size: 16),
-                  SizedBox(width: 3),
-                  Flexible(
-                    child: TextField(
-                      controller: widget.arguments.searchDetails.locationController,
-                      readOnly: true,
-                      style: TextStyle(fontSize: 18),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Address",
-                      ),
-                    ),
-                  ),
-                ],
+              LocationWidget(textField: address, textSize: 18),
+              SizedBox(height: 8),
+              ToggleButtonsRow(
+                onTransportTypeChanged: widget.onTransportTypeChanged,
               ),
               SizedBox(height: 4),
-              ToggleButtonsRow(
-                onTransportTypeChanged: widget
-                    .onTransportTypeChanged,
-              ),
               Divider(),
               Wrap(
                 spacing: 5.0,
@@ -118,91 +107,45 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
               bottom: 0.0,
               left: 16.0,
             ),
-            itemCount: widget.arguments.searchDetails.stops.length,
+            itemCount: widget.arguments.searchDetails!.stops.length,
             itemBuilder: (context, index) {
 
-              if (index >= widget.arguments.searchDetails.routes.length) {
+              if (index >= widget.arguments.searchDetails!.routes.length) {
                 return Container();
               }
 
-              final stopName = widget.arguments.searchDetails.stops[index].name;
-              final routeNumber = widget.arguments.searchDetails.routes[index].number.toString();
-              final routeName = widget.arguments.searchDetails.routes[index].name;
-              final distance = widget.arguments.searchDetails.stops[index].distance;
-              final routeColour = widget.arguments.searchDetails.routes[index].colour;
-              final routeTextColour = widget.arguments.searchDetails.routes[index].textColour;
-              final routeType = widget.arguments.searchDetails.routes[index].type.type.name;
+              final route = widget.arguments.searchDetails!.routes[index];
+              final stopName = widget.arguments.searchDetails!.stops[index].name;
+              final routeName = widget.arguments.searchDetails!.routes[index].name;
+              final distance = widget.arguments.searchDetails!.stops[index].distance;
+              final routeType = widget.arguments.searchDetails!.routes[index].type.type.name;
 
               return Card(
                 child: ListTile(
+                  // Distance in meters from marker
                   trailing: Text("${distance?.round()}m", style: TextStyle(fontSize: 16)),
+
+                  // Stop and route details
                   title: Column(
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.location_pin, size: 16),
-                          SizedBox(width: 3),
-                          Flexible(
-                            child: Text(
-                              stopName,
-                              style: TextStyle(fontSize: 16),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                      ),
+                      LocationWidget(textField: stopName, textSize: 16),
                       SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Image.asset(
-                            // "assets/icons/PTV tram Logo.png",
-                            "assets/icons/PTV ${routeType} Logo.png",
-                            width: 40,
-                            height: 40,
+                      RouteWidget(route: route),
+                      if (routeType != "train" && routeType != "vLine")
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            routeName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          SizedBox(width: 8),
-
-                          Flexible(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                // color: Colors.grey,
-                                color: ColourUtils.hexToColour(routeColour!),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                routeType == "train" ||
-                                    routeType == "vLine"
-                                    ? routeName
-                                    : routeNumber,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  // color: Colors.white,
-                                  color: ColourUtils.hexToColour(routeTextColour!),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ),
-
-                        ],
-                      ),
-                      if (routeType != "train" &&
-                          routeType != "vLine")
-                        Text(
-                          routeName,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
                         ),
                     ],
                   ),
 
+                  // Render stop details sheet if stop is tapped
                   onTap: () async {
-                    // Render stop details sheet if stop is tapped
-                    await widget.onStopTapped(widget.arguments.searchDetails.stops[index], widget.arguments.searchDetails.routes[index]);
+                    await widget.onStopTapped(widget.arguments.searchDetails!.stops[index], widget.arguments.searchDetails!.routes[index]);
                   },
                 ),
               );

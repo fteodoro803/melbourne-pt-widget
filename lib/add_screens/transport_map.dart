@@ -8,6 +8,7 @@ import '../ptv_info_classes/stop_info.dart';
 import '../screen_arguments.dart';
 import '../ptv_service.dart';
 import '../transport.dart';
+import '../widgets/screen_widgets.dart';
 
 class TransportMap extends StatefulWidget {
   final ScreenArguments arguments;
@@ -67,9 +68,9 @@ class _TransportMapState extends State<TransportMap> {
     bool isReverseDirection = GeoPathUtils.reverseDirection(_geopath, _stops);
 
     _markers = await transportPathUtils.setMarkers(
+        _markers,
         _stopsAlongGeopath,
         _stopPositionAlongGeopath,
-        widget.arguments.searchDetails.markerPosition,
         true,
         isReverseDirection,
     );
@@ -107,6 +108,7 @@ class _TransportMapState extends State<TransportMap> {
             ),
           ),
 
+
           Positioned(
             top: 40,
             left: 15,
@@ -114,25 +116,7 @@ class _TransportMapState extends State<TransportMap> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  size: 30,
-                ),
-              ),
+              child: BackButtonWidget(),
             ),
           ),
 
