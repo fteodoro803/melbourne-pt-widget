@@ -149,15 +149,27 @@ class _SearchScreenState extends State<SearchScreen> {
     _stopPositionAlongGeopath = _stopPosition;
 
     _geopath = await ptvService.fetchGeoPath(widget.arguments.searchDetails.route!);
-    _stops = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails.route!, widget.arguments.searchDetails.directions[0].direction!);
+    _stops = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails.route!, widget.arguments.transport.direction!);
     GeopathAndStops geopathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
 
     _geopath = geopathAndStops.geopath;
     _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;
     _stopPositionAlongGeopath = geopathAndStops.stopPositionAlongGeopath;
 
-    _markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition, isDirectionSpecified);
-    _polylines = await transportPathUtils.loadRoutePolyline(widget.arguments.searchDetails.directions[0], _geopath, _stopPositionAlongGeopath, isDirectionSpecified);
+    bool isReverseDirection = GeoPathUtils.reverseDirection(_geopath, _stops);
+
+    _markers = await transportPathUtils.setMarkers(
+        _stopsAlongGeopath,
+        _stopPositionAlongGeopath,
+        widget.arguments.searchDetails.markerPosition,
+        isDirectionSpecified,
+        isReverseDirection);
+    _polylines = await transportPathUtils.loadRoutePolyline(
+        widget.arguments.searchDetails.directions[0],
+        _geopath,
+        _stopPositionAlongGeopath,
+        isDirectionSpecified,
+        isReverseDirection);
 
     setState(() {
     });

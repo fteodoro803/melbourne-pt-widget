@@ -64,8 +64,22 @@ class _TransportMapState extends State<TransportMap> {
     _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;
     _stopPositionAlongGeopath = geopathAndStops.stopPositionAlongGeopath;
 
-    _markers = await transportPathUtils.setMarkers(_stopsAlongGeopath, _stopPositionAlongGeopath, widget.arguments.searchDetails.markerPosition, true);
-    _polylines = await transportPathUtils.loadRoutePolyline(transport, _geopath, _stopPositionAlongGeopath, true);
+    bool isReverseDirection = GeoPathUtils.reverseDirection(_geopath, _stops);
+
+    _markers = await transportPathUtils.setMarkers(
+        _stopsAlongGeopath,
+        _stopPositionAlongGeopath,
+        widget.arguments.searchDetails.markerPosition,
+        true,
+        isReverseDirection,
+    );
+    _polylines = await transportPathUtils.loadRoutePolyline(
+        transport,
+        _geopath,
+        _stopPositionAlongGeopath,
+        true,
+        isReverseDirection,
+    );
 
     setState(() {
     });

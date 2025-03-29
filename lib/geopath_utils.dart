@@ -75,6 +75,14 @@ class GeoPathUtils {
     // If the sum of distances from point to pointA and pointB equals the distance from pointA to pointB
     return (distanceAClosest + distanceBClosest - distanceAB).abs() < 0.001;
   }
+
+  static bool reverseDirection(List<LatLng> geopath, List<Stop> stops) {
+    LatLng firstGeopathPoint = geopath[0];
+    LatLng lastGeopathPoint = geopath[geopath.length - 1];
+    LatLng lastStopLocation = LatLng(stops[stops.length -1].latitude!, stops[0].longitude!);
+    return calculateDistance(lastStopLocation, firstGeopathPoint)
+        < calculateDistance(lastStopLocation, lastGeopathPoint);
+  }
 }
 
 class GeopathAndStops {
@@ -86,18 +94,25 @@ class GeopathAndStops {
 }
 
 class TransportPathUtils {
-  Future<Set<Polyline>> loadRoutePolyline(Transport transport, List<LatLng> geopath, LatLng stopPositionAlongGeopath, bool isDirectionSpecified) async {
-    Set<Polyline> _polylines = {};
+  Future<Set<Polyline>> loadRoutePolyline(
+      Transport transport, List<LatLng> geopath,
+      LatLng stopPositionAlongGeopath,
+      bool isDirectionSpecified,
+      bool isReverseDirection
+      ) async {
 
-    int closestIndex = geopath.indexOf(stopPositionAlongGeopath);
+    Set<Polyline> polylines = {};
+    List<LatLng> newGeopath = isReverseDirection ? geopath.reversed.toList() : geopath;
 
-    // Separate the coordinates into previous and future journey                  ADD IMPLEMENTATION FOR REVERSE DIRECTION !!!
-    List<LatLng> previousRoute = geopath.sublist(0, closestIndex + 1);
-    List<LatLng> futureRoute = isDirectionSpecified ? geopath.sublist(closestIndex) : geopath;
+    int closestIndex = newGeopath.indexOf(stopPositionAlongGeopath);
+
+    // Separate the coordinates into previous and future journey
+    List<LatLng> previousRoute = newGeopath.sublist(0, closestIndex + 1);
+    List<LatLng> futureRoute = isDirectionSpecified ? newGeopath.sublist(closestIndex) : newGeopath;
 
     if (isDirectionSpecified) {
       // Add polyline for previous journey
-      _polylines.add(Polyline(
+      polylines.add(Polyline(
         polylineId: PolylineId('previous_route_polyline'),
         color: Color(0xFFB6B6B6),
         width: 6,
@@ -106,27 +121,35 @@ class TransportPathUtils {
     }
 
     // Add polyline for future journey
-    _polylines.add(Polyline(
+    polylines.add(Polyline(
       polylineId: PolylineId('future_route_polyline'),
       color: ColourUtils.hexToColour(transport.route!.colour!),
       width: 9,
       points: futureRoute,
     ));
 
-    return _polylines;
+    return polylines;
 
   }
 
-  Future<Set<Marker>> setMarkers(List<LatLng> stopsAlongGeopath, LatLng stopPositionAlongGeopath, LatLng? redMarkerPosition, bool isDirectionSpecified) async {
+  Future<Set<Marker>> setMarkers(
+      List<LatLng> stopsAlongGeopath,
+      LatLng stopPositionAlongGeopath,
+      LatLng? redMarkerPosition,
+      bool isDirectionSpecified,
+      bool isReverseDirection,
+      ) async {
+
     Set<Marker> markers = {};
+    List<LatLng> newStopsAlongGeopath = isReverseDirection ? stopsAlongGeopath.reversed.toList() : stopsAlongGeopath;
 
     BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 8, 8);
     BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 10, 10);
     BitmapDescriptor? customMarkerIcon = isDirectionSpecified ? customMarkerIconFuture : customMarkerIconPrevious;
-    BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 16, 16);
+    BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 20, 20);
 
 
-    for (var stop in stopsAlongGeopath) {
+    for (var stop in newStopsAlongGeopath) {
       if (stop == stopPositionAlongGeopath) {
         customMarkerIcon = customMarkerIconFuture;
         continue;
