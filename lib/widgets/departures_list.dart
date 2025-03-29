@@ -4,11 +4,12 @@ import '../../time_utils.dart';
 import '../ptv_info_classes/departure_info.dart';
 
 // Widget for the Address input section with transport type toggle
-class DeparturesList extends StatelessWidget {
+class DeparturesList extends StatefulWidget {
   final int departuresLength;
   final Transport transport;
   final bool lowFloorFilter;
   final bool airConditionerFilter;
+  final Function(Departure)? onDepartureTapped;
 
   const DeparturesList({
     super.key,
@@ -16,14 +17,21 @@ class DeparturesList extends StatelessWidget {
     required this.transport,
     required this.lowFloorFilter,
     required this.airConditionerFilter,
+    this.onDepartureTapped,
   });
+
+  @override
+  _DeparturesListState createState() => _DeparturesListState();
+}
+
+class _DeparturesListState extends State<DeparturesList> {
 
   @override
   Widget build(BuildContext context) {
 
-    List<Departure>? filteredDepartures = transport.departures;
-    if (lowFloorFilter) {
-      filteredDepartures = transport.departures?.where((departure) => departure.hasLowFloor == lowFloorFilter).toList();
+    List<Departure>? filteredDepartures = widget.transport.departures;
+    if (widget.lowFloorFilter) {
+      filteredDepartures = widget.transport.departures?.where((departure) => departure.hasLowFloor == widget.lowFloorFilter).toList();
     }
 
     return ListView.builder(
@@ -35,7 +43,7 @@ class DeparturesList extends StatelessWidget {
           bottom: 0.0,
           // left: 8.0,
         ),
-        itemCount: filteredDepartures!.length > departuresLength ? departuresLength : filteredDepartures.length,
+        itemCount: filteredDepartures!.length > widget.departuresLength ? widget.departuresLength : filteredDepartures.length,
         itemBuilder: (context, index) {
           final departure = filteredDepartures?[index];
           final String departureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
@@ -50,7 +58,7 @@ class DeparturesList extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 2.0),
             elevation: 1,
             child: ListTile(
-              title: Text("${transport.direction?.name}"),
+              title: Text("${widget.transport.direction?.name}"),
               subtitle: Row(
                 children: [
                   Text(
@@ -83,7 +91,13 @@ class DeparturesList extends StatelessWidget {
                     color: TransportUtils.getColorForStatus(status.status),
                   ),
                 ),
-                onTap: () {},
+                onTap: () {
+                  if (widget.onDepartureTapped != null) {
+                    setState(() {
+                      widget.onDepartureTapped!(departure!);
+                    });
+                  }
+                },
             ),
           );
         },

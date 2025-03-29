@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/departures_list.dart';
 import '../file_service.dart';
+import '../ptv_info_classes/departure_info.dart';
 import '../transport.dart';
 import '../widgets/transport_widgets.dart';
 
@@ -10,12 +11,14 @@ class StopDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
   final Function(Transport) onTransportTapped;
+  final Function(Departure) onDepartureTapped;
 
   const StopDetailsSheet({
     super.key,
     required this.arguments,
     required this.scrollController,
-    required this.onTransportTapped
+    required this.onTransportTapped,
+    required this.onDepartureTapped
   });
 
   @override
@@ -132,7 +135,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                           // Display departures if they exist
                           if (departures != null && departures.isNotEmpty)
-                            DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false),
+                            DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false,),
 
                           // Display a message if no departures
                           if (departures == null || departures.isEmpty)

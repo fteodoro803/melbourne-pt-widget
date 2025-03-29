@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../file_service.dart';
+import '../ptv_info_classes/departure_info.dart';
 import '../screen_arguments.dart';
 import '../widgets/departures_list.dart';
 import '../transport.dart';
@@ -20,11 +21,13 @@ enum ResultsFilter {
 class TransportDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
+  final Function(Departure) onDepartureTapped;
 
   TransportDetailsSheet({
     super.key,
     required this.arguments,
     required this.scrollController,
+    required this.onDepartureTapped
   });
 
   @override
@@ -146,7 +149,7 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: DeparturesList(departuresLength: 30, transport: transport, lowFloorFilter: lowFloorFilter, airConditionerFilter: airConditionerFilter,),
+            child: DeparturesList(departuresLength: 30, transport: transport, lowFloorFilter: lowFloorFilter, airConditionerFilter: airConditionerFilter, onDepartureTapped: widget.onDepartureTapped,),
           ),
         ),
       ],

@@ -9,9 +9,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api_data.dart';
 import '../geopath_utils.dart';
 import '../ptv_api_service.dart';
+import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import '../widgets/screen_widgets.dart';
+import 'departure_details_sheet.dart';
 import 'nearby_stops_sheet.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -33,6 +35,9 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _isStopSelected = false;
   bool _hasDroppedPin = false;
   bool _isTransportSelected = false;
+  bool _isDepartureSelected = false;
+
+  late Departure _departure;
 
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
@@ -229,7 +234,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
     setState(() {
       setMarker(selectedLocation);
-      widget.arguments.searchDetails.markerPosition = selectedLocation;     // todo doing this line can just be part of setMarker?? Not having this makes it crash
+      widget.arguments.searchDetails!.markerPosition = selectedLocation;     // todo doing this line can just be part of setMarker?? Not having this makes it crash
+    });
+  }
+
+  Future<void> _onDepartureTapped(Departure departure) async {
+    setState(() {
+      _isDepartureSelected = true;
+      _departure = departure;
     });
   }
 
@@ -291,22 +303,30 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                   child: _isStopSelected
-                      ? _isTransportSelected
-                          ? TransportDetailsSheet(
-                              arguments: widget.arguments,
-                              scrollController: scrollController,
-                            )
-                          : StopDetailsSheet(
-                              arguments: widget.arguments,
-                              scrollController: scrollController,
-                              onTransportTapped: _onTransportTapped,
-                            )
-                      : NearbyStopsSheet(
+                    ? _isTransportSelected
+                      ? _isDepartureSelected
+                        ? DepartureDetailsSheet(
+                            arguments: widget.arguments,
+                            scrollController: scrollController,
+                            departure: _departure,
+                          )
+                        : TransportDetailsSheet(
+                            arguments: widget.arguments,
+                            scrollController: scrollController,
+                            onDepartureTapped: _onDepartureTapped,
+                          )
+                      : StopDetailsSheet(
                           arguments: widget.arguments,
                           scrollController: scrollController,
-                          onTransportTypeChanged: _onTransportTypeChanged,
-                          onStopTapped: _onStopTapped,
-                        ),
+                          onTransportTapped: _onTransportTapped,
+                          onDepartureTapped: _onDepartureTapped,
+                        )
+                    : NearbyStopsSheet(
+                        arguments: widget.arguments,
+                        scrollController: scrollController,
+                        onTransportTypeChanged: _onTransportTypeChanged,
+                        onStopTapped: _onStopTapped,
+                      ),
                 );
               },
             ),
@@ -324,17 +344,21 @@ class _SearchScreenState extends State<SearchScreen> {
                   GestureDetector(
                     // Changes back button functionality depending on if stop has been selected
                     onTap: () {
-                      if (_isStopSelected && !_isTransportSelected) {
+                      if (_isStopSelected && !_isTransportSelected && !_isDepartureSelected) {
                         setState(() {
                           _isStopSelected = false; // Return to list of stops
                           _polylines.clear();
                           setMarker(widget.arguments.searchDetails!.markerPosition!);
                         });
-                      } else if (_isTransportSelected) {
+                      } else if (_isTransportSelected && !_isDepartureSelected) {
                         setState(() {
                           _isTransportSelected = false;
                           setMarker(widget.arguments.searchDetails!.markerPosition!);
                           loadTransportPath(false);
+                        });
+                      } else if (_isDepartureSelected) {
+                        setState(() {
+                          _isDepartureSelected = false;
                         });
                       } else {
                         Navigator.pop(context); // Return to home page

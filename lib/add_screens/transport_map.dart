@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/departure_details_sheet.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../geopath_utils.dart';
+import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import '../screen_arguments.dart';
 import '../ptv_service.dart';
@@ -24,6 +26,8 @@ class TransportMap extends StatefulWidget {
 
 class _TransportMapState extends State<TransportMap> {
   late Transport transport;
+  late Departure _departure;
+  bool _isDepartureSelected = false;
 
   // Google Maps controller and center position
   late GoogleMapController mapController;
@@ -86,6 +90,13 @@ class _TransportMapState extends State<TransportMap> {
     });
   }
 
+  Future<void> _onDepartureTapped(Departure departure) async {
+    setState(() {
+      _departure = departure;
+      _isDepartureSelected = true;
+    });
+  }
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
@@ -114,7 +125,13 @@ class _TransportMapState extends State<TransportMap> {
             left: 15,
             child: GestureDetector(
               onTap: () {
-                Navigator.pop(context);
+                if (_isDepartureSelected) {
+                  setState(() {
+                    _isDepartureSelected = false;
+                  });
+                } else {
+                  Navigator.pop(context);
+                }
               },
               child: BackButtonWidget(),
             ),
@@ -143,7 +160,9 @@ class _TransportMapState extends State<TransportMap> {
                     ),
                   ],
                 ),
-                child: TransportDetailsSheet(arguments: widget.arguments, scrollController: scrollController)
+                child: _isDepartureSelected
+                  ? DepartureDetailsSheet(arguments: widget.arguments, scrollController: scrollController, departure: _departure)
+                  : TransportDetailsSheet(arguments: widget.arguments, scrollController: scrollController, onDepartureTapped: _onDepartureTapped,)
               );
             },
           ),
