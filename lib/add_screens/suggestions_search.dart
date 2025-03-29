@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../google_service.dart';
+import 'package:flutter_project/google_service.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const Duration DEBOUNCE_DURATION = Duration(milliseconds: 500);
 
 class SuggestionsSearch extends StatefulWidget {
-  const SuggestionsSearch({super.key,});
+  final Function(LatLng) onLocationSelected;      // Callback function when Location is Selected
+
+  const SuggestionsSearch({super.key, required this.onLocationSelected});
 
   @override
   State<SuggestionsSearch> createState() => _SuggestionsSearchState();
@@ -17,7 +21,6 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
 
   // The most recent options retrieved from Google Autocomplete API
   late Iterable<String> _lastOptions = <String>[];
-
   late final _Debouncable<Iterable<String>?, String> _debouncedSearch;
 
   // Calls remote API
@@ -25,17 +28,25 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
     _currentQuery = query;
 
     // Early exit of current query is null or empty
-    if (_currentQuery == null || _currentQuery!.isEmpty) {
-      return null;
-    }
+    if (_currentQuery == null || _currentQuery!.isEmpty) { return null; }
     final Iterable<String> options = await googleService.fetchSuggestions(_currentQuery!);
 
     // If another search happened after this one, reset
-    if (_currentQuery != query) {
-      return null;
-    }
+    if (_currentQuery != query) { return null; }
     _currentQuery = null;
     return options;
+  }
+
+  // Get Location of Address
+  Future<LatLng?> getAddressLocation(String address) async {
+    List<Location> locations = await locationFromAddress(address);
+
+    if (locations.isNotEmpty) {
+      Location location = locations.first;
+      LatLng coordinates = LatLng(location.latitude, location.longitude);
+      return coordinates;
+    }
+    return null;
   }
 
   @override
@@ -56,8 +67,12 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
           _lastOptions = options;
           return options;
         },
-      onSelected: (String selection) {
-          debugPrint("(suggestion_search.dart) -- Selected $selection");
+      onSelected: (String selection) async {
+          // debugPrint("(suggestion_search.dart) -- Selected $selection");
+          LatLng? selectedLocation = await getAddressLocation(selection);        // make this return to search screen
+          if (selectedLocation != null) {
+            widget.onLocationSelected(selectedLocation);
+          }
       },
 
       // Appearance of the Searchbar

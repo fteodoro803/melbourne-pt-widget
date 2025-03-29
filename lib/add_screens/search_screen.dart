@@ -219,6 +219,17 @@ class _SearchScreenState extends State<SearchScreen> {
     loadTransportPath(true);
   }
 
+  // Sets the map's Marker and Camera to the Location
+  // todo Complete this function, make the camera move to the Location
+  void _onLocationSelected(LatLng selectedLocation) {
+    print("(searchScreen -> _onLocationSelected -- selected location: $selectedLocation)");
+
+    setState(() {
+      setMarker(selectedLocation);
+      widget.arguments.searchDetails.markerPosition = selectedLocation;     // todo doing this line can just be part of setMarker?? Not having this makes it crash
+    });
+  }
+
   // Rendering
   @override
   Widget build(BuildContext context) {
@@ -356,7 +367,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     SizedBox(width: 10),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.7,
-                      child: SuggestionsSearch(),
+                      child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
                     ),
                   ],
                 ],
