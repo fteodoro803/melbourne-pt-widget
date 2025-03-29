@@ -1,5 +1,6 @@
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/route_direction_info.dart' as pt_route;
 import '../ptv_info_classes/route_info.dart' as pt_route;
 import '../time_utils.dart';
@@ -9,28 +10,37 @@ class LocationWidget extends StatelessWidget {
     super.key,
     required this.textField,
     required this.textSize,
+    required this.scrollable,
   });
 
   final String textField;
   final double textSize;
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
+
+    var textLine = Text(
+      textField,
+      style: TextStyle(fontSize: textSize),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+    );
+
     return Row(
       children: [
         Icon(Icons.location_pin, size: textSize),
         SizedBox(width: 3),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Text(
-              textField,
-              style: TextStyle(fontSize: textSize),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+        scrollable ?
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: textLine,
             ),
+          )
+          : Flexible(
+            child: textLine,
           ),
-        ),
       ],
     );
   }
@@ -157,6 +167,126 @@ class SaveTransportService {
       textStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       duration: const Duration(milliseconds: 2000),
       backgroundColor: isSaved ? Color(0xFF4E754F) : Color(0xFF7C291F),
+    );
+  }
+}
+
+class MinutesUntilDepartureWidget extends StatelessWidget {
+  const MinutesUntilDepartureWidget({
+    super.key,
+    required this.departure,
+  });
+
+  final Departure departure;
+
+  @override
+  Widget build(BuildContext context) {
+
+    DepartureStatus departureStatus;
+
+    String minutesUntilNextDepartureText;
+
+    // Gets the first departure information
+    departureStatus = TransportUtils.getDepartureStatus(
+      departure.estimatedDepartureTime,
+      departure.scheduledDepartureTime,
+    );
+    String? departureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime;
+
+    minutesUntilNextDepartureText = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime!));
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (minutesUntilNextDepartureText == "Now")
+          Text(
+            minutesUntilNextDepartureText,
+            style: TextStyle(
+              fontSize: 16, // Smaller font size for "Now"
+              fontWeight: FontWeight.w600,
+              color: TransportUtils.getColorForStatus(departureStatus.status),
+              height: 1.1,
+            ),
+          )
+        else ...[
+          Text(
+            minutesUntilNextDepartureText.split(' ').first,
+            style: TextStyle(
+              fontSize: 20, // Larger font size for the first word
+              fontWeight: FontWeight.w600,
+              color: TransportUtils.getColorForStatus(departureStatus.status),
+              height: 1.1,
+            ),
+          ),
+          Text(
+            minutesUntilNextDepartureText.split(' ').skip(1).join(' '),
+            style: TextStyle(
+              fontSize: 14, // Smaller font size for the remaining text
+              fontWeight: FontWeight.w600,
+              color: TransportUtils.getColorForStatus(departureStatus.status),
+              height: 1.1,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class DeparturesStringWidget extends StatelessWidget {
+  const DeparturesStringWidget({
+    super.key,
+    this.departures,
+  });
+
+  final List<Departure>? departures;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        if (departures == null || departures!.isEmpty)
+          Text(
+            "No times to show.",
+            style: TextStyle(height: 1.1),
+          )
+        else
+          ...List.generate(
+              departures!.length > 3 ? 3 : departures!.length,
+                  (index) {
+                bool hasLowFloor = departures![index].hasLowFloor ?? false;
+                String departureTime = departures![index].estimatedDepartureTime ??
+                    departures![index].scheduledDepartureTime ??
+                    "No Data";
+
+                return Row(
+                  children: [
+                    Text(
+                      departureTime,
+                      style: TextStyle(height: 1.1),
+                    ),
+                    if (hasLowFloor) ...[
+                      SizedBox(width: 3),
+                      Image.asset(
+                        "assets/icons/Low Floor Icon.png",
+                        width: 14,
+                        height: 14,
+                      ),
+                    ],
+                    SizedBox(width: 4),
+                    if (index < ((departures!.length > 3 ? 3 : departures!.length) - 1)) ...[
+                      Text(
+                        "•",
+                        style: TextStyle(height: 1.1),
+                      ),
+                      SizedBox(width: 4),
+                    ],
+                  ],
+                );
+              }
+          ),
+      ],
     );
   }
 }

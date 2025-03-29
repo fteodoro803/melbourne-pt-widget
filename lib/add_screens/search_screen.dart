@@ -234,8 +234,15 @@ class _SearchScreenState extends State<SearchScreen> {
 
     setState(() {
       setMarker(selectedLocation);
+      _polylines.clear();
       widget.arguments.searchDetails!.markerPosition = selectedLocation;     // todo doing this line can just be part of setMarker?? Not having this makes it crash
+      _isStopSelected = false; // Return to list of stops
+      _isDepartureSelected = false;
+      _isTransportSelected = false;
     });
+    mapController.animateCamera(
+      CameraUpdate.newLatLng(selectedLocation),
+    );
   }
 
   Future<void> _onDepartureTapped(Departure departure) async {
@@ -368,13 +375,13 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
 
                   // Conditionally renders search bar if stop has not been selected
-                  if (!_isStopSelected) ...[
-                    SizedBox(width: 10),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
-                    ),
-                  ],
+                  // if (!_isStopSelected) ...[
+                  SizedBox(width: 10),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
+                  ),
+                  // ],
                 ],
               ),
             ),

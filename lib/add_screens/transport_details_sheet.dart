@@ -89,7 +89,7 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                   Expanded(
                     child: Column(
                       children: [
-                        LocationWidget(textField: transport.stop!.name, textSize: 16),
+                        LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: true),
                         SizedBox(height: 4),
                         RouteWidget(route: transport.route!, direction: transport.direction),
                       ],

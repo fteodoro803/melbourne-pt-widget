@@ -69,7 +69,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              LocationWidget(textField: address, textSize: 18),
+              LocationWidget(textField: address, textSize: 18, scrollable: true),
               SizedBox(height: 8),
               ToggleButtonsRow(
                 onTransportTypeChanged: widget.onTransportTypeChanged,
@@ -128,7 +128,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                   // Stop and route details
                   title: Column(
                     children: [
-                      LocationWidget(textField: stopName, textSize: 16),
+                      LocationWidget(textField: stopName, textSize: 16, scrollable: true),
                       SizedBox(height: 4),
                       RouteWidget(route: route),
                       if (routeType != "train" && routeType != "vLine")

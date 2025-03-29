@@ -81,7 +81,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
             child: Column(
               children: [
                 // Stop location
-                LocationWidget(textField: widget.arguments.searchDetails!.stop!.name, textSize: 16),
+                LocationWidget(textField: widget.arguments.searchDetails!.stop!.name, textSize: 16, scrollable: true),
                 SizedBox(height: 4),
 
                 // Route details
