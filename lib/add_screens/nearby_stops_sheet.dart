@@ -27,14 +27,14 @@ enum DistanceFilter {
 class NearbyStopsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
-  final Function(String) onTransportTypeChanged;
+  final Function({int? newDistance, String? newTransportType}) onSearchFiltersChanged;
   final Function(Stop, pt_route.Route) onStopTapped;
 
   const NearbyStopsSheet({
     super.key,
     required this.arguments,
     required this.scrollController,
-    required this.onTransportTypeChanged,
+    required this.onSearchFiltersChanged,
     required this.onStopTapped,
   });
 
@@ -145,7 +145,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
               LocationWidget(textField: address, textSize: 18, scrollable: true),
               SizedBox(height: 8),
               ToggleButtonsRow(
-                onTransportTypeChanged: widget.onTransportTypeChanged,
+                onTransportTypeChanged: widget.onSearchFiltersChanged,
               ),
               SizedBox(height: 4),
               Divider(),
@@ -312,7 +312,9 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                             ),
                                             SizedBox(width: 8),
                                             ElevatedButton(
-                                              onPressed: () {
+                                              onPressed: () async {
+                                                int distanceInMeters = (_tempSelectedUnit == "m" ? int.parse(_tempSelectedDistance) : int.parse(_tempSelectedDistance) * 1000);
+                                                await widget.onSearchFiltersChanged(newTransportType: null, newDistance: distanceInMeters);
                                                 setState(() {
                                                   // Save both the unit and distance values
                                                   _selectedUnit = _tempSelectedUnit;
