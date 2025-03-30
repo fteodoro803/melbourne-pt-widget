@@ -152,12 +152,17 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> loadTransportPath(bool isDirectionSpecified) async {
-    _stopPosition = LatLng(widget.arguments.searchDetails!.stop!.latitude!, widget.arguments.searchDetails!.stop!.longitude!);
+    LatLng stopPos = LatLng(widget.arguments.searchDetails!.stop!.latitude!, widget.arguments.searchDetails!.stop!.longitude!);
+    _stopPosition = stopPos;
     _stopPositionAlongGeopath = _stopPosition;
 
-    _geopath = await ptvService.fetchGeoPath(widget.arguments.searchDetails!.route!);
-    _stops = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails!.route!, widget.arguments.transport.direction!);
-    GeopathAndStops geopathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
+    List<LatLng> geoPathList = await ptvService.fetchGeoPath(widget.arguments.searchDetails!.route!);
+    _geopath = geoPathList;
+    // List<Stop> stopList = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails!.route!, widget.arguments.searchDetails!.route!.direction!);
+    List<Stop> stopList = await ptvService.fetchStopsRoute(widget.arguments.searchDetails!.route!);
+    _stops = stopList;
+    GeopathAndStops geoStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
+    GeopathAndStops geopathAndStops = geoStops;
 
     _geopath = geopathAndStops.geopath;
     _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;

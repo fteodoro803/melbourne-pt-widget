@@ -145,14 +145,23 @@ class PtvService {
     return StopRouteLists(stops, routes);
   }
 
+  // todo Fetch Stops near a Location
+
   // Fetch Stops along a Route
-  Future<List<Stop>> fetchStopsAlongDirection(Route route, RouteDirection direction) async {
+  Future<List<Stop>> fetchStopsRoute(Route route, {RouteDirection? direction}) async {
     List<Stop> stopList = [];
 
     // Fetches stops data via PTV API
-    ApiData data = await PtvApiService().stopsAlongRoute(
-        route.id, route.type.type.id.toString(), directionId: direction.id,
-        geoPath: true);
+    ApiData data;
+    if (direction != null) {
+      data = await PtvApiService().stopsAlongRoute(
+          route.id, route.type.type.id.toString(), directionId: direction.id,
+          geoPath: true);
+    }
+    else {
+      data = await PtvApiService().stopsAlongRoute(
+          route.id, route.type.type.id.toString(), geoPath: true);
+    }
     Map<String, dynamic>? jsonResponse = data.response;
 
     // print(" (ptv_service.dart -> fetchStopsAlongDirection) -- fetched stops along direction:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
