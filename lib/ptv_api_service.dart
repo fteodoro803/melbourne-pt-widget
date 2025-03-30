@@ -155,4 +155,44 @@ class PtvApiService {
   }
 
   // Runs
+  Future<ApiData> runs(String runRef, String routeType, {String? expand}) async {
+    String request = "/v3/runs/$runRef/route_type/$routeType";
+
+    // Parameter Handling
+    Map<String, String> parameters = {};
+    if (expand != null && expand.isNotEmpty) {
+      List<String> expandList = expand.split(',');
+      // print('(ptv_api_service.dart): expandList: $expandList');
+      for (int i=0; i<expandList.length; i++) {
+        parameters['expand'] = expandList[i];   // NOTE :::: SO FAR THIS IS WRONG BC IT OVERWRITES THE PREVIOUS EXPAND, BC THERE ARE NO DUPLICATE KEYS IN MAP
+      }
+      // print('(ptv_api_service.dart): parameters: $parameters');
+    }
+
+    Uri url = getURL(request, parameters: parameters);
+    Map<String, dynamic>? response = await getResponse(url);
+    // print("(ptv_api_service -> runs): response: $response"); //*test
+    return ApiData(url, response);
+  }
+
+  // Patterns
+  Future<ApiData> patterns(String runRef, String routeType, {String? expand}) async {
+    String request = "/v3/pattern/run/$runRef/route_type/$routeType";
+
+    // Parameter Handling
+    Map<String, String> parameters = {};
+    if (expand != null && expand.isNotEmpty) {
+      List<String> expandList = expand.split(',');
+      // print('(ptv_api_service.dart): expandList: $expandList');
+      for (int i=0; i<expandList.length; i++) {
+        parameters['expand'] = expandList[i];   // NOTE :::: SO FAR THIS IS WRONG BC IT OVERWRITES THE PREVIOUS EXPAND, BC THERE ARE NO DUPLICATE KEYS IN MAP
+      }
+      // print('(ptv_api_service.dart): parameters: $parameters');
+    }
+
+    Uri url = getURL(request, parameters: parameters);
+    Map<String, dynamic>? response = await getResponse(url);
+    // print("(ptv_api_service -> patterns): response: $response"); //*test
+    return ApiData(url, response);
+  }
 }

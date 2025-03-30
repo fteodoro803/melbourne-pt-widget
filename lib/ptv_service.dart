@@ -8,6 +8,7 @@ import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class StopRouteLists {
@@ -145,8 +146,7 @@ class PtvService {
   }
 
   // Fetch Stops along a Route
-  Future<List<Stop>> fetchStopsAlongDirection(Route route,
-      RouteDirection direction) async {
+  Future<List<Stop>> fetchStopsAlongDirection(Route route, RouteDirection direction) async {
     List<Stop> stopList = [];
 
     // Fetches stops data via PTV API
@@ -202,5 +202,68 @@ class PtvService {
     // convertPolylineToCsv(paths);     // test save to CSV, for rendering on https://kepler.gl/demo
 
     return pathList;
+  }
+
+  Future<void> fetchRuns(Transport transport) async {
+    String expands = "All";
+    String? runRef = transport.departures?[0].runRef;
+    RouteType? routeType = transport.routeType;
+    ApiData data = await PtvApiService().runs(runRef!, routeType!.type.name, expand: expands);
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    print("(ptv_service.dart -> fetchRuns) -- Fetched Runs:\n$jsonResponse");
+  }
+
+  Future<List<Departure>> fetchPattern(Transport transport) async {
+    List<Departure> departures = [];
+    String expands = "Stop";
+    String? runRef = transport.departures?[0].runRef;
+    RouteType? routeType = transport.routeType;
+    ApiData data = await PtvApiService().patterns(runRef!, routeType!.type.name, expand: expands);
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Empty JSON Response
+    if (jsonResponse == null) {
+      print(
+          "( ptv_service.dart -> fetchDepartures ) -- Null data response, Improper Location Data");
+      return departures;
+    }
+
+    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
+    for (var departure in jsonResponse["departures"]) {
+      DateTime? scheduledDepartureUTC = departure["scheduled_departure_utc"] !=
+          null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
+      DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
+          null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
+      String? runId = departure["run_id"]?.toString();
+      String? runRef = departure["run_ref"]?.toString();
+      int? stopId = departure["stop_id"];
+
+      Departure newDeparture = Departure(
+          scheduledDepartureUTC: scheduledDepartureUTC,
+          estimatedDepartureUTC: estimatedDepartureUTC,
+          runId: runId,
+          runRef: runRef,
+          stopId: stopId,
+      );
+
+      // Get Stop Name per Departure
+      String? stopName = jsonResponse["stops"]?[stopId.toString()]?["stop_name"]; // makes stopName null if data for "runs" and/or "runRef" doesn't exist
+      if (stopName != null && stopName.toString().isNotEmpty) {
+        // print("( ptv_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
+
+        newDeparture.stopName = stopName;
+      }
+      else {
+        print(
+            "( ptv_service.dart -> fetchPattern() ) -- patterns for runId $runId is empty )");
+      }
+
+      departures.add(newDeparture);
+    }
+
+    // String prettyJson = JsonEncoder.withIndent('  ').convert(jsonResponse);
+    // print("(ptv_service.dart -> fetchPattern) -- Fetched Pattern:\n$prettyJson");
+    return departures;
   }
 }
