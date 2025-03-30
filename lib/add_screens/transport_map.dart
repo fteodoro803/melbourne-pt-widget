@@ -62,7 +62,7 @@ class _TransportMapState extends State<TransportMap> {
     _stopPositionAlongGeopath = _stopPosition;
 
     _geopath = await ptvService.fetchGeoPath(transport.route!);
-    _stops = await ptvService.fetchStopsAlongDirection(transport.route!, transport.direction!);
+    _stops = await ptvService.fetchStopsRoute(transport.route!, direction: transport.direction!);
     GeopathAndStops geopathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
 
     _geopath = geopathAndStops.geopath;
