@@ -9,6 +9,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class SearchDetails {
   LatLng? markerPosition;
+  int? distance;
+  String? transportType;
   Stop? stop;
   PTRoute.Route? route;
   TextEditingController locationController;

@@ -64,6 +64,8 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
 
     // Debug Printing
+    widget.arguments.searchDetails?.distance = 300;
+    widget.arguments.searchDetails?.transportType = "all";
     tools.printScreenState(_screenName, widget.arguments);
   }
 
@@ -190,20 +192,30 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // Handling choosing a new transport type in ToggleButtonsRow
-  void _onTransportTypeChanged(String newTransportType) async {
+  Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
     StopRouteLists stopRouteLists;
-    if (newTransportType == "all") {
+    String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType!;
+    int distance = newDistance ?? widget.arguments.searchDetails!.distance!;
+
+    if (transportType == "all") {
       stopRouteLists = await ptvService
-          .fetchStopRoutePairs(widget.arguments.searchDetails!.markerPosition!);
+          .fetchStopRoutePairs(
+          widget.arguments.searchDetails!.markerPosition!,
+          maxDistance: distance,
+      );
     } else {
       stopRouteLists = await ptvService.fetchStopRoutePairs(
           widget.arguments.searchDetails!.markerPosition!,
-          routeTypes: newTransportType);
+          routeTypes: transportType,
+          maxDistance: distance,
+      );
     }
 
     setState(() {
       widget.arguments.searchDetails!.routes = stopRouteLists.routes;
       widget.arguments.searchDetails!.stops = stopRouteLists.stops;
+      widget.arguments.searchDetails!.distance = distance;
+      widget.arguments.searchDetails!.transportType = transportType;
     });
   }
 
@@ -336,7 +348,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     : NearbyStopsSheet(
                         arguments: widget.arguments,
                         scrollController: scrollController,
-                        onTransportTypeChanged: _onTransportTypeChanged,
+                        onSearchFiltersChanged: _onSearchFiltersChanged,
                         onStopTapped: _onStopTapped,
                       ),
                 );

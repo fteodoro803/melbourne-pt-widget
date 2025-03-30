@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ToggleButtonsRow extends StatefulWidget {
 
-  final Function(String) onTransportTypeChanged; // Callback for parent widget
+  final Function({int? newDistance, String? newTransportType}) onTransportTypeChanged; // Callback for parent widget
   const ToggleButtonsRow({super.key, required this.onTransportTypeChanged});
 
   @override
@@ -33,7 +33,7 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isBusSelected = false;
                 isVLineSelected = false;
                 isTrainSelected = false;
-                widget.onTransportTypeChanged("all");
+                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
               }
             });
           },
@@ -61,11 +61,11 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isBusSelected = false;
                 isVLineSelected = false;
                 isTrainSelected = false;
-                widget.onTransportTypeChanged("tram");
+                widget.onTransportTypeChanged(newTransportType: "tram", newDistance: null);
               }
               else {
                 isAllSelected = true;
-                widget.onTransportTypeChanged("all");
+                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
               }
             });
 
@@ -98,11 +98,11 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isBusSelected = false;
                 isVLineSelected = false;
                 isAllSelected = false;
-                widget.onTransportTypeChanged("train");
+                widget.onTransportTypeChanged(newTransportType: "train", newDistance: null);
               }
               else {
                 isAllSelected = true;
-                widget.onTransportTypeChanged("all");
+                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
               }
             });
           },
@@ -134,11 +134,11 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
                 isVLineSelected = false;
                 isAllSelected = false;
-                widget.onTransportTypeChanged("bus");
+                widget.onTransportTypeChanged(newTransportType: "bus", newDistance: null);
               }
               else {
                 isAllSelected = true;
-                widget.onTransportTypeChanged("all");
+                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
               }
             });
           },
@@ -170,11 +170,11 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
                 isTrainSelected = false;
                 isBusSelected = false;
                 isAllSelected = false;
-                widget.onTransportTypeChanged("vLine");
+                widget.onTransportTypeChanged(newTransportType: "vLine", newDistance: null);
               }
               else {
                 isAllSelected = true;
-                widget.onTransportTypeChanged("all");
+                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
               }
             });
           },
