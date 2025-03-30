@@ -14,10 +14,10 @@ class Route {
   String? textColour;
 
   RouteDirection? direction;
-  RouteType type;
+  RouteTypeEnum type;
 
   Route({required this.id, required this.name, required this.number, required this.type}) {
-    setRouteColour(type.type.name);
+    setRouteColour(type.name);
   }
 
   @override

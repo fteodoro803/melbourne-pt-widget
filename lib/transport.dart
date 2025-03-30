@@ -15,7 +15,7 @@ part 'transport.g.dart';
 @JsonSerializable()
 class Transport {
   String? uniqueID; // unique ID for the widget timeline
-  RouteType? routeType;
+  RouteTypeEnum? routeType;
   Location? location;
   Stop? stop;
   Route? route;
@@ -30,7 +30,7 @@ class Transport {
     this.direction = direction;
   }
 
-  Transport.withAttributes(RouteType? routeType, Stop? stop, Route? route, RouteDirection? direction) {
+  Transport.withAttributes(RouteTypeEnum? routeType, Stop? stop, Route? route, RouteDirection? direction) {
     this.routeType = routeType;
     // this.location = location;
     this.stop = stop;
@@ -49,7 +49,7 @@ class Transport {
 
   // Update Departures
   Future<void> updateDepartures() async {
-    String? routeType = this.routeType?.type.id.toString();
+    String? routeType = this.routeType?.id.toString();
     String? stopId = stop?.id;
     String? directionId = direction?.id;
     String? routeId = route?.id;
@@ -75,7 +75,7 @@ class Transport {
 
   void generateUniqueID() {
     if (routeType != null && stop != null && route != null && direction != null) {
-      uniqueID = "${routeType?.type}-${stop?.id}-${route?.id}-${direction?.id}";
+      uniqueID = "${routeType?.name}-${stop?.id}-${route?.id}-${direction?.id}";
     }
   }
 
@@ -123,15 +123,16 @@ class Transport {
   }
 
   void setRouteType(int id) {
-    try {
-      RouteTypeEnum matchingEnum = RouteTypeEnum.values.firstWhere(
-            (e) => e.id == id,
-        orElse: () => throw FormatException("( transport.dart -> setRouteType() ) -- Unknown RouteType ID: $id"),
-      );
-      routeType = RouteType(type: matchingEnum);
-    } catch (e) {
-      print(e); // Logs unknown route type errors
-    }
+    // try {
+    //   RouteTypeEnum matchingEnum = RouteTypeEnum.values.firstWhere(
+    //         (e) => e.id == id,
+    //     orElse: () => throw FormatException("( transport.dart -> setRouteType() ) -- Unknown RouteType ID: $id"),
+    //   );
+    //   routeType = RouteTypeEnum(type: matchingEnum);
+    // } catch (e) {
+    //   print(e); // Logs unknown route type errors
+    // }
+    routeType = RouteTypeEnum.fromId(id);
   }
 
   // Make the toString for list representation???~
