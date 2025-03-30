@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
@@ -35,7 +36,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   // Fetches Routes and generates Map/Dictionary of PT Options               // I dont like how this logic is in the same file as the frontend rendering, find a way to split this
   Future<void> fetchRouteTypes() async {
     // Fetching Data and converting to JSON
-    Data data = await PtvApiService().routeTypes();
+    ApiData data = await PtvApiService().routeTypes();
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit     // Make it display on screen if there is no data
@@ -48,10 +49,23 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
     for (var entry in jsonResponse!["route_types"]) {
       String name = entry["route_type_name"];
       String type = entry["route_type"].toString();
-      RouteType newRouteType = RouteType(name: name, type: type);
+      // RouteType newRouteType = RouteType(name: name, type: type);
 
-      _routeTypes.add(newRouteType);
-    }
+      switch (name.toLowerCase()) {
+        case "train":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.train));
+        case "tram":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.tram));
+        case "bus":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.bus));
+        case "vline":
+          _routeTypes.add(RouteType(type: RouteTypeEnum.vLine));
+
+          // reenable night bus later
+        // case "night bus":
+        //   _routeTypes.add(RouteType(type: RouteTypeEnum.nightBus));
+      }
+     }
 
     setState(() {});
   }
@@ -74,7 +88,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
         // old
         itemCount: _routeTypes.length,
         itemBuilder: (context, index) {
-          final routeTypeName = _routeTypes[index].name ?? "Unknown RouteType";
+          final routeTypeName = _routeTypes[index].type.name ?? "Unknown RouteType";
 
           return ListTile(
             title: Text(routeTypeName),

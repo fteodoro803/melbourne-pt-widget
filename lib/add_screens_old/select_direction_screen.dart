@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
@@ -34,7 +35,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
         widget.arguments.transport.route?.id; // this seems a bit convoluted
 
     // Fetching Data and converting to JSON
-    Data data = await PtvApiService().routeDirections(routeId!);
+    ApiData data = await PtvApiService().routeDirections(routeId!);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
@@ -59,8 +60,14 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
     setState(() {});
   }
 
-  void setDirection(index) {
-    widget.arguments.transport.direction = _directions[index];
+  void setDirection(int? index) {
+    if (index != null) {
+      widget.arguments.transport.direction = _directions[index];
+    }
+    else {
+      widget.arguments.transport.direction = null;
+
+    }
   }
 
   @override
@@ -72,23 +79,39 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       ),
 
       // Generates List of Stops
-      body: ListView.builder(
-        // old
-        itemCount: _directions.length,
-        itemBuilder: (context, index) {
-          final directionName = _directions[index].name ?? "Null directionName";
-          final directionId = _directions[index].id ?? "Null directionId";
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                // old
+                itemCount: _directions.length,
+                itemBuilder: (context, index) {
+                  final directionName =
+                      _directions[index].name ?? "Null directionName";
+                  final directionId =
+                      _directions[index].id ?? "Null directionId";
 
-          return ListTile(
-            title:
-                Text("$directionName ($directionId)"),
-            onTap: () {
-              setDirection(index);
-              Navigator.pushNamed(context, '/confirmationScreen',
-                  arguments: widget.arguments);
-            },
-          );
-        },
+                  return ListTile(
+                    title: Text("$directionName ($directionId)"),
+                    onTap: () {
+                      setDirection(index);
+                      Navigator.pushNamed(context, '/confirmationScreen',
+                          arguments: widget.arguments);
+                    },
+                  );
+                },
+              ),
+            ),
+            ElevatedButton(
+                onPressed: () => {
+                  setDirection(null),
+                  Navigator.pushNamed(context, '/confirmationScreen',
+                          arguments: widget.arguments),
+                },
+                child: Text("Skip"))
+          ],
+        ),
       ),
     );
   }

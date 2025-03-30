@@ -17,12 +17,16 @@ class Departure {
   String? estimatedDepartureTime;
 
   // Vehicle Descriptions
-  String? runId;
+  String? runId;              // todo remove this it's deprecated
   String? runRef;
   bool? hasLowFloor;
 
+  // Stop Description     // todo i feel like there's a smarter way to do this. Stop name being here seems redundant
+  String? stopName;
+  int? stopId;
+
   // Constructor
-  Departure({required this.scheduledDepartureUTC, required this.estimatedDepartureUTC, required this.runId, required this.runRef}) {
+  Departure({required this.scheduledDepartureUTC, required this.estimatedDepartureUTC, required this.runId, required this.runRef, this.stopId}) {
 
     // Adds and converts Departure to local Melbourne Time
     if (scheduledDepartureUTC != null){
@@ -66,10 +70,11 @@ class Departure {
   @override
   String toString() {
     return "Departures:\n"
-      "\tScheduled Departure: $scheduledDeparture\n"
+      "\tScheduled Departure: $scheduledDeparture\t"
       "\tEstimated Departure: $estimatedDeparture\n"
-      "\tRun ID, Ref: $runId, $runRef\n"
-      "\tLow Floor: $hasLowFloor\n"
+      "\tRun ID, Ref: $runId, $runRef\t"
+      "\tLow Floor: $hasLowFloor\t"
+      "\tStop Name ($stopId): $stopName\n"
     ;
   }
 

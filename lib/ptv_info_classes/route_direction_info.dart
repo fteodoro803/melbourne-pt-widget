@@ -13,7 +13,7 @@ class RouteDirection {
   @override
   String toString() {
     return "Route Direction:\n"
-        "\tID: $id\n"
+        "\tID: $id\t"
         "\tName: $name\n";
   }
 

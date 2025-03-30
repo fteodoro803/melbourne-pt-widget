@@ -13,6 +13,7 @@ Copy-paste these commands to
   2. Ensure developer credential files don't get tracked by Git 
      - ```git update-index --assume-unchanged assets/cfg/config.json```
      - ```git update-index --assume-unchanged android/secrets.properties```
+     - ```git update-index --assume-unchanged ios/Runner/AppDelegate.swift```
   3. [Build JSON Serializable files](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility)
      - ```dart run build_runner build --delete-conflicting-outputs```
 
@@ -66,6 +67,8 @@ Copy-paste these commands to
 - Find way to remove old/removed routes that no longer exist/have no data
 - Optimisations
   - Remove description from route direction
+- If Response Data is Null, maybe Refresh 3 times? Then after that, assume it's null
+  - Because sometimes, the responses just are null but suddenly work again after
 
 - Ideas
   - Notification for Disruptions?
@@ -87,8 +90,10 @@ Copy-paste these commands to
 
 ### Decisions
 - Every variable will be of String type, because the API handles the numbers in strings
+- HomeWidget vs Shared Preferences for sending data??
 
 ### Bugs
+- Some docklands trams glitch out
 - Buses just seem kinda iffy
   - Maybe remove them for now?
   - The 907 Mitcham bus, for example, returns no data when going towards Mitcham, but does when towards the city
