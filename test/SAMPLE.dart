@@ -12,12 +12,14 @@
 // import 'package:flutter_test/flutter_test.dart';
 
 // main() {
-//   group("Location Tests",() {
-//     test("Given Location, when ", () {
-//       //   Arrange
+//   test('Calculator should add two numbers correctly', () {
+// // Arrange: Set up the Calculator instance
+//     final calculator = Calculator();
 //
-//       //   Act
-//       //   Assert
-//     },);
-//   },);
+// // Act: Call the method being tested
+//     final result = calculator.add(2, 3);
+//
+// // Assert: Check if the result is as expected
+//     expect(result, equals(5));
+//   });
 // }
