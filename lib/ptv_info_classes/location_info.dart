@@ -3,24 +3,31 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'location_info.g.dart';
 
+/// Represents a location of a stop.
+/// Handles parsing of coordinates and conversion between GoogleMaps' LatLng.
 @JsonSerializable()
 class Location {
-  String coordinates;
+  String coordinates;   // string representation in "latitude, longitude" format
   String? name;
-  double latitude;
-  double longitude;
+  double latitude;      // parsed latitude as a double
+  double longitude;     // parsed longitude as a double
 
+  /// Creates a Location from a coordinate string.
+  /// Automatically parses the string to extract latitude and longitude.
   Location({required this.coordinates, this.name})
       : latitude = 0,
         longitude = 0 {
     _parseCoordinates(coordinates);
   }
 
+  /// Creates a Location from a GoogleMaps LatLng.
+  /// Also creates a string representation of coordinates.
   Location.withLatLng(LatLng location, {this.name})
       : latitude = location.latitude,
         longitude = location.longitude,
         coordinates = "${location.latitude}, ${location.longitude}";
 
+  /// Parses a coordinate string into latitude and longitude values.
   void _parseCoordinates(String coordinates) {
     // Check if empty
     if (coordinates.isEmpty) {
@@ -46,17 +53,19 @@ class Location {
     }
   }
 
+  /// Converts this location to a GoogleMaps LatLng object.
+  /// Useful for map operations and markers.
+  LatLng toLatLng() {
+    return LatLng(latitude, longitude);
+  }
+
   @override
   String toString() {
     return "Location: $coordinates, Name: $name\n"
         "\tLatitude, Longitude: $latitude, $longitude\n";
   }
 
-  LatLng toLatLng() {
-    return LatLng(latitude, longitude);
-  }
-
-  // Methods for JSON Serialization
+  /// Methods for JSON Serialization.
   factory Location.fromJson(Map<String, dynamic> json) =>
       _$LocationFromJson(json);
   Map<String, dynamic> toJson() => _$LocationToJson(this);

@@ -14,22 +14,28 @@ enum RouteTypeEnum {
 
   const RouteTypeEnum(this.id, this.name);
 
-  // Helper method to normalize name for comparison
+  /// Helper method to normalize name for comparison
   static String _normaliseName(String name) {
     return name.toLowerCase().replaceAll(' ', '');
   }
 }
 
+/// Represents the route types currently available via Melbourne PTV.
 @JsonSerializable()
 class RouteType {
   RouteTypeEnum type;
 
+  /// Creates a RouteType object from a RouteTypeEnum.
   RouteType({required this.type});
+
+  /// Creates a RouteType object from a route type's ID.
   RouteType.withId({required int id})
       : type = RouteTypeEnum.values.firstWhere(
             (routeType) => routeType.id == id,
             orElse: () =>
                 throw ArgumentError('No RouteTypeEnum found for id: $id'));
+
+  /// Creates a RouteType object from a route type's name.
   RouteType.withName({required String name})
       : type = RouteTypeEnum.values.firstWhere(
             (routeType) =>
@@ -45,7 +51,7 @@ class RouteType {
         "\tName: ${type.name}\n";
   }
 
-  // Methods for JSON Serialization
+  /// Methods for JSON Serialization
   factory RouteType.fromJson(Map<String, dynamic> json) =>
       _$RouteTypeFromJson(json);
   Map<String, dynamic> toJson() => _$RouteTypeToJson(this);
