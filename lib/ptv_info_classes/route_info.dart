@@ -11,11 +11,11 @@ part 'route_info.g.dart';
 class Route {
   int id;
   String name;
-  String number;
-  String? colour;       // Hex colour code for background
+  String number;        // todo: should this be an int? Maybe nullable, since train doesnt have a number
+  String? colour;       // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
   String? textColour;   // Hex colour code for text
 
-  RouteDirection? direction;
+  RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
   RouteType type;
 
   /// Creates a route object, and matches its details to its respective colour.
@@ -29,6 +29,7 @@ class Route {
 
   /// Sets a route's colours based on its type.
   /// Uses predefined colour palette with fallbacks for routes.
+  // todo: convert the string routeType to a RouteTypeEnum
   void setRouteColour(String routeType) {
     routeType = routeType.toLowerCase(); // Normalise case for matching
 
