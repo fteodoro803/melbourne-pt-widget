@@ -51,11 +51,12 @@ class RouteWidget extends StatelessWidget {
     super.key,
     required this.route,
     this.direction,
+    required this.scrollable,
   });
 
   final pt_route.Route route;
   final pt_route.RouteDirection? direction;
-
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
@@ -64,40 +65,50 @@ class RouteWidget extends StatelessWidget {
       children: [
         Image.asset(
           "assets/icons/PTV $routeType Logo.png",
-          width: 40,
-          height: 40,
+          width: 30,
+          height: 30,
         ),
         SizedBox(width: 8),
 
-        Flexible(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: route.colour != null
-                  ? ColourUtils.hexToColour(route.colour!)
-                  : Colors.grey,
-              borderRadius: BorderRadius.circular(8),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: route.colour != null
+                ? ColourUtils.hexToColour(route.colour!)
+                : Colors.grey,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            routeType == "train" ||
+                routeType == "vLine"
+                ? route.name
+                : route.number,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: route.textColour != null
+                  ? ColourUtils.hexToColour(route.textColour!)
+                  : Colors.black,
             ),
-            child: Text(
-              routeType == "train" ||
-                  routeType == "vLine"
-                  ? route.name
-                  : route.number,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: route.textColour != null
-                    ? ColourUtils.hexToColour(route.textColour!)
-                    : Colors.black,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
         SizedBox(width: 10),
 
         if (routeType != "train" && routeType != "vLine" && direction != null)
+          // Expanded(
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Text(
+          //       direction?.name ?? "No Data",
+          //       style: TextStyle(
+          //         fontSize: 18,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          scrollable ?
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -106,8 +117,30 @@ class RouteWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                 ),
+
               ),
+            )
+          )
+          : Flexible(
+            child: Text(
+              direction?.name ?? "No Data",
+              style: TextStyle(
+                fontSize: 18,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
+          // Expanded(
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Text(
+          //       direction?.name ?? "No Data",
+          //       style: TextStyle(
+          //         fontSize: 18,
+          //       ),
+          //       // overflow: TextOverflow.ellipsis,
+          //     ),
+          //   ),
           ),
       ],
     );
@@ -184,7 +217,7 @@ class MinutesUntilDepartureWidget extends StatelessWidget {
 
     DepartureStatus departureStatus;
 
-    String minutesUntilNextDepartureText;
+    String? minutesUntilNextDepartureText;
 
     // Gets the first departure information
     departureStatus = TransportUtils.getDepartureStatus(
@@ -195,41 +228,56 @@ class MinutesUntilDepartureWidget extends StatelessWidget {
 
     minutesUntilNextDepartureText = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime!));
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (minutesUntilNextDepartureText == "Now")
-          Text(
-            minutesUntilNextDepartureText,
-            style: TextStyle(
-              fontSize: 16, // Smaller font size for "Now"
-              fontWeight: FontWeight.w600,
-              color: TransportUtils.getColorForStatus(departureStatus.status),
-              height: 1.1,
-            ),
-          )
-        else ...[
-          Text(
-            minutesUntilNextDepartureText.split(' ').first,
-            style: TextStyle(
-              fontSize: 20, // Larger font size for the first word
-              fontWeight: FontWeight.w600,
-              color: TransportUtils.getColorForStatus(departureStatus.status),
-              height: 1.1,
-            ),
-          ),
-          Text(
-            minutesUntilNextDepartureText.split(' ').skip(1).join(' '),
-            style: TextStyle(
-              fontSize: 14, // Smaller font size for the remaining text
-              fontWeight: FontWeight.w600,
-              color: TransportUtils.getColorForStatus(departureStatus.status),
-              height: 1.1,
-            ),
-          ),
-        ],
-      ],
+    // Check if minutesUntilNextDepartureText is null after calculation
+    if (minutesUntilNextDepartureText == null) {
+      return SizedBox.shrink(); // Return an empty widget if minutesUntilNextDepartureText is null
+    }
+
+    return Text(
+        minutesUntilNextDepartureText,
+        style: TextStyle(
+        fontSize: 16, // Smaller font size for "Now"
+        fontWeight: FontWeight.w600,
+        color: TransportUtils.getColorForStatus(departureStatus.status),
+      height: 1.1,
+      ),
     );
+
+    //   Column(
+    //   mainAxisAlignment: MainAxisAlignment.center,
+    //   children: [
+    //     if (minutesUntilNextDepartureText == "Now")
+    //       Text(
+    //         minutesUntilNextDepartureText!,
+    //         style: TextStyle(
+    //           fontSize: 16, // Smaller font size for "Now"
+    //           fontWeight: FontWeight.w600,
+    //           color: TransportUtils.getColorForStatus(departureStatus.status),
+    //           height: 1.1,
+    //         ),
+    //       )
+    //     else ...[
+    //       Text(
+    //         minutesUntilNextDepartureText!.split(' ').first,
+    //         style: TextStyle(
+    //           fontSize: 20, // Larger font size for the first word
+    //           fontWeight: FontWeight.w600,
+    //           color: TransportUtils.getColorForStatus(departureStatus.status),
+    //           height: 1.1,
+    //         ),
+    //       ),
+    //       Text(
+    //         minutesUntilNextDepartureText.split(' ').skip(1).join(' '),
+    //         style: TextStyle(
+    //           fontSize: 14, // Smaller font size for the remaining text
+    //           fontWeight: FontWeight.w600,
+    //           color: TransportUtils.getColorForStatus(departureStatus.status),
+    //           height: 1.1,
+    //         ),
+    //       ),
+    //     ],
+    //   ],
+    // );
   }
 }
 
@@ -253,7 +301,7 @@ class DeparturesStringWidget extends StatelessWidget {
           )
         else
           ...List.generate(
-              departures!.length > 3 ? 3 : departures!.length,
+              departures!.length > 2 ? 2 : departures!.length,
                   (index) {
                 bool hasLowFloor = departures![index].hasLowFloor ?? false;
                 String departureTime = departures![index].estimatedDepartureTime ??
@@ -262,6 +310,11 @@ class DeparturesStringWidget extends StatelessWidget {
 
                 return Row(
                   children: [
+                    if (index == 0)
+                      Text(
+                        "At ",
+                        style: TextStyle(height: 1.1),
+                      ),
                     Text(
                       departureTime,
                       style: TextStyle(height: 1.1),
@@ -275,9 +328,10 @@ class DeparturesStringWidget extends StatelessWidget {
                       ),
                     ],
                     SizedBox(width: 4),
-                    if (index < ((departures!.length > 3 ? 3 : departures!.length) - 1)) ...[
+                    if (index < ((departures!.length > 2 ? 2 : departures!.length) - 1)) ...[
                       Text(
-                        "•",
+                        // "•",
+                        "and",
                         style: TextStyle(height: 1.1),
                       ),
                       SizedBox(width: 4),

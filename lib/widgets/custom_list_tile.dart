@@ -42,25 +42,37 @@ class CustomListTile extends StatelessWidget {
 
     // Information Tile
     child: ListTile(
-      title: Row(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: false),
+          // LocationWidget above the vertical line
+          LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: false),
 
-                ListTile(
-                  contentPadding: EdgeInsets.all(0),
-                  title: RouteWidget(route: transport.route!, direction: transport.direction),
-                  trailing: transport.departures?[0] != null
-                      && transport.departures!.isNotEmpty
-                      ? MinutesUntilDepartureWidget(departure: transport.departures![0])
-                      : null,
+          // Row for the vertical line and the rest of the widgets
+          Row(
+            children: [
+              SizedBox(width: 4),
+              // Vertical line
+              Container(
+                width: 2,
+                color: Colors.grey,
+                height: 70,
+              ),
+              SizedBox(width: 10), // Optional space between the line and the widgets
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.all(0),
+                      title: RouteWidget(route: transport.route!, direction: transport.direction, scrollable: false,),
+                      trailing: MinutesUntilDepartureWidget(departure: transport.departures![0]),
+                    ),
+                    DeparturesStringWidget(departures: transport.departures),
+                  ],
                 ),
-                DeparturesStringWidget(departures: transport.departures),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

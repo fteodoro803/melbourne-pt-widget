@@ -85,7 +85,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                 SizedBox(height: 4),
 
                 // Route details
-                RouteWidget(route: widget.arguments.searchDetails!.route!),
+                RouteWidget(route: widget.arguments.searchDetails!.route!, scrollable: false,),
                 Divider(),
 
                 // Departures for each direction

@@ -86,12 +86,13 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
               Row(
                 children: [
                   // Route and stop details
-                  Expanded(
+                  Flexible(
+                    fit: FlexFit.tight,
                     child: Column(
                       children: [
                         LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: true),
                         SizedBox(height: 4),
-                        RouteWidget(route: transport.route!, direction: transport.direction),
+                        RouteWidget(route: transport.route!, direction: transport.direction, scrollable: true),
                       ],
                     ),
                   ),

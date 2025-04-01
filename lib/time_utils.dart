@@ -15,25 +15,21 @@ class TransportUtils {
       return DepartureStatus("Scheduled", null); // Default to On-time if either value is null
     }
 
-    // Convert the time strings to DateTime objects for comparison
-    var formatter = DateFormat('hh:mma'); // Adjust the format according to your input time format
-
     try {
-      DateTime estimatedTime = formatter.parse(estimatedDepartureTime.toUpperCase());
-      DateTime scheduledTime = formatter.parse(scheduledDepartureTime.toUpperCase());
+      int? timeDifference = TimeUtils.timeDifference(scheduledDepartureTime, estimatedDepartureTime)?['minutes'];
 
       // Compare the times
-      if (estimatedTime.isAfter(scheduledTime)) {
-        int? timeDelayed = TimeUtils.timeDifference(scheduledDepartureTime, estimatedDepartureTime)?['minutes'];
-        return DepartureStatus("Delayed", timeDelayed); // Estimated departure is later than scheduled, so it's late
-      } else if (estimatedTime.isBefore(scheduledTime)) {
-        int? timeEarly = TimeUtils.timeDifference(estimatedDepartureTime, scheduledDepartureTime)?['minutes'];
-        return DepartureStatus("Early", timeEarly); // Estimated departure is earlier than scheduled, so it's early
-      } else {
+      if (timeDifference != null && timeDifference > 0) {
+        return DepartureStatus("Delayed", timeDifference.abs()); // Estimated departure is later than scheduled, so it's late
+      } else if (timeDifference != null && timeDifference < 0) {
+        return DepartureStatus("Early", timeDifference.abs()); // Estimated departure is earlier than scheduled, so it's early
+      } else if (timeDifference != null && timeDifference == 0){
         return DepartureStatus("On time", null); // Both times are the same, so it's on-time
+      } else {
+        return DepartureStatus("Scheduled", null);
       }
     } catch (e) {
-      return DepartureStatus("Scheduled", null); // Default to "On-time" if there is any error in parsing the time
+      return DepartureStatus("Scheduled", null); // Default to "Scheduled" if there is any error in parsing the time
     }
   }
 
@@ -51,6 +47,15 @@ class TransportUtils {
         return Colors.white; // Green for on-time or default
     }
   }
+
+  static String? trimTime(String? timeString) {
+    if (timeString?[0] == "0") {
+      return timeString?.substring(1, timeString.length);
+    }
+    else {
+      return timeString;
+    }
+  }
 }
 
 class TimeUtils {
@@ -66,7 +71,6 @@ class TimeUtils {
 
       // Parse the first input time string into a DateTime object
       DateTime inputDate1 = formatter.parse(inputTime1);
-
       DateTime fullInputDate1 = DateTime.now().copyWith(
           hour: inputDate1.hour,
           minute: inputDate1.minute,
@@ -77,7 +81,6 @@ class TimeUtils {
       // If a second input time is provided, compute the difference between them
       if (inputTime2 != null) {
         DateTime inputDate2 = formatter.parse(inputTime2);
-
         DateTime fullInputDate2 = DateTime.now().copyWith(
             hour: inputDate2.hour,
             minute: inputDate2.minute,
@@ -86,25 +89,49 @@ class TimeUtils {
         );
 
         // Find the difference between the two input times
-        Duration difference = fullInputDate2.difference(fullInputDate1);
+        Duration difference = fullInputDate1.difference(fullInputDate2); // Reverse the order to reflect the desired sign
 
-        int days = difference.inDays;
-        int hours = difference.inHours % 24;
-        int minutes = difference.inMinutes % 60;
+        bool isNegative = difference.isNegative;
 
+        // Get the absolute values first
+        int totalMinutes = difference.inMinutes.abs();
+        int days = totalMinutes ~/ (24 * 60);
+        int hours = (totalMinutes % (24 * 60)) ~/ 60;
+        int minutes = totalMinutes % 60;
+
+        // Apply the sign if needed
+        if (isNegative) {
+          days = -days;
+          hours = -hours;
+          minutes = -minutes;
+        }
+
+        // Return the difference with sign
         return {'days': days, 'hours': hours, 'minutes': minutes};
       } else {
         // If only one time is provided, calculate the difference between input time and current system time
         DateTime currentDate = DateTime.now();
 
-        // Find the difference between current time and the input time
-        Duration difference = fullInputDate1.difference(currentDate);
+        // Find the difference between the current time and the input time
+        Duration difference = fullInputDate1.difference(currentDate); // Positive if future, negative if past
 
-        // Get the days and minutes from the difference
-        int days = difference.inDays;
-        int hours = difference.inHours % 24;
-        int minutes = difference.inMinutes % 60;
+        // Determine if the overall difference is negative
+        bool isNegative = difference.isNegative;
 
+        // Get the absolute values first
+        int totalMinutes = difference.inMinutes.abs();
+        int days = totalMinutes ~/ (24 * 60);
+        int hours = (totalMinutes % (24 * 60)) ~/ 60;
+        int minutes = totalMinutes % 60;
+
+        // Apply the sign if needed
+        if (isNegative) {
+          days = -days;
+          hours = -hours;
+          minutes = -minutes;
+        }
+
+        // Return the difference with sign
         return {'days': days, 'hours': hours, 'minutes': minutes};
       }
     } catch (e) {
@@ -112,17 +139,17 @@ class TimeUtils {
     }
   }
 
-  static String minutesToString(Map<String, int>? timeMap) {
-    if (timeMap?['days'] == 0 && timeMap?['hours'] == 0) {
-      if (timeMap?['minutes'] == 0) {
+  static String? minutesToString(Map<String, int>? timeMap) {
+    if (timeMap?['days'] == 0 && timeMap?['hours'] == 0 && timeMap!['minutes']! >= 0) {
+      if (timeMap['minutes'] == 0) {
         return "Now";
       }
       else {
-        String minutes = timeMap?['minutes'].toString() ?? "";
+        String minutes = timeMap['minutes'].toString() ?? "";
         return "$minutes min";
       }
     } else {
-      return "";
+      return null;
     }
   }
 }

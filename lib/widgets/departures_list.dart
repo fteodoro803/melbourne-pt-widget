@@ -52,7 +52,7 @@ class _DeparturesListState extends State<DeparturesList> {
             departure?.scheduledDepartureTime,
           );
           final bool hasLowFloor = departure?.hasLowFloor ?? false;
-          String minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
+          String? minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
 
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 2.0),
@@ -83,21 +83,22 @@ class _DeparturesListState extends State<DeparturesList> {
                   ],
                 ],
               ),
-              trailing:
-                Text(
+              trailing: minutesUntilNextDepartureString != null
+                ? Text(
                   minutesUntilNextDepartureString,
                   style: TextStyle(
                     fontSize: 15,
                     color: TransportUtils.getColorForStatus(status.status),
                   ),
-                ),
-                onTap: () {
-                  if (widget.onDepartureTapped != null) {
-                    setState(() {
-                      widget.onDepartureTapped!(departure!);
-                    });
-                  }
-                },
+                )
+                : null,
+              onTap: () {
+                if (widget.onDepartureTapped != null) {
+                  setState(() {
+                    widget.onDepartureTapped!(departure!);
+                  });
+                }
+              },
             ),
           );
         },

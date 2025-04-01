@@ -397,7 +397,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     children: [
                       LocationWidget(textField: stopName, textSize: 16, scrollable: true),
                       SizedBox(height: 4),
-                      RouteWidget(route: route),
+                      RouteWidget(route: route, scrollable: true),
                       if (routeType != "train" && routeType != "vLine")
                         Align(
                           alignment: Alignment.topLeft,

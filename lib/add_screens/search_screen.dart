@@ -55,6 +55,8 @@ class _SearchScreenState extends State<SearchScreen> {
   late List<Stop> _stops = [];
   List<LatLng> _stopsAlongGeopath = [];
 
+  final DraggableScrollableController _controller = DraggableScrollableController();
+
   final LatLng _initialPosition = const LatLng(-37.813812122509205,
       144.96358311072478); // Change based on user's location
 
@@ -67,6 +69,7 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.arguments.searchDetails?.distance = 300;
     widget.arguments.searchDetails?.transportType = "all";
     tools.printScreenState(_screenName, widget.arguments);
+
   }
 
   // Initializes the map
@@ -303,9 +306,12 @@ class _SearchScreenState extends State<SearchScreen> {
           // Create DraggableScrollableSheet with nearby stop information if user has dropped pin
           if (_hasDroppedPin)
             DraggableScrollableSheet(
+              controller: _controller,
               initialChildSize: 0.3,
               minChildSize: 0.2,
-              maxChildSize: 0.85,
+              maxChildSize: 0.87,
+              // snap: true,
+              // snapSizes: [0.6, 1],
               builder: (context, scrollController) {
                 return Container(
                   decoration: BoxDecoration(
