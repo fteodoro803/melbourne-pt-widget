@@ -4,7 +4,7 @@ part 'route_direction_info.g.dart';
 
 @JsonSerializable()
 class RouteDirection {
-  String id;        // todo: change this to an int
+  int id;
   String name;
   String description;
 

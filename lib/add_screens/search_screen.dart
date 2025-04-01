@@ -134,7 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Populating Stops List
     for (var direction in jsonResponse!["directions"]) {
-      String id = direction["direction_id"].toString();
+      int id = direction["direction_id"];
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
       RouteDirection newDirection =

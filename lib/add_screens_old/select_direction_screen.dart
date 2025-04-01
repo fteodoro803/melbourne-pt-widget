@@ -48,7 +48,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
     for (var direction in jsonResponse!["directions"]) {
       // if (direction["route_id"] != widget.userSelections.stop?.route.id) {continue;}
 
-      String id = direction["direction_id"].toString();
+      int id = direction["direction_id"];
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
       RouteDirection newDirection =

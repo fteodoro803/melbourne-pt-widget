@@ -20,6 +20,7 @@ class Transport {
   Stop? stop;
   Route? route;
   RouteDirection? direction;
+  // todo: add GeoPath as an attribute
 
   // Constructor
   Transport();    // Empty Transport
@@ -51,7 +52,7 @@ class Transport {
   Future<void> updateDepartures() async {
     String? routeType = this.routeType?.type.id.toString();
     String? stopId = stop?.id;
-    String? directionId = direction?.id;
+    String? directionId = direction?.id.toString();
     String? routeId = route?.id;
 
     // print("( transport.dart -> updateDepartures() ) -- transport file: \n${toString()} ");
@@ -109,7 +110,7 @@ class Transport {
 
     // Populating Stops List
     for (var direction in jsonResponse!["directions"]) {
-      String id = direction["direction_id"].toString();
+      int id = direction["direction_id"];
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
       RouteDirection newDirection =
