@@ -51,9 +51,9 @@ class Transport {
   // Update Departures
   Future<void> updateDepartures() async {
     String? routeType = this.routeType?.type.id.toString();
-    String? stopId = stop?.id;
+    String? stopId = stop?.id.toString();
     String? directionId = direction?.id.toString();
-    String? routeId = route?.id;
+    String? routeId = route?.id.toString();
 
     // print("( transport.dart -> updateDepartures() ) -- transport file: \n${toString()} ");
 
@@ -76,7 +76,7 @@ class Transport {
 
   void generateUniqueID() {
     if (routeType != null && stop != null && route != null && direction != null) {
-      uniqueID = "${routeType?.type}-${stop?.id}-${route?.id}-${direction?.id}";
+      uniqueID = "${routeType?.type.id}-${stop?.id}-${route?.id}-${direction?.id}";
     }
   }
 
@@ -95,7 +95,7 @@ class Transport {
   }
 
   Future<List<RouteDirection>> fetchRouteDirections() async {
-    String? routeId = route?.id;
+    String? routeId = route?.id.toString();
     List<RouteDirection> directions = [];
 
     // Fetching Data and converting to JSON

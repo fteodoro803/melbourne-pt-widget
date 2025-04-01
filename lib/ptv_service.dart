@@ -48,13 +48,11 @@ class PtvService {
           null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
       DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
-      String? runId = departure["run_id"]?.toString();
       String? runRef = departure["run_ref"]?.toString();
 
       Departure newDeparture = Departure(
           scheduledDepartureUTC: scheduledDepartureUTC,
           estimatedDepartureUTC: estimatedDepartureUTC,
-          runId: runId,
           runRef: runRef);
 
       // Get Vehicle descriptors per Departure
@@ -68,7 +66,7 @@ class PtvService {
       }
       else {
         print(
-            "( ptv_service.dart -> fetchDepartures() ) -- runs for runId $runId is empty )");
+            "( ptv_service.dart -> fetchDepartures() ) -- runs for runRef $runRef is empty )");
       }
 
       departures.add(newDeparture);
@@ -117,7 +115,7 @@ class PtvService {
         //   continue;
         // }
 
-        String stopId = stop["stop_id"].toString();
+        int stopId = stop["stop_id"];
         String stopName = stop["stop_name"];
         double latitude = stop["stop_latitude"];
         double longitude = stop["stop_longitude"];
@@ -130,7 +128,7 @@ class PtvService {
 
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
-        String routeId = route["route_id"].toString();
+        int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.withId(id: routeTypeId);
 
@@ -155,12 +153,12 @@ class PtvService {
     ApiData data;
     if (direction != null) {
       data = await PtvApiService().stopsAlongRoute(
-          route.id, route.type.type.id.toString(), directionId: direction.id.toString(),
+          route.id.toString(), route.type.type.id.toString(), directionId: direction.id.toString(),
           geoPath: true);
     }
     else {
       data = await PtvApiService().stopsAlongRoute(
-          route.id, route.type.type.id.toString(), geoPath: true);
+          route.id.toString(), route.type.type.id.toString(), geoPath: true);
     }
     Map<String, dynamic>? jsonResponse = data.response;
 
@@ -175,7 +173,7 @@ class PtvService {
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
     for (var stop in jsonResponse["stops"]) {
-      String id = stop["stop_id"].toString();
+      int id = stop["stop_id"];
       String name = stop["stop_name"];
       double latitude = stop["stop_latitude"];
       double longitude = stop["stop_longitude"];
@@ -193,7 +191,7 @@ class PtvService {
 
     // Fetches stops data via PTV API
     ApiData data = await PtvApiService().stopsAlongRoute(
-        route.id, route.type.type.id.toString(), geoPath: true);
+        route.id.toString(), route.type.type.id.toString(), geoPath: true);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // print(" (ptv_service.dart -> fetchGeoPath) -- fetched Geopath for route ${route.id}:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
@@ -244,14 +242,12 @@ class PtvService {
           null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
       DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
-      String? runId = departure["run_id"]?.toString();
       String? runRef = departure["run_ref"]?.toString();
       int? stopId = departure["stop_id"];
 
       Departure newDeparture = Departure(
           scheduledDepartureUTC: scheduledDepartureUTC,
           estimatedDepartureUTC: estimatedDepartureUTC,
-          runId: runId,
           runRef: runRef,
           stopId: stopId,
       );
@@ -265,7 +261,7 @@ class PtvService {
       }
       else {
         print(
-            "( ptv_service.dart -> fetchPattern() ) -- patterns for runId $runId is empty )");
+            "( ptv_service.dart -> fetchPattern() ) -- patterns for runRef $runRef is empty )");
       }
 
       departures.add(newDeparture);

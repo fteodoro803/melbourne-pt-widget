@@ -1,23 +1,87 @@
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:json_annotation/json_annotation.dart';
-import '../palettes.dart';
+import 'package:flutter_project/palettes.dart';
 
 part 'route_info.g.dart';
 
+/// Represents PTV's route, with identification and styling information.
+/// Handles colour mapping based on route type.
 @JsonSerializable()
 class Route {
-  String id;
+  int id;
   String name;
-  String number;
-  String? colour;
-  String? textColour;
+  String number;        // todo: should this be an int? Maybe nullable, since train doesnt have a number
+  String? colour;       // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
+  String? textColour;   // Hex colour code for text
 
-  RouteDirection? direction;
+  RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
   RouteType type;
 
-  Route({required this.id, required this.name, required this.number, required this.type}) {
+  /// Creates a route object, and matches its details to its respective colour.
+  Route(
+      {required this.id,
+      required this.name,
+      required this.number,
+      required this.type}) {
     setRouteColour(type.type.name);
+  }
+
+  /// Sets a route's colours based on its type.
+  /// Uses predefined colour palette with fallbacks for routes.
+  // todo: convert the string routeType to a RouteTypeEnum
+  void setRouteColour(String routeType) {
+    routeType = routeType.toLowerCase(); // Normalise case for matching
+
+    // Tram routes: match by route number
+    if (routeType == "tram") {
+      String routeId = "route$number";
+
+      colour = TramPalette.values
+          .firstWhere((route) => route.name == routeId,
+              orElse: () => TramPalette.routeDefault)
+          .colour;
+      textColour = TramPalette.values
+          .firstWhere((route) => route.name == routeId,
+              orElse: () => TramPalette.routeDefault)
+          .textColour
+          .colour;
+    }
+
+    // Train routes: match by route name
+    else if (routeType == "train") {
+      String routeName = name.replaceAll(" ", "").toLowerCase();
+
+      // Matches Transport route name to Palette route Name
+      colour = TrainPalette.values
+          .firstWhere((route) => route.name == routeName,
+              orElse: () => TrainPalette.routeDefault)
+          .colour;
+      textColour = TrainPalette.values
+          .firstWhere((route) => route.name == routeName,
+              orElse: () => TrainPalette.routeDefault)
+          .textColour
+          .colour;
+    }
+
+    // Bus and Night Bus routes: use standard colours
+    // todo: add route-specific colours
+    else if (routeType == "bus" || routeType == "night bus") {
+      colour = BusPalette.routeDefault.colour;
+      textColour = BusPalette.routeDefault.textColour.colour;
+    }
+
+    // VLine routes: use standard colours
+    // todo: add route-specific colours
+    else if (routeType == "vline") {
+      colour = VLine.routeDefault.colour;
+      textColour = VLine.routeDefault.textColour.colour;
+
+    // Unknown route type: use fallback colours
+    } else {
+      colour = FallbackColour.routeDefault.colour;
+      textColour = FallbackColour.routeDefault.textColour.colour;
+    }
   }
 
   @override
@@ -27,8 +91,7 @@ class Route {
         "\tName: $name\t"
         "\tNumber: $number\n"
         "\tColour: $colour\t"
-        "\tTextColour: $textColour\n"
-    ;
+        "\tTextColour: $textColour\n";
 
     if (direction != null) {
       str += direction.toString();
@@ -37,65 +100,7 @@ class Route {
     return str;
   }
 
-  // Sets this route's Colour according to Palette
-  // For testing, ensure that all the routes go to the right things
-  void setRouteColour(String routeType) {
-    routeType = routeType.toLowerCase();      // improve case matching
-    // print("( route_info.dart -> getRouteColour() ) -- routeType: $routeType");
-
-    // Tram
-    if (routeType == "tram") {
-      String routeId = "route$number";
-
-      // print("( route_info.dart -> getRouteColour() ) -- Tram routeId: $routeId");
-
-      // Matches Transport route number to Palette route Name
-      this.colour = TramPalette.values.firstWhere(
-          (route) => route.name == routeId,
-          orElse: () => TramPalette.routeDefault
-      ).colour;
-      this.textColour = TramPalette.values.firstWhere(
-              (route) => route.name == routeId,
-          orElse: () => TramPalette.routeDefault
-      ).textColour.colour;
-    }
-
-    // Train
-    else if (routeType == "train") {
-      String routeName = name.replaceAll(" ", "").toLowerCase();
-      print("( route_info.dart -> getRouteColour() ) -- routeName conversion: $name -> $routeName");
-
-      // Matches Transport route name to Palette route Name
-      this.colour = TrainPalette.values.firstWhere(
-              (route) => route.name == routeName,
-          orElse: () => TrainPalette.routeDefault
-      ).colour;
-      this.textColour = TrainPalette.values.firstWhere(
-              (route) => route.name == routeName,
-          orElse: () => TrainPalette.routeDefault
-      ).textColour.colour;
-    }
-
-    // Bus and Night Bus
-    else if (routeType == "bus" || routeType == "night bus") {
-      this.colour = BusPalette.routeDefault.colour;
-      this.textColour = BusPalette.routeDefault.textColour.colour;
-    }
-
-    // VLine
-    else if (routeType == "vline") {
-      this.colour = VLine.routeDefault.colour;
-      this.textColour = VLine.routeDefault.textColour.colour;
-    }
-
-    else {
-      print("( route_info.dart -> getRouteColour() ) -- Fallback colour used");
-      this.colour = FallbackColour.routeDefault.colour;
-      this.textColour = FallbackColour.routeDefault.textColour.colour;
-    }
-  }
-
-  // Methods for JSON Serialization
+  /// Methods for JSON Serialization.
   factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
   Map<String, dynamic> toJson() => _$RouteToJson(this);
 }

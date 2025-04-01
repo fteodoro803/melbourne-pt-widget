@@ -12,7 +12,7 @@
     - Valid Input for Constructors
     - Invalid Input for Constructors
     - Edge Cases for Constructors
-    - Class Methods   (can be more lax with these because we are "assured" correct formatting with the constructors' tests)
+    - Each Class Method   (can be more lax with these because we are "assured" correct formatting with the constructors' tests)
 * */
 
 /*

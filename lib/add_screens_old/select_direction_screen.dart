@@ -32,7 +32,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
 
   void fetchRouteDirections() async {
     String? routeId =
-        widget.arguments.transport.route?.id; // this seems a bit convoluted
+        widget.arguments.transport.route?.id.toString(); // this seems a bit convoluted
 
     // Fetching Data and converting to JSON
     ApiData data = await PtvApiService().routeDirections(routeId!);
