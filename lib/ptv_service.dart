@@ -117,7 +117,7 @@ class PtvService {
         //   continue;
         // }
 
-        String stopId = stop["stop_id"].toString();
+        int stopId = stop["stop_id"];
         String stopName = stop["stop_name"];
         double latitude = stop["stop_latitude"];
         double longitude = stop["stop_longitude"];
@@ -175,7 +175,7 @@ class PtvService {
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
     for (var stop in jsonResponse["stops"]) {
-      String id = stop["stop_id"].toString();
+      int id = stop["stop_id"];
       String name = stop["stop_name"];
       double latitude = stop["stop_latitude"];
       double longitude = stop["stop_longitude"];

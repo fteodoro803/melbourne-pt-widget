@@ -63,7 +63,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
           continue;
         }
 
-        String stopId = stop["stop_id"].toString();
+        int stopId = stop["stop_id"];
         String stopName = stop["stop_name"];
         double latitude = stop["stop_latitude"];
         double longitude = stop["stop_longitude"];

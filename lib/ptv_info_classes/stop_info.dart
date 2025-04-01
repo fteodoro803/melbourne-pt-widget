@@ -4,7 +4,7 @@ part 'stop_info.g.dart';
 
 @JsonSerializable()
 class Stop {
-  String id;      // convert this to integer ~note
+  int id;      // convert this to integer ~note
   String name;      //~note what happens if in an api call, these are null?
 
   // idk if these are necessary

@@ -51,7 +51,7 @@ class Transport {
   // Update Departures
   Future<void> updateDepartures() async {
     String? routeType = this.routeType?.type.id.toString();
-    String? stopId = stop?.id;
+    String? stopId = stop?.id.toString();
     String? directionId = direction?.id.toString();
     String? routeId = route?.id.toString();
 
