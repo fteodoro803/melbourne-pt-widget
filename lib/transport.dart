@@ -76,7 +76,7 @@ class Transport {
 
   void generateUniqueID() {
     if (routeType != null && stop != null && route != null && direction != null) {
-      uniqueID = "${routeType?.type}-${stop?.id}-${route?.id}-${direction?.id}";
+      uniqueID = "${routeType?.type.id}-${stop?.id}-${route?.id}-${direction?.id}";
     }
   }
 
