@@ -46,13 +46,14 @@ class _DeparturesListState extends State<DeparturesList> {
         itemCount: filteredDepartures!.length > widget.departuresLength ? widget.departuresLength : filteredDepartures.length,
         itemBuilder: (context, index) {
           final departure = filteredDepartures?[index];
-          final String departureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
+          final String estimatedDepartureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
+          final String scheduledDepartureTime = departure?.scheduledDepartureTime ?? "No Data";
           final DepartureStatus status = TransportUtils.getDepartureStatus(
-            departure?.estimatedDepartureTime,
             departure?.scheduledDepartureTime,
+            departure?.estimatedDepartureTime,
           );
           final bool hasLowFloor = departure?.hasLowFloor ?? false;
-          String? minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
+          String? minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(estimatedDepartureTime));
 
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 2.0),
@@ -62,19 +63,44 @@ class _DeparturesListState extends State<DeparturesList> {
               subtitle: Row(
                 children: [
                   Text(
-                    "${status.status} ",
+                    "${status.status}",
                     style: TextStyle(
                       color: TransportUtils.getColorForStatus(status.status),
                     ),
                   ),
+                  if (status.timeDifference != null)
+                    Text(
+                      " ${status.timeDifference} min",
+                      style: TextStyle(
+                        color: TransportUtils.getColorForStatus(status.status),
+                      ),
+                    ),
                   Text(
-                    status.timeDifference != null ? "${status.timeDifference} min • $departureTime" : "• $departureTime",
+                    " • ",
                     style: TextStyle(
                       color: TransportUtils.getColorForStatus(status.status),
                     ),
                   ),
+                  if (minutesUntilNextDepartureString != null)...[
+                    Text(
+                      TransportUtils.trimTime(scheduledDepartureTime),
+                      style: TextStyle(
+                        color: TransportUtils.getColorForStatus(status.status),
+                        decoration: status.timeDifference != null ? TextDecoration.lineThrough : null,
+                        decorationColor: TransportUtils.getColorForStatus(status.status),
+                      ),
+                    ),
+                    Text(
+                      " • ",
+                      style: TextStyle(
+                        color: TransportUtils.getColorForStatus(status.status),
+                      ),
+                    ),
+                  ],
+
                   if (hasLowFloor) ...[
-                    SizedBox(width: 4),
+
+                    // SizedBox(width: 4),
                     Image.asset(
                       "assets/icons/Low Floor Icon.png",
                       width: 14,
@@ -91,7 +117,13 @@ class _DeparturesListState extends State<DeparturesList> {
                     color: TransportUtils.getColorForStatus(status.status),
                   ),
                 )
-                : null,
+                : Text(
+                  TransportUtils.trimTime(scheduledDepartureTime)!,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: TransportUtils.getColorForStatus(status.status),
+                  ),
+              ),
               onTap: () {
                 if (widget.onDepartureTapped != null) {
                   setState(() {

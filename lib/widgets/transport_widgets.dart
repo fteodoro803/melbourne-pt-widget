@@ -29,8 +29,8 @@ class LocationWidget extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(Icons.location_pin, size: textSize),
-        SizedBox(width: 3),
+        Icon(Icons.location_pin, size: textSize + 2),
+        SizedBox(width: 4),
         scrollable ?
           Expanded(
             child: SingleChildScrollView(

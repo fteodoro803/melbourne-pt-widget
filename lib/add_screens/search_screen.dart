@@ -141,6 +141,7 @@ class _SearchScreenState extends State<SearchScreen> {
         .fetchStopRoutePairs(widget.arguments.searchDetails!.markerPosition!);
     // widget.arguments.searchDetails.routes = stopRouteLists.routes;
     // widget.arguments.searchDetails.stops = stopRouteLists.stops;
+    // print(StopRouteLists);
 
     // Update the state with the new address
     setState(() {
@@ -304,7 +305,6 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       _departure = departure;
     });
-
     _changeSheet(ActiveSheet.departureDetails);
   }
 
@@ -334,7 +334,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
     switch (_activeSheet) {
       case ActiveSheet.departureDetails:
-        previousSheet = ActiveSheet.transportDetails;
+        if (_navigationHistory[_navigationHistory.length - 2] == ActiveSheet.transportDetails) {
+          previousSheet = ActiveSheet.transportDetails;
+        }
+        else {previousSheet = ActiveSheet.stopDetails;}
         break;
       case ActiveSheet.transportDetails:
         previousSheet = ActiveSheet.stopDetails;
@@ -476,25 +479,25 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
 
           Positioned(
-            top: 40,
+            top: 60,
             left: 15,
             right: 15,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  // Back button with updated handler
-                  GestureDetector(
-                    onTap: _handleBackButton,
-                    child: BackButtonWidget(),
+            child: Row(
+              children: [
+                // Back button with updated handler
+                GestureDetector(
+                  onTap: _handleBackButton,
+                  child: BackButtonWidget(),
+                ),
+                SizedBox(width: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  SizedBox(width: 10),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
-                  ),
-                ],
-              ),
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
+                ),
+              ],
             ),
           ),
         ],

@@ -1,3 +1,5 @@
+import 'package:flutter_project/ptv_info_classes/route_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'stop_info.g.dart';
@@ -6,6 +8,8 @@ part 'stop_info.g.dart';
 class Stop {
   String id;      // convert this to integer ~note
   String name;      //~note what happens if in an api call, these are null?
+  List<Route>? routes;
+  RouteType? routeType;
 
   // idk if these are necessary
   String? suburb;
@@ -22,7 +26,9 @@ class Stop {
         "\tName: $name\n"
         "\tLatitude: $latitude\n"
         "\tLongitude: $longitude\n"
-        "\tDistance: $distance\n";
+        "\tDistance: $distance\n"
+        "\tRoutes: $routes\n"
+        "\tRouteType: $routeType\n";
   }
 
   // Methods for JSON Serialization

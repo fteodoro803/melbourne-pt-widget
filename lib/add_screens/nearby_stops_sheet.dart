@@ -4,6 +4,7 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/toggle_buttons_row.dart';
 
 import '../ptv_info_classes/route_info.dart' as pt_route;
+import '../time_utils.dart';
 import '../widgets/transport_widgets.dart';
 
 enum ToggleableFilter {
@@ -83,6 +84,9 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
   bool get lowFloorFilter => filters.contains(ToggleableFilter.lowFloor);
   bool get shelterFilter => filters.contains(ToggleableFilter.shelter);
 
+  List<Stop> _processedStops = [];
+  Set<String> _expandedStopIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -131,6 +135,25 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
       _notifyStateChanged();
       print("Unit scroll listener triggered. Selected: $_tempSelectedUnit");
     });
+
+    _processStopsAndRoutes();
+  }
+
+  Future<void> _processStopsAndRoutes() async {
+    List<Stop> processedStops = await parseStopsAndRoutes();
+
+    if (mounted) {
+      setState(() {
+        _processedStops = processedStops;
+      });
+
+      // Debug to verify stops were processed correctly
+      print("Processed ${_processedStops.length} unique stops");
+      if (_processedStops.isNotEmpty) {
+        print("First stop routes: ${_processedStops[0].routes?.length ?? 'null'}");
+        print("First stop routeType: ${_processedStops[0].routeType?.type.name ?? 'null'}");
+      }
+    }
   }
 
   NearbyStopsState getCurrentState() {
@@ -139,6 +162,46 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
       selectedUnit: _selectedUnit,
       filters: filters,
     );
+  }
+
+  Future<List<Stop>> parseStopsAndRoutes() async {
+    Set<String> uniqueStopIDs = {};
+    List<Stop> uniqueStops = [];
+
+    List<Stop> stopList = widget.arguments.searchDetails!.stops;
+    List<pt_route.Route> routeList = widget.arguments.searchDetails!.routes;
+
+    int stopIndex = 0;
+
+    for (var stop in stopList) {
+      if (!uniqueStopIDs.contains(stop.id)) {
+        // Create a new stop object to avoid reference issues
+        Stop newStop = Stop(
+          id: stop.id,
+          name: stop.name,
+          latitude: stop.latitude,
+          longitude: stop.longitude,
+          distance: stop.distance,
+          // Copy other necessary properties
+        );
+
+        newStop.routes = <pt_route.Route>[];
+        newStop.routeType = routeList[stopIndex].type;
+
+        uniqueStops.add(newStop);
+        uniqueStopIDs.add(stop.id);
+      }
+
+      // Find the index of this stop in our uniqueStops list
+      int uniqueStopIndex = uniqueStops.indexWhere((s) => s.id == stop.id);
+      if (uniqueStopIndex != -1) {
+        uniqueStops[uniqueStopIndex].routes!.add(routeList[stopIndex]);
+      }
+
+      stopIndex++;
+    }
+
+    return uniqueStops;
   }
 
   // Function to handle confirm button press
@@ -426,46 +489,178 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
               bottom: 0.0,
               left: 16.0,
             ),
-            itemCount: widget.arguments.searchDetails!.stops.length,
+            itemCount: _processedStops.length,
             itemBuilder: (context, index) {
 
-              if (index >= widget.arguments.searchDetails!.routes.length) {
-                return Container();
-              }
+              final stop = _processedStops[index];
+              final bool isExpanded = _expandedStopIds.contains(stop.id);
 
-              final route = widget.arguments.searchDetails!.routes[index];
-              final stopName = widget.arguments.searchDetails!.stops[index].name;
-              final routeName = widget.arguments.searchDetails!.routes[index].name;
-              final distance = widget.arguments.searchDetails!.stops[index].distance;
-              final routeType = widget.arguments.searchDetails!.routes[index].type.type.name;
+              // Debug information
+              print("Stop at index $index: ${stop.id}, Routes: ${stop.routes?.length ?? 'null'}, RouteType: ${stop.routeType?.type.name ?? 'null'}");
+
+              final routes = stop.routes ?? [];
+              final stopName = stop.name;
+              final distance = stop.distance;
+              final routeType = stop.routeType?.type.name ?? 'unknown';
 
               return Card(
+                margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
                 child: ListTile(
-                  // Distance in meters from marker
-                  trailing: Text("${distance?.round()}m", style: TextStyle(fontSize: 16)),
-
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                  dense: true,
+                  contentPadding: EdgeInsets.all(0),
                   // Stop and route details
                   title: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      LocationWidget(textField: stopName, textSize: 16, scrollable: true),
-                      SizedBox(height: 4),
-                      RouteWidget(route: route, scrollable: true),
-                      if (routeType != "train" && routeType != "vLine")
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            routeName,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -3, vertical: 0),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                        title: !isExpanded
+                          ? Column(
+                            children: [
+                              LocationWidget(textField: stopName, textSize: 18, scrollable: false),
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    spacing: 6,
+                                    children: routes.map((route) {
+                                      return Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: route.colour != null
+                                              ? ColourUtils.hexToColour(route.colour!)
+                                              : Colors.grey,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          routeType == "train" || routeType == "vLine"
+                                              ? route.name
+                                              : route.number,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: route.textColour != null
+                                                ? ColourUtils.hexToColour(route.textColour!)
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                          : Column(
+                            children: [
+                              Row(
+                                // crossAxisAlignment: CrossAxisAlignment.start,  // This aligns items to the start (top) of the row
+                                children: [
+                                  Icon(Icons.location_pin, size: 20),
+                                  // Padding(
+                                  //   padding: const EdgeInsets.only(top: 4),  // Small padding to align with first line of text
+                                  //   child: Icon(Icons.location_pin, size: 20),
+                                  // ),
+                                  SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      stopName,
+                                      style: TextStyle(fontSize: 18, height: 1.1),
+
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Icon(Icons.directions_walk, size: 20),
+                                  SizedBox(width: 4),
+                                  Text("${distance?.round()}m", style: TextStyle(fontSize: 18)),
+                                ],
+                              )
+                            ],
                           ),
+                        leading: Image.asset(
+                          "assets/icons/PTV $routeType Logo.png",
+                          width: 40,
+                          height: 40,
                         ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Text("${distance?.round()}m", style: TextStyle(fontSize: 16)),
+                            // SizedBox(width: 4),
+                            Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                          ],
+                        ),
+                        onTap: () {
+                          setState(() {
+                            if (isExpanded) {
+                              _expandedStopIds.remove(stop.id);
+                            } else {
+                              _expandedStopIds.add(stop.id);
+                            }
+                          });
+                        }
+                      ),
+
+                      if (isExpanded)
+                        Divider(height: 0,),
+                      if (isExpanded)
+                        Container(
+                        // color: Color(0xFF212325),
+                        child: ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          padding: EdgeInsets.zero,
+                          itemCount: routes.length,
+                          itemBuilder: (context, routeIndex) {
+
+                            final route = routes[routeIndex];
+                            print("Route at index $routeIndex: $route");
+
+                            return Container(
+
+                              child: ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                                trailing: Icon(Icons.keyboard_arrow_right_outlined),
+                                leading: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: route.colour != null
+                                        ? ColourUtils.hexToColour(route.colour!)
+                                        : Colors.grey,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    routeType == "train" || routeType == "vLine"
+                                      ? route.name
+                                      : route.number,
+                                    style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: route.textColour != null
+                                      ? ColourUtils.hexToColour(route.textColour!)
+                                      : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                title: routeType != "train" && routeType != "vLine" ? Text(route.name) : null,
+                                onTap: () async {
+                                  await widget.onStopTapped(stop, route);
+                                },
+                              ),
+                            );
+                          }
+                        ),
+                      ),
                     ],
                   ),
-
-                  // Render stop details sheet if stop is tapped
-                  onTap: () async {
-                    await widget.onStopTapped(widget.arguments.searchDetails!.stops[index], widget.arguments.searchDetails!.routes[index]);
-                  },
                 ),
               );
             },

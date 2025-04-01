@@ -139,9 +139,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
               itemBuilder: (context, index) {
                 final stopDeparture = _pattern[index];
                 final stopName = stopDeparture.stopName;
-                final departureTime = TransportUtils.trimTime(stopDeparture.scheduledDepartureTime);
+                final departureTime = stopDeparture.scheduledDepartureTime!;
 
-                final timeDifference = TimeUtils.timeDifference(departureTime!);
+                final timeDifference = TimeUtils.timeDifference(departureTime);
                 // print(timeDifference);
                 String? minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime!));
 
@@ -155,7 +155,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(departureTime, style: TextStyle(fontSize: 12),),
+                          Text(TransportUtils.trimTime(departureTime), style: TextStyle(fontSize: 12),),
                           if (minutesUntilNextDepartureString != null )
                             Container(
                                 padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),

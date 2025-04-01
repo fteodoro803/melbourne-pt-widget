@@ -257,7 +257,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                           // Display departures if they exist
                           if (departures != null && departures.isNotEmpty)
-                            DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false,),
+                            DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false, onDepartureTapped: widget.onDepartureTapped,),
 
                           // Display a message if no departures
                           if (departures == null || departures.isEmpty)

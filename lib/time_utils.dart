@@ -48,9 +48,14 @@ class TransportUtils {
     }
   }
 
-  static String? trimTime(String? timeString) {
-    if (timeString?[0] == "0") {
-      return timeString?.substring(1, timeString.length);
+  static String trimTime(String timeString) {
+    String timeElement;
+    String timeOfDay;
+    if (timeString[0] == "0") {
+      timeElement = timeString.substring(1, timeString.length - 2);
+      timeOfDay = timeString.substring(timeString.length - 2, timeString.length);
+
+      return "$timeElement $timeOfDay";
     }
     else {
       return timeString;
