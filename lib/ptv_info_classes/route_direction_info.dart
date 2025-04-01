@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'route_direction_info.g.dart';
 
+/// Represents a direction of travel for a route.
 @JsonSerializable()
 class RouteDirection {
   int id;
