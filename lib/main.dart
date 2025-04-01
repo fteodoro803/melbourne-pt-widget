@@ -6,6 +6,7 @@ import "package:flutter_project/add_screens_old/select_location_screen.dart";
 import "package:flutter_project/add_screens_old/select_direction_screen.dart";
 import "package:flutter_project/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/add_screens_old/select_stop_screen.dart";
+import "package:flutter_project/widgets/bottom_navigation_bar.dart";
 import "package:flutter_project/widgets/custom_list_tile.dart";
 import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
@@ -61,6 +62,7 @@ class _MyAppState extends State<MyApp> {
 
         // Pages/Screens
         routes: {
+          // '/': (context) => const MyHomePage(title: "Demo Home Page"),
           '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
@@ -243,52 +245,52 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
 
 
-            Divider(),
-
-            // ADD PAGE BUTTON
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      // '/selectLocationScreen2',
-                      '/selectRouteTypeScreen',
-                      arguments: ScreenArguments(Transport(), _updateMainPage),
-                    );
-                  },
-                  child: Text("+"),
-                ),
-                SizedBox(width: 8),
-
-                // ADD PAGE BUTTON
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/searchScreen',
-                      arguments: ScreenArguments.withSearchDetails(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController()))
-                    );
-                  },
-                  child: Column(
-                    children: [
-                      Icon(Icons.search),
-                      // Text("Search"),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 8),
-
-                // REFRESH BUTTON
-                ElevatedButton(
-                  onPressed: () {
-                    _updateMainPage();
-                  },
-                  child: Icon(Icons.refresh),
-                ),
-              ],
-            ),
+            // Divider(),
+            //
+            // // ADD PAGE BUTTON
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     ElevatedButton(
+            //       onPressed: () {
+            //         Navigator.pushNamed(
+            //           context,
+            //           // '/selectLocationScreen2',
+            //           '/selectRouteTypeScreen',
+            //           arguments: ScreenArguments(Transport(), _updateMainPage),
+            //         );
+            //       },
+            //       child: Text("+"),
+            //     ),
+            //     SizedBox(width: 8),
+            //
+            //     // ADD PAGE BUTTON
+            //     ElevatedButton(
+            //       onPressed: () {
+            //         Navigator.pushNamed(
+            //           context,
+            //           '/searchScreen',
+            //           arguments: ScreenArguments.withSearchDetails(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController()))
+            //         );
+            //       },
+            //       child: Column(
+            //         children: [
+            //           Icon(Icons.search),
+            //           // Text("Search"),
+            //         ],
+            //       ),
+            //     ),
+            //     SizedBox(width: 8),
+            //
+            //     // REFRESH BUTTON
+            //     ElevatedButton(
+            //       onPressed: () {
+            //         _updateMainPage();
+            //       },
+            //       child: Icon(Icons.refresh),
+            //     ),
+            //   ],
+            // ),
 
             // // TEST BUTTON
             // ElevatedButton(
@@ -299,6 +301,17 @@ class _MyHomePageState extends State<MyHomePage> {
             // ),
           ],
         ),
+      ),
+      // Add the refresh button as a floating action button
+      floatingActionButton: FloatingActionButton(
+        onPressed: _updateMainPage,
+        tooltip: 'Refresh',
+        child: Icon(Icons.refresh),
+      ),
+      // Add the bottom navigation bar
+      bottomNavigationBar: BottomNavigation(
+        currentIndex: 0, // Home page is index 0
+        updateMainPage: _updateMainPage,
       ),
     );
   }

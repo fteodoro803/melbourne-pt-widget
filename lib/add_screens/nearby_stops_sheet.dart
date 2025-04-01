@@ -24,11 +24,25 @@ enum DistanceFilter {
   const DistanceFilter({required this.name});
 }
 
+class NearbyStopsState {
+  final String selectedDistance;
+  final String selectedUnit;
+  final Set<ToggleableFilter> filters;
+
+  NearbyStopsState({
+    required this.selectedDistance,
+    required this.selectedUnit,
+    required this.filters,
+  });
+}
+
 class NearbyStopsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
   final Function({int? newDistance, String? newTransportType}) onSearchFiltersChanged;
   final Function(Stop, pt_route.Route) onStopTapped;
+  final Function(NearbyStopsState) onStateChanged; // New callback
+  final NearbyStopsState? initialState; // New parameter
 
   const NearbyStopsSheet({
     super.key,
@@ -36,13 +50,15 @@ class NearbyStopsSheet extends StatefulWidget {
     required this.scrollController,
     required this.onSearchFiltersChanged,
     required this.onStopTapped,
+    this.initialState,
+    required this.onStateChanged,
   });
 
   @override
-  State<NearbyStopsSheet> createState() => _NearbyStopsSheetState();
+  State<NearbyStopsSheet> createState() => NearbyStopsSheetState();
 }
 
-class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
+class NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
   List<String> meterList = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"];
   List<String> kilometerList = ["1", "2", "3", "4", "5", "10"];
@@ -73,13 +89,28 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
     distanceList = meterList;
 
-    _selectedDistance = _initialSelectedMeters;
-    _tempSelectedDistance = _initialSelectedMeters;
+    // Use initial state if available
+    if (widget.initialState != null) {
+      _selectedDistance = widget.initialState!.selectedDistance;
+      _selectedUnit = widget.initialState!.selectedUnit;
+      filters = widget.initialState!.filters;
+    } else {
+      _selectedDistance = _initialSelectedMeters;
+      _selectedUnit = _initialSelectedUnit;
+      filters = <ToggleableFilter>{};
+    }
 
-    _selectedUnit = _initialSelectedUnit;
-    _tempSelectedUnit = _initialSelectedUnit;
+    _tempSelectedDistance = _selectedDistance;
+    _tempSelectedUnit = _selectedUnit;
 
-    _distanceScrollController = FixedExtentScrollController(initialItem: meterList.indexOf(_selectedDistance));
+    // Use the correct list based on the selected unit
+    distanceList = _selectedUnit == "m" ? meterList : kilometerList;
+
+    // Initialize controllers with correct positions
+    int distanceIndex = distanceList.indexOf(_selectedDistance);
+    if (distanceIndex == -1) distanceIndex = 0;
+
+    _distanceScrollController = FixedExtentScrollController(initialItem: distanceIndex);
     _unitScrollController = FixedExtentScrollController(initialItem: distanceUnitsList.indexOf(_selectedUnit));
 
     // Listeners for scroll controllers to update the selected items dynamically
@@ -87,6 +118,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
       setState(() {
         _tempSelectedDistance = meterList[_distanceScrollController.selectedItem];
       });
+      _notifyStateChanged();
       print("Meters scroll listener triggered. Selected: $_tempSelectedDistance");
     });
 
@@ -96,8 +128,17 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
         distanceList = _tempSelectedUnit == "m" ? meterList : kilometerList;
         _tempSelectedDistance = _selectedUnit == "m" ? _tempSelectedDistance : _initialSelectedKilometers;
       });
+      _notifyStateChanged();
       print("Unit scroll listener triggered. Selected: $_tempSelectedUnit");
     });
+  }
+
+  NearbyStopsState getCurrentState() {
+    return NearbyStopsState(
+      selectedDistance: _selectedDistance,
+      selectedUnit: _selectedUnit,
+      filters: filters,
+    );
   }
 
   // Function to handle confirm button press
@@ -113,6 +154,15 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
       print(_selectedDistance);
     });
+    _notifyStateChanged();
+  }
+
+  void _notifyStateChanged() {
+    widget.onStateChanged(NearbyStopsState(
+      selectedDistance: _selectedDistance,
+      selectedUnit: _selectedUnit,
+      filters: filters,
+    ));
   }
 
   @override
@@ -305,6 +355,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                                     _selectedUnit = _initialSelectedUnit;
                                                     _selectedDistance = _initialSelectedMeters;
                                                   });
+                                                  _notifyStateChanged();
 
                                                   Navigator.pop(context);
                                                 },
@@ -320,6 +371,7 @@ class _NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                                   _selectedUnit = _tempSelectedUnit;
                                                   _selectedDistance = _tempSelectedDistance;
                                                 });
+                                                _notifyStateChanged();
                                                 Navigator.pop(context);
                                               },
                                               child: Text("Confirm"),

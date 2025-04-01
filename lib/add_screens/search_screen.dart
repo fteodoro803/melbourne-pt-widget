@@ -12,6 +12,7 @@ import '../ptv_api_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
+import '../widgets/bottom_navigation_bar.dart';
 import '../widgets/screen_widgets.dart';
 import 'departure_details_sheet.dart';
 import 'nearby_stops_sheet.dart';
@@ -20,6 +21,8 @@ import 'package:geocoding/geocoding.dart' as geocoding;
 import '../ptv_info_classes/route_info.dart' as PTRoute;
 import 'package:flutter_project/google_service.dart';
 import 'suggestions_search.dart';
+
+enum ActiveSheet { none, nearbyStops, stopDetails, transportDetails, departureDetails }
 
 class SearchScreen extends StatefulWidget {
   final ScreenArguments arguments;
@@ -34,8 +37,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   bool _isStopSelected = false;
   bool _hasDroppedPin = false;
-  bool _isTransportSelected = false;
-  bool _isDepartureSelected = false;
 
   late Departure _departure;
 
@@ -44,7 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
   GoogleService googleService = GoogleService();
   TransportPathUtils transportPathUtils = TransportPathUtils();
 
-// Map
+  // Map
   late GoogleMapController mapController;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
@@ -60,6 +61,15 @@ class _SearchScreenState extends State<SearchScreen> {
   final LatLng _initialPosition = const LatLng(-37.813812122509205,
       144.96358311072478); // Change based on user's location
 
+  ActiveSheet _activeSheet = ActiveSheet.none;
+  Map<ActiveSheet, double> _sheetScrollPositions = {};
+  List<ActiveSheet> _navigationHistory = [];
+
+  // Store NearbyStopsSheet specific state
+  final GlobalKey<NearbyStopsSheetState> _nearbyStopsSheetKey = GlobalKey<NearbyStopsSheetState>();
+  NearbyStopsState? _savedNearbyStopsState;
+
+
   // Initialises the state
   @override
   void initState() {
@@ -70,6 +80,47 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.arguments.searchDetails?.transportType = "all";
     tools.printScreenState(_screenName, widget.arguments);
 
+  }
+
+  // Method to handle sheet transitions
+  void _changeSheet(ActiveSheet newSheet) {
+    // Save current sheet's scroll position if controller is attached
+    if (_controller.isAttached && _activeSheet != ActiveSheet.none) {
+      _sheetScrollPositions[_activeSheet] = _controller.size;
+
+      // Save NearbyStopsSheet state if that's the current sheet
+      if (_activeSheet == ActiveSheet.nearbyStops) {
+        _savedNearbyStopsState = _getNearbyStopsState();
+      }
+    }
+
+    // Add to navigation history
+    if (_activeSheet != ActiveSheet.none) {
+      if (!_navigationHistory.contains(_activeSheet)) {
+        _navigationHistory.add(_activeSheet);
+      }
+    }
+
+    setState(() {
+      _activeSheet = newSheet;
+
+      // Restore scroll position
+      if (_controller.isAttached) {
+        double targetSize = _sheetScrollPositions[newSheet] ?? 0.3;
+        _controller.animateTo(
+          targetSize,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  NearbyStopsState? _getNearbyStopsState() {
+    if (_nearbyStopsSheetKey.currentState != null) {
+      return _nearbyStopsSheetKey.currentState!.getCurrentState();
+    }
+    return null;
   }
 
   // Initializes the map
@@ -229,47 +280,98 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       widget.arguments.searchDetails!.stop = stop;
       widget.arguments.searchDetails!.route = route;
-      _isStopSelected = true; // Switch to StopDirectionsSheet
 
       widget.arguments.searchDetails!.directions.clear();
       for (var transport in listTransport) {
         widget.arguments.searchDetails!.directions.add(transport);
       }
     });
+
     loadTransportPath(false);
+    _changeSheet(ActiveSheet.stopDetails);
   }
 
   Future<void> _onTransportTapped(Transport transport) async {
     setState(() {
       widget.arguments.transport = transport;
-      _isTransportSelected = true;
     });
+
     loadTransportPath(true);
+    _changeSheet(ActiveSheet.transportDetails);
+  }
+
+  Future<void> _onDepartureTapped(Departure departure) async {
+    setState(() {
+      _departure = departure;
+    });
+
+    _changeSheet(ActiveSheet.departureDetails);
   }
 
   // Sets the map's Marker and Camera to the Location
-  // todo Complete this function, make the camera move to the Location
   void _onLocationSelected(LatLng selectedLocation) {
     print("(searchScreen -> _onLocationSelected -- selected location: $selectedLocation)");
 
     setState(() {
       setMarker(selectedLocation);
       _polylines.clear();
-      widget.arguments.searchDetails!.markerPosition = selectedLocation;     // todo doing this line can just be part of setMarker?? Not having this makes it crash
-      _isStopSelected = false; // Return to list of stops
-      _isDepartureSelected = false;
-      _isTransportSelected = false;
+      widget.arguments.searchDetails!.markerPosition = selectedLocation;
     });
+
     mapController.animateCamera(
       CameraUpdate.newLatLng(selectedLocation),
     );
+
+    // If user selected a location, show nearby stops
+    if(_hasDroppedPin) {
+      _changeSheet(ActiveSheet.nearbyStops);
+    }
   }
 
-  Future<void> _onDepartureTapped(Departure departure) async {
-    setState(() {
-      _isDepartureSelected = true;
-      _departure = departure;
-    });
+  // Back button handler
+  void _handleBackButton() {
+    ActiveSheet previousSheet;
+
+    switch (_activeSheet) {
+      case ActiveSheet.departureDetails:
+        previousSheet = ActiveSheet.transportDetails;
+        break;
+      case ActiveSheet.transportDetails:
+        previousSheet = ActiveSheet.stopDetails;
+        // Restore transport path display
+        loadTransportPath(false);
+        break;
+      case ActiveSheet.stopDetails:
+        previousSheet = ActiveSheet.nearbyStops;
+        // Clear polylines and restore marker
+        _polylines.clear();
+        setMarker(widget.arguments.searchDetails!.markerPosition!);
+        break;
+      case ActiveSheet.nearbyStops:
+      case ActiveSheet.none:
+      default:
+        Navigator.pop(context);
+        return; // Exit early
+    }
+
+    // Remove current sheet from history
+    if (_navigationHistory.isNotEmpty &&
+        _navigationHistory.last == _activeSheet) {
+      _navigationHistory.removeLast();
+    }
+
+    // If we need to go back more than one step (e.g., departure → nearby)
+    if (_navigationHistory.isNotEmpty &&
+        previousSheet != _navigationHistory.last &&
+        _navigationHistory.contains(previousSheet)) {
+      // Find the correct previous sheet in history
+      while (_navigationHistory.isNotEmpty &&
+          _navigationHistory.last != previousSheet) {
+        _navigationHistory.removeLast();
+      }
+    }
+
+    _changeSheet(previousSheet);
   }
 
   // Rendering
@@ -332,36 +434,46 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                     ],
                   ),
-                  child: _isStopSelected
-                    ? _isTransportSelected
-                      ? _isDepartureSelected
-                        ? DepartureDetailsSheet(
-                            arguments: widget.arguments,
-                            scrollController: scrollController,
-                            departure: _departure,
-                          )
-                        : TransportDetailsSheet(
-                            arguments: widget.arguments,
-                            scrollController: scrollController,
-                            onDepartureTapped: _onDepartureTapped,
-                          )
-                      : StopDetailsSheet(
+                  child: () {
+                    switch (_activeSheet) {
+                      case ActiveSheet.stopDetails:
+                        return StopDetailsSheet(
                           arguments: widget.arguments,
                           scrollController: scrollController,
                           onTransportTapped: _onTransportTapped,
                           onDepartureTapped: _onDepartureTapped,
-                        )
-                    : NearbyStopsSheet(
-                        arguments: widget.arguments,
-                        scrollController: scrollController,
-                        onSearchFiltersChanged: _onSearchFiltersChanged,
-                        onStopTapped: _onStopTapped,
-                      ),
+                        );
+                      case ActiveSheet.transportDetails:
+                        return TransportDetailsSheet(
+                          arguments: widget.arguments,
+                          scrollController: scrollController,
+                          onDepartureTapped: _onDepartureTapped,
+                        );
+                      case ActiveSheet.departureDetails:
+                        return DepartureDetailsSheet(
+                          arguments: widget.arguments,
+                          scrollController: scrollController,
+                          departure: _departure,
+                        );
+                      case ActiveSheet.nearbyStops:
+                      default:
+                        return NearbyStopsSheet(
+                          key: _nearbyStopsSheetKey,  // Add this line
+                          arguments: widget.arguments,
+                          scrollController: scrollController,
+                          onSearchFiltersChanged: _onSearchFiltersChanged,
+                          onStopTapped: _onStopTapped,
+                          initialState: _savedNearbyStopsState,
+                          onStateChanged: (state) {
+                            _savedNearbyStopsState = state;
+                          },
+                        );
+                    }
+                  }(),
                 );
               },
             ),
 
-          // Back button and search bar
           Positioned(
             top: 40,
             left: 15,
@@ -370,46 +482,26 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  // Back button rendering and functionality
+                  // Back button with updated handler
                   GestureDetector(
-                    // Changes back button functionality depending on if stop has been selected
-                    onTap: () {
-                      if (_isStopSelected && !_isTransportSelected && !_isDepartureSelected) {
-                        setState(() {
-                          _isStopSelected = false; // Return to list of stops
-                          _polylines.clear();
-                          setMarker(widget.arguments.searchDetails!.markerPosition!);
-                        });
-                      } else if (_isTransportSelected && !_isDepartureSelected) {
-                        setState(() {
-                          _isTransportSelected = false;
-                          setMarker(widget.arguments.searchDetails!.markerPosition!);
-                          loadTransportPath(false);
-                        });
-                      } else if (_isDepartureSelected) {
-                        setState(() {
-                          _isDepartureSelected = false;
-                        });
-                      } else {
-                        Navigator.pop(context); // Return to home page
-                      }
-                    },
+                    onTap: _handleBackButton,
                     child: BackButtonWidget(),
                   ),
-
-                  // Conditionally renders search bar if stop has not been selected
-                  // if (!_isStopSelected) ...[
                   SizedBox(width: 10),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.7,
                     child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
                   ),
-                  // ],
                 ],
               ),
             ),
           ),
         ],
+      ),
+      // Only call updateMainPage when necessary (e.g., when adding a new route)
+      bottomNavigationBar: BottomNavigation(
+        currentIndex: 1, // Search page is index 1
+        updateMainPage: null,
       ),
     );
   }
