@@ -117,7 +117,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<List<Transport>> splitDirection(Stop stop, PTRoute.Route route) async {
-    String? routeId = route.id;
+    String? routeId = route.id.toString();
     List<RouteDirection> directions = [];
     List<Transport> transportList = [];
 

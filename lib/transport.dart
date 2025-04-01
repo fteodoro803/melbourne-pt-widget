@@ -53,7 +53,7 @@ class Transport {
     String? routeType = this.routeType?.type.id.toString();
     String? stopId = stop?.id;
     String? directionId = direction?.id.toString();
-    String? routeId = route?.id;
+    String? routeId = route?.id.toString();
 
     // print("( transport.dart -> updateDepartures() ) -- transport file: \n${toString()} ");
 
@@ -95,7 +95,7 @@ class Transport {
   }
 
   Future<List<RouteDirection>> fetchRouteDirections() async {
-    String? routeId = route?.id;
+    String? routeId = route?.id.toString();
     List<RouteDirection> directions = [];
 
     // Fetching Data and converting to JSON

@@ -130,7 +130,7 @@ class PtvService {
 
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
-        String routeId = route["route_id"].toString();
+        int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.withId(id: routeTypeId);
 
@@ -155,12 +155,12 @@ class PtvService {
     ApiData data;
     if (direction != null) {
       data = await PtvApiService().stopsAlongRoute(
-          route.id, route.type.type.id.toString(), directionId: direction.id.toString(),
+          route.id.toString(), route.type.type.id.toString(), directionId: direction.id.toString(),
           geoPath: true);
     }
     else {
       data = await PtvApiService().stopsAlongRoute(
-          route.id, route.type.type.id.toString(), geoPath: true);
+          route.id.toString(), route.type.type.id.toString(), geoPath: true);
     }
     Map<String, dynamic>? jsonResponse = data.response;
 
@@ -193,7 +193,7 @@ class PtvService {
 
     // Fetches stops data via PTV API
     ApiData data = await PtvApiService().stopsAlongRoute(
-        route.id, route.type.type.id.toString(), geoPath: true);
+        route.id.toString(), route.type.type.id.toString(), geoPath: true);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // print(" (ptv_service.dart -> fetchGeoPath) -- fetched Geopath for route ${route.id}:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
