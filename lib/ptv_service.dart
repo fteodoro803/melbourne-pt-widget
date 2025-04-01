@@ -155,7 +155,7 @@ class PtvService {
     ApiData data;
     if (direction != null) {
       data = await PtvApiService().stopsAlongRoute(
-          route.id, route.type.type.id.toString(), directionId: direction.id,
+          route.id, route.type.type.id.toString(), directionId: direction.id.toString(),
           geoPath: true);
     }
     else {
