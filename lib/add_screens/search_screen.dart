@@ -416,6 +416,7 @@ class _SearchScreenState extends State<SearchScreen> {
               // snapSizes: [0.6, 1],
               builder: (context, scrollController) {
                 return Container(
+                  // width: double.infinity,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius:

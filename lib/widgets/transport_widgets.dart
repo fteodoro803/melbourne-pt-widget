@@ -97,17 +97,6 @@ class RouteWidget extends StatelessWidget {
         SizedBox(width: 10),
 
         if (routeType != "train" && routeType != "vLine" && direction != null)
-          // Expanded(
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Text(
-          //       direction?.name ?? "No Data",
-          //       style: TextStyle(
-          //         fontSize: 18,
-          //       ),
-          //     ),
-          //   ),
-          // ),
           scrollable ?
           Expanded(
             child: SingleChildScrollView(
@@ -130,17 +119,6 @@ class RouteWidget extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
-          // Expanded(
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Text(
-          //       direction?.name ?? "No Data",
-          //       style: TextStyle(
-          //         fontSize: 18,
-          //       ),
-          //       // overflow: TextOverflow.ellipsis,
-          //     ),
-          //   ),
           ),
       ],
     );
@@ -178,9 +156,10 @@ class FavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
-      width: 45,
-      height: 40,
+      width: 30,
+      height: 30,
       child: Center(
         child: Icon(
           _isSaved ? Icons.star : Icons.star_border,
