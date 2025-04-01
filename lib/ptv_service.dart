@@ -48,13 +48,11 @@ class PtvService {
           null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
       DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
-      String? runId = departure["run_id"]?.toString();
       String? runRef = departure["run_ref"]?.toString();
 
       Departure newDeparture = Departure(
           scheduledDepartureUTC: scheduledDepartureUTC,
           estimatedDepartureUTC: estimatedDepartureUTC,
-          runId: runId,
           runRef: runRef);
 
       // Get Vehicle descriptors per Departure
@@ -68,7 +66,7 @@ class PtvService {
       }
       else {
         print(
-            "( ptv_service.dart -> fetchDepartures() ) -- runs for runId $runId is empty )");
+            "( ptv_service.dart -> fetchDepartures() ) -- runs for runRef $runRef is empty )");
       }
 
       departures.add(newDeparture);
@@ -244,14 +242,12 @@ class PtvService {
           null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
       DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
-      String? runId = departure["run_id"]?.toString();
       String? runRef = departure["run_ref"]?.toString();
       int? stopId = departure["stop_id"];
 
       Departure newDeparture = Departure(
           scheduledDepartureUTC: scheduledDepartureUTC,
           estimatedDepartureUTC: estimatedDepartureUTC,
-          runId: runId,
           runRef: runRef,
           stopId: stopId,
       );
@@ -265,7 +261,7 @@ class PtvService {
       }
       else {
         print(
-            "( ptv_service.dart -> fetchPattern() ) -- patterns for runId $runId is empty )");
+            "( ptv_service.dart -> fetchPattern() ) -- patterns for runRef $runRef is empty )");
       }
 
       departures.add(newDeparture);

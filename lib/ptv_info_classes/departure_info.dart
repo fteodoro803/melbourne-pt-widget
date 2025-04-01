@@ -17,7 +17,6 @@ class Departure {
   String? estimatedDepartureTime;
 
   // Vehicle Descriptions
-  String? runId;              // todo remove this it's deprecated
   String? runRef;
   bool? hasLowFloor;
 
@@ -26,7 +25,7 @@ class Departure {
   int? stopId;
 
   // Constructor
-  Departure({required this.scheduledDepartureUTC, required this.estimatedDepartureUTC, required this.runId, required this.runRef, this.stopId}) {
+  Departure({required this.scheduledDepartureUTC, required this.estimatedDepartureUTC, required this.runRef, this.stopId}) {
 
     // Adds and converts Departure to local Melbourne Time
     if (scheduledDepartureUTC != null){
@@ -72,7 +71,7 @@ class Departure {
     return "Departures:\n"
       "\tScheduled Departure: $scheduledDeparture\t"
       "\tEstimated Departure: $estimatedDeparture\n"
-      "\tRun ID, Ref: $runId, $runRef\t"
+      "\tRun Ref: $runRef\t"
       "\tLow Floor: $hasLowFloor\t"
       "\tStop Name ($stopId): $stopName\n"
     ;
