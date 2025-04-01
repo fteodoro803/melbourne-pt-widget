@@ -61,6 +61,12 @@ class Departure {
     if (dateTime.hour > 12) {
       hour = (dateTime.hour - 12).toString();
       meridiem = "pm";
+    } else if (dateTime.hour == 12) {
+      hour = "12";
+      meridiem = "pm";
+    } else if (dateTime.hour == 0) {
+      hour = "12";
+      meridiem = "am";
     } else {
       hour = dateTime.hour.toString();
       meridiem = "am";
