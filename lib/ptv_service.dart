@@ -1,5 +1,7 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
+import 'dart:convert';
+
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
@@ -21,7 +23,7 @@ class StopRouteLists {
 class PtvService {
   Future<List<Departure>> fetchDepartures(String routeType, String stopId,
       String routeId,
-      {String? directionId, String maxResults = "20", String expands = "All"}) async {
+      {String? directionId, String? maxResults = "20", String? expands = "All"}) async {
     List<Departure> departures = [];
 
     // Fetches departure data via PTV API
@@ -203,9 +205,13 @@ class PtvService {
       return pathList;
     }
 
-    // Adding GeoPath to List
-    var paths = jsonResponse["geopath"][0]["paths"];
-    pathList = convertPolylineToLatLng(paths);
+    // Adding GeoPath to List if GeoPath isn't empty
+    List<dynamic> geopath = jsonResponse["geopath"];
+    if (geopath.isNotEmpty) {
+      var paths = jsonResponse["geopath"][0]["paths"];
+      pathList = convertPolylineToLatLng(paths);
+    }
+
     // convertPolylineToCsv(paths);     // test save to CSV, for rendering on https://kepler.gl/demo
 
     return pathList;

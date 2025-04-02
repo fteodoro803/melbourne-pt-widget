@@ -159,6 +159,12 @@ class _SearchScreenState extends State<SearchScreen> {
     _stopPositionAlongGeopath = _stopPosition;
 
     List<LatLng> geoPathList = await ptvService.fetchGeoPath(widget.arguments.searchDetails!.route!);
+
+    // Early exit if GeoPath is empty
+    if (geoPathList.isEmpty) {
+      return;
+    }
+
     _geopath = geoPathList;
     // List<Stop> stopList = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails!.route!, widget.arguments.searchDetails!.route!.direction!);
     List<Stop> stopList = await ptvService.fetchStopsRoute(widget.arguments.searchDetails!.route!);
