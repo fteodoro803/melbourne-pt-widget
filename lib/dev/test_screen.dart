@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_project/ptv_service.dart';
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
 
@@ -8,29 +8,32 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
+  var ptvService = PtvService();
+  String routeTypes = "1,2,3";
 
-  void testFunct(String location, {Map<String, Object>? parameters}) {
-    var parameters = {
-      'routeTypes': ['1', '2'],
-      'color': ['red', 'blue'],
-      'maxResults': '5',
-      'maxDistance': '30',
-    };
+  // 19 tram
+  String routeType = "1";
+  String routeId = "725";
+  String stopId = "2718";
+  String maxResults = "2";
+  String expand = "Stop,Route";
+
+  void testFunc() {
+    ptvService.fetchDepartures(routeType, stopId, routeId, expands: expand, maxResults: maxResults);
+    
+    
+    
   }
 
   void getStops() {}
 
   @override
   Widget build(BuildContext context) {
-    String location = "loc";
-    String? routeTypes = "1,2,3";
-    String? maxResults = "3";
-    String? maxDistance = null;
-
     return Scaffold(
       appBar: AppBar(title: const Text("Test Screen")),
       body: ElevatedButton(onPressed: () {
-      }, child: Text("BoolTest")),
+        testFunc();
+      }, child: Text("ExpandsRouteTypesTest")),
     );
   }
 }
