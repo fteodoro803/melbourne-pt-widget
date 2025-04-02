@@ -12,6 +12,7 @@ class SearchDetails {
   int distance = 300;
   String transportType = "all";
   Stop? stop;
+  bool? isSheetExpanded = false;
   PTRoute.Route? route;
   TextEditingController locationController;
 

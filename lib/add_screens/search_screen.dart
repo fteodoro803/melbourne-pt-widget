@@ -35,6 +35,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final String _screenName = "SelectLocation";
 
+  bool _isSheetFullyExpanded = false;
+  final DraggableScrollableController _controller = DraggableScrollableController();
+
   bool _hasDroppedPin = false;
 
   late Departure _departure;
@@ -73,6 +76,26 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
 
+    // Listen for changes in the sheet's size
+
+    _controller.addListener(() {
+      if (_controller.size > 0.95) {
+        if (!_isSheetFullyExpanded) {
+          setState(() {
+            _isSheetFullyExpanded = true;
+            widget.arguments.searchDetails!.isSheetExpanded = true;
+          });
+        }
+      } else if (_controller.size < 0.65) {
+        if (_isSheetFullyExpanded) {
+          setState(() {
+            _isSheetFullyExpanded = false;
+            widget.arguments.searchDetails!.isSheetExpanded = false;
+          });
+        }
+      }
+    });
+
     // Debug Printing
     widget.arguments.searchDetails?.distance = 300;
     widget.arguments.searchDetails?.transportType = "all";
@@ -88,7 +111,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       // Save NearbyStopsSheet state if that's the current sheet
       if (_activeSheet == ActiveSheet.nearbyStops) {
-        _savedNearbyStopsState = _getNearbyStopsState(newMarker);
+          _savedNearbyStopsState = _getNearbyStopsState();
       }
     }
 
@@ -114,10 +137,7 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  NearbyStopsState? _getNearbyStopsState(bool newMarker) {
-    if (newMarker) {
-      return null;
-    }
+  NearbyStopsState? _getNearbyStopsState() {
     if (_nearbyStopsSheetKey.currentState != null) {
       return _nearbyStopsSheetKey.currentState!.getCurrentState();
     }
@@ -140,18 +160,16 @@ class _SearchScreenState extends State<SearchScreen> {
       await getAddressFromCoordinates(position.latitude, position.longitude);
 
     // Update the state with the new address
-    setState(() {
-      widget.arguments.searchDetails!.markerPosition = position;
-      widget.arguments.searchDetails!.locationController.text = address;
-      widget.arguments.searchDetails!.distance = 300;
-      widget.arguments.searchDetails!.transportType = "all";
-      _hasDroppedPin = true;
-    });
+    widget.arguments.searchDetails!.markerPosition = position;
+    widget.arguments.searchDetails!.locationController.text = address;
+    widget.arguments.searchDetails!.distance = 300;
+    widget.arguments.searchDetails!.transportType = "all";
+    _hasDroppedPin = true;
+
   }
 
   // Retrieves address from coordinates of dropped pin
-  Future<String> getAddressFromCoordinates(
-      double latitude, double longitude) async {
+  Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
     try {
       List<geocoding.Placemark> placemarks =
           await geocoding.placemarkFromCoordinates(latitude, longitude);
@@ -242,49 +260,42 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // Handling choosing a new transport type in ToggleButtonsRow
-  Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
+  void _onSearchFiltersChanged({String? newTransportType, int? newDistance}) {
     String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType;
     int distance = newDistance ?? widget.arguments.searchDetails!.distance;
 
     _getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
 
-    setState(() {
-      widget.arguments.searchDetails!.distance = distance;
-      widget.arguments.searchDetails!.transportType = transportType;
-    });
+    widget.arguments.searchDetails!.distance = distance;
+    widget.arguments.searchDetails!.transportType = transportType;
+
   }
 
   // Handling tap on an item in NearbyStopsSheet
   Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
     List<Transport> listTransport = await splitDirection(stop, route);
 
-    setState(() {
-      widget.arguments.searchDetails!.stop = stop;
-      widget.arguments.searchDetails!.route = route;
+    widget.arguments.searchDetails!.stop = stop;
+    widget.arguments.searchDetails!.route = route;
 
-      widget.arguments.searchDetails!.directions.clear();
-      for (var transport in listTransport) {
-        widget.arguments.searchDetails!.directions.add(transport);
-      }
-    });
+    widget.arguments.searchDetails!.directions.clear();
+    for (var transport in listTransport) {
+      widget.arguments.searchDetails!.directions.add(transport);
+    }
 
     loadTransportPath(false);
     _changeSheet(ActiveSheet.stopDetails, false);
   }
 
-  Future<void> _onTransportTapped(Transport transport) async {
-    setState(() {
-      widget.arguments.transport = transport;
-    });
+  void _onTransportTapped(Transport transport) {
+    widget.arguments.transport = transport;
 
     loadTransportPath(true);
     _changeSheet(ActiveSheet.transportDetails, false);
   }
 
-  Future<void> _onDepartureTapped(Departure departure) async {
-    setState(() {
-      _departure = departure;
-    });
+  void _onDepartureTapped(Departure departure) {
+    _departure = departure;
     _changeSheet(ActiveSheet.departureDetails, false);
   }
 
@@ -413,6 +424,57 @@ class _SearchScreenState extends State<SearchScreen> {
     _changeSheet(previousSheet, false);
   }
 
+  String _getSheetTitle() {
+    switch (_activeSheet) {
+      case ActiveSheet.stopDetails:
+        return "Stop Details";
+      case ActiveSheet.transportDetails:
+        return "Transport Details";
+      case ActiveSheet.departureDetails:
+        return "Departure Details";
+      case ActiveSheet.nearbyStops:
+      default:
+        return "Nearby Stops";
+    }
+  }
+
+  Widget _getSheetContent(ScrollController scrollController) {
+    switch (_activeSheet) {
+      case ActiveSheet.stopDetails:
+        return StopDetailsSheet(
+          arguments: widget.arguments,
+          scrollController: scrollController,
+          onTransportTapped: _onTransportTapped,
+          onDepartureTapped: _onDepartureTapped,
+        );
+      case ActiveSheet.transportDetails:
+        return TransportDetailsSheet(
+          arguments: widget.arguments,
+          scrollController: scrollController,
+          onDepartureTapped: _onDepartureTapped,
+        );
+      case ActiveSheet.departureDetails:
+        return DepartureDetailsSheet(
+          arguments: widget.arguments,
+          scrollController: scrollController,
+          departure: _departure,
+        );
+      case ActiveSheet.nearbyStops:
+      default:
+        return NearbyStopsSheet(
+          key: _nearbyStopsSheetKey,
+          arguments: widget.arguments,
+          scrollController: scrollController,
+          onSearchFiltersChanged: _onSearchFiltersChanged,
+          onStopTapped: _onStopTapped,
+          initialState: _savedNearbyStopsState,
+          onStateChanged: (state) {
+            _savedNearbyStopsState = state;
+          },
+        );
+    }
+  }
+
   // Rendering
   @override
   Widget build(BuildContext context) {
@@ -422,15 +484,13 @@ class _SearchScreenState extends State<SearchScreen> {
           // Google Map
           Positioned.fill(
             child: GoogleMap(
-              onCameraMove: (position) {
-                setState(() {});
-              },
+              // onCameraMove: (position) {
+              //   setState(() {});
+              // },
               onMapCreated: _onMapCreated,
               // Creates marker when user presses on screen
-              onLongPress: (LatLng position) {
-                setState(() {
-                  _onLocationSelected(position);
-                });
+              onLongPress: (LatLng position) async {
+                await _onLocationSelected(position);
               },
               // Set initial position and zoom of map
               initialCameraPosition:
@@ -449,73 +509,52 @@ class _SearchScreenState extends State<SearchScreen> {
               maxChildSize: 1.0,
               snap: true,
               snapSizes: [0.15, 0.6, 1.0],
+              expand: true,
               shouldCloseOnMinExtent: false,
-              builder: (context, scrollController) {
-                return Container(
-                  // width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(
-                          red: 0,
-                          green: 0,
-                          blue: 0,
-                          alpha: 0.1,
+                builder: (context, scrollController) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(red: 0, green: 0, blue: 0, alpha: 0.1),
+                          spreadRadius: 1,
+                          blurRadius: 7,
+                          offset: Offset(0, -2),
                         ),
-                        spreadRadius: 1,
-                        blurRadius: 7,
-                        offset: Offset(0, -2),
-                      ),
-                    ],
-                  ),
-                  child: () {
-                    switch (_activeSheet) {
-                      case ActiveSheet.stopDetails:
-                        return StopDetailsSheet(
-                          arguments: widget.arguments,
-                          scrollController: scrollController,
-                          onTransportTapped: _onTransportTapped,
-                          onDepartureTapped: _onDepartureTapped,
-                        );
-                      case ActiveSheet.transportDetails:
-                        return TransportDetailsSheet(
-                          arguments: widget.arguments,
-                          scrollController: scrollController,
-                          onDepartureTapped: _onDepartureTapped,
-                        );
-                      case ActiveSheet.departureDetails:
-                        return DepartureDetailsSheet(
-                          arguments: widget.arguments,
-                          scrollController: scrollController,
-                          departure: _departure,
-                        );
-                      case ActiveSheet.nearbyStops:
-                      default:
-                        return NearbyStopsSheet(
-                          key: _nearbyStopsSheetKey,  // Add this line
-                          arguments: widget.arguments,
-                          scrollController: scrollController,
-                          onSearchFiltersChanged: _onSearchFiltersChanged,
-                          onStopTapped: _onStopTapped,
-                          initialState: _savedNearbyStopsState,
-                          onStateChanged: (state) {
-                            _savedNearbyStopsState = state;
-                          },
-                        );
-                    }
-                  }(),
-                );
-              },
+                      ],
+                    ),
+                    child: _isSheetFullyExpanded
+                      ? Column(
+                        children: [
+                          SizedBox(height: 50),
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: _handleBackButton,
+                                child: BackButton(),
+                              ),
+                              SizedBox(width: 10),
+                              Text(_getSheetTitle()),
+                            ],
+                          ),
+                          Divider(),
+                          Expanded(child: _getSheetContent(scrollController)),
+                        ],
+                      )
+                    : _getSheetContent(scrollController),
+                  );
+                }
             ),
 
           Positioned(
             top: 60,
             left: 15,
             right: 15,
-            child: Row(
+            child: _isSheetFullyExpanded
+                ? Container() // Hide search bar when sheet is fully expanded
+                : Row(
               children: [
                 // Back button with updated handler
                 GestureDetector(
@@ -532,7 +571,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ],
             ),
-          ),
+          )
         ],
       ),
       // Only call updateMainPage when necessary (e.g., when adding a new route)

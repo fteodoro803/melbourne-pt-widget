@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
 
-class ToggleButtonsRow extends StatefulWidget {
+class ToggleButtonsRow extends StatelessWidget {
+  final String initialTransportType;
+  final Function({int? newDistance, String? newTransportType}) onSearchFiltersChanged;
+  final Function(String newTransportType) onTransportTypeChanged;
 
-  final Function({int? newDistance, String? newTransportType}) onTransportTypeChanged; // Callback for parent widget
-  const ToggleButtonsRow({super.key, required this.onTransportTypeChanged});
+  const ToggleButtonsRow({
+    Key? key,
+    required this.initialTransportType,
+    required this.onSearchFiltersChanged,
+    required this.onTransportTypeChanged
+  }) : super(key: key);
 
-  @override
-  _ToggleButtonsRowState createState() => _ToggleButtonsRowState();
-}
+  // Helper method to check which button is selected
+  bool _isSelected(String transportType) {
+    return initialTransportType == transportType;
+  }
 
-class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
-  // Track the selected state of each button
-  bool isAllSelected = true;
-  bool isTramSelected = false;
-  bool isTrainSelected = false;
-  bool isBusSelected = false;
-  bool isVLineSelected = false;
+  // Method to handle button press
+  void _handleButtonPress(BuildContext context, String transportType) {
+    if (initialTransportType == transportType) {
+      // If the same button is pressed again, switch to "all"
+      onSearchFiltersChanged(newTransportType: "all", newDistance: null);
+      onTransportTypeChanged("all");
+    } else {
+      // Otherwise select the pressed button
+      onSearchFiltersChanged(newTransportType: transportType, newDistance: null);
+      onTransportTypeChanged(transportType);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,55 +37,29 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
       children: [
         // "All transport" button
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              print("All selected");
-              isAllSelected = !isAllSelected; // Toggle state
-              if (isAllSelected) {
-                isTramSelected = false;
-                isBusSelected = false;
-                isVLineSelected = false;
-                isTrainSelected = false;
-                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
-              }
-            });
-          },
+          onPressed: () => _handleButtonPress(context, "all"),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            backgroundColor: isAllSelected || (!isTramSelected && !isBusSelected && !isVLineSelected && !isTrainSelected) ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.secondary,
+            backgroundColor: _isSelected("all") ?
+            Theme.of(context).colorScheme.secondaryContainer :
+            Theme.of(context).colorScheme.secondary,
             minimumSize: Size(50, 50),
           ),
           child: Text(
             "All Transport",
-            style: TextStyle(color: isAllSelected || (!isTramSelected && !isBusSelected && !isVLineSelected && !isTrainSelected) ? Colors.white : Colors.black),
+            style: TextStyle(color: _isSelected("all") ? Colors.white : Colors.black),
           ),
         ),
         SizedBox(width: 8),
 
         // Tram button
         ElevatedButton(
-          onPressed: () {
-
-            setState(() {
-              print("Tram selected");
-              isTramSelected = !isTramSelected; // Toggle state
-              if (isTramSelected) {
-                isAllSelected = false;
-                isBusSelected = false;
-                isVLineSelected = false;
-                isTrainSelected = false;
-                widget.onTransportTypeChanged(newTransportType: "tram", newDistance: null);
-              }
-              else {
-                isAllSelected = true;
-                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
-              }
-            });
-
-          },
+          onPressed: () => _handleButtonPress(context, "tram"),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero,
-            backgroundColor: isTramSelected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.secondary,
+            backgroundColor: _isSelected("tram") ?
+            Theme.of(context).colorScheme.secondaryContainer :
+            Theme.of(context).colorScheme.secondary,
             minimumSize: Size(50, 50),
             shape: CircleBorder(),
           ),
@@ -85,30 +72,17 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
             ),
           ),
         ),
+        // Other buttons follow the same pattern...
         SizedBox(width: 8),
 
         // Train button
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              print("Train selected");
-              isTrainSelected = !isTrainSelected;
-              if (isTrainSelected) {
-                isTramSelected = false;
-                isBusSelected = false;
-                isVLineSelected = false;
-                isAllSelected = false;
-                widget.onTransportTypeChanged(newTransportType: "train", newDistance: null);
-              }
-              else {
-                isAllSelected = true;
-                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
-              }
-            });
-          },
+          onPressed: () => _handleButtonPress(context, "train"),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero,
-            backgroundColor: isTrainSelected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.secondary,
+            backgroundColor: _isSelected("train") ?
+            Theme.of(context).colorScheme.secondaryContainer :
+            Theme.of(context).colorScheme.secondary,
             minimumSize: Size(50, 50),
             shape: CircleBorder(),
           ),
@@ -125,26 +99,12 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
 
         // Bus button
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              print("Bus selected");
-              isBusSelected = !isBusSelected; // Toggle state
-              if (isBusSelected) {
-                isTramSelected = false;
-                isTrainSelected = false;
-                isVLineSelected = false;
-                isAllSelected = false;
-                widget.onTransportTypeChanged(newTransportType: "bus", newDistance: null);
-              }
-              else {
-                isAllSelected = true;
-                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
-              }
-            });
-          },
+          onPressed: () => _handleButtonPress(context, "bus"),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero,
-            backgroundColor: isBusSelected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.secondary,
+            backgroundColor: _isSelected("bus") ?
+            Theme.of(context).colorScheme.secondaryContainer :
+            Theme.of(context).colorScheme.secondary,
             minimumSize: Size(50, 50),
             shape: CircleBorder(),
           ),
@@ -161,26 +121,12 @@ class _ToggleButtonsRowState extends State<ToggleButtonsRow> {
 
         // VLine button
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              print("VLine selected");
-              isVLineSelected = !isVLineSelected; // Toggle state
-              if (isVLineSelected) {
-                isTramSelected = false;
-                isTrainSelected = false;
-                isBusSelected = false;
-                isAllSelected = false;
-                widget.onTransportTypeChanged(newTransportType: "vLine", newDistance: null);
-              }
-              else {
-                isAllSelected = true;
-                widget.onTransportTypeChanged(newTransportType: "all", newDistance: null);
-              }
-            });
-          },
+          onPressed: () => _handleButtonPress(context, "vLine"),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero,
-            backgroundColor: isVLineSelected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.secondary,
+            backgroundColor: _isSelected("vLine") ?
+            Theme.of(context).colorScheme.secondaryContainer :
+            Theme.of(context).colorScheme.secondary,
             minimumSize: Size(50, 50),
             shape: CircleBorder(),
           ),
