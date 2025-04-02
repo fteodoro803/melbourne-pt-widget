@@ -18,7 +18,7 @@ import 'departure_details_sheet.dart';
 import 'nearby_stops_sheet.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
-import '../ptv_info_classes/route_info.dart' as PTRoute;
+import '../ptv_info_classes/route_info.dart' as pt_route;
 import 'package:flutter_project/google_service.dart';
 import 'suggestions_search.dart';
 
@@ -35,7 +35,6 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final String _screenName = "SelectLocation";
 
-  bool _isStopSelected = false;
   bool _hasDroppedPin = false;
 
   late Departure _departure;
@@ -45,7 +44,6 @@ class _SearchScreenState extends State<SearchScreen> {
   GoogleService googleService = GoogleService();
   TransportPathUtils transportPathUtils = TransportPathUtils();
 
-  // Map
   late GoogleMapController mapController;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
@@ -83,14 +81,14 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // Method to handle sheet transitions
-  void _changeSheet(ActiveSheet newSheet) {
+  void _changeSheet(ActiveSheet newSheet, bool newMarker) {
     // Save current sheet's scroll position if controller is attached
     if (_controller.isAttached && _activeSheet != ActiveSheet.none) {
       _sheetScrollPositions[_activeSheet] = _controller.size;
 
       // Save NearbyStopsSheet state if that's the current sheet
       if (_activeSheet == ActiveSheet.nearbyStops) {
-        _savedNearbyStopsState = _getNearbyStopsState();
+        _savedNearbyStopsState = _getNearbyStopsState(newMarker);
       }
     }
 
@@ -116,7 +114,10 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  NearbyStopsState? _getNearbyStopsState() {
+  NearbyStopsState? _getNearbyStopsState(bool newMarker) {
+    if (newMarker) {
+      return null;
+    }
     if (_nearbyStopsSheetKey.currentState != null) {
       return _nearbyStopsSheetKey.currentState!.getCurrentState();
     }
@@ -136,20 +137,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Get the address for the dropped marker
     String address =
-        await getAddressFromCoordinates(position.latitude, position.longitude);
-    StopRouteLists stopRouteLists = await ptvService
-        .fetchStopRoutePairs(widget.arguments.searchDetails!.markerPosition!);
-    // widget.arguments.searchDetails.routes = stopRouteLists.routes;
-    // widget.arguments.searchDetails.stops = stopRouteLists.stops;
-    // print(StopRouteLists);
+      await getAddressFromCoordinates(position.latitude, position.longitude);
 
     // Update the state with the new address
     setState(() {
       widget.arguments.searchDetails!.markerPosition = position;
-      widget.arguments.searchDetails!.routes = stopRouteLists.routes;
-      widget.arguments.searchDetails!.stops = stopRouteLists.stops;
-      widget.arguments.searchDetails!.locationController.text =
-          address; // Set the address in the text field
+      widget.arguments.searchDetails!.locationController.text = address;
+      widget.arguments.searchDetails!.distance = 300;
+      widget.arguments.searchDetails!.transportType = "all";
       _hasDroppedPin = true;
     });
   }
@@ -171,7 +166,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return "Address not found"; // Return a default message if something goes wrong
   }
 
-  Future<List<Transport>> splitDirection(Stop stop, PTRoute.Route route) async {
+  Future<List<Transport>> splitDirection(Stop stop, pt_route.Route route) async {
     String? routeId = route.id;
     List<RouteDirection> directions = [];
     List<Transport> transportList = [];
@@ -248,34 +243,19 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Handling choosing a new transport type in ToggleButtonsRow
   Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
-    StopRouteLists stopRouteLists;
-    String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType!;
-    int distance = newDistance ?? widget.arguments.searchDetails!.distance!;
+    String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType;
+    int distance = newDistance ?? widget.arguments.searchDetails!.distance;
 
-    if (transportType == "all") {
-      stopRouteLists = await ptvService
-          .fetchStopRoutePairs(
-          widget.arguments.searchDetails!.markerPosition!,
-          maxDistance: distance,
-      );
-    } else {
-      stopRouteLists = await ptvService.fetchStopRoutePairs(
-          widget.arguments.searchDetails!.markerPosition!,
-          routeTypes: transportType,
-          maxDistance: distance,
-      );
-    }
+    _getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
 
     setState(() {
-      widget.arguments.searchDetails!.routes = stopRouteLists.routes;
-      widget.arguments.searchDetails!.stops = stopRouteLists.stops;
       widget.arguments.searchDetails!.distance = distance;
       widget.arguments.searchDetails!.transportType = transportType;
     });
   }
 
   // Handling tap on an item in NearbyStopsSheet
-  Future<void> _onStopTapped(Stop stop, PTRoute.Route route) async {
+  Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
     List<Transport> listTransport = await splitDirection(stop, route);
 
     setState(() {
@@ -289,7 +269,7 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     loadTransportPath(false);
-    _changeSheet(ActiveSheet.stopDetails);
+    _changeSheet(ActiveSheet.stopDetails, false);
   }
 
   Future<void> _onTransportTapped(Transport transport) async {
@@ -298,34 +278,90 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     loadTransportPath(true);
-    _changeSheet(ActiveSheet.transportDetails);
+    _changeSheet(ActiveSheet.transportDetails, false);
   }
 
   Future<void> _onDepartureTapped(Departure departure) async {
     setState(() {
       _departure = departure;
     });
-    _changeSheet(ActiveSheet.departureDetails);
+    _changeSheet(ActiveSheet.departureDetails, false);
+  }
+
+  Future<void> _getStops(LatLng position, String transportType, int distance) async {
+    StopRouteLists stopRouteLists;
+
+    if (transportType == "all") {
+      stopRouteLists = await ptvService.fetchStopRoutePairs(
+        position,
+        maxDistance: distance,
+        maxResults: 50,
+      );
+    } else {
+      stopRouteLists = await ptvService.fetchStopRoutePairs(
+        position,
+        routeTypes: transportType,
+        maxDistance: distance,
+        maxResults: 50,
+      );
+    }
+
+    Set<String> uniqueStopIDs = {};
+    List<Stop> uniqueStops = [];
+
+    List<Stop> stopList = stopRouteLists.stops;
+    List<pt_route.Route> routeList = stopRouteLists.routes;
+
+    int stopIndex = 0;
+
+    for (var stop in stopList) {
+      if (!uniqueStopIDs.contains(stop.id)) {
+        // Create a new stop object to avoid reference issues
+        Stop newStop = Stop(
+          id: stop.id,
+          name: stop.name,
+          latitude: stop.latitude,
+          longitude: stop.longitude,
+          distance: stop.distance,
+        );
+
+        newStop.routes = <pt_route.Route>[];
+        newStop.routeType = routeList[stopIndex].type;
+
+        uniqueStops.add(newStop);
+        uniqueStopIDs.add(stop.id);
+      }
+
+      // Find the index of this stop in our uniqueStops list
+      int uniqueStopIndex = uniqueStops.indexWhere((s) => s.id == stop.id);
+      if (uniqueStopIndex != -1) {
+        uniqueStops[uniqueStopIndex].routes!.add(routeList[stopIndex]);
+      }
+
+      stopIndex++;
+    }
+
+    setState(() {
+      widget.arguments.searchDetails!.stops = uniqueStops;
+    });
   }
 
   // Sets the map's Marker and Camera to the Location
-  void _onLocationSelected(LatLng selectedLocation) {
-    print("(searchScreen -> _onLocationSelected -- selected location: $selectedLocation)");
+  Future<void> _onLocationSelected(LatLng selectedLocation) async {
+    await setMarker(selectedLocation);
+
+    _getStops(selectedLocation, "all", 300);
 
     setState(() {
-      setMarker(selectedLocation);
       _polylines.clear();
-      widget.arguments.searchDetails!.markerPosition = selectedLocation;
     });
 
     mapController.animateCamera(
       CameraUpdate.newLatLng(selectedLocation),
     );
 
-    // If user selected a location, show nearby stops
-    if(_hasDroppedPin) {
-      _changeSheet(ActiveSheet.nearbyStops);
-    }
+    // Bring the user to the NearbyStopsSheet with the updated data
+    _changeSheet(ActiveSheet.nearbyStops, true);
   }
 
   // Back button handler
@@ -374,7 +410,7 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     }
 
-    _changeSheet(previousSheet);
+    _changeSheet(previousSheet, false);
   }
 
   // Rendering
@@ -392,13 +428,9 @@ class _SearchScreenState extends State<SearchScreen> {
               onMapCreated: _onMapCreated,
               // Creates marker when user presses on screen
               onLongPress: (LatLng position) {
-                if (!_isStopSelected) {
-                  setState(() {
-                    setMarker(position);
-                  });
-                  // Sets marker position and transport location
-                  widget.arguments.searchDetails!.markerPosition = position;
-                }
+                setState(() {
+                  _onLocationSelected(position);
+                });
               },
               // Set initial position and zoom of map
               initialCameraPosition:
@@ -412,11 +444,12 @@ class _SearchScreenState extends State<SearchScreen> {
           if (_hasDroppedPin)
             DraggableScrollableSheet(
               controller: _controller,
-              initialChildSize: 0.3,
-              minChildSize: 0.2,
-              maxChildSize: 0.87,
-              // snap: true,
-              // snapSizes: [0.6, 1],
+              initialChildSize: 0.6,
+              minChildSize: 0.15,
+              maxChildSize: 1.0,
+              snap: true,
+              snapSizes: [0.15, 0.6, 1.0],
+              shouldCloseOnMinExtent: false,
               builder: (context, scrollController) {
                 return Container(
                   // width: double.infinity,
