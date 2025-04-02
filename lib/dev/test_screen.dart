@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-
-// Google Maps
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-
+import 'package:flutter_project/ptv_service.dart';
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
 
@@ -12,22 +8,32 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
-  late GoogleMapController mapController;
+  var ptvService = PtvService();
+  String routeTypes = "1,2,3";
 
-  final LatLng _center = const LatLng(-37.813812122509205, 144.96358311072478);
+  // 19 tram
+  String routeType = "1";
+  String routeId = "725";
+  String stopId = "2718";
+  String maxResults = "2";
+  String expand = "Stop,Route";
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+  void testFunc() {
+    ptvService.fetchDepartures(routeType, stopId, routeId, expands: expand, maxResults: maxResults);
+    
+    
+    
   }
+
+  void getStops() {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Test Screen")),
-      body: GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(target: _center, zoom: 11)
-      ),
+      body: ElevatedButton(onPressed: () {
+        testFunc();
+      }, child: Text("ExpandsRouteTypesTest")),
     );
   }
 }

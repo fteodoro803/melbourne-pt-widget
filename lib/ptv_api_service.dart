@@ -1,25 +1,27 @@
-/*
-Handles the data requests to the PTV API
-*/
-
 import 'dart:convert';
 import 'package:flutter_project/api_data.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:crypto/crypto.dart';
 
-// Handles fetching Data from API
+/// Handles fetching Data from the PTV API v3
 class PtvApiService {
-  String userId = GlobalConfiguration().get("ptvUserId");
-  String apiKey = GlobalConfiguration().get("ptvApiKey");
+  final String userId;
+  final String apiKey;
+  final http.Client client;
+
+  /// Creates a PtvApiService object, with an optional GlobalConfiguration
+  PtvApiService({GlobalConfiguration? config, http.Client? client}) :
+        userId = (config ?? GlobalConfiguration()).get("ptvUserId"),
+        apiKey = (config ?? GlobalConfiguration()).get("ptvApiKey"),
+        client = client ?? http.Client();
 
   // Generate URL for API Calls
-  Uri getURL(String request, {Map<String, String>? parameters}) {
+  Uri getURL(String request, {Map<String, Object>? parameters}) {
     // Signature
     parameters ??= {};    // initialises if parameters is null
     if (parameters.isEmpty) { parameters = {}; }    // initialises if parameters is empty
-    parameters ['devid'] = userId;
+    parameters['devid'] = userId;
 
     // Encode the api_key and message to bytes
     final List<int> keyBytes = utf8.encode(apiKey);
@@ -38,6 +40,7 @@ class PtvApiService {
         host: 'timetableapi.ptv.vic.gov.au',
         path: request,
         queryParameters: parameters);
+    print("(ptv_api_service.dart -> getURL) -- URL: $url");
     return url;
   }
 
@@ -47,6 +50,7 @@ class PtvApiService {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
+        // print("(ptv_api_service -> getResponse) -- JSON Response: ${response.body}");
         final jsonResponse = json.decode(response.body);
         return jsonResponse;
       } else {
@@ -64,7 +68,7 @@ class PtvApiService {
     String request = "/v3/route_types";
     Uri url = getURL(request);
     Map<String, dynamic>? response = await getResponse(url);
-    // print("(pt v_api_service -> routeTypes): response: $response");  // *test
+    // print("(ptv_api_service -> routeTypes): response: $response");  // *test
     return ApiData(url, response);
   }
 
@@ -80,39 +84,23 @@ class PtvApiService {
   // Get Stops around a Location
   Future<ApiData> stops(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
     String request = "/v3/stops/location/$location";
-    Map<String, String> parameters = {};
 
     // Parameter handling
-    if (routeTypes != null && routeTypes.isNotEmpty) {      // Assumes routeTypes string is in the form "1,2,3,..."
-      List<String> routeTypesList = routeTypes.split(',');
-      for (int i=0; i<routeTypesList.length; i++) {
-        parameters['route_types'] = routeTypesList[i];
-      }
-    }
-    if (maxResults != null && maxResults.isNotEmpty) {
-      parameters['max_results'] = maxResults;
-    }
-    if (maxDistance != null && maxDistance.isNotEmpty) {
-      parameters['max_distance'] = maxDistance;
-    }
+    Map<String, Object> parameters = {};
+    parameters = handleParameters(routeTypes: routeTypes, maxResults: maxResults, maxDistance: maxDistance);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
-    print("(ptv_api_service -> stops) -- response: $response"); //*test
+    // print("(ptv_api_service -> stops) -- response: $response"); //*test
     return ApiData(url, response);
   }
 
   Future<ApiData> stopsAlongRoute(String routeId, String routeType, {String? directionId, bool? geoPath}) async {
     String request = "/v3/stops/route/$routeId/route_type/$routeType";
-    Map<String, String> parameters = {};
 
     // Parameter handling
-    if (directionId != null && directionId.isNotEmpty) {      // Assumes routeTypes string is in the form "1,2,3,..."
-        parameters['direction_id'] = directionId;
-    }
-    if (geoPath!= null && geoPath == true) {
-      parameters['include_geopath'] = "true";
-    }
+    Map<String, Object> parameters = {};
+    parameters = handleParameters(directionId: directionId, geoPath: geoPath);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
@@ -131,22 +119,8 @@ class PtvApiService {
     }
 
     // Parameter Handling
-    Map<String, String> parameters = {};
-    if (directionId != null && directionId.isNotEmpty) {
-      parameters['direction_id'] = directionId;
-    }
-    if (maxResults != null && maxResults.isNotEmpty) {
-      parameters['max_results'] = maxResults;
-    }
-    // print('(ptv_api_service.dart): expand: $expand');
-    if (expand != null && expand.isNotEmpty) {
-      List<String> expandList = expand.split(',');
-      // print('(ptv_api_service.dart): expandList: $expandList');
-      for (int i=0; i<expandList.length; i++) {
-        parameters['expand'] = expandList[i];   // NOTE :::: SO FAR THIS IS WRONG BC IT OVERWRITES THE PREVIOUS EXPAND, BC THERE ARE NO DUPLICATE KEYS IN MAP
-      }
-      // print('(ptv_api_service.dart): parameters: $parameters');
-    }
+    Map<String, Object> parameters = {};
+    parameters = handleParameters(directionId: directionId, maxResults: maxResults, expand: expand);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
@@ -159,15 +133,8 @@ class PtvApiService {
     String request = "/v3/runs/$runRef/route_type/$routeType";
 
     // Parameter Handling
-    Map<String, String> parameters = {};
-    if (expand != null && expand.isNotEmpty) {
-      List<String> expandList = expand.split(',');
-      // print('(ptv_api_service.dart): expandList: $expandList');
-      for (int i=0; i<expandList.length; i++) {
-        parameters['expand'] = expandList[i];   // NOTE :::: SO FAR THIS IS WRONG BC IT OVERWRITES THE PREVIOUS EXPAND, BC THERE ARE NO DUPLICATE KEYS IN MAP
-      }
-      // print('(ptv_api_service.dart): parameters: $parameters');
-    }
+    Map<String, Object> parameters = {};
+    parameters = handleParameters(expand: expand);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
@@ -180,19 +147,50 @@ class PtvApiService {
     String request = "/v3/pattern/run/$runRef/route_type/$routeType";
 
     // Parameter Handling
-    Map<String, String> parameters = {};
-    if (expand != null && expand.isNotEmpty) {
-      List<String> expandList = expand.split(',');
-      // print('(ptv_api_service.dart): expandList: $expandList');
-      for (int i=0; i<expandList.length; i++) {
-        parameters['expand'] = expandList[i];   // NOTE :::: SO FAR THIS IS WRONG BC IT OVERWRITES THE PREVIOUS EXPAND, BC THERE ARE NO DUPLICATE KEYS IN MAP
-      }
-      // print('(ptv_api_service.dart): parameters: $parameters');
-    }
+    Map<String, Object> parameters = {};
+    parameters = handleParameters(expand: expand);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> patterns): response: $response"); //*test
     return ApiData(url, response);
+  }
+
+  /// Handles parameters
+  // todo: test if this messes with getURLs signature
+  Map<String, Object> handleParameters({String? routeTypes, String? maxResults,
+      String? maxDistance, String? directionId, bool? geoPath, String? expand}) {
+
+    Map<String, Object> parameters = {};
+
+    // Assumes routeTypes is of the form: "1,2,3,.."
+    if (routeTypes != null && routeTypes.isNotEmpty) {
+      List<String> types = routeTypes.split(',');
+      parameters['route_types'] = types;
+    }
+
+    if (maxResults != null && maxResults.isNotEmpty) {
+      parameters['max_results'] = maxResults;
+    }
+
+    if (maxDistance != null && maxDistance.isNotEmpty) {
+      parameters['max_distance'] = maxDistance;
+    }
+
+    if (directionId != null && directionId.isNotEmpty) {
+      parameters['direction_id'] = directionId;
+    }
+
+    if (geoPath!= null && geoPath == true) {
+      parameters['include_geopath'] = "true";
+    }
+
+    // Assumes expands is of the form "All" or "Stops,Routes,...", Comma Separated String
+    if (expand != null && expand.isNotEmpty) {
+      List<String> expands = expand.split(',');
+      parameters['expand'] = expands;
+    }
+
+    return parameters;
   }
 }
