@@ -1,24 +1,48 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_project/ptv_api_service.dart';
+import 'package:http/http.dart' as http;
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import '../mocks/mock_global_configuration.mocks.dart';
+import '../../mocks/mock_global_configuration.mocks.dart';
+import '../../mocks/ptv_responses.dart';
+
+@GenerateMocks([http.Client])
+import 'ptv_api_service_test.mocks.dart';
 
 void main() {
   late PtvApiService service;
   late MockGlobalConfiguration mockConfig;
+  late MockClient mockClient;
+  late PtvResponses ptvResponses;
 
   setUp(() {
+    ptvResponses = PtvResponses();
     mockConfig = MockGlobalConfiguration();
     when(mockConfig.get("ptvUserId")).thenReturn("testUser");
     when(mockConfig.get("ptvApiKey")).thenReturn("testApiKey");
+    mockClient = MockClient();
 
-    service = PtvApiService(config: mockConfig); // Instantiate your class if it's a method within a class
+    service = PtvApiService(config: mockConfig, client: mockClient); // Instantiate your class if it's a method within a class
   });
 
   test("ptv_api_service initialisation", () {
     expect(service.userId, "testUser");
     expect(service.apiKey, "testApiKey");
   });
+
+  // todo: figure out mockito
+  // group("routeTypes()", () {
+  //   test("should return correct ApiData", () async {
+  //     // Setup mock response
+  //     String response = ptvResponses.routeTypesResponse;
+  //     when(mockClient.get(any)).thenAnswer((_) async =>
+  //       http.Response(response, 200));
+  //
+  //     final result = await service.routeTypes();
+  //
+  //     expect(result.response?["route_types"][0]["route_type_name"], "Train");
+  //   });
+  // });
 
   group('_handleParameters', () {
     test('should return an empty map when all parameters are null', () {
