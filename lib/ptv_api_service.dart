@@ -1,25 +1,25 @@
-/*
-Handles the data requests to the PTV API
-*/
-
 import 'dart:convert';
 import 'package:flutter_project/api_data.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:crypto/crypto.dart';
 
-// Handles fetching Data from API
+/// Handles fetching Data from the PTV API v3
 class PtvApiService {
-  String userId = GlobalConfiguration().get("ptvUserId");
-  String apiKey = GlobalConfiguration().get("ptvApiKey");
+  final String userId;
+  final String apiKey;
+
+  /// Creates a PtvApiService object, with an optional GlobalConfiguration
+  PtvApiService({GlobalConfiguration? config}) :
+        userId = (config ?? GlobalConfiguration()).get("ptvUserId"),
+        apiKey = (config ?? GlobalConfiguration()).get("ptvApiKey");
 
   // Generate URL for API Calls
   Uri getURL(String request, {Map<String, String>? parameters}) {
     // Signature
     parameters ??= {};    // initialises if parameters is null
     if (parameters.isEmpty) { parameters = {}; }    // initialises if parameters is empty
-    parameters ['devid'] = userId;
+    parameters['devid'] = userId;
 
     // Encode the api_key and message to bytes
     final List<int> keyBytes = utf8.encode(apiKey);
@@ -38,6 +38,7 @@ class PtvApiService {
         host: 'timetableapi.ptv.vic.gov.au',
         path: request,
         queryParameters: parameters);
+    print("(ptv_api_service.dart -> getURL) -- URL: $url");
     return url;
   }
 
@@ -98,7 +99,7 @@ class PtvApiService {
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
-    print("(ptv_api_service -> stops) -- response: $response"); //*test
+    // print("(ptv_api_service -> stops) -- response: $response"); //*test
     return ApiData(url, response);
   }
 
@@ -194,5 +195,43 @@ class PtvApiService {
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> patterns): response: $response"); //*test
     return ApiData(url, response);
+  }
+
+  /// Handles parameters
+  // todo: test if this messes with getURLs signature
+  Map<String, Object> handleParameters({String? routeTypes, String? maxResults,
+      String? maxDistance, String? directionId, bool? geoPath, String? expand}) {
+
+    Map<String, Object> parameters = {};
+
+    // Assumes routeTypes is of the form: "1,2,3,.."
+    if (routeTypes != null && routeTypes.isNotEmpty) {
+      List<String> types = routeTypes.split(',');
+      parameters['route_types'] = types;
+    }
+
+    if (maxResults != null && maxResults.isNotEmpty) {
+      parameters['max_results'] = maxResults;
+    }
+
+    if (maxDistance != null && maxDistance.isNotEmpty) {
+      parameters['max_distance'] = maxDistance;
+    }
+
+    if (directionId != null && directionId.isNotEmpty) {
+      parameters['direction_id'] = directionId;
+    }
+
+    if (geoPath!= null && geoPath == true) {
+      parameters['include_geopath'] = "true";
+    }
+
+    // Assumes expands is of the form "All" or "Stops,Routes,...", Comma Separated String
+    if (expand != null && expand.isNotEmpty) {
+      List<String> expands = expand.split(',');
+      parameters['expand'] = expands;
+    }
+
+    return parameters;
   }
 }
