@@ -152,31 +152,31 @@ struct MelbournePTWidget: Widget {
                 transports: [
                     Transport(
                         uniqueID: "id1",
-                        routeType: RouteType(name: "Tram"),
+                        routeType: RouteType(name: "tram"),
                         stop: Stop(name: "Melbourne Central Station"),
                         route: Route(number: "59", colour: "00653A", textColour: "FFFFFF"),
                         direction: Direction(name: "Airport West"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "7:45pm",
-                                scheduledDepartureTime: "7:46pm",
-                                hasLowFloor: nil
+                                estimatedDepartureTime: "6:45pm",
+                                scheduledDepartureTime: "6:46pm",
+                                hasLowFloor: true
                             ),
                             Departure(
-                                estimatedDepartureTime: "7:49pm",
-                                scheduledDepartureTime: "7:49pm",
+                                estimatedDepartureTime: "6:49pm",
+                                scheduledDepartureTime: "6:49pm",
                                 hasLowFloor: true
                             ),
                             Departure(
                                 estimatedDepartureTime: nil,
                                 scheduledDepartureTime: "6:53pm",
-                                hasLowFloor: false
+                                hasLowFloor: true
                             )
                         ]
                     ),
                     Transport(
                         uniqueID: "id2",
-                        routeType: RouteType(name: "Bus"),
+                        routeType: RouteType(name: "bus"),
                         stop: Stop(name: "Hope St/Melville Rd"),
                         route: Route(number: "517", colour: "FF8200", textColour: "FFFFFF"),
                         direction: Direction(name: "Mooney Ponds"),
@@ -200,7 +200,7 @@ struct MelbournePTWidget: Widget {
                     ),
                     Transport(
                         uniqueID: "id3",
-                        routeType: RouteType(name: "VLine"),
+                        routeType: RouteType(name: "vLine"),
                         stop: Stop(name: "Southern Cross Station"),
                         route: Route(number: "", colour: "D92B26", textColour: "FFFFFF"),
                         direction: Direction(name: "Geelong"),
@@ -224,7 +224,7 @@ struct MelbournePTWidget: Widget {
                     ),
                     Transport(
                         uniqueID: "id4",
-                        routeType: RouteType(name: "Train"),
+                        routeType: RouteType(name: "train"),
                         stop: Stop(name: "Royal Park Station"),
                         route: Route(number: "", colour: "FFBE00", textColour: "000000"),
                         direction: Direction(name: "Upfield"),
@@ -252,7 +252,7 @@ struct MelbournePTWidget: Widget {
                 transports: [
                     Transport(
                         uniqueID: "id1",
-                        routeType: RouteType(name: "Train"),
+                        routeType: RouteType(name: "train"),
                         stop: Stop(name: "Melbourne Central Station"),
                         route: Route(number: "", colour: "FFBE00", textColour: "FFFFFF"),
                         direction: Direction(name: "Upfield"),

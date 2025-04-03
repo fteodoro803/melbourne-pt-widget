@@ -57,8 +57,6 @@ class _SearchScreenState extends State<SearchScreen> {
   late List<Stop> _stops = [];
   List<LatLng> _stopsAlongGeopath = [];
 
-  final DraggableScrollableController _controller = DraggableScrollableController();
-
   final LatLng _initialPosition = const LatLng(-37.813812122509205,
       144.96358311072478); // Change based on user's location
 
@@ -121,6 +119,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _navigationHistory.add(_activeSheet);
       }
     }
+
 
     setState(() {
       _activeSheet = newSheet;
@@ -373,6 +372,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Bring the user to the NearbyStopsSheet with the updated data
     _changeSheet(ActiveSheet.nearbyStops, true);
+
   }
 
   // Back button handler
