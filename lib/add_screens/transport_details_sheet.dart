@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../file_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../screen_arguments.dart';
-import '../widgets/departure_item.dart';
 import '../widgets/departures_list.dart';
 import '../transport.dart';
 import '../widgets/transport_widgets.dart';
