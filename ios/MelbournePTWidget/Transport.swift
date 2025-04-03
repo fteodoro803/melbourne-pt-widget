@@ -1,5 +1,14 @@
 import Foundation
 
+//struct RouteType: Codable {
+//    let type: RouteTypeEnum
+//    
+//    // Accessor to retrieve the name of the routeType from the enum
+//    var name: String {
+//        return type.name
+//    }
+//}
+
 // ~note make sure there is null checking
 
 struct RouteType: Codable {
@@ -35,15 +44,15 @@ struct Transport: Codable, CustomStringConvertible {
     let departures: [Departure]
             
     var description: String {
-            return """
-            Route Type: \(routeType.name)
-            Stop: \(stop.name)
-            Route Number: \(route.number)
-            Direction: \(direction.name)
-            Departures:
-            \(departures.map { departure in
-                "Scheduled: \(departure.scheduledDepartureTime ?? "N/A"), Estimated: \(departure.estimatedDepartureTime ?? "N/A")"
-            }.joined(separator: "\n"))
-            """
-        }
+        return """
+        Route Type: \(routeType.name) // Access name from RouteType
+        Stop: \(stop.name)
+        Route Number: \(route.number)
+        Direction: \(direction.name)
+        Departures:
+        \(departures.map { departure in
+            "Scheduled: \(departure.scheduledDepartureTime ?? "N/A"), Estimated: \(departure.estimatedDepartureTime ?? "N/A")"
+        }.joined(separator: "\n"))
+        """
+    }
 }

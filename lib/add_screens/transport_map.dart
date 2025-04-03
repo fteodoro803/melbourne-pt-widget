@@ -10,6 +10,7 @@ import '../ptv_info_classes/stop_info.dart';
 import '../screen_arguments.dart';
 import '../ptv_service.dart';
 import '../transport.dart';
+import '../widgets/bottom_navigation_bar.dart';
 import '../widgets/screen_widgets.dart';
 
 class TransportMap extends StatefulWidget {
@@ -167,6 +168,11 @@ class _TransportMapState extends State<TransportMap> {
             },
           ),
         ],
+      ),
+      // Only call updateMainPage when necessary (e.g., when adding a new route)
+      bottomNavigationBar: BottomNavigation(
+        currentIndex: 2, // Search page is index 2
+        updateMainPage: null,
       ),
     );
   }

@@ -37,14 +37,10 @@ struct AccessoryRectangularWidgetView: View {
                 // Route number and direction
                 HStack(spacing: 2) {
                     
-                    let imageString = TransportTypeUtils.transportTypeSmall(from: firstTransport.routeType.name)
-                    Image("\(imageString)")
-                        .resizable()
-                        .frame(width: 15.0, height: 15.0)
-                        .padding(.trailing, 2)
+                    WidgetUtils.transportTypeImage(transportType: firstTransport.routeType.name, imageSize: 15, small: true)
                     
                     // Train and V Line direction => "To [destination]"
-                    if firstTransport.routeType.name == "Train" || firstTransport.routeType.name == "VLine" {
+                    if firstTransport.routeType.name == "train" || firstTransport.routeType.name == "vLine" {
                         Text("To")
                             .font(.caption2)
                             .lineLimit(1)
@@ -78,20 +74,20 @@ struct AccessoryRectangularWidgetView: View {
                 
                 // Time remaining until next 2 departures, if applicable
                 HStack(spacing: 2) {
-                    if let timeDifference1 = TimeUtils.timeDifference(from: departureText[0]) {
-                        
+                    if let timeDifference1 = TimeUtils.timeDifference(estimatedTime: departureText[0], scheduledTime: nil) {
+                        let minutes1 = timeDifference1.minutes
                         // Case 1: first departure is now
-                        if timeDifference1.minutes == 0 {
+                        if minutes1 == 0 {
                             Text("Now")
                                 .font(.caption2)
                                 .fontWeight(.semibold)
                         }
                         // Case 2: first departure is in the next hour
-                        else if timeDifference1.minutes > 0 && timeDifference1.minutes < 60 {
+                        else if minutes1 > 0 && minutes1 < 60 {
                             Text("In")
                                 .font(.caption2)
                                 .fontWeight(.regular)
-                            Text("\(timeDifference1.minutes) min")
+                            Text("\(minutes1) min")
                                 .font(.caption2)
                                 .fontWeight(.semibold)
                         }
@@ -106,29 +102,31 @@ struct AccessoryRectangularWidgetView: View {
                         }
                         
                         // If second departure exists
-                        if let timeDifference2 = TimeUtils.timeDifference(from: departureText[1]) {
+                        if let timeDifference2 = TimeUtils.timeDifference(estimatedTime: departureText[1], scheduledTime: nil) {
+                            let minutes2 = timeDifference2.minutes
+                            
                             Text("and")
                                 .font(.caption2)
                                 .fontWeight(.regular)
                             
                             // Case 1: second departure is in the next hour
-                            if timeDifference2.minutes > 0 && timeDifference2.minutes < 60 {
+                            if minutes2 > 0 && minutes2 < 60 {
                                 
                                 // First departure is now
-                                if timeDifference1.minutes == 0 {
+                                if minutes1 == 0 {
                                     Text("in")
                                         .font(.caption2)
                                         .fontWeight(.semibold)
                                 }
                                 
-                                Text("\(timeDifference2.minutes) min")
+                                Text("\(minutes2) min")
                                     .font(.caption2)
                                     .fontWeight(.semibold)
                             }
                             
                             // Case 2: second departure is more than an hour away
                             else {
-                                if timeDifference1.minutes > 0 && timeDifference1.minutes < 60 {
+                                if minutes1 > 0 && minutes1 < 60 {
                                     Text("at")
                                         .font(.caption2)
                                         .fontWeight(.regular)

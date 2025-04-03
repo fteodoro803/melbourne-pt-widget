@@ -1,3 +1,4 @@
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/departures_list.dart';
@@ -26,17 +27,25 @@ class StopDetailsSheet extends StatefulWidget {
 }
 
 class _StopDetailsSheetState extends State<StopDetailsSheet> {
+  late List<Transport> transports;
 
   List<bool> savedList = [];
 
-  // Function to add/remove transport from favorites
-  Future<void> handleSave(bool isSaved, Transport transport) async {
-    if (isSaved) {
-      await append(transport);  // Add transport to saved list
-      widget.arguments.callback();
-    } else {
-      await deleteMatchingTransport(transport);  // Remove transport from saved list
-      widget.arguments.callback();
+  Future<void> handleSave(List<bool> isSavedList, List<bool> newSavedList) async {
+    for (var transport in transports) {
+      int index = transports.indexOf(transport);
+      bool wasSaved = isSavedList[index];
+      bool isNowSaved = newSavedList[index];
+      if (wasSaved != isNowSaved) {
+        if (!wasSaved) {
+          await append(transport);  // Add transport to saved list
+          widget.arguments.callback();
+        }
+        else {
+          await deleteMatchingTransport(transport);  // Remove transport from saved list
+          widget.arguments.callback();
+        }
+      }
     }
   }
 
@@ -58,6 +67,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   @override
   void initState() {
     super.initState();
+    transports = widget.arguments.searchDetails!.directions;
     initializeSavedList();
   }
 
@@ -75,98 +85,197 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
         // Stop and route details
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            padding: EdgeInsets.zero,
             controller: widget.scrollController,
-            child: Column(
-              children: [
-                // Stop location
-                LocationWidget(textField: widget.arguments.searchDetails!.stop!.name, textSize: 16, scrollable: true),
-                SizedBox(height: 4),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    LocationWidget(textField: widget.arguments.searchDetails!.stop!.name, textSize: 18, scrollable: true),
 
-                // Route details
-                RouteWidget(route: widget.arguments.searchDetails!.route!),
-                Divider(),
+                    // Stop location
+                    ListTile(
+                      contentPadding: EdgeInsets.all(0),
+                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                      dense: true,
+                      title: RouteWidget(route: widget.arguments.searchDetails!.route!, scrollable: false,),
+                      trailing: GestureDetector(
+                        child: FavoriteButton(isSaved: savedList.contains(true)),
+                        onTap: () async {
+                          await showModalBottomSheet(
+                            constraints: BoxConstraints(maxHeight: 320),
+                            context: context,
+                            builder: (BuildContext context) {
+                              List<bool> tempSavedList = List.from(savedList);
+                              bool hasListChanged = false;
+                              return StatefulBuilder(builder: (context, setModalState) {
 
-                // Departures for each direction
-                Column(
-                  children: widget.arguments.searchDetails!.directions.map((transport) {
-                    var departures = transport.departures;
-                    var index = widget.arguments.searchDetails!.directions.indexOf(transport);
-                    bool isSaved = savedList[index];
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Row(
-
-                              children: [
-                                // Direction text
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Text(
-                                      "Towards ${transport.direction?.name}",
-                                      style: TextStyle(fontSize: 18),
-                                      maxLines: 1,
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      leading: Padding(
+                                        padding: const EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
+                                        child: GestureDetector(
+                                          child: Text(
+                                            "Cancel",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                          }
+                                        ),
+                                      ),
+                                      trailing: GestureDetector(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 8.0, top: 10.0, bottom: 10.0),
+                                          child: Text(
+                                            "Confirm",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: hasListChanged ? null : Color(
+                                                  0xFF555555),
+                                            ),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          if (hasListChanged) {
+                                            handleSave(savedList, tempSavedList);
+                                            setState(() {
+                                              savedList = tempSavedList;
+                                            });
+                                            Navigator.pop(context);
+                                          }
+                                        }
+                                      ),
+                                      title: Text(
+                                        "Save Transport",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                // Add to Favorites button
-                                GestureDetector(
-                                  child: FavoriteButton(isSaved: savedList[index]),
-                                  onTap: () {
-                                    // Toggle the saved status
-                                    setState(() {
-                                      savedList[index] = !isSaved;
-                                    });
-
-                                    handleSave(savedList[index], transport);
-                                    SaveTransportService.renderSnackBar(context, savedList[index]);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Display departures if they exist
-                          if (departures != null && departures.isNotEmpty)
-                            DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false,),
-
-                          // Display a message if no departures
-                          if (departures == null || departures.isEmpty)
-                            Card(
-                              margin: const EdgeInsets.all(0.0),
-                              elevation: 0,
-                              child: Text("No departures to show."),
-                            ),
-
-                          // Navigate to Transport Details Sheet
-                          GestureDetector(
-                            child: Row(
-                              children: [
-                                SizedBox(width: 16),
-                                Text("See more departures", style: TextStyle(fontSize: 14)),
-                              ],
-                            ),
-
-                            onTap: () {
-                              setState(() {
-                                widget.onTransportTapped(transport);
+                                    Card(
+                                      color: Colors.black,
+                                      margin: const EdgeInsets.symmetric(horizontal: 18.0),
+                                      elevation: 1,
+                                      child: ListTile(
+                                        title: LocationWidget(textField: widget.arguments.searchDetails!.stop!.name, textSize: 18, scrollable: false),
+                                        subtitle: RouteWidget(route: widget.arguments.searchDetails!.route!, scrollable: false,),
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+                                    Text("Choose direction:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                                    SizedBox(height: 8),
+                                    Column(
+                                      children: widget.arguments.searchDetails!.directions.map((transport) {
+                                        var index = widget.arguments.searchDetails!.directions.indexOf(transport);
+                                        return Card(
+                                          color: Colors.black,
+                                          margin: const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 6),
+                                          elevation: 1,
+                                          child: ListTile(
+                                            contentPadding: const EdgeInsets.only(left: 20, right: 16),
+                                            visualDensity: VisualDensity(horizontal: 2, vertical: 0),
+                                            dense: true,
+                                            title: Text(
+                                              "${transport.direction?.name}",
+                                              style: TextStyle(fontSize: 18),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                            trailing: FavoriteButton(isSaved: tempSavedList[index]),
+                                            onTap: () {
+                                              setModalState(() {
+                                                tempSavedList[index] = !tempSavedList[index];
+                                                hasListChanged = !savedList.every((item) => item == tempSavedList[savedList.indexOf(item)]);
+                                              });
+                                            },
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                );
                               });
                             }
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  }).toList(),
+                    ),
+                    Divider(),
+
+                    // Departures for each direction
+                    Column(
+                      children: widget.arguments.searchDetails!.directions.map((transport) {
+                        var departures = transport.departures;
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                                dense: true,
+                                contentPadding: EdgeInsets.all(0),
+                                title: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Text(
+                                    "Towards ${transport.direction?.name}",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                                trailing: SizedBox(
+                                  width: 100,
+                                  child: GestureDetector(
+                                    child: Row(
+                                      children: [
+                                        SizedBox(width: 18),
+                                        Text("See all", style: TextStyle(fontSize: 16,)),
+                                        Icon(Icons.keyboard_arrow_right),
+                                      ],
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        widget.onTransportTapped(transport);
+                                      });
+                                    }
+                                  ),
+                                ),
+                              ),
+
+                              // Display departures if they exist
+                              if (departures != null && departures.isNotEmpty)
+                                DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false, onDepartureTapped: widget.onDepartureTapped,),
+
+                              // Display a message if no departures
+                              if (departures == null || departures.isEmpty)
+                                Card(
+                                  margin: const EdgeInsets.all(0.0),
+                                  elevation: 0,
+                                  child: Text("No departures to show."),
+                                ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],
