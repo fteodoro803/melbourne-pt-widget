@@ -212,7 +212,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     for (var direction in directions) {
       Transport newTransport = Transport.withStopRoute(stop, route, direction);
-      newTransport.routeType = RouteType.withId(id: route.type.type.id);
+      newTransport.routeType = RouteTypeEnum.fromId(route.type.id);
       await newTransport.updateDepartures();
       transportList.add(newTransport);
     }

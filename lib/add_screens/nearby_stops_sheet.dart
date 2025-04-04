@@ -448,7 +448,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                       final routes = stop.routes ?? [];
                       final stopName = stop.name;
                       final distance = stop.distance;
-                      final routeType = stop.routeType?.type.name ?? 'unknown';
+                      final routeType = stop.routeType?.name ?? 'unknown';
 
                       return Card(
                         margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),

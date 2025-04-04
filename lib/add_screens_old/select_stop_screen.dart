@@ -41,7 +41,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   Future<void> fetchStops() async {
     String? location = widget.arguments.transport.location?.coordinates;
     // print(location);
-    String? routeType = widget.arguments.transport.routeType?.type.id.toString();
+    String? routeType = widget.arguments.transport.routeType?.id.toString();
     // print(routeType);
     String? maxDistance = "300";
 
@@ -59,7 +59,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     for (var stop in jsonResponse!["stops"]) {
       for (var route in stop["routes"]) {
         if (route["route_type"] !=
-            widget.arguments.transport.routeType!.type.id) {
+            widget.arguments.transport.routeType!.id) {
           continue;
         }
 
@@ -74,7 +74,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         String routeNumber = route["route_number"].toString();
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
-        RouteType routeType = RouteType.withId(id: routeTypeId);
+        RouteTypeEnum routeType = RouteTypeEnum.fromId(routeTypeId);
         PTRoute.Route newRoute = PTRoute.Route(name: routeName, number: routeNumber, id: routeId, type: routeType);
 
         _stops.add(newStop);

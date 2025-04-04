@@ -60,7 +60,7 @@ class RouteWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String routeType = route.type.type.name;
+    String routeType = route.type.name;
     return Row(
       children: [
         Image.asset(

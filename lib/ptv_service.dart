@@ -1,7 +1,5 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
-import 'dart:convert';
-
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
@@ -132,7 +130,7 @@ class PtvService {
         String routeNumber = route["route_number"].toString();
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
-        RouteType routeType = RouteType.withId(id: routeTypeId);
+        RouteTypeEnum routeType = RouteTypeEnum.fromId(routeTypeId);
 
         Route newRoute = Route(
             name: routeName, number: routeNumber, id: routeId, type: routeType);
@@ -155,12 +153,12 @@ class PtvService {
     ApiData data;
     if (direction != null) {
       data = await PtvApiService().stopsAlongRoute(
-          route.id.toString(), route.type.type.id.toString(), directionId: direction.id.toString(),
+          route.id.toString(), route.type.id.toString(), directionId: direction.id.toString(),
           geoPath: true);
     }
     else {
       data = await PtvApiService().stopsAlongRoute(
-          route.id.toString(), route.type.type.id.toString(), geoPath: true);
+          route.id.toString(), route.type.id.toString(), geoPath: true);
     }
     Map<String, dynamic>? jsonResponse = data.response;
 
@@ -193,7 +191,7 @@ class PtvService {
 
     // Fetches stops data via PTV API
     ApiData data = await PtvApiService().stopsAlongRoute(
-        route.id.toString(), route.type.type.id.toString(), geoPath: true);
+        route.id.toString(), route.type.id.toString(), geoPath: true);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // print(" (ptv_service.dart -> fetchGeoPath) -- fetched Geopath for route ${route.id}:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
@@ -220,8 +218,8 @@ class PtvService {
   Future<void> fetchRuns(Transport transport) async {
     String expands = "All";
     String? runRef = transport.departures?[0].runRef;
-    RouteType? routeType = transport.routeType;
-    ApiData data = await PtvApiService().runs(runRef!, routeType!.type.name, expand: expands);
+    RouteTypeEnum? routeType = transport.routeType;
+    ApiData data = await PtvApiService().runs(runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 
     print("(ptv_service.dart -> fetchRuns) -- Fetched Runs:\n$jsonResponse");
@@ -231,8 +229,8 @@ class PtvService {
     List<Departure> departures = [];
     String expands = "Stop";
     String? runRef = departure.runRef;
-    RouteType? routeType = transport.routeType;
-    ApiData data = await PtvApiService().patterns(runRef!, routeType!.type.name, expand: expands);
+    RouteTypeEnum? routeType = transport.routeType;
+    ApiData data = await PtvApiService().patterns(runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Empty JSON Response

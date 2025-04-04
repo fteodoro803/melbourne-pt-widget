@@ -20,7 +20,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   // PtvApiService apiService = PtvApiService();
 
   final String _screenName = "SelectRouteType";
-  final List<RouteType> _routeTypes = [];
+  final List<RouteTypeEnum> _routeTypes = [];
   DevTools tools = DevTools();
 
   // Initialising State
@@ -53,17 +53,17 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
 
       switch (name.toLowerCase()) {
         case "train":
-          _routeTypes.add(RouteType(type: RouteTypeEnum.train));
+          _routeTypes.add(RouteTypeEnum.train);
         case "tram":
-          _routeTypes.add(RouteType(type: RouteTypeEnum.tram));
+          _routeTypes.add(RouteTypeEnum.tram);
         case "bus":
-          _routeTypes.add(RouteType(type: RouteTypeEnum.bus));
+          _routeTypes.add(RouteTypeEnum.bus);
         case "vline":
-          _routeTypes.add(RouteType(type: RouteTypeEnum.vLine));
+          _routeTypes.add(RouteTypeEnum.vLine);
 
           // reenable night bus later
         // case "night bus":
-        //   _routeTypes.add(RouteType(type: RouteTypeEnum.nightBus));
+        //   _routeTypes.add(RouteTypeEnum.nightBus);
       }
      }
 
@@ -88,7 +88,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
         // old
         itemCount: _routeTypes.length,
         itemBuilder: (context, index) {
-          final routeTypeName = _routeTypes[index].type.name ?? "Unknown RouteType";
+          final routeTypeName = _routeTypes[index].name ?? "Unknown RouteType";
 
           return ListTile(
             title: Text(routeTypeName),

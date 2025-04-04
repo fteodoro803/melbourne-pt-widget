@@ -16,7 +16,7 @@ class Route {
   String? textColour;   // Hex colour code for text
 
   RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
-  RouteType type;
+  RouteTypeEnum type;
 
   /// Creates a route object, and matches its details to its respective colour.
   Route(
@@ -24,7 +24,7 @@ class Route {
       required this.name,
       required this.number,
       required this.type}) {
-    setRouteColour(type.type.name);
+    setRouteColour(type.name);
   }
 
   /// Sets a route's colours based on its type.
