@@ -373,8 +373,30 @@ class _SearchScreenState extends State<SearchScreen> {
       _polylines.clear();
     });
 
-    mapController.animateCamera(
-      CameraUpdate.newLatLng(selectedLocation),
+    // Get the current map's zoom level and visible region
+    double currentZoom = await mapController.getZoomLevel();
+    LatLngBounds visibleRegion = await mapController.getVisibleRegion();
+
+    // Calculate the height of the visible region in latitude degrees
+    double latitudeSpan = visibleRegion.northeast.latitude - visibleRegion.southwest.latitude;
+
+    // Calculate 70% from the top of the screen in latitude degrees
+    // Positive offset moves down from center (center is at 50%)
+    double verticalOffsetFactor = 0.15; // 70% from top = 20% from center upward = -0.4 from center
+    double latitudeOffset = latitudeSpan * verticalOffsetFactor;
+
+    // Create new camera position with adjusted latitude
+    CameraPosition newCameraPosition = CameraPosition(
+      target: LatLng(
+          selectedLocation.latitude - latitudeOffset, // Move upward from the marker
+          selectedLocation.longitude // Keep longitude the same for horizontal centering
+      ),
+      zoom: currentZoom,
+    );
+
+    // Animate the camera to this position
+    await mapController.animateCamera(
+      CameraUpdate.newCameraPosition(newCameraPosition),
     );
 
     // Bring the user to the NearbyStopsSheet with the updated data
