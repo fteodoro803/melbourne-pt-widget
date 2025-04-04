@@ -6,6 +6,7 @@ import "package:flutter_project/add_screens_old/select_location_screen.dart";
 import "package:flutter_project/add_screens_old/select_direction_screen.dart";
 import "package:flutter_project/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/add_screens_old/select_stop_screen.dart";
+import "package:flutter_project/database.dart";
 import "package:flutter_project/widgets/bottom_navigation_bar.dart";
 import "package:flutter_project/widgets/custom_list_tile.dart";
 import "package:flutter_project/screen_arguments.dart";
@@ -21,12 +22,14 @@ import "add_screens/search_screen.dart";
 import "add_screens/transport_map.dart";
 import "home_widget_service.dart";
 
-
+import 'package:get/get.dart';
 
 // void main() {
 void main() async {
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
+
+  Get.put(AppDatabase());
 
   // // Loads Config
   // await GlobalConfiguration().loadFromAsset("config");
