@@ -20,7 +20,7 @@ class Routes extends Table {
   IntColumn get number => integer().nullable()();
   TextColumn get colour => text().nullable()();        // todo: make this non nullable
   TextColumn get textColour => text().nullable()();    // todo: make this non nullable
-  IntColumn get routeTypeId => integer().references(RouteTypes, #id).nullable()();
+  IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
   // TextColumn get routeTypeName => text().references(RouteTypes, #name)();
   DateTimeColumn get lastUpdated => dateTime()();
 
@@ -59,24 +59,37 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  // Direction Functions
   /// Adds a direction to the database, if it doesn't already exist,
   /// or if it has past the "expiry" time
   Future<void> insertDirection(DirectionsCompanion direction) async {
-    final exists = await (select(directions)..where((d) => d.id.equals(direction.id.value))).getSingleOrNull();
+    final exists = await (select(directions)
+      ..where((d) => d.id.equals(direction.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
       into(directions).insertOnConflictUpdate(direction);
     }
   }
 
+  // RouteType Functions
   /// Adds a route type to the database, if it doesn't already exist,
   /// or if it has past the "expiry" time
   Future<void> insertRouteType(RouteTypesCompanion routeType) async {
-    final exists = await (select(routeTypes)..where((d) => d.id.equals(routeType.id.value))).getSingleOrNull();
+    final exists = await (select(routeTypes)
+      ..where((d) => d.id.equals(routeType.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
       into(routeTypes).insertOnConflictUpdate(routeType);
     }
   }
 
+  Future<String?> getRouteTypeNameFromRouteTypeId(int id) async {
+    final result = await (select(routeTypes)
+      ..where((routeType) => routeType.id.equals(id)))
+        .getSingleOrNull();
+
+    return result?.name;
+  }
+
+  // Route Functions
   /// Adds a route to the database, if it doesn't already exist,
   /// or if it has past the "expiry" time
   Future<void> insertRoute(RoutesCompanion route) async {

@@ -99,7 +99,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     if (_routes[index].number.isNotEmpty) {
       routeNumber = int.tryParse(_routes[index].number);
     }
-    Get.find<db.AppDatabase>().addRoute(routeId, routeName, number: routeNumber, routeTypeId: routeTypeId);
+    Get.find<db.AppDatabase>().addRoute(routeId, routeName, number: routeNumber, routeTypeId);
   }
 
   Future<void> testFetchStopRoutePairs(LatLng location) async {
