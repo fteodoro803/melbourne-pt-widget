@@ -69,10 +69,11 @@ class CustomListTile extends StatelessWidget {
                       dense: true,
                       contentPadding: EdgeInsets.all(0),
                       title: RouteWidget(route: transport.route!, direction: transport.direction, scrollable: false,),
-                      trailing: MinutesUntilDepartureWidget(departure: transport.departures![0]),
+                      trailing: transport.departures != null ? MinutesUntilDepartureWidget(departure: transport.departures![0]) : null,
                     ),
                     SizedBox(height: 2),
-                    DeparturesStringWidget(departures: transport.departures),
+                    if (transport.departures != null)
+                      DeparturesStringWidget(departures: transport.departures),
                   ],
                 ),
               ),
