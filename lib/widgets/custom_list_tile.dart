@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/widgets/transport_widgets.dart';
 
+import '../time_utils.dart';
+
 class CustomListTile extends StatelessWidget {
   final Transport transport;
   final VoidCallback onTap;
@@ -26,6 +28,25 @@ class CustomListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Transport transport = this.transport;
 
+    final departure = transport.departures?[0];
+    final String estimatedDepartureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
+    final DepartureStatus status = TransportUtils.getDepartureStatus(
+      departure?.scheduledDepartureTime,
+      departure?.estimatedDepartureTime,
+    );
+    Map<String, int>? timeToDeparture = TimeUtils.timeDifference(estimatedDepartureTime);
+
+    String? timeString;
+
+    if (timeToDeparture?['days'] == 0 && timeToDeparture?['hours'] == 0) {
+      if (timeToDeparture?['minutes'] == 0) {
+        timeString = "Now";
+      }
+      else if (timeToDeparture!['minutes']! > 0){
+        timeString = "${timeToDeparture['minutes']!} min";
+      }
+    }
+
   // Enables the Widget to be Deleted/Dismissed by Swiping
   return Dismissible(
     key: Key(transport.toString()),
@@ -42,42 +63,41 @@ class CustomListTile extends StatelessWidget {
 
     // Information Tile
     child: ListTile(
+      contentPadding: EdgeInsets.only(left: 12, right: 16, top: 4),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // LocationWidget above the vertical line
           LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: false),
           SizedBox(height: 2),
+          RouteWidget(route: transport.route!, direction: transport.direction, scrollable: false,),
 
           // Row for the vertical line and the rest of the widgets
-          Row(
-            children: [
-              SizedBox(width: 6),
-              // Vertical line
-              Container(
-                width: 4,
-                color: Colors.grey,
-                height: 63,
-              ),
-              SizedBox(width: 10), // Optional space between the line and the widgets
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                      dense: true,
-                      contentPadding: EdgeInsets.all(0),
-                      title: RouteWidget(route: transport.route!, direction: transport.direction, scrollable: false,),
-                      trailing: MinutesUntilDepartureWidget(departure: transport.departures![0]),
+          if (transport.departures != null)
+            ListTile(
+              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+              dense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+              leading: Icon(Icons.access_time_filled),
+              title: DeparturesStringWidget(departures: transport.departures),
+              trailing: timeString != null
+                ? Container(
+                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: TransportUtils.getColorForStatus(status.status),
+                    borderRadius: BorderRadius.circular(12)
+                  ),
+                  child: Text(
+                    timeString,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15
                     ),
-                    SizedBox(height: 2),
-                    DeparturesStringWidget(departures: transport.departures),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                  ),
+                )
+                : null,
+            ),
         ],
       ),
       onTap: onTap,

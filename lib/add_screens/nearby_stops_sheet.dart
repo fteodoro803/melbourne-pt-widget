@@ -86,7 +86,6 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
   bool get lowFloorFilter => filters.contains(ToggleableFilter.lowFloor);
   bool get shelterFilter => filters.contains(ToggleableFilter.shelter);
 
-  Set<String> _expandedStopIds = {};
   late String _selectedTransportType;
 
   @override
@@ -440,14 +439,17 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     itemBuilder: (context, index) {
 
                       final stop = widget.arguments.searchDetails!.stops[index];
-                      final bool isExpanded = _expandedStopIds.contains(stop.id.toString());
+
+                      // final bool isExpanded = _expandedStopIds.contains(stop.id.toString());
+                      final bool? isExpanded = stop.isExpanded;
+                      print(isExpanded);
                       final routes = stop.routes ?? [];
                       final stopName = stop.name;
                       final distance = stop.distance;
                       final routeType = stop.routeType?.type.name ?? 'unknown';
 
                       return Card(
-                        margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),
+                        margin: EdgeInsets.only(bottom: isExpanded! ? 12 : 4, top: 8, left: 0, right: 0),
                         child: ListTile(
                           visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                           dense: true,
@@ -471,11 +473,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                 trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
                                 onTap: () {
                                   setState(() {
-                                    if (isExpanded) {
-                                      _expandedStopIds.remove(stop.id.toString());
-                                    } else {
-                                      _expandedStopIds.add(stop.id.toString());
-                                    }
+                                    widget.arguments.searchDetails?.stops[index].isExpanded = !widget.arguments.searchDetails!.stops[index].isExpanded!;
                                   });
                                 }
                               ),

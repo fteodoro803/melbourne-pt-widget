@@ -114,7 +114,7 @@ class RouteWidget extends StatelessWidget {
             child: Text(
               direction?.name ?? "No Data",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
@@ -292,11 +292,16 @@ class DeparturesStringWidget extends StatelessWidget {
                     if (index == 0)
                       Text(
                         "At ",
-                        style: TextStyle(height: 1.1),
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
                     Text(
                       departureTime,
-                      style: TextStyle(height: 1.1),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     if (hasLowFloor) ...[
                       SizedBox(width: 3),
@@ -311,7 +316,9 @@ class DeparturesStringWidget extends StatelessWidget {
                       Text(
                         // "•",
                         "and",
-                        style: TextStyle(height: 1.1),
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
                       SizedBox(width: 4),
                     ],

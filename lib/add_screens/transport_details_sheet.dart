@@ -107,8 +107,11 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                                   SizedBox(width: 8),
                                   Container(
                                     width: 4,
-                                    color: Color(0xFF717171),
                                     height: 67,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      color: Color(0xFF717171),
+                                    ),
                                   ),
                                   SizedBox(width: 10),
                                   Expanded(

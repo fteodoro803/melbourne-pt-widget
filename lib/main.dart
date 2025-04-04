@@ -223,8 +223,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     for (int index = 0; index < _transportList.length; index++)
                       Card(
                         key: ValueKey(_transportList[index].hashCode),
-                        margin: const EdgeInsets.symmetric(vertical: 1.0),
-                        elevation: 1,
+                        margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 6.0),
+                        elevation: 4,
                         child: CustomListTile(
                           transport: _transportList[index],
                           dismissible: true,
@@ -243,62 +243,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-
-
-            // Divider(),
-            //
-            // // ADD PAGE BUTTON
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     ElevatedButton(
-            //       onPressed: () {
-            //         Navigator.pushNamed(
-            //           context,
-            //           // '/selectLocationScreen2',
-            //           '/selectRouteTypeScreen',
-            //           arguments: ScreenArguments(Transport(), _updateMainPage),
-            //         );
-            //       },
-            //       child: Text("+"),
-            //     ),
-            //     SizedBox(width: 8),
-            //
-            //     // ADD PAGE BUTTON
-            //     ElevatedButton(
-            //       onPressed: () {
-            //         Navigator.pushNamed(
-            //           context,
-            //           '/searchScreen',
-            //           arguments: ScreenArguments.withSearchDetails(Transport(), _updateMainPage, SearchDetails([], [], [], TextEditingController()))
-            //         );
-            //       },
-            //       child: Column(
-            //         children: [
-            //           Icon(Icons.search),
-            //           // Text("Search"),
-            //         ],
-            //       ),
-            //     ),
-            //     SizedBox(width: 8),
-            //
-            //     // REFRESH BUTTON
-            //     ElevatedButton(
-            //       onPressed: () {
-            //         _updateMainPage();
-            //       },
-            //       child: Icon(Icons.refresh),
-            //     ),
-            //   ],
-            // ),
-
-            // // TEST BUTTON
-            // ElevatedButton(
-            //   onPressed: () {
-            //     Navigator.pushNamed(context, '/testScreen');
-            //   },
-            //   child: Text("TEST BUTTON"),
-            // ),
           ],
         ),
       ),

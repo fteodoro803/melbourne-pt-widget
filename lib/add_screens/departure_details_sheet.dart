@@ -72,6 +72,31 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   @override
   Widget build(BuildContext context) {
 
+    final departure = widget.departure;
+    final String estimatedDepartureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime ?? "No Data";
+    final DepartureStatus status = TransportUtils.getDepartureStatus(
+      departure.scheduledDepartureTime,
+      departure.estimatedDepartureTime,
+    );
+    Map<String, int>? timeToDeparture = TimeUtils.timeDifference(estimatedDepartureTime);
+
+
+    String timeString = "At ${TransportUtils.trimTime(estimatedDepartureTime)}";
+    if (timeToDeparture!['days']! < 0 || timeToDeparture['hours']! < 0) {
+      timeString = "Departed ${TransportUtils.trimTime(estimatedDepartureTime)}";
+    }
+    else if (timeToDeparture['days'] == 0 && timeToDeparture['hours'] == 0) {
+      if (timeToDeparture['minutes'] == 0) {
+        timeString = "Departing now";
+      }
+      else if (timeToDeparture['minutes']! < 0) {
+        timeString = "${timeToDeparture['minutes']!.abs()} min ago";
+      }
+      else {
+        timeString = "In ${timeToDeparture['minutes']!} min";
+      }
+    }
+
     return Column(
       children: [
         // DraggableScrollableSheet Handle
@@ -82,6 +107,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
           child: ListView(
             padding: EdgeInsets.zero,
             controller: widget.scrollController,
+            physics: ClampingScrollPhysics(),
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -95,19 +121,85 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                           fit: FlexFit.tight,
                           child: Column(
                             children: [
-                              LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: true),
+                              LocationWidget(textField: transport.stop!.name, textSize: 18, scrollable: true),
                               SizedBox(height: 4),
-                              RouteWidget(route: transport.route!, direction: transport.direction, scrollable: true),
-                              SizedBox(height: 4),
-                              Text("Scheduled: ${widget.departure.scheduledDepartureTime}"),
-                              SizedBox(height: 4),
-                              Text("Estimated: ${widget.departure.estimatedDepartureTime ?? 'N/A'}"),
+                              Row(
+                                children: [
+                                  SizedBox(width: 8),
+                                  Container(
+                                    width: 4,
+                                    height: 82,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      color: Color(0xFF717171),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(transport.direction!.name, style: TextStyle(fontSize: 16, height: 1.1), overflow: TextOverflow.ellipsis, maxLines: 2),
+                                        SizedBox(height: 8),
+                                        RouteWidget(route: transport.route!, scrollable: true),
+                                        SizedBox(height: 4)
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+
+                                  Card(
+                                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                                    elevation: 1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 2),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(vertical: 1, horizontal: 6),
+                                            decoration: BoxDecoration(
+
+                                              color: TransportUtils.getColorForStatus(status.status),
+                                              borderRadius: BorderRadius.circular(8)
+                                            ),
+                                            child: Text(
+                                              timeString,
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 16
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 2),
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 2.0),
+                                            child: Text("Scheduled: ${widget.departure.scheduledDepartureTime}", style: TextStyle(fontSize: 13)),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 2.0),
+                                            child: Text(
+                                              "Estimated: ${widget.departure.estimatedDepartureTime ?? 'N/A'}",
+                                              style: TextStyle(
+                                                color: TransportUtils.getColorForStatus(status.status),
+                                                fontSize: 13
+                                            ),),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
+
                     Divider(),
                   ],
                 ),
@@ -137,7 +229,6 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                       final departureTime = stopDeparture.scheduledDepartureTime!;
 
                       final timeDifference = TimeUtils.timeDifference(departureTime);
-                      String? minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
 
                       return Card(
                         color: index == _currentStopIndex ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
@@ -146,27 +237,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                         child: ListTile(
                           leading: SizedBox(
                             width: 55,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(TransportUtils.trimTime(departureTime), style: TextStyle(fontSize: 12),),
-                                if (minutesUntilNextDepartureString != null )
-                                  Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFF93BA96),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        minutesUntilNextDepartureString,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.black,
-                                        ),
-                                      )
-                                  ),
-                              ],
-                            ),
+                            child: Text(TransportUtils.trimTime(departureTime), style: TextStyle(fontSize: 12),),
                           ),
                           title: Row(
                             children: [

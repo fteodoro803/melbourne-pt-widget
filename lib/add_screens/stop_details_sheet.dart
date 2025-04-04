@@ -88,10 +88,12 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
           child: ListView(
             padding: EdgeInsets.zero,
             controller: widget.scrollController,
+            physics: ClampingScrollPhysics(),
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     LocationWidget(textField: widget.arguments.searchDetails!.stop!.name, textSize: 18, scrollable: true),
 
@@ -105,8 +107,12 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                           SizedBox(width: 8),
                           Container(
                             width: 4,
-                            color: Color(0xFF717171),
-                            height: 40,
+
+                            height: 42,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(2),
+                              color: Color(0xFF717171),
+                            ),
                           ),
                           SizedBox(width: 10),
                           RouteWidget(route: widget.arguments.searchDetails!.route!, scrollable: false,),

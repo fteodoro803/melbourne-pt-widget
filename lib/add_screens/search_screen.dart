@@ -157,7 +157,10 @@ class _SearchScreenState extends State<SearchScreen> {
   void setMarker(LatLng position) {
     MarkerId id = MarkerId(position.toString()); // Unique ID based on position
     _markers.clear();
-    _markers.add(Marker(markerId: id, position: position));
+    _markers.add(Marker(
+        markerId: id,
+        position: position,
+    ));
   }
 
   Future <void> showStopMarkers() async {
@@ -185,12 +188,21 @@ class _SearchScreenState extends State<SearchScreen> {
             customMarkerIcon = customMarkerIconVLine;
           }
           _markers.add(
-              Marker(
-                markerId: MarkerId(stop.name),
-                position: stopPosition,
-                icon: customMarkerIcon!,
-                anchor: const Offset(0.5, 0.5),
-              )
+            Marker(
+              markerId: MarkerId(stop.name),
+              position: stopPosition,
+              icon: customMarkerIcon!,
+              // anchor: const Offset(0.5, 0.5),
+              onTap: () {
+                setState(() {
+                  for (var s in widget.arguments.searchDetails!.stops) {
+                    s.isExpanded = false;
+                  }
+                  stop.isExpanded = true;
+                });
+
+              }
+            )
           );
         }
         _circles.clear();
@@ -478,7 +490,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
 
     // Get the current map's zoom level and visible region
-    double currentZoom = await mapController.getZoomLevel();
     LatLngBounds visibleRegion = await mapController.getVisibleRegion();
 
     // Calculate the height of the visible region in latitude degrees
@@ -710,7 +721,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 Row(
                   children: [
                     // Back button with updated handler
-                    SizedBox(width: 15),
+                    SizedBox(width: 18),
                     GestureDetector(
                       onTap: _handleBackButton,
                       child: BackButtonWidget(),
@@ -727,13 +738,33 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
                 if (_activeSheet == ActiveSheet.nearbyStops)
                   ElevatedButton(
-                      onPressed: () async {
-                        setState(() {
-                          _showStops = !_showStops;
-                        });
-                        await showStopMarkers();
-                      },
-                      child: Text("Show Stops")
+                    onPressed: () async {
+                      setState(() {
+                        _showStops = !_showStops;
+                      });
+                      await showStopMarkers();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 14),
+                      backgroundColor: !_showStops ?
+                        Theme.of(context).colorScheme.surfaceContainerHighest :
+                        Theme.of(context).colorScheme.primaryContainer,
+                      minimumSize: Size(40, 40),
+                      ),
+                    child: SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.location_pin),
+                            Icon(Icons.tram),
+                          ],
+                        ),
+                      ),
+                    )
+
                   ),
               ],
             )
