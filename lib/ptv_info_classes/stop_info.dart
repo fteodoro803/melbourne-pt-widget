@@ -10,7 +10,7 @@ class Stop {
   int id;      // convert this to integer ~note
   String name;      //~note what happens if in an api call, these are null?
   List<Route>? routes;
-  RouteTypeEnum? routeType;
+  RouteType? routeType;
 
   // todo: maybe use the Location class; im not sure if these should be here
   double? latitude;

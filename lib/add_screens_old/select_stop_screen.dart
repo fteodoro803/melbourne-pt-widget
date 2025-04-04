@@ -74,7 +74,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         String routeNumber = route["route_number"].toString();
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
-        RouteTypeEnum routeType = RouteTypeEnum.fromId(routeTypeId);
+        RouteType routeType = RouteType.fromId(routeTypeId);
         PTRoute.Route newRoute = PTRoute.Route(name: routeName, number: routeNumber, id: routeId, type: routeType);
 
         _stops.add(newStop);

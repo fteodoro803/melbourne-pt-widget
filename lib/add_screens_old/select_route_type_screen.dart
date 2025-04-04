@@ -20,7 +20,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   // PtvApiService apiService = PtvApiService();
 
   final String _screenName = "SelectRouteType";
-  final List<RouteTypeEnum> _routeTypes = [];
+  final List<RouteType> _routeTypes = [];
   DevTools tools = DevTools();
 
   // Initialising State
@@ -48,18 +48,16 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
     // Populating RouteTypes List                                                         // add case for if 0
     for (var entry in jsonResponse!["route_types"]) {
       String name = entry["route_type_name"];
-      String type = entry["route_type"].toString();
-      // RouteType newRouteType = RouteType(name: name, type: type);
 
       switch (name.toLowerCase()) {
         case "train":
-          _routeTypes.add(RouteTypeEnum.train);
+          _routeTypes.add(RouteType.train);
         case "tram":
-          _routeTypes.add(RouteTypeEnum.tram);
+          _routeTypes.add(RouteType.tram);
         case "bus":
-          _routeTypes.add(RouteTypeEnum.bus);
+          _routeTypes.add(RouteType.bus);
         case "vline":
-          _routeTypes.add(RouteTypeEnum.vLine);
+          _routeTypes.add(RouteType.vLine);
 
           // reenable night bus later
         // case "night bus":
