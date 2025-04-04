@@ -127,7 +127,6 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
         _tempSelectedDistance = meterList[_distanceScrollController.selectedItem];
       });
       _notifyStateChanged();
-      print("Meters scroll listener triggered. Selected: $_tempSelectedDistance");
     });
 
     _unitScrollController.addListener(() {
@@ -137,10 +136,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
         _tempSelectedDistance = _selectedUnit == "m" ? _tempSelectedDistance : _initialSelectedKilometers;
       });
       _notifyStateChanged();
-      print("Unit scroll listener triggered. Selected: $_tempSelectedUnit");
     });
-
-    // _processStopsAndRoutes();
   }
 
   Future<void> _onTransportTypeChanged(String transportType) async {

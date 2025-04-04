@@ -413,15 +413,15 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Sets the map's Marker and Camera to the Location
   Future<void> _onLocationSelected(LatLng selectedLocation) async {
-    _showStops = false;
-    await setMarker(selectedLocation);
+    // _showStops = false;
+    setMarker(selectedLocation);
     _circles.clear();
 
     // Get the address for the dropped marker
     String address =
     await getAddressFromCoordinates(selectedLocation.latitude, selectedLocation.longitude);
 
-    _getStops(selectedLocation, "all", 300);
+    await _getStops(selectedLocation, "all", 300);
 
     setState(() {
       // Update the state with the new address
@@ -432,6 +432,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _hasDroppedPin = true;
       _polylines.clear();
     });
+    await showStopMarkers();
 
     // Get the current map's zoom level and visible region
     double currentZoom = await mapController.getZoomLevel();
@@ -495,6 +496,7 @@ class _SearchScreenState extends State<SearchScreen> {
         previousSheet = ActiveSheet.none;
         _hasDroppedPin = false;
         _markers.clear();
+        _circles.clear();
         break;
       default:
         Navigator.pop(context);
