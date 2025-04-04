@@ -100,7 +100,18 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                       contentPadding: EdgeInsets.all(0),
                       visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                       dense: true,
-                      title: RouteWidget(route: widget.arguments.searchDetails!.route!, scrollable: false,),
+                      title: Row(
+                        children: [
+                          SizedBox(width: 8),
+                          Container(
+                            width: 4,
+                            color: Color(0xFF717171),
+                            height: 40,
+                          ),
+                          SizedBox(width: 10),
+                          RouteWidget(route: widget.arguments.searchDetails!.route!, scrollable: false,),
+                        ],
+                      ),
                       trailing: GestureDetector(
                         child: FavoriteButton(isSaved: savedList.contains(true)),
                         onTap: () async {

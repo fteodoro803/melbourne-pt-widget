@@ -122,9 +122,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Add to navigation history
     if (_activeSheet != ActiveSheet.none && !newMarker) {
-      if (!_navigationHistory.contains(_activeSheet)) {
-        _navigationHistory.add(_activeSheet);
-      }
+      _navigationHistory.add(_activeSheet);
     }
 
 
@@ -511,22 +509,26 @@ class _SearchScreenState extends State<SearchScreen> {
     showStopMarkers();
   }
 
-  // Back button handler
   void _handleBackButton() {
     ActiveSheet previousSheet;
 
+    // Handle different scenarios depending on the current active sheet
     switch (_activeSheet) {
       case ActiveSheet.departureDetails:
-        if (_navigationHistory[_navigationHistory.length - 1] == ActiveSheet.transportDetails) {
+      // Check if the last visited sheet was transportDetails
+        if (_navigationHistory.isNotEmpty && _navigationHistory.last == ActiveSheet.transportDetails) {
           previousSheet = ActiveSheet.transportDetails;
+        } else {
+          previousSheet = ActiveSheet.stopDetails;
         }
-        else {previousSheet = ActiveSheet.stopDetails;}
         break;
+
       case ActiveSheet.transportDetails:
         previousSheet = ActiveSheet.stopDetails;
         // Restore transport path display
         loadTransportPath(false);
         break;
+
       case ActiveSheet.stopDetails:
         previousSheet = ActiveSheet.nearbyStops;
         // Clear polylines and restore marker
@@ -534,6 +536,7 @@ class _SearchScreenState extends State<SearchScreen> {
         setMarker(widget.arguments.searchDetails!.markerPosition!);
         showStopMarkers();
         break;
+
       case ActiveSheet.nearbyStops:
         if (_isSheetFullyExpanded) {
           _controller.jumpTo(0.6);
@@ -544,28 +547,28 @@ class _SearchScreenState extends State<SearchScreen> {
         _markers.clear();
         _circles.clear();
         break;
+
       default:
         Navigator.pop(context);
         return;
     }
 
-    // Remove current sheet from history
-    if (_navigationHistory.isNotEmpty &&
-        _navigationHistory.last == _activeSheet) {
+    // Remove the current sheet from history if it matches the last one
+    if (_navigationHistory.isNotEmpty && _navigationHistory.last == _activeSheet) {
       _navigationHistory.removeLast();
     }
 
-    // If we need to go back more than one step (e.g., departure → nearby)
+    // Handle the case where we might have skipped sheets (e.g., direct transition to departureDetails)
     if (_navigationHistory.isNotEmpty &&
         previousSheet != _navigationHistory.last &&
         _navigationHistory.contains(previousSheet)) {
-      // Find the correct previous sheet in history
-      while (_navigationHistory.isNotEmpty &&
-          _navigationHistory.last != previousSheet) {
+      // Clean up history by removing any sheets that are not in the path
+      while (_navigationHistory.isNotEmpty && _navigationHistory.last != previousSheet) {
         _navigationHistory.removeLast();
       }
     }
 
+    // Perform the sheet change
     _changeSheet(previousSheet, false);
   }
 
