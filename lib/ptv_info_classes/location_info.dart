@@ -3,6 +3,8 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'location_info.g.dart';
 
+// todo: delete this class. It seems useless
+
 /// Represents a location of a stop.
 /// Handles parsing of coordinates and conversion between GoogleMaps' LatLng.
 @JsonSerializable()
