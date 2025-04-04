@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import '../database.dart';
 import 'package:get/get.dart';
 
+
 extension DirectionHelpers on AppDatabase {
   Future<DirectionsCompanion> createDirectionCompanion({required int id, required String name, required String description,})
   async {
@@ -9,6 +10,7 @@ extension DirectionHelpers on AppDatabase {
       id: drift.Value(id),
       name: drift.Value(name),
       description: drift.Value(description),
+      lastUpdated: drift.Value(DateTime.now()),
     );
   }
 

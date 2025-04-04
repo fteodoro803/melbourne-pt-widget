@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/api_data.dart';
-import 'package:flutter_project/database.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/ptv_database_classes/directionHelpers.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
-// import '../ptv_database_classes/directionHelpers.dart';
+
+import 'package:flutter_project/database.dart' as db;
 import 'package:get/get.dart';
+import 'package:flutter_project/ptv_database_classes/directionHelpers.dart';
 
 class SelectDirectionScreen extends StatefulWidget {
   const SelectDirectionScreen({super.key, required this.arguments});
@@ -71,7 +71,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       int id = _directions[index].id;
       String name = _directions[index].name;
       String description = _directions[index].description;
-      Get.find<AppDatabase>().addDirection(id, name, description);
+      Get.find<db.AppDatabase>().addDirection(id, name, description);
     }
     else {
       widget.arguments.transport.direction = null;
