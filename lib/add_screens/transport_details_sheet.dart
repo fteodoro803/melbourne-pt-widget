@@ -21,7 +21,7 @@ enum ResultsFilter {
 class TransportDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
-  final Function(Departure) onDepartureTapped;
+  final Function(Departure, Transport) onDepartureTapped;
 
   TransportDetailsSheet({
     super.key,
@@ -72,10 +72,6 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    List<Departure>? filteredDepartures = transport.departures;
-    if (lowFloorFilter) {
-      filteredDepartures = transport.departures?.where((departure) => departure.hasLowFloor == lowFloorFilter).toList();
-    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,

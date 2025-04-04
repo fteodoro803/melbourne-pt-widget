@@ -91,7 +91,7 @@ class _TransportMapState extends State<TransportMap> {
     });
   }
 
-  Future<void> _onDepartureTapped(Departure departure) async {
+  Future<void> _onDepartureTapped(Departure departure, Transport transport) async {
     setState(() {
       _departure = departure;
       _isDepartureSelected = true;

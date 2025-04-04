@@ -293,7 +293,8 @@ class _SearchScreenState extends State<SearchScreen> {
     _changeSheet(ActiveSheet.transportDetails, false);
   }
 
-  void _onDepartureTapped(Departure departure) {
+  void _onDepartureTapped(Departure departure, Transport transport) {
+    widget.arguments.transport = transport;
     _departure = departure;
     _changeSheet(ActiveSheet.departureDetails, false);
   }
@@ -381,7 +382,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     switch (_activeSheet) {
       case ActiveSheet.departureDetails:
-        if (_navigationHistory[_navigationHistory.length - 2] == ActiveSheet.transportDetails) {
+        if (_navigationHistory[_navigationHistory.length - 1] == ActiveSheet.transportDetails) {
           previousSheet = ActiveSheet.transportDetails;
         }
         else {previousSheet = ActiveSheet.stopDetails;}
@@ -398,7 +399,11 @@ class _SearchScreenState extends State<SearchScreen> {
         setMarker(widget.arguments.searchDetails!.markerPosition!);
         break;
       case ActiveSheet.nearbyStops:
-      case ActiveSheet.none:
+        previousSheet = ActiveSheet.none;
+        _hasDroppedPin = false;
+        _markers.clear();
+
+        break;
       default:
         Navigator.pop(context);
         return; // Exit early
@@ -526,24 +531,28 @@ class _SearchScreenState extends State<SearchScreen> {
                       ],
                     ),
                     child: _isSheetFullyExpanded
-                      ? Column(
-                        children: [
-                          SizedBox(height: 50),
-                          Row(
+                        ? Column(
+                      children: [
+                        SizedBox(height: 50),
+                        Container(
+                          width: MediaQuery.of(context).size.width,  // Forces full screen width
+                          child: Row(
                             children: [
                               GestureDetector(
                                 onTap: _handleBackButton,
                                 child: BackButton(),
                               ),
-                              SizedBox(width: 10),
-                              Text(_getSheetTitle()),
+                              Spacer(),  // Pushes the Text towards the center
+                              Text(_getSheetTitle()), // Text will be centered relative to the whole screen
+                              Spacer(),  // Ensures the Text stays centered on the screen
                             ],
                           ),
-                          Divider(),
-                          Expanded(child: _getSheetContent(scrollController)),
-                        ],
-                      )
-                    : _getSheetContent(scrollController),
+                        ),
+                        Divider(),
+                        Expanded(child: _getSheetContent(scrollController)),
+                      ],
+                    )
+                        : _getSheetContent(scrollController),
                   );
                 }
             ),

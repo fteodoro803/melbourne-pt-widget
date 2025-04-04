@@ -451,7 +451,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                       final routeType = stop.routeType?.type.name ?? 'unknown';
 
                       return Card(
-                        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+                        margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),
                         child: ListTile(
                           visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                           dense: true,
