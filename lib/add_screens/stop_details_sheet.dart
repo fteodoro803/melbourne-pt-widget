@@ -1,4 +1,3 @@
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/widgets/departures_list.dart';
@@ -12,7 +11,7 @@ class StopDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
   final Function(Transport) onTransportTapped;
-  final Function(Departure) onDepartureTapped;
+  final Function(Departure, Transport) onDepartureTapped;
 
   const StopDetailsSheet({
     super.key,

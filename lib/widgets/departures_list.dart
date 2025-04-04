@@ -9,7 +9,7 @@ class DeparturesList extends StatefulWidget {
   final Transport transport;
   final bool lowFloorFilter;
   final bool airConditionerFilter;
-  final Function(Departure)? onDepartureTapped;
+  final Function(Departure, Transport)? onDepartureTapped;
 
   const DeparturesList({
     super.key,
@@ -118,7 +118,7 @@ class _DeparturesListState extends State<DeparturesList> {
                   ),
                 )
                 : Text(
-                  TransportUtils.trimTime(scheduledDepartureTime)!,
+                  TransportUtils.trimTime(scheduledDepartureTime),
                   style: TextStyle(
                     fontSize: 15,
                     color: TransportUtils.getColorForStatus(status.status),
@@ -127,7 +127,7 @@ class _DeparturesListState extends State<DeparturesList> {
               onTap: () {
                 if (widget.onDepartureTapped != null) {
                   setState(() {
-                    widget.onDepartureTapped!(departure!);
+                    widget.onDepartureTapped!(departure!, widget.transport);
                   });
                 }
               },

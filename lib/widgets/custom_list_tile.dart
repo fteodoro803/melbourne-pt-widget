@@ -47,16 +47,17 @@ class CustomListTile extends StatelessWidget {
         children: [
           // LocationWidget above the vertical line
           LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: false),
+          SizedBox(height: 2),
 
           // Row for the vertical line and the rest of the widgets
           Row(
             children: [
-              SizedBox(width: 4),
+              SizedBox(width: 6),
               // Vertical line
               Container(
-                width: 2,
+                width: 4,
                 color: Colors.grey,
-                height: 70,
+                height: 63,
               ),
               SizedBox(width: 10), // Optional space between the line and the widgets
               Expanded(
@@ -64,10 +65,13 @@ class CustomListTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
+                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                      dense: true,
                       contentPadding: EdgeInsets.all(0),
                       title: RouteWidget(route: transport.route!, direction: transport.direction, scrollable: false,),
                       trailing: MinutesUntilDepartureWidget(departure: transport.departures![0]),
                     ),
+                    SizedBox(height: 2),
                     DeparturesStringWidget(departures: transport.departures),
                   ],
                 ),
