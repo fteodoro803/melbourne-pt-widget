@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
@@ -154,7 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // Resets markers and creates new marker when pin is dropped by user
-  Future<void> setMarker(LatLng position) async {
+  void setMarker(LatLng position) {
     MarkerId id = MarkerId(position.toString()); // Unique ID based on position
     _markers.clear();
     _markers.add(Marker(markerId: id, position: position));
@@ -311,14 +313,62 @@ class _SearchScreenState extends State<SearchScreen> {
   // Handling choosing a new transport type in ToggleButtonsRow
   Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
     String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType;
-    int distance = newDistance ?? widget.arguments.searchDetails!.distance;
+    int oldDistance = widget.arguments.searchDetails!.distance;
+    int distance = newDistance ?? oldDistance;
 
     await _getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
+
+    LatLngBounds bounds = await _calculateBoundsForMarkers(distance.toDouble());
+
+    // todo: when the camera reanimates, make it center properly on the pin again (at 0.7x the height of the screen)
+    mapController.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, 50), // Padding around the bounds (50 is arbitrary)
+    );
 
     widget.arguments.searchDetails!.distance = distance;
     widget.arguments.searchDetails!.transportType = transportType;
     await showStopMarkers();
 
+  }
+
+  // Function to calculate the bounds that include all points within a given distance from _chosenPosition
+  Future<LatLngBounds> _calculateBoundsForMarkers(double distanceInMeters) async {
+    List<LatLng> allPoints = [];
+    LatLng chosenPosition = widget.arguments.searchDetails!.markerPosition!;
+
+    // Add the chosen position as the center point
+    allPoints.add(chosenPosition);
+
+    double latMin = chosenPosition.latitude;
+    double latMax = chosenPosition.latitude;
+    double lonMin = chosenPosition.longitude;
+    double lonMax = chosenPosition.longitude;
+
+    for (LatLng point in allPoints) {
+      double latDelta = point.latitude - chosenPosition.latitude;
+      double lonDelta = point.longitude - chosenPosition.longitude;
+
+      if (latDelta < latMin) latMin = point.latitude;
+      if (latDelta > latMax) latMax = point.latitude;
+
+      if (lonDelta < lonMin) lonMin = point.longitude;
+      if (lonDelta > lonMax) lonMax = point.longitude;
+    }
+
+    // Adjusting bounds to cover the given distance
+    double latDistance = distanceInMeters / 111000; // 111000 meters = 1 degree of latitude
+    double lonDistance = distanceInMeters / (111000 * cos(chosenPosition.latitude * pi / 180));
+
+    latMin -= latDistance;
+    latMax += latDistance;
+    lonMin -= lonDistance;
+    lonMax += lonDistance;
+
+    // Return the calculated bounds
+    return LatLngBounds(
+      southwest: LatLng(latMin, lonMin),
+      northeast: LatLng(latMax, lonMax),
+    );
   }
 
   // Handling tap on an item in NearbyStopsSheet
@@ -413,26 +463,21 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Sets the map's Marker and Camera to the Location
   Future<void> _onLocationSelected(LatLng selectedLocation) async {
-    // _showStops = false;
-    setMarker(selectedLocation);
     _circles.clear();
+    _polylines.clear();
 
     // Get the address for the dropped marker
     String address =
     await getAddressFromCoordinates(selectedLocation.latitude, selectedLocation.longitude);
-
     await _getStops(selectedLocation, "all", 300);
 
-    setState(() {
-      // Update the state with the new address
-      widget.arguments.searchDetails!.markerPosition = selectedLocation;
-      widget.arguments.searchDetails!.locationController.text = address;
-      widget.arguments.searchDetails!.distance = 300;
-      widget.arguments.searchDetails!.transportType = "all";
-      _hasDroppedPin = true;
-      _polylines.clear();
-    });
-    await showStopMarkers();
+    // Update the state with the new address
+    widget.arguments.searchDetails!.markerPosition = selectedLocation;
+    widget.arguments.searchDetails!.locationController.text = address;
+    widget.arguments.searchDetails!.distance = 300;
+    widget.arguments.searchDetails!.transportType = "all";
+    _hasDroppedPin = true;
+
 
     // Get the current map's zoom level and visible region
     double currentZoom = await mapController.getZoomLevel();
@@ -452,7 +497,7 @@ class _SearchScreenState extends State<SearchScreen> {
           selectedLocation.latitude - latitudeOffset, // Move upward from the marker
           selectedLocation.longitude // Keep longitude the same for horizontal centering
       ),
-      zoom: currentZoom,
+      zoom: 16,
     );
 
     // Animate the camera to this position
@@ -463,6 +508,7 @@ class _SearchScreenState extends State<SearchScreen> {
     // Bring the user to the NearbyStopsSheet with the updated data
     _changeSheet(ActiveSheet.nearbyStops, true); //todo: FIX ISSUE WHERE SEARCH FILTERS ARE STILL THE SAME BETWEEN DROPPED PINS
 
+    showStopMarkers();
   }
 
   // Back button handler
@@ -584,7 +630,6 @@ class _SearchScreenState extends State<SearchScreen> {
           Positioned.fill(
             child: GoogleMap(
               onMapCreated: _onMapCreated,
-
               // Creates marker when user presses on screen
               onLongPress: (LatLng position) async {
                 await _onLocationSelected(position);
