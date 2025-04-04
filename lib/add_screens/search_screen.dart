@@ -332,7 +332,7 @@ class _SearchScreenState extends State<SearchScreen> {
     int stopIndex = 0;
 
     for (var stop in stopList) {
-      if (!uniqueStopIDs.contains(stop.id)) {
+      if (!uniqueStopIDs.contains(stop.id.toString())) {
         // Create a new stop object to avoid reference issues
         Stop newStop = Stop(
           id: stop.id,
@@ -346,7 +346,7 @@ class _SearchScreenState extends State<SearchScreen> {
         newStop.routeType = routeList[stopIndex].type;
 
         uniqueStops.add(newStop);
-        uniqueStopIDs.add(stop.id);
+        uniqueStopIDs.add(stop.id.toString());
       }
 
       // Find the index of this stop in our uniqueStops list

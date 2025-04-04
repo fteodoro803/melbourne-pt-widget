@@ -444,7 +444,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     itemBuilder: (context, index) {
 
                       final stop = widget.arguments.searchDetails!.stops[index];
-                      final bool isExpanded = _expandedStopIds.contains(stop.id);
+                      final bool isExpanded = _expandedStopIds.contains(stop.id.toString());
                       final routes = stop.routes ?? [];
                       final stopName = stop.name;
                       final distance = stop.distance;
@@ -476,9 +476,9 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                 onTap: () {
                                   setState(() {
                                     if (isExpanded) {
-                                      _expandedStopIds.remove(stop.id);
+                                      _expandedStopIds.remove(stop.id.toString());
                                     } else {
-                                      _expandedStopIds.add(stop.id);
+                                      _expandedStopIds.add(stop.id.toString());
                                     }
                                   });
                                 }
