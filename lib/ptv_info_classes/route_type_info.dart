@@ -1,58 +1,52 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'route_type_info.g.dart';
-
+/// Enumerator representing the route types available via PTV
+@JsonEnum()
 enum RouteTypeEnum {
+  @JsonValue(0)
   train(0, "train"),
+
+  @JsonValue(1)
   tram(1, "tram"),
+
+  @JsonValue(2)
   bus(2, "bus"),
+
+  @JsonValue(3)
   vLine(3, "vLine");
-  // nightBus(4, "night bus");   // todo: Re-enable Night Bus, or merge with Bus
+
+  // @JsonValue(4)
+  // nightBus(4, "night bus");      // reenable nightbus later, or merge with bus
 
   final int id;
   final String name;
 
+  //Constructors
   const RouteTypeEnum(this.id, this.name);
+
+  /// Factory constructor for a route type via id (ie. 0, 1).
+  static RouteTypeEnum fromId(int id) {
+    return RouteTypeEnum.values.firstWhere(
+            (routeType) => routeType.id == id,
+        orElse: () => throw ArgumentError('No RouteType found for id: $id')
+    );
+  }
+
+  /// Factory constructor for a route type via name (ie. "tram", "bus").
+  static RouteTypeEnum fromName(String name) {
+    return RouteTypeEnum.values.firstWhere(
+            (routeType) => RouteTypeEnum._normaliseName(routeType.name) == RouteTypeEnum._normaliseName(name),
+        orElse: () => throw ArgumentError('( route_type_info.dart -> RouteType.withName() ) -- No RouteTypeEnum found for name: $name')
+    );
+  }
 
   /// Helper method to normalize name for comparison
   static String _normaliseName(String name) {
     return name.toLowerCase().replaceAll(' ', '');
   }
-}
-
-/// Represents the route types currently available via Melbourne PTV.
-@JsonSerializable()
-class RouteType {
-  RouteTypeEnum type;
-
-  /// Creates a RouteType object from a RouteTypeEnum.
-  RouteType({required this.type});
-
-  /// Creates a RouteType object from a route type's ID.
-  RouteType.withId({required int id})
-      : type = RouteTypeEnum.values.firstWhere(
-            (routeType) => routeType.id == id,
-            orElse: () =>
-                throw ArgumentError('No RouteTypeEnum found for id: $id'));
-
-  /// Creates a RouteType object from a route type's name.
-  RouteType.withName({required String name})
-      : type = RouteTypeEnum.values.firstWhere(
-            (routeType) =>
-                RouteTypeEnum._normaliseName(routeType.name) ==
-                RouteTypeEnum._normaliseName(name),
-            orElse: () =>
-                throw ArgumentError('No RouteTypeEnum found for name: $name'));
-
-  @override
-  String toString() {
-    return "RouteType:\n"
-        "\tType: ${type.id}\t"
-        "\tName: ${type.name}\n";
-  }
 
   /// Methods for JSON Serialization
-  factory RouteType.fromJson(Map<String, dynamic> json) =>
-      _$RouteTypeFromJson(json);
-  Map<String, dynamic> toJson() => _$RouteTypeToJson(this);
+  // These methods handle conversion between RouteType and JSON representation
+  static RouteTypeEnum fromJson(int json) => fromId(json);
+  int toJson() => id;
 }

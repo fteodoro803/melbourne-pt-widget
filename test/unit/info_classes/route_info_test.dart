@@ -5,16 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   late Route route;
-  late RouteType trainType;
-  late RouteType tramType;
-  late RouteType busType;
-  late RouteType vLineType;
+  late RouteTypeEnum trainType;
+  late RouteTypeEnum tramType;
+  late RouteTypeEnum busType;
+  late RouteTypeEnum vLineType;
 
   setUp(() {
-    trainType = RouteType.withName(name: "train");
-    tramType = RouteType.withName(name: "tram");
-    busType = RouteType.withName(name: "bus");
-    vLineType = RouteType.withName(name: "vLine");
+    trainType = RouteTypeEnum.fromName("train");
+    tramType = RouteTypeEnum.fromName("tram");
+    busType = RouteTypeEnum.fromName("bus");
+    vLineType = RouteTypeEnum.fromName("vLine");
   });
 
   // test each transport type, to see if they match
