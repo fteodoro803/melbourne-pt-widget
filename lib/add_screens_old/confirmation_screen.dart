@@ -23,11 +23,13 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   String _screenName = "ConfirmationScreen";
   DevTools tools = DevTools();
   List<Transport> transportList = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
-    super.initState();
     initialiseData();
+
+    super.initState();
 
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
@@ -36,6 +38,10 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   Future<void> initialiseData() async {
     await _setTransportList();
     await _initialiseDepartures();
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   // Updates UI as a result of Update Departures
@@ -46,7 +52,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       await transportList[i].updateDepartures();
     }
 
-    setState(() {});
+    // setState(() {});
   }
 
   Future<void> _setTransportList() async {
@@ -60,13 +66,19 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       // print("( confirmation_screen.dart -> _setTransportList() ) -- done splitting transport by direction: $transportList");
     }
 
-    setState(() {});
+    // setState(() {});
   }
 
   // Generate
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Confirmation"),
