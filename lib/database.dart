@@ -14,6 +14,20 @@ class Directions extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+class Routes extends Table {
+  IntColumn get id => integer()();
+  TextColumn get name => text()();
+  IntColumn get number => integer().nullable()();
+  TextColumn get colour => text().nullable()();        // todo: make this non nullable
+  TextColumn get textColour => text().nullable()();    // todo: make this non nullable
+  IntColumn get routeTypeId => integer().references(RouteTypes, #id).nullable()();
+  // TextColumn get routeTypeName => text().references(RouteTypes, #name)();
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 class RouteTypes extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text().withLength(min: 3, max: 10)();
@@ -23,7 +37,7 @@ class RouteTypes extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Directions, RouteTypes])
+@DriftDatabase(tables: [Directions, RouteTypes, Routes])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -60,6 +74,15 @@ class AppDatabase extends _$AppDatabase {
     final exists = await (select(routeTypes)..where((d) => d.id.equals(routeType.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
       into(routeTypes).insertOnConflictUpdate(routeType);
+    }
+  }
+
+  /// Adds a route to the database, if it doesn't already exist,
+  /// or if it has past the "expiry" time
+  Future<void> insertRoute(RoutesCompanion route) async {
+    final exists = await (select(routes)..where((d) => d.id.equals(route.id.value))).getSingleOrNull();
+    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+      into(routes).insertOnConflictUpdate(route);
     }
   }
 }

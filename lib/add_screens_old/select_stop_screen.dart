@@ -9,6 +9,9 @@ import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart'
     as PTRoute;
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // to avoid conflict with material's "Route"
+import 'package:get/get.dart';
+import 'package:flutter_project/ptv_database_classes/routeHelpers.dart';
+import 'package:flutter_project/database.dart' as db;
 
 class SelectStopScreen extends StatefulWidget {
   const SelectStopScreen({super.key, required this.arguments});
@@ -88,6 +91,15 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   void setStopAndRoute(index) {
     widget.arguments.transport.stop = _stops[index];
     widget.arguments.transport.route = _routes[index];
+
+    int routeId = _routes[index].id;
+    String routeName = _routes[index].name;
+    int routeTypeId = _routes[index].type.id;
+    int? routeNumber;
+    if (_routes[index].number.isNotEmpty) {
+      routeNumber = int.tryParse(_routes[index].number);
+    }
+    Get.find<db.AppDatabase>().addRoute(routeId, routeName, number: routeNumber, routeTypeId: routeTypeId);
   }
 
   Future<void> testFetchStopRoutePairs(LatLng location) async {
