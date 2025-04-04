@@ -39,7 +39,6 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
     super.initState();
     transport = widget.arguments.transport;
     fetchPattern();
-    // itemScrollController.jumpTo(index: _currentStopIndex!);
   }
 
   Future<void> fetchPattern() async {
@@ -68,22 +67,6 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
         );
       }
     });
-
-    // print("Pattern: ${_pattern}");
-    // for (var stop in _pattern!) { print("Stop name: ${stop.stopName}");}
-    // print("Current stop name: ${transport.stop?.name}");
-    //
-    // print(_currentStopIndex);
-    //
-    // print(transport.direction);
-    // print(transport.route!.name);
-    // print(_pattern[0].stopName);
-    for (var stop in _pattern!) {
-      print("Stop name: ${stop.stopName}");
-      print("Scheduled departure time: ${stop.scheduledDepartureTime}");
-      print("Estimated departure time: ${stop.estimatedDepartureTime}");
-    }
-
   }
 
   @override
@@ -92,7 +75,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
     return Column(
       children: [
         // DraggableScrollableSheet Handle
-        HandleWidget(),
+        if (!widget.arguments.searchDetails!.isSheetExpanded!)
+          HandleWidget(),
+
         Expanded(
           child: ListView(
             padding: EdgeInsets.zero,
@@ -152,8 +137,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                       final departureTime = stopDeparture.scheduledDepartureTime!;
 
                       final timeDifference = TimeUtils.timeDifference(departureTime);
-                      // print(timeDifference);
-                      String? minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime!));
+                      String? minutesUntilNextDepartureString = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime));
 
                       return Card(
                         color: index == _currentStopIndex ? Theme.of(context).colorScheme.surfaceContainerHigh : null,

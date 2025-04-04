@@ -11,7 +11,7 @@ class BackButtonWidget extends StatelessWidget {
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
         color:
-        Theme.of(context).colorScheme.surfaceContainerHigh,
+        Theme.of(context).colorScheme.surfaceContainerHighest,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
@@ -22,9 +22,9 @@ class BackButtonWidget extends StatelessWidget {
         ],
       ),
       child: Icon(
-        Icons.arrow_back,
+        Icons.arrow_back_ios_new,
         color: Theme.of(context).colorScheme.onSurface,
-        size: 30,
+        size: 25,
       ),
     );
   }

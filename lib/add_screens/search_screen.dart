@@ -39,6 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final DraggableScrollableController _controller = DraggableScrollableController();
 
   bool _hasDroppedPin = false;
+  bool _showStops = false;
 
   late Departure _departure;
 
@@ -50,6 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late GoogleMapController mapController;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
+  Set<Circle> _circles = {};
 
   late LatLng _stopPosition;
   late LatLng _stopPositionAlongGeopath;
@@ -75,24 +77,27 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
 
     // Listen for changes in the sheet's size
-
     _controller.addListener(() {
-      if (_controller.size > 0.95) {
+      if (_controller.size >= 0.85) {
         if (!_isSheetFullyExpanded) {
           setState(() {
+            _controller.jumpTo(1.0);
             _isSheetFullyExpanded = true;
             widget.arguments.searchDetails!.isSheetExpanded = true;
           });
         }
-      } else if (_controller.size < 0.65) {
+      } else if (_controller.size < 0.85) {
         if (_isSheetFullyExpanded) {
           setState(() {
+            _controller.jumpTo(0.6);
             _isSheetFullyExpanded = false;
             widget.arguments.searchDetails!.isSheetExpanded = false;
           });
         }
       }
     });
+
+
 
     // Debug Printing
     widget.arguments.searchDetails?.distance = 300;
@@ -114,7 +119,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     // Add to navigation history
-    if (_activeSheet != ActiveSheet.none) {
+    if (_activeSheet != ActiveSheet.none && !newMarker) {
       if (!_navigationHistory.contains(_activeSheet)) {
         _navigationHistory.add(_activeSheet);
       }
@@ -153,18 +158,57 @@ class _SearchScreenState extends State<SearchScreen> {
     MarkerId id = MarkerId(position.toString()); // Unique ID based on position
     _markers.clear();
     _markers.add(Marker(markerId: id, position: position));
+  }
 
-    // Get the address for the dropped marker
-    String address =
-      await getAddressFromCoordinates(position.latitude, position.longitude);
+  Future <void> showStopMarkers() async {
+    if (_showStops) {
+      setMarker(widget.arguments.searchDetails!.markerPosition!);
+      BitmapDescriptor? customMarkerIconTrain = await transportPathUtils.getResizedImage("assets/icons/PTV train Logo.png", 20, 20);
+      BitmapDescriptor? customMarkerIconTram = await transportPathUtils.getResizedImage("assets/icons/PTV tram Logo.png", 20, 20);
+      BitmapDescriptor? customMarkerIconBus = await transportPathUtils.getResizedImage("assets/icons/PTV bus Logo.png", 20, 20);
+      BitmapDescriptor? customMarkerIconVLine = await transportPathUtils.getResizedImage("assets/icons/PTV vLine Logo.png", 20, 20);
 
-    // Update the state with the new address
-    widget.arguments.searchDetails!.markerPosition = position;
-    widget.arguments.searchDetails!.locationController.text = address;
-    widget.arguments.searchDetails!.distance = 300;
-    widget.arguments.searchDetails!.transportType = "all";
-    _hasDroppedPin = true;
-
+      setState(() {
+        for (var stop in widget.arguments.searchDetails!.stops) {
+          LatLng stopPosition = LatLng(stop.latitude!, stop.longitude!);
+          BitmapDescriptor? customMarkerIcon;
+          if (stop.routeType?.type.name == "tram") {
+            customMarkerIcon = customMarkerIconTram;
+          }
+          if (stop.routeType?.type.name == "train") {
+            customMarkerIcon = customMarkerIconTrain;
+          }
+          if (stop.routeType?.type.name == "bus") {
+            customMarkerIcon = customMarkerIconBus;
+          }
+          if (stop.routeType?.type.name == "vLine") {
+            customMarkerIcon = customMarkerIconVLine;
+          }
+          _markers.add(
+              Marker(
+                markerId: MarkerId(stop.name),
+                position: stopPosition,
+                icon: customMarkerIcon!,
+                anchor: const Offset(0.5, 0.5),
+              )
+          );
+        }
+        _circles.clear();
+        _circles.add(
+            Circle(
+              circleId: CircleId("circle"),
+              center: widget.arguments.searchDetails!.markerPosition!,
+              fillColor: Colors.blue.withOpacity(0.2),
+              strokeWidth: 0,
+              radius: widget.arguments.searchDetails!.distance.toDouble(),
+            )
+        );
+      });
+    }
+    else {
+      _circles.clear();
+      setMarker(widget.arguments.searchDetails!.markerPosition!);
+    }
   }
 
   // Retrieves address from coordinates of dropped pin
@@ -265,19 +309,23 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // Handling choosing a new transport type in ToggleButtonsRow
-  void _onSearchFiltersChanged({String? newTransportType, int? newDistance}) {
+  Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
     String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType;
     int distance = newDistance ?? widget.arguments.searchDetails!.distance;
 
-    _getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
+    await _getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
 
     widget.arguments.searchDetails!.distance = distance;
     widget.arguments.searchDetails!.transportType = transportType;
+    await showStopMarkers();
 
   }
 
   // Handling tap on an item in NearbyStopsSheet
   Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
+    // _showStops = false;
+    _circles.clear();
+    setMarker(widget.arguments.searchDetails!.markerPosition!);
     List<Transport> listTransport = await splitDirection(stop, route);
 
     widget.arguments.searchDetails!.stop = stop;
@@ -365,11 +413,23 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Sets the map's Marker and Camera to the Location
   Future<void> _onLocationSelected(LatLng selectedLocation) async {
+    _showStops = false;
     await setMarker(selectedLocation);
+    _circles.clear();
+
+    // Get the address for the dropped marker
+    String address =
+    await getAddressFromCoordinates(selectedLocation.latitude, selectedLocation.longitude);
 
     _getStops(selectedLocation, "all", 300);
 
     setState(() {
+      // Update the state with the new address
+      widget.arguments.searchDetails!.markerPosition = selectedLocation;
+      widget.arguments.searchDetails!.locationController.text = address;
+      widget.arguments.searchDetails!.distance = 300;
+      widget.arguments.searchDetails!.transportType = "all";
+      _hasDroppedPin = true;
       _polylines.clear();
     });
 
@@ -400,7 +460,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
 
     // Bring the user to the NearbyStopsSheet with the updated data
-    _changeSheet(ActiveSheet.nearbyStops, true);
+    _changeSheet(ActiveSheet.nearbyStops, true); //todo: FIX ISSUE WHERE SEARCH FILTERS ARE STILL THE SAME BETWEEN DROPPED PINS
 
   }
 
@@ -425,16 +485,20 @@ class _SearchScreenState extends State<SearchScreen> {
         // Clear polylines and restore marker
         _polylines.clear();
         setMarker(widget.arguments.searchDetails!.markerPosition!);
+        showStopMarkers();
         break;
       case ActiveSheet.nearbyStops:
+        if (_isSheetFullyExpanded) {
+          _controller.jumpTo(0.6);
+          return;
+        }
         previousSheet = ActiveSheet.none;
         _hasDroppedPin = false;
         _markers.clear();
-
         break;
       default:
         Navigator.pop(context);
-        return; // Exit early
+        return;
     }
 
     // Remove current sheet from history
@@ -517,19 +581,19 @@ class _SearchScreenState extends State<SearchScreen> {
           // Google Map
           Positioned.fill(
             child: GoogleMap(
-              // onCameraMove: (position) {
-              //   setState(() {});
-              // },
               onMapCreated: _onMapCreated,
+
               // Creates marker when user presses on screen
               onLongPress: (LatLng position) async {
                 await _onLocationSelected(position);
               },
+
               // Set initial position and zoom of map
               initialCameraPosition:
                   CameraPosition(target: _initialPosition, zoom: 15),
               markers: _markers,
               polylines: _polylines,
+              circles: _circles,
             ),
           ),
 
@@ -540,8 +604,6 @@ class _SearchScreenState extends State<SearchScreen> {
               initialChildSize: 0.6,
               minChildSize: 0.15,
               maxChildSize: 1.0,
-              snap: true,
-              snapSizes: [0.15, 0.6, 1.0],
               expand: true,
               shouldCloseOnMinExtent: false,
                 builder: (context, scrollController) {
@@ -559,56 +621,72 @@ class _SearchScreenState extends State<SearchScreen> {
                       ],
                     ),
                     child: _isSheetFullyExpanded
-                        ? Column(
-                      children: [
-                        SizedBox(height: 50),
-                        Container(
-                          width: MediaQuery.of(context).size.width,  // Forces full screen width
-                          child: Row(
+                      ? Column(
+                        children: [
+                          SizedBox(height: 50),
+                          Row(
                             children: [
-                              GestureDetector(
-                                onTap: _handleBackButton,
-                                child: BackButton(),
+                              IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new),
+                                onPressed: () => _handleBackButton(),
                               ),
-                              Spacer(),  // Pushes the Text towards the center
-                              Text(_getSheetTitle()), // Text will be centered relative to the whole screen
-                              Spacer(),  // Ensures the Text stays centered on the screen
+                              Expanded(
+                                child: Text(
+                                  _getSheetTitle(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.location_pin),
+                                onPressed: () => _controller.jumpTo(0.6),
+                              ),
                             ],
                           ),
-                        ),
-                        Divider(),
-                        Expanded(child: _getSheetContent(scrollController)),
-                      ],
-                    )
+                          Divider(),
+                          Expanded(child: _getSheetContent(scrollController)),
+                        ],
+                      )
                         : _getSheetContent(scrollController),
                   );
                 }
             ),
 
-          Positioned(
-            top: 60,
-            left: 15,
-            right: 15,
-            child: _isSheetFullyExpanded
-                ? Container() // Hide search bar when sheet is fully expanded
-                : Row(
+          _isSheetFullyExpanded
+            ? Container() // Hide search bar when sheet is fully expanded
+            : Column(
               children: [
-                // Back button with updated handler
-                GestureDetector(
-                  onTap: _handleBackButton,
-                  child: BackButtonWidget(),
+                SizedBox(height: 60),
+                Row(
+                  children: [
+                    // Back button with updated handler
+                    SizedBox(width: 15),
+                    GestureDetector(
+                      onTap: _handleBackButton,
+                      child: BackButtonWidget(),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                if (_activeSheet == ActiveSheet.nearbyStops)
+                  ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          _showStops = !_showStops;
+                        });
+                        await showStopMarkers();
+                      },
+                      child: Text("Show Stops")
                   ),
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: SuggestionsSearch(onLocationSelected: _onLocationSelected),
-                ),
               ],
-            ),
-          )
+            )
         ],
       ),
       // Only call updateMainPage when necessary (e.g., when adding a new route)

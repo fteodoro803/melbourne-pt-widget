@@ -79,7 +79,9 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
       children: [
 
         // DraggableScrollableSheet Handle
-        HandleWidget(),
+        if (!widget.arguments.searchDetails!.isSheetExpanded!)
+          HandleWidget(),
+
         Expanded(
           child: ListView(
             padding: EdgeInsets.zero,

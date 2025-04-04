@@ -80,7 +80,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     return Column(
       children: [
         // Draggable Scrollable Sheet Handle
-        HandleWidget(),
+        if (!widget.arguments.searchDetails!.isSheetExpanded!)
+          HandleWidget(),
 
         // Stop and route details
         Expanded(

@@ -85,9 +85,10 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
             filled: true,
             fillColor: Colors.grey[99], // Change background color
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(30),
               borderSide: BorderSide(color: Colors.black87), // Change border color
             ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.0)
           ),
           style: TextStyle(color: Colors.white), // Change text color
           // onSubmitted: ,
@@ -117,7 +118,8 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
             ),
           ),
         );
-      },    );
+      },
+    );
   }
 }
 
