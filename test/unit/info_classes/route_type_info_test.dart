@@ -9,10 +9,10 @@ void main() {
       int trainId = 0;
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromId(trainId);
+      RouteType result = RouteType.fromId(trainId);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.train));
+      expect(result, equals(RouteType.train));
     });
 
     test("Initialising train via Name", () {
@@ -20,10 +20,10 @@ void main() {
       String trainName = "train";
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromName(trainName);
+      RouteType result = RouteType.fromName(trainName);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.train));
+      expect(result, equals(RouteType.train));
     });
   });
 
@@ -34,10 +34,10 @@ void main() {
       int tramId = 1;
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromId(tramId);
+      RouteType result = RouteType.fromId(tramId);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.tram));
+      expect(result, equals(RouteType.tram));
     });
 
     test("Initialising tram via Name", () {
@@ -45,10 +45,10 @@ void main() {
       String tramName = "tram";
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromName(tramName);
+      RouteType result = RouteType.fromName(tramName);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.tram));
+      expect(result, equals(RouteType.tram));
     });
   });
 
@@ -59,10 +59,10 @@ void main() {
       int busId = 2;
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromId(busId);
+      RouteType result = RouteType.fromId(busId);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.bus));
+      expect(result, equals(RouteType.bus));
     });
 
     test("Initialising vLine via Name", () {
@@ -70,10 +70,10 @@ void main() {
       String busName = "bus";
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromName(busName);
+      RouteType result = RouteType.fromName(busName);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.bus));
+      expect(result, equals(RouteType.bus));
     });
   });
 
@@ -84,10 +84,10 @@ void main() {
       int vLineId = 3;
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromId(vLineId);
+      RouteType result = RouteType.fromId(vLineId);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.vLine));
+      expect(result, equals(RouteType.vLine));
     });
 
     test("Initialising vLine via Name", () {
@@ -95,10 +95,10 @@ void main() {
       String vLineName = "vLine";
 
       // Act
-      RouteTypeEnum result = RouteTypeEnum.fromName(vLineName);
+      RouteType result = RouteType.fromName(vLineName);
 
       //Assert
-      expect(result, equals(RouteTypeEnum.vLine));
+      expect(result, equals(RouteType.vLine));
     });
   });
 
@@ -106,21 +106,21 @@ void main() {
   group("Name Normalisation", () {
     test("Uppercase", () {
       String name = "TRAM";
-      expect(RouteTypeEnum.fromName(name), RouteTypeEnum.tram);
+      expect(RouteType.fromName(name), RouteType.tram);
 
       name = "tRAm";
-      expect(RouteTypeEnum.fromName(name), RouteTypeEnum.tram);
+      expect(RouteType.fromName(name), RouteType.tram);
     });
 
     test("Spaces", () {
       String name = "t r a m";
-      expect(RouteTypeEnum.fromName(name), RouteTypeEnum.tram);
+      expect(RouteType.fromName(name), RouteType.tram);
 
       name = "tram ";
-      expect(RouteTypeEnum.fromName(name), RouteTypeEnum.tram);
+      expect(RouteType.fromName(name), RouteType.tram);
 
       name = "     tram ";
-      expect(RouteTypeEnum.fromName(name), RouteTypeEnum.tram);
+      expect(RouteType.fromName(name), RouteType.tram);
     });
   });
 
@@ -131,7 +131,7 @@ void main() {
       int id = -2;
 
       // Act & Assert
-      expect( () => RouteTypeEnum.fromId(id), throwsArgumentError);
+      expect( () => RouteType.fromId(id), throwsArgumentError);
     });
 
     test("Initialising via Name", () {
@@ -139,7 +139,7 @@ void main() {
       String name = "busz";
 
       // Act & Assert
-      expect( () => RouteTypeEnum.fromName(name), throwsArgumentError);
+      expect( () => RouteType.fromName(name), throwsArgumentError);
     });
   });
 }

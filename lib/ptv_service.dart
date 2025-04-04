@@ -130,7 +130,7 @@ class PtvService {
         String routeNumber = route["route_number"].toString();
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
-        RouteTypeEnum routeType = RouteTypeEnum.fromId(routeTypeId);
+        RouteType routeType = RouteType.fromId(routeTypeId);
 
         Route newRoute = Route(
             name: routeName, number: routeNumber, id: routeId, type: routeType);
@@ -218,7 +218,7 @@ class PtvService {
   Future<void> fetchRuns(Transport transport) async {
     String expands = "All";
     String? runRef = transport.departures?[0].runRef;
-    RouteTypeEnum? routeType = transport.routeType;
+    RouteType? routeType = transport.routeType;
     ApiData data = await PtvApiService().runs(runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 
@@ -229,7 +229,7 @@ class PtvService {
     List<Departure> departures = [];
     String expands = "Stop";
     String? runRef = departure.runRef;
-    RouteTypeEnum? routeType = transport.routeType;
+    RouteType? routeType = transport.routeType;
     ApiData data = await PtvApiService().patterns(runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
 

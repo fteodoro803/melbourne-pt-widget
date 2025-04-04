@@ -15,7 +15,7 @@ part 'transport.g.dart';
 @JsonSerializable()
 class Transport {
   String? uniqueID; // unique ID for the widget timeline
-  RouteTypeEnum? routeType;
+  RouteType? routeType;
   Location? location;
   Stop? stop;
   Route? route;
@@ -31,7 +31,7 @@ class Transport {
     this.direction = direction;
   }
 
-  Transport.withAttributes(RouteTypeEnum? routeType, Stop? stop, Route? route, RouteDirection? direction) {
+  Transport.withAttributes(RouteType? routeType, Stop? stop, Route? route, RouteDirection? direction) {
     this.routeType = routeType;
     // this.location = location;
     this.stop = stop;
@@ -125,7 +125,7 @@ class Transport {
 
   void setRouteType(int id) {
     try {
-      routeType = RouteTypeEnum.fromId(id);     // todo: remove the try/catch, it might already be covered in the creation of the enum? Or maybe keep it bc it helps with crashes
+      routeType = RouteType.fromId(id);     // todo: remove the try/catch, it might already be covered in the creation of the enum? Or maybe keep it bc it helps with crashes
     } catch (e) {
       print(e); // Logs unknown route type errors
     }

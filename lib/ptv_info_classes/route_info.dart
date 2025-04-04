@@ -16,7 +16,7 @@ class Route {
   String? textColour;   // Hex colour code for text
 
   RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
-  RouteTypeEnum type;
+  RouteType type;
 
   /// Creates a route object, and matches its details to its respective colour.
   Route(

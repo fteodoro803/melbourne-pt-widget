@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 /// Enumerator representing the route types available via PTV
 @JsonEnum()
-enum RouteTypeEnum {
+enum RouteType {
   @JsonValue(0)
   train(0, "train"),
 
@@ -22,20 +22,20 @@ enum RouteTypeEnum {
   final String name;
 
   //Constructors
-  const RouteTypeEnum(this.id, this.name);
+  const RouteType(this.id, this.name);
 
   /// Factory constructor for a route type via id (ie. 0, 1).
-  static RouteTypeEnum fromId(int id) {
-    return RouteTypeEnum.values.firstWhere(
+  static RouteType fromId(int id) {
+    return RouteType.values.firstWhere(
             (routeType) => routeType.id == id,
         orElse: () => throw ArgumentError('No RouteType found for id: $id')
     );
   }
 
   /// Factory constructor for a route type via name (ie. "tram", "bus").
-  static RouteTypeEnum fromName(String name) {
-    return RouteTypeEnum.values.firstWhere(
-            (routeType) => RouteTypeEnum._normaliseName(routeType.name) == RouteTypeEnum._normaliseName(name),
+  static RouteType fromName(String name) {
+    return RouteType.values.firstWhere(
+            (routeType) => RouteType._normaliseName(routeType.name) == RouteType._normaliseName(name),
         orElse: () => throw ArgumentError('( route_type_info.dart -> RouteType.withName() ) -- No RouteTypeEnum found for name: $name')
     );
   }
@@ -47,6 +47,6 @@ enum RouteTypeEnum {
 
   /// Methods for JSON Serialization
   // These methods handle conversion between RouteType and JSON representation
-  static RouteTypeEnum fromJson(int json) => fromId(json);
+  static RouteType fromJson(int json) => fromId(json);
   int toJson() => id;
 }
