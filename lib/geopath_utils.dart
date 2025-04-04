@@ -142,14 +142,15 @@ class TransportPathUtils {
 
     Set<Marker> newMarkers = markers;
     List<LatLng> newStopsAlongGeopath = isReverseDirection ? stopsAlongGeopath.reversed.toList() : stopsAlongGeopath;
-    debugPrint("stops along geopath: $newStopsAlongGeopath");
 
-    BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 8, 8); // this doesn't work - they're all the same size
-    BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 10, 10);
-    BitmapDescriptor? customMarkerIcon = isDirectionSpecified ? customMarkerIconFuture : customMarkerIconPrevious;
+    BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 10, 10); // this doesn't work - they're all the same size
+    BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 7, 7);
+
+    BitmapDescriptor? customMarkerIcon = isDirectionSpecified
+        ? customMarkerIconPrevious
+        : customMarkerIconFuture;
     BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 20, 20);
 
-    // for (var stop in newStopsAlongGeopath.sublist(1, newStopsAlongGeopath.length - 1)) {
     for (var stop in newStopsAlongGeopath) {
       if (stop == stopPositionAlongGeopath) {
         customMarkerIcon = customMarkerIconFuture;
@@ -159,39 +160,62 @@ class TransportPathUtils {
         markerId: MarkerId("$stop"),
         position: stop,
         icon: customMarkerIcon!,
+        anchor: const Offset(0.5, 0.5),
       ));
     }
-    // for (var stop in _stops) {
-    //   _markers.add(Marker(
-    //     markerId: MarkerId(stop.id),
-    //     position: LatLng(stop.latitude!, stop.longitude!),
-    //     icon: _customMarkerIconPrevious!,
-    //   ));
-    // }
+
     newMarkers.add(Marker(
       markerId: MarkerId('center_marker'),
       position: stopPositionAlongGeopath,
       icon: customStopMarkerIcon,
+      anchor: const Offset(0.5, 0.5),
     ));
-    // newMarkers.add(Marker(
-    //   markerId: MarkerId('first_marker'),
-    //   position: newStopsAlongGeopath[0],
-    //   icon: customStopMarkerIcon,
-    // ));
-    // newMarkers.add(Marker(
-    //   markerId: MarkerId('last_marker'),
-    //   position: newStopsAlongGeopath[newStopsAlongGeopath.length - 1],
-    //   icon: customStopMarkerIcon,
-    // ));
+
 
     return newMarkers;
   }
 
+  // for (var stop in _stops) {
+  //   _markers.add(Marker(
+  //     markerId: MarkerId(stop.id),
+  //     position: LatLng(stop.latitude!, stop.longitude!),
+  //     icon: _customMarkerIconPrevious!,
+  //   ));
+  // }
+  // newMarkers.add(Marker(
+  //   markerId: MarkerId('first_marker'),
+  //   position: newStopsAlongGeopath[0],
+  //   icon: customStopMarkerIcon,
+  // ));
+  // newMarkers.add(Marker(
+  //   markerId: MarkerId('last_marker'),
+  //   position: newStopsAlongGeopath[newStopsAlongGeopath.length - 1],
+  //   icon: customStopMarkerIcon,
+  // ));
+
   Future<GeopathAndStops> addStopsToGeoPath(List<Stop> stops, List<LatLng> geopath, LatLng chosenStopPosition) async {
     List<LatLng> stopsAlongGeopath = [];
     LatLng stopPositionAlongGeopath = chosenStopPosition;
+    List<Stop> newStops = [];
+    Set<int> uniqueStopNumbers = {};
 
     for (var stop in stops) {
+      RegExp regExp = RegExp(r'#(\d+)');
+
+      Match? match = regExp.firstMatch(stop.name);
+
+      if (match != null) {
+        int number = int.parse(match.group(1)!);
+        stop.number = number;
+        if (!uniqueStopNumbers.contains(number)) {
+          uniqueStopNumbers.add(number);
+          newStops.add(stop);
+        }
+      }
+    }
+    newStops.sort((a, b) => a.number!.compareTo(b.number!));
+
+    for (var stop in newStops) {
       var stopPosition = LatLng(stop.latitude!, stop.longitude!);
       var closestPoint = GeoPathUtils.findClosestPoint(stopPosition, geopath);
       stopsAlongGeopath.add(closestPoint);
@@ -217,6 +241,8 @@ class TransportPathUtils {
         geopath.insert(insertionIndex, closestPoint);
       }
     }
+
+    print("Length of stops along geopath: ${stopsAlongGeopath.length}");
 
     return GeopathAndStops(geopath, stopsAlongGeopath, stopPositionAlongGeopath);
   }

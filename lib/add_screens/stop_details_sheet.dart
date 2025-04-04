@@ -194,7 +194,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                             onTap: () {
                                               setModalState(() {
                                                 tempSavedList[index] = !tempSavedList[index];
-                                                hasListChanged = !savedList.every((item) => item == tempSavedList[savedList.indexOf(item)]);
+                                                hasListChanged = !(savedList == tempSavedList);
                                               });
                                             },
                                           ),
