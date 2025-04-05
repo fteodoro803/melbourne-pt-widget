@@ -144,6 +144,23 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     });
   }
 
+  // Add this method to your NearbyStopsSheet class
+  void scrollToStopItem(int stopIndex) {
+    // Calculate position to scroll to (header + item height * index)
+    double headerHeight = 152.0 + 28; // Adjust based on your header size
+    double itemHeight = 98.0;    // Adjust based on your item height
+
+    // Add 1 to account for the header item in the ListView.builder
+    double scrollPosition = headerHeight + (itemHeight * stopIndex);
+
+    // Use the DraggableScrollableSheet's controller
+    widget.scrollController.animateTo(
+      scrollPosition,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   NearbyStopsState getCurrentState() {
     return NearbyStopsState(
       selectedDistance: _selectedDistance,
@@ -471,7 +488,8 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Card(
-                  margin: EdgeInsets.only(bottom: isExpanded! ? 12 : 4, top: 8, left: 0, right: 0),
+                  color: isExpanded! ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
+                  margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),
                   child: ListTile(
                     visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                     dense: true,
@@ -481,23 +499,23 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                            dense: true,
-                            visualDensity: VisualDensity(horizontal: -3, vertical: 0),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
-                            title: !isExpanded
-                                ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
-                                : ExpandedStopWidget(stopName: stopName, distance: distance),
-                            leading: Image.asset(
-                              "assets/icons/PTV $routeType Logo.png",
-                              width: 40,
-                              height: 40,
-                            ),
-                            trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-                            onTap: () {
-                              setState(() {
-                                widget.arguments.searchDetails?.stops[stopIndex].isExpanded = !widget.arguments.searchDetails!.stops[stopIndex].isExpanded!;
-                              });
-                            }
+                          dense: true,
+                          visualDensity: VisualDensity(horizontal: -3, vertical: 0),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                          title: !isExpanded
+                              ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
+                              : ExpandedStopWidget(stopName: stopName, distance: distance),
+                          leading: Image.asset(
+                            "assets/icons/PTV $routeType Logo.png",
+                            width: 40,
+                            height: 40,
+                          ),
+                          trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                          onTap: () {
+                            setState(() {
+                              widget.arguments.searchDetails?.stops[stopIndex].isExpanded = !widget.arguments.searchDetails!.stops[stopIndex].isExpanded!;
+                            });
+                          }
                         ),
 
                         if (isExpanded)...[
@@ -600,7 +618,7 @@ class ExpandedStopWidget extends StatelessWidget {
           Expanded(
             child: Text(
               stopName,
-              style: TextStyle(fontSize: 18, height: 1.1),
+              style: TextStyle(fontSize: 17, height: 1.1, fontWeight: FontWeight.w700),
 
             ),
           ),
@@ -611,11 +629,10 @@ class ExpandedStopWidget extends StatelessWidget {
         children: [
           Icon(Icons.directions_walk, size: 20),
           SizedBox(width: 4),
-          Text("${distance?.round()}m", style: TextStyle(fontSize: 18)),
+          Text("${distance?.round()}m", style: TextStyle(fontSize: 17)),
         ],
       )
-    ],
-                                    );
+    ],);
   }
 }
 

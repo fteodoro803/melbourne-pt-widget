@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
@@ -23,6 +24,9 @@ import 'package:geocoding/geocoding.dart' as geocoding;
 import '../ptv_info_classes/route_info.dart' as pt_route;
 import 'package:flutter_project/google_service.dart';
 import 'suggestions_search.dart';
+
+import 'package:custom_info_window/custom_info_window.dart';
+
 
 enum ActiveSheet { none, nearbyStops, stopDetails, transportDetails, departureDetails }
 
@@ -72,6 +76,11 @@ class _SearchScreenState extends State<SearchScreen> {
   final GlobalKey<NearbyStopsSheetState> _nearbyStopsSheetKey = GlobalKey<NearbyStopsSheetState>();
   NearbyStopsState? _savedNearbyStopsState;
 
+  @override
+  void dispose() {
+    _customInfoWindowController.dispose();
+    super.dispose();
+  }
 
   // Initialises the state
   @override
@@ -151,6 +160,7 @@ class _SearchScreenState extends State<SearchScreen> {
   // Initializes the map
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    _customInfoWindowController.googleMapController = controller;
   }
 
   // Resets markers and creates new marker when pin is dropped by user
@@ -163,42 +173,115 @@ class _SearchScreenState extends State<SearchScreen> {
     ));
   }
 
+  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
+  String? _selectedStopId;
+  Marker? _selectedStopMarker;
+
   Future <void> showStopMarkers() async {
     if (_showStops) {
-      setMarker(widget.arguments.searchDetails!.markerPosition!);
       BitmapDescriptor? customMarkerIconTrain = await transportPathUtils.getResizedImage("assets/icons/PTV train Logo.png", 20, 20);
       BitmapDescriptor? customMarkerIconTram = await transportPathUtils.getResizedImage("assets/icons/PTV tram Logo.png", 20, 20);
       BitmapDescriptor? customMarkerIconBus = await transportPathUtils.getResizedImage("assets/icons/PTV bus Logo.png", 20, 20);
       BitmapDescriptor? customMarkerIconVLine = await transportPathUtils.getResizedImage("assets/icons/PTV vLine Logo.png", 20, 20);
 
+      BitmapDescriptor? customMarkerIconTrainLarge = await transportPathUtils.getResizedImage("assets/icons/PTV train Logo.png", 30, 30);
+      BitmapDescriptor? customMarkerIconTramLarge = await transportPathUtils.getResizedImage("assets/icons/PTV tram Logo.png", 30, 30);
+      BitmapDescriptor? customMarkerIconBusLarge = await transportPathUtils.getResizedImage("assets/icons/PTV bus Logo.png", 30, 30);
+      BitmapDescriptor? customMarkerIconVLineLarge = await transportPathUtils.getResizedImage("assets/icons/PTV vLine Logo.png", 30, 30);
+
       setState(() {
+        setMarker(widget.arguments.searchDetails!.markerPosition!);
+        _selectedStopId = null;
+
         for (var stop in widget.arguments.searchDetails!.stops) {
-          LatLng stopPosition = LatLng(stop.latitude!, stop.longitude!);
           BitmapDescriptor? customMarkerIcon;
+          BitmapDescriptor? largeCustomMarkerIcon;
+
           if (stop.routeType?.type.name == "tram") {
             customMarkerIcon = customMarkerIconTram;
+            largeCustomMarkerIcon = customMarkerIconTramLarge;
           }
           if (stop.routeType?.type.name == "train") {
             customMarkerIcon = customMarkerIconTrain;
+            largeCustomMarkerIcon = customMarkerIconTrainLarge;
           }
           if (stop.routeType?.type.name == "bus") {
             customMarkerIcon = customMarkerIconBus;
+            largeCustomMarkerIcon = customMarkerIconBusLarge;
           }
           if (stop.routeType?.type.name == "vLine") {
             customMarkerIcon = customMarkerIconVLine;
+            largeCustomMarkerIcon = customMarkerIconVLineLarge;
           }
+
+          LatLng stopPosition = LatLng(stop.latitude!, stop.longitude!);
           _markers.add(
             Marker(
-              markerId: MarkerId(stop.name),
+              markerId: MarkerId(stop.id.toString()),
               position: stopPosition,
               icon: customMarkerIcon!,
-              // anchor: const Offset(0.5, 0.5),
+              consumeTapEvents: true,
+                // anchor: const Offset(0.5, 0.5),
               onTap: () {
+                // mapController.showMarkerInfoWindow(MarkerId(stop.name));
                 setState(() {
+
                   for (var s in widget.arguments.searchDetails!.stops) {
                     s.isExpanded = false;
                   }
                   stop.isExpanded = true;
+                  if (_selectedStopId != null) {
+                    _markers.removeWhere((marker) => marker.markerId == MarkerId(_selectedStopId!));
+                    _markers.add(_selectedStopMarker!);
+                  }
+                  _selectedStopMarker = _markers.firstWhere(
+                      (marker) => marker.markerId == MarkerId(stop.id.toString()),
+                  );
+                  _markers.removeWhere((marker) => marker.markerId == MarkerId(stop.name));
+
+                  _selectedStopId = stop.id.toString();
+                  _markers.add(Marker(
+                    markerId: MarkerId(_selectedStopId!),
+                    position: stopPosition,
+                    icon: largeCustomMarkerIcon!,
+                    ),
+                  );
+
+                  _customInfoWindowController.addInfoWindow!(
+                    Text(stop.name,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                        shadows: <Shadow>[
+                          Shadow(
+                          offset: Offset(1, 1),
+                          blurRadius: 3.0,
+                          color: Color.fromARGB(0, 255, 255, 255),
+                          ),
+                        ],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    stopPosition, // Position of the info window
+                  );
+
+                  // Find the index of the tapped stop
+                  int stopIndex = widget.arguments.searchDetails!.stops.indexOf(stop);
+
+                  // First ensure the sheet is expanded enough to see the content
+                  _controller.animateTo(
+                    0.4, // Adjust as needed
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+
+                  // Scroll to the stop using the global key to access the method
+                  // Wait a bit to ensure the expansion is complete
+                  Future.delayed(Duration(milliseconds: 100), () {
+                    _nearbyStopsSheetKey.currentState?.scrollToStopItem(stopIndex);
+                  });
                 });
 
               }
@@ -331,7 +414,7 @@ class _SearchScreenState extends State<SearchScreen> {
     LatLngBounds bounds = await _calculateBoundsForMarkers(distance.toDouble());
 
     // todo: when the camera reanimates, make it center properly on the pin again (at 0.7x the height of the screen)
-    mapController.animateCamera(
+    mapController.moveCamera(
       CameraUpdate.newLatLngBounds(bounds, 50), // Padding around the bounds (50 is arbitrary)
     );
 
@@ -398,6 +481,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     loadTransportPath(false);
     _changeSheet(ActiveSheet.stopDetails, false);
+    _customInfoWindowController.hideInfoWindow!();
   }
 
   void _onTransportTapped(Transport transport) {
@@ -488,6 +572,7 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.arguments.searchDetails!.transportType = "all";
     _hasDroppedPin = true;
 
+    _customInfoWindowController.hideInfoWindow!();
 
     // Get the current map's zoom level and visible region
     LatLngBounds visibleRegion = await mapController.getVisibleRegion();
@@ -510,7 +595,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
 
     // Animate the camera to this position
-    await mapController.animateCamera(
+    await mapController.moveCamera(
       CameraUpdate.newCameraPosition(newCameraPosition),
     );
 
@@ -557,6 +642,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _hasDroppedPin = false;
         _markers.clear();
         _circles.clear();
+        _customInfoWindowController.hideInfoWindow!();
         break;
 
       default:
@@ -648,7 +734,9 @@ class _SearchScreenState extends State<SearchScreen> {
               onLongPress: (LatLng position) async {
                 await _onLocationSelected(position);
               },
-
+              onCameraMove: (position) {
+                _customInfoWindowController.onCameraMove!();
+              },
               // Set initial position and zoom of map
               initialCameraPosition:
                   CameraPosition(target: _initialPosition, zoom: 15),
@@ -656,6 +744,12 @@ class _SearchScreenState extends State<SearchScreen> {
               polylines: _polylines,
               circles: _circles,
             ),
+          ),
+          CustomInfoWindow(
+            controller: _customInfoWindowController,
+            height: 65,
+            width: 150,
+            offset: 5,
           ),
 
           // Create DraggableScrollableSheet with nearby stop information if user has dropped pin

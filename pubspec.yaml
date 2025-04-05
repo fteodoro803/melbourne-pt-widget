@@ -47,6 +47,7 @@ dependencies:
   google_maps_flutter: ^2.10.0
   home_widget: ^0.7.0+1
   mockito: ^5.4.5
+  custom_info_window: ^1.0.1
 
 dev_dependencies:
   flutter_test:
