@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
+import 'package:flutter_project/ptv_database_classes/stopHelpers.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
@@ -100,6 +101,13 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
       routeNumber = int.tryParse(_routes[index].number);
     }
     Get.find<db.AppDatabase>().addRoute(routeId, routeName, number: routeNumber, routeTypeId);
+
+    int stopId = _stops[index].id;
+    String stopName = _stops[index].name;
+    double? latitude = _stops[index].latitude;
+    double? longitude = _stops[index].longitude;
+    Get.find<db.AppDatabase>().addStop(stopId, stopName, routeTypeId, latitude!, longitude!);
+
   }
 
   Future<void> testFetchStopRoutePairs(LatLng location) async {
