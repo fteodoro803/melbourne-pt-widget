@@ -29,3 +29,47 @@ class BackButtonWidget extends StatelessWidget {
     );
   }
 }
+
+
+class TransportToggleButton extends StatelessWidget {
+  const TransportToggleButton({
+    super.key,
+    required this.isSelected,
+    required this.transportType,
+    required this.handleTransportToggle
+});
+
+  final bool isSelected;
+  final String transportType;
+  final Function(String transportType) handleTransportToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isAll = transportType == "all" ? true : false;
+
+    return ElevatedButton(
+      onPressed: () => handleTransportToggle(transportType),
+      style: ElevatedButton.styleFrom(
+        padding: isAll ? EdgeInsets.symmetric(horizontal: 14) : EdgeInsets.zero,
+        backgroundColor: isSelected ?
+        Theme.of(context).colorScheme.secondaryContainer :
+        Theme.of(context).colorScheme.secondary,
+        minimumSize: Size(50, 50),
+        shape: isAll ? null : CircleBorder(),
+      ),
+      child: transportType == "all"
+        ? Text(
+          "All Transport",
+          style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+        )
+      : ClipOval(
+        child: Image.asset(
+          "assets/icons/PTV $transportType Logo.png",
+          width: 30,
+          height: 30,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}

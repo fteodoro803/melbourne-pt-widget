@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/widgets/toggle_buttons_row.dart';
 
 import '../ptv_info_classes/route_info.dart' as pt_route;
 import '../time_utils.dart';
+import '../widgets/screen_widgets.dart' as ScreenWidgets;
 import '../widgets/transport_widgets.dart';
 
 enum ToggleableFilter {
@@ -29,13 +29,13 @@ class NearbyStopsState {
   final String selectedDistance;
   final String selectedUnit;
   final Set<ToggleableFilter> filters;
-  String selectedTransportType;
+  final Map<String, bool> transportTypeFilters;
 
   NearbyStopsState({
     required this.selectedDistance,
     required this.selectedUnit,
     required this.filters,
-    required this.selectedTransportType,
+    required this.transportTypeFilters,
   });
 }
 
@@ -86,7 +86,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
   bool get lowFloorFilter => filters.contains(ToggleableFilter.lowFloor);
   bool get shelterFilter => filters.contains(ToggleableFilter.shelter);
 
-  late String _selectedTransportType;
+  late Map<String, bool> _transportTypeFilters = {};
 
   @override
   void initState() {
@@ -99,12 +99,18 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
       _selectedDistance = widget.initialState!.selectedDistance;
       _selectedUnit = widget.initialState!.selectedUnit;
       filters = widget.initialState!.filters;
-      _selectedTransportType = widget.initialState!.selectedTransportType;
+      _transportTypeFilters = widget.initialState!.transportTypeFilters;
     } else {
       _selectedDistance = _initialSelectedMeters;
       _selectedUnit = _initialSelectedUnit;
       filters = <ToggleableFilter>{};
-      _selectedTransportType = widget.arguments.searchDetails!.transportType;
+      _transportTypeFilters = {
+        "all": true,
+        "tram": false,
+        "bus": false,
+        "train": false,
+        "vLine": false
+      };
     }
 
     _tempSelectedDistance = _selectedDistance;
@@ -138,19 +144,12 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     });
   }
 
-  Future<void> _onTransportTypeChanged(String transportType) async {
-    setState(() {
-      _selectedTransportType = transportType;
-    });
-    _notifyStateChanged();
-  }
-
   NearbyStopsState getCurrentState() {
     return NearbyStopsState(
       selectedDistance: _selectedDistance,
       selectedUnit: _selectedUnit,
       filters: filters,
-      selectedTransportType: _selectedTransportType,
+      transportTypeFilters: _transportTypeFilters,
     );
   }
 
@@ -173,8 +172,33 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
       selectedDistance: _selectedDistance,
       selectedUnit: _selectedUnit,
       filters: filters,
-      selectedTransportType: _selectedTransportType,
+      transportTypeFilters: _transportTypeFilters,
     ));
+  }
+
+  void _handleTransportToggle(String transportType) {
+    bool wasSelected = _transportTypeFilters[transportType]!;
+    String newTransportToggled;
+    if (wasSelected) {
+      widget.onSearchFiltersChanged(newTransportType: "all", newDistance: null);
+      newTransportToggled = "all";
+    }
+    else {
+      widget.onSearchFiltersChanged(newTransportType: transportType, newDistance: null);
+      newTransportToggled = transportType;
+    }
+    setState(() {
+      for (var entry in _transportTypeFilters.entries) {
+        String type = entry.key;
+        if (type == newTransportToggled) {
+          _transportTypeFilters[type] = true;
+        }
+        else {
+          _transportTypeFilters[type] = false;
+        }
+      }
+    });
+    _notifyStateChanged();
   }
 
   @override
@@ -189,308 +213,303 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
           HandleWidget(),
         // Address and toggleable transport type buttons
         Expanded(
-          child: ListView(
+          child: ListView.builder(
             padding: EdgeInsets.zero,
-            controller: widget.scrollController,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LocationWidget(textField: address, textSize: 18, scrollable: true),
-                    SizedBox(height: 8),
-                    ToggleButtonsRow(
-                      onSearchFiltersChanged: widget.onSearchFiltersChanged,
-                      onTransportTypeChanged: _onTransportTypeChanged,
-                      initialTransportType: _selectedTransportType,
-                    ),
-                    SizedBox(height: 4),
-                    Divider(),
+            controller: widget.scrollController, // Use the same controller from parent
+            itemCount: widget.arguments.searchDetails!.stops.length + 1, // +1 for the header
+            itemBuilder: (context, index) {
+              // Header item
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LocationWidget(textField: address, textSize: 18, scrollable: true),
+                      SizedBox(height: 8),
+                      Row(
+                        spacing: 8,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: _transportTypeFilters.keys.map((transportType) {
+                          final isSelected = _transportTypeFilters[transportType] ?? false;
+                          return ScreenWidgets.TransportToggleButton(
+                            isSelected: isSelected,
+                            transportType: transportType,
+                            handleTransportToggle: _handleTransportToggle,
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(height: 4),
+                      Divider(),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            ActionChip(
+                              avatar: Icon(Icons.keyboard_arrow_down_sharp),
+                              label: Text('Within $_selectedDistance$_selectedUnit'),
+                              onPressed: () async {
+                                _tempSelectedUnit = _selectedUnit;
+                                _tempSelectedDistance = _selectedDistance;
 
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          ActionChip(
-                            avatar: Icon(Icons.keyboard_arrow_down_sharp),
-                            label: Text('Within $_selectedDistance$_selectedUnit'),
-                            onPressed: () async {
-                              _tempSelectedUnit = _selectedUnit;
-                              _tempSelectedDistance = _selectedDistance;
+                                // Determine which list to use based on current unit
+                                final currentList = _selectedUnit == "m" ? meterList : kilometerList;
 
-                              // Determine which list to use based on current unit
-                              final currentList = _selectedUnit == "m" ? meterList : kilometerList;
+                                // Find the index of the current selected distance in the appropriate list
+                                int distanceIndex = currentList.indexOf(_selectedDistance);
+                                if (distanceIndex == -1) distanceIndex = 0; // Fallback if not found
 
-                              // Find the index of the current selected distance in the appropriate list
-                              int distanceIndex = currentList.indexOf(_selectedDistance);
-                              if (distanceIndex == -1) distanceIndex = 0; // Fallback if not found
+                                // Initialize controllers with the correct current positions
+                                _distanceScrollController = FixedExtentScrollController(initialItem: distanceIndex);
+                                _unitScrollController = FixedExtentScrollController(
+                                    initialItem: distanceUnitsList.indexOf(_selectedUnit)
+                                );
 
-                              // Initialize controllers with the correct current positions
-                              _distanceScrollController = FixedExtentScrollController(initialItem: distanceIndex);
-                              _unitScrollController = FixedExtentScrollController(
-                                  initialItem: distanceUnitsList.indexOf(_selectedUnit)
-                              );
+                                await showModalBottomSheet(
+                                    constraints: BoxConstraints(maxHeight: 500),
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                          builder: (context, setModalState) {
+                                            // Get the current distance list based on the temp selected unit
+                                            final currentDistanceList = _tempSelectedUnit == "m" ? meterList : kilometerList;
 
-                              await showModalBottomSheet(
-                                constraints: BoxConstraints(maxHeight: 500),
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return StatefulBuilder(
-                                    builder: (context, setModalState) {
-                                      // Get the current distance list based on the temp selected unit
-                                      final currentDistanceList = _tempSelectedUnit == "m" ? meterList : kilometerList;
-
-                                      return Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.topLeft,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 5),
-                                              child: Text("Distance:", style: TextStyle(fontSize: 18)),
-                                            ),
-                                          ),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text("Within", style: TextStyle(fontSize: 22)),
-                                              SizedBox(width: 8.0),
-                                              Container(
-                                                height: 130,
-                                                width: 60,
-                                                child: ListWheelScrollView.useDelegate(
-                                                  controller: _distanceScrollController,
-                                                  physics: FixedExtentScrollPhysics(),
-                                                  overAndUnderCenterOpacity: 0.5,
-                                                  itemExtent: 26,
-                                                  diameterRatio: 1.1,
-                                                  squeeze: 1.0,
-                                                  onSelectedItemChanged: (index) {
-                                                    setModalState(() {
-                                                      // Update the temp selected distance when it changes
-                                                      _tempSelectedDistance = currentDistanceList[index];
-                                                    });
-                                                  },
-                                                  childDelegate: ListWheelChildBuilderDelegate(
-                                                    builder: (context, index) {
-                                                      if (index < currentDistanceList.length) {
-                                                        return Text(
-                                                          currentDistanceList[index],
-                                                          style: TextStyle(fontSize: 22),
-                                                        );
-                                                      }
-                                                      return null;
-                                                    },
-                                                    childCount: currentDistanceList.length,
+                                            return Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Align(
+                                                  alignment: Alignment.topLeft,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 5),
+                                                    child: Text("Distance:", style: TextStyle(fontSize: 18)),
                                                   ),
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                height: 130,
-                                                width: 60,
-                                                child: ListWheelScrollView.useDelegate(
-                                                  controller: _unitScrollController,
-                                                  physics: FixedExtentScrollPhysics(),
-                                                  overAndUnderCenterOpacity: 0.5,
-                                                  itemExtent: 26,
-                                                  diameterRatio: 1.1,
-                                                  squeeze: 1.0,
-                                                  onSelectedItemChanged: (index) {
-                                                    setModalState(() {
-                                                      String newUnit = distanceUnitsList[index];
-                                                      if (newUnit != _tempSelectedUnit) {
-                                                        _tempSelectedUnit = newUnit;
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Text("Within", style: TextStyle(fontSize: 22)),
+                                                    SizedBox(width: 8.0),
+                                                    Container(
+                                                      height: 130,
+                                                      width: 60,
+                                                      child: ListWheelScrollView.useDelegate(
+                                                        controller: _distanceScrollController,
+                                                        physics: FixedExtentScrollPhysics(),
+                                                        overAndUnderCenterOpacity: 0.5,
+                                                        itemExtent: 26,
+                                                        diameterRatio: 1.1,
+                                                        squeeze: 1.0,
+                                                        onSelectedItemChanged: (index) {
+                                                          setModalState(() {
+                                                            // Update the temp selected distance when it changes
+                                                            _tempSelectedDistance = currentDistanceList[index];
+                                                          });
+                                                        },
+                                                        childDelegate: ListWheelChildBuilderDelegate(
+                                                          builder: (context, index) {
+                                                            if (index < currentDistanceList.length) {
+                                                              return Text(
+                                                                currentDistanceList[index],
+                                                                style: TextStyle(fontSize: 22),
+                                                              );
+                                                            }
+                                                            return null;
+                                                          },
+                                                          childCount: currentDistanceList.length,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 130,
+                                                      width: 60,
+                                                      child: ListWheelScrollView.useDelegate(
+                                                        controller: _unitScrollController,
+                                                        physics: FixedExtentScrollPhysics(),
+                                                        overAndUnderCenterOpacity: 0.5,
+                                                        itemExtent: 26,
+                                                        diameterRatio: 1.1,
+                                                        squeeze: 1.0,
+                                                        onSelectedItemChanged: (index) {
+                                                          setModalState(() {
+                                                            String newUnit = distanceUnitsList[index];
+                                                            if (newUnit != _tempSelectedUnit) {
+                                                              _tempSelectedUnit = newUnit;
 
-                                                        // Get the new list based on the selected unit
-                                                        final newList = _tempSelectedUnit == "m" ? meterList : kilometerList;
+                                                              // Get the new list based on the selected unit
+                                                              final newList = _tempSelectedUnit == "m" ? meterList : kilometerList;
 
-                                                        // Set a reasonable default value in the new unit
-                                                        _tempSelectedDistance = _tempSelectedUnit == "m"
-                                                            ? _initialSelectedMeters
-                                                            : _initialSelectedKilometers;
+                                                              // Set a reasonable default value in the new unit
+                                                              _tempSelectedDistance = _tempSelectedUnit == "m"
+                                                                  ? _initialSelectedMeters
+                                                                  : _initialSelectedKilometers;
 
-                                                        // Reset the distance scroll controller
-                                                        _distanceScrollController.dispose();
-                                                        _distanceScrollController = FixedExtentScrollController(
-                                                            initialItem: newList.indexOf(_tempSelectedDistance)
-                                                        );
-                                                      }
-                                                    });
-                                                  },
-                                                  childDelegate: ListWheelChildBuilderDelegate(
-                                                    builder: (context, index) {
-                                                      return Text(
-                                                        distanceUnitsList[index],
-                                                        style: TextStyle(fontSize: 22),
-                                                      );
-                                                    },
-                                                    childCount: distanceUnitsList.length,
-                                                  ),
+                                                              // Reset the distance scroll controller
+                                                              _distanceScrollController.dispose();
+                                                              _distanceScrollController = FixedExtentScrollController(
+                                                                  initialItem: newList.indexOf(_tempSelectedDistance)
+                                                              );
+                                                            }
+                                                          });
+                                                        },
+                                                        childDelegate: ListWheelChildBuilderDelegate(
+                                                          builder: (context, index) {
+                                                            return Text(
+                                                              distanceUnitsList[index],
+                                                              style: TextStyle(fontSize: 22),
+                                                            );
+                                                          },
+                                                          childCount: distanceUnitsList.length,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 7),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              ElevatedButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text("Cancel", style: TextStyle(color: Colors.grey))
-                                              ),
-                                              SizedBox(width: 8),
-                                              ElevatedButton(
-                                                  onPressed: () {
-                                                    setModalState(() {
-                                                      // Reset to default values
-                                                      _tempSelectedUnit = _initialSelectedUnit;
-                                                      _tempSelectedDistance = _initialSelectedMeters;
+                                                SizedBox(height: 7),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    ElevatedButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: Text("Cancel", style: TextStyle(color: Colors.grey))
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                    ElevatedButton(
+                                                        onPressed: () {
+                                                          setModalState(() {
+                                                            // Reset to default values
+                                                            _tempSelectedUnit = _initialSelectedUnit;
+                                                            _tempSelectedDistance = _initialSelectedMeters;
 
-                                                      // Update the controllers to show the default values
-                                                      _distanceScrollController.dispose();
-                                                      _distanceScrollController = FixedExtentScrollController(
-                                                          initialItem: meterList.indexOf(_initialSelectedMeters)
-                                                      );
-                                                      _unitScrollController.jumpToItem(
-                                                          distanceUnitsList.indexOf(_initialSelectedUnit)
-                                                      );
-                                                    });
+                                                            // Update the controllers to show the default values
+                                                            _distanceScrollController.dispose();
+                                                            _distanceScrollController = FixedExtentScrollController(
+                                                                initialItem: meterList.indexOf(_initialSelectedMeters)
+                                                            );
+                                                            _unitScrollController.jumpToItem(
+                                                                distanceUnitsList.indexOf(_initialSelectedUnit)
+                                                            );
+                                                          });
 
-                                                    setState(() {
-                                                      _selectedUnit = _initialSelectedUnit;
-                                                      _selectedDistance = _initialSelectedMeters;
-                                                    });
-                                                    _notifyStateChanged();
+                                                          setState(() {
+                                                            _selectedUnit = _initialSelectedUnit;
+                                                            _selectedDistance = _initialSelectedMeters;
+                                                          });
+                                                          _notifyStateChanged();
 
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text("Use Default", style: TextStyle(color: Colors.white))
-                                              ),
-                                              SizedBox(width: 8),
-                                              ElevatedButton(
-                                                onPressed: () async {
-                                                  int distanceInMeters = (_tempSelectedUnit == "m" ? int.parse(_tempSelectedDistance) : int.parse(_tempSelectedDistance) * 1000);
-                                                  await widget.onSearchFiltersChanged(newTransportType: null, newDistance: distanceInMeters);
-                                                  setState(() {
-                                                    // Save both the unit and distance values
-                                                    _selectedUnit = _tempSelectedUnit;
-                                                    _selectedDistance = _tempSelectedDistance;
-                                                  });
-                                                  _notifyStateChanged();
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text("Confirm"),
-                                              ),
-                                            ],
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(left: 45, right: 40, top: 0, bottom: 20),
-                                            child: Text("\'Use Default\' automatically increases search radius until 20 results are found."),
-                                          ),
-                                        ],
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: Text("Use Default", style: TextStyle(color: Colors.white))
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                    ElevatedButton(
+                                                      onPressed: () async {
+                                                        int distanceInMeters = (_tempSelectedUnit == "m" ? int.parse(_tempSelectedDistance) : int.parse(_tempSelectedDistance) * 1000);
+                                                        await widget.onSearchFiltersChanged(newTransportType: null, newDistance: distanceInMeters);
+                                                        setState(() {
+                                                          // Save both the unit and distance values
+                                                          _selectedUnit = _tempSelectedUnit;
+                                                          _selectedDistance = _tempSelectedDistance;
+                                                        });
+                                                        _notifyStateChanged();
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text("Confirm"),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 45, right: 40, top: 0, bottom: 20),
+                                                  child: Text("\'Use Default\' automatically increases search radius until 20 results are found."),
+                                                ),
+                                              ],
+                                            );
+                                          }
                                       );
                                     }
-                                  );
-                                }
-                              );
-                            },
-                          ),
-                          SizedBox(width: 5.0),
-                          Wrap(
-                            spacing: 5.0,
-                            children:
-                            ToggleableFilter.values.map((ToggleableFilter result) {
-                              return FilterChip(
-                                  label: Text(result.name),
-                                  selected: filters.contains(result),
-                                  onSelected: (bool selected) {
-                                    setState(() {
-                                      if (selected) {
-                                        filters.add(result);
-                                      } else {
-                                        filters.remove(result);
-                                      }
-                                    });
-                                  }
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.6, // Use a fixed or calculated height
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: NotificationListener<ScrollNotification>(
-                  // This prevents the scroll events from bubbling up to the DraggableScrollableSheet
-                  onNotification: (ScrollNotification notification) {
-                    // Return true to stop the notification from bubbling up
-                    return true;
-                  },
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: widget.arguments.searchDetails!.stops.length,
-                    itemBuilder: (context, index) {
-
-                      final stop = widget.arguments.searchDetails!.stops[index];
-
-                      // final bool isExpanded = _expandedStopIds.contains(stop.id.toString());
-                      final bool? isExpanded = stop.isExpanded;
-                      print(isExpanded);
-                      final routes = stop.routes ?? [];
-                      final stopName = stop.name;
-                      final distance = stop.distance;
-                      final routeType = stop.routeType?.type.name ?? 'unknown';
-
-                      return Card(
-                        margin: EdgeInsets.only(bottom: isExpanded! ? 12 : 4, top: 8, left: 0, right: 0),
-                        child: ListTile(
-                          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                          dense: true,
-                          contentPadding: EdgeInsets.all(0),
-                          // Stop and route details
-                          title: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                dense: true,
-                                visualDensity: VisualDensity(horizontal: -3, vertical: 0),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
-                                title: !isExpanded
-                                  ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
-                                  : ExpandedStopWidget(stopName: stopName, distance: distance),
-                                leading: Image.asset(
-                                  "assets/icons/PTV $routeType Logo.png",
-                                  width: 40,
-                                  height: 40,
-                                ),
-                                trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-                                onTap: () {
-                                  setState(() {
-                                    widget.arguments.searchDetails?.stops[index].isExpanded = !widget.arguments.searchDetails!.stops[index].isExpanded!;
-                                  });
-                                }
-                              ),
-
-                              if (isExpanded)...[
-                                Divider(height: 0,),
-                                ExpandedStopRoutesWidget(routes: routes, routeType: routeType, widget: widget, stop: stop),
-                              ],
-                            ],
-                          ),
+                                );
+                              },
+                            ),
+                            SizedBox(width: 5.0),
+                            Wrap(
+                              spacing: 5.0,
+                              children:
+                              ToggleableFilter.values.map((ToggleableFilter result) {
+                                return FilterChip(
+                                    label: Text(result.name),
+                                    selected: filters.contains(result),
+                                    onSelected: (bool selected) {
+                                      setState(() {
+                                        if (selected) {
+                                          filters.add(result);
+                                        } else {
+                                          filters.remove(result);
+                                        }
+                                      });
+                                    }
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ),
-                      );
-                    },
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // Stop items
+              final stopIndex = index - 1; // Adjust for header item
+              final stop = widget.arguments.searchDetails!.stops[stopIndex];
+              final bool? isExpanded = stop.isExpanded;
+              final routes = stop.routes ?? [];
+              final stopName = stop.name;
+              final distance = stop.distance;
+              final routeType = stop.routeType?.type.name ?? 'unknown';
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  margin: EdgeInsets.only(bottom: isExpanded! ? 12 : 4, top: 8, left: 0, right: 0),
+                  child: ListTile(
+                    visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                    dense: true,
+                    contentPadding: EdgeInsets.all(0),
+                    // Stop and route details
+                    title: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                            dense: true,
+                            visualDensity: VisualDensity(horizontal: -3, vertical: 0),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                            title: !isExpanded
+                                ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
+                                : ExpandedStopWidget(stopName: stopName, distance: distance),
+                            leading: Image.asset(
+                              "assets/icons/PTV $routeType Logo.png",
+                              width: 40,
+                              height: 40,
+                            ),
+                            trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                            onTap: () {
+                              setState(() {
+                                widget.arguments.searchDetails?.stops[stopIndex].isExpanded = !widget.arguments.searchDetails!.stops[stopIndex].isExpanded!;
+                              });
+                            }
+                        ),
+
+                        if (isExpanded)...[
+                          Divider(height: 0,),
+                          ExpandedStopRoutesWidget(routes: routes, routeType: routeType, widget: widget, stop: stop),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ],
