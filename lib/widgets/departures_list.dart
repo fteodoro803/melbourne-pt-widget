@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
-import '../../time_utils.dart';
+import '../utility/time_utils.dart';
 import '../ptv_info_classes/departure_info.dart';
 
 // Widget for the Address input section with transport type toggle

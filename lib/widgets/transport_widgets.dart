@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/route_direction_info.dart' as pt_route;
 import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../time_utils.dart';
+import '../utility/time_utils.dart';
 
 class LocationWidget extends StatelessWidget {
   const LocationWidget({
@@ -297,10 +297,10 @@ class DeparturesStringWidget extends StatelessWidget {
                         ),
                       ),
                     Text(
-                      departureTime,
+                      TransportUtils.trimTime(departureTime),
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        // fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (hasLowFloor) ...[

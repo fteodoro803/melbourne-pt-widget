@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
-import 'package:flutter_project/time_utils.dart';
+import 'package:flutter_project/utility/time_utils.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

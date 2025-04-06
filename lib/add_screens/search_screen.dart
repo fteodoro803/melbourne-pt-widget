@@ -1,32 +1,29 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:custom_info_window/custom_info_window.dart';
+
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../api_data.dart';
-import '../geopath_utils.dart';
-import '../ptv_api_service.dart';
+import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/google_service.dart';
+
 import '../ptv_info_classes/departure_info.dart';
-import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
+import '../ptv_info_classes/route_info.dart' as pt_route;
+
+import '../utility/geopath_utils.dart';
+import '../utility/map_utils.dart';
+import '../utility/search_utils.dart';
+
 import '../widgets/bottom_navigation_bar.dart';
 import '../widgets/screen_widgets.dart';
+
 import 'departure_details_sheet.dart';
 import 'nearby_stops_sheet.dart';
-import 'package:flutter_project/ptv_service.dart';
-import 'package:geocoding/geocoding.dart' as geocoding;
-import '../ptv_info_classes/route_info.dart' as pt_route;
-import 'package:flutter_project/google_service.dart';
 import 'suggestions_search.dart';
-
-import 'package:custom_info_window/custom_info_window.dart';
-
 
 enum ActiveSheet { none, nearbyStops, stopDetails, transportDetails, departureDetails }
 
@@ -41,40 +38,41 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final String _screenName = "SelectLocation";
 
-  bool _isSheetFullyExpanded = false;
+  // DraggableScrollableSheet state management
   final DraggableScrollableController _controller = DraggableScrollableController();
-
+  bool _isSheetFullyExpanded = false;
   bool _hasDroppedPin = false;
   bool _showStops = false;
+  ActiveSheet _activeSheet = ActiveSheet.none;
+  Map<ActiveSheet, double> _sheetScrollPositions = {};
+  List<ActiveSheet> _navigationHistory = [];
+  final GlobalKey<NearbyStopsSheetState> _nearbyStopsSheetKey = GlobalKey<NearbyStopsSheetState>();
+  NearbyStopsState? _savedNearbyStopsState;
 
-  late Departure _departure;
-
+  // Utility
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
   GoogleService googleService = GoogleService();
   TransportPathUtils transportPathUtils = TransportPathUtils();
+  SearchUtils searchUtils = SearchUtils();
+  MapUtils mapUtils = MapUtils();
 
+  // Google Map
   late GoogleMapController mapController;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   Set<Circle> _circles = {};
-
   late LatLng _stopPosition;
   late LatLng _stopPositionAlongGeopath;
   late List<LatLng> _geopath = [];
   late List<Stop> _stops = [];
   List<LatLng> _stopsAlongGeopath = [];
-
   final LatLng _initialPosition = const LatLng(-37.813812122509205,
-      144.96358311072478); // Change based on user's location
+      144.96358311072478); //todo: Change based on user's location
+  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
+  String? _selectedStopId;
+  Marker? _selectedStopMarker;
 
-  ActiveSheet _activeSheet = ActiveSheet.none;
-  Map<ActiveSheet, double> _sheetScrollPositions = {};
-  List<ActiveSheet> _navigationHistory = [];
-
-  // Store NearbyStopsSheet specific state
-  final GlobalKey<NearbyStopsSheetState> _nearbyStopsSheetKey = GlobalKey<NearbyStopsSheetState>();
-  NearbyStopsState? _savedNearbyStopsState;
 
   @override
   void dispose() {
@@ -82,7 +80,6 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  // Initialises the state
   @override
   void initState() {
     super.initState();
@@ -108,46 +105,9 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     });
 
-
-
-    // Debug Printing
     widget.arguments.searchDetails?.distance = 300;
     widget.arguments.searchDetails?.transportType = "all";
     tools.printScreenState(_screenName, widget.arguments);
-
-  }
-
-  // Method to handle sheet transitions
-  void _changeSheet(ActiveSheet newSheet, bool newMarker) {
-    // Save current sheet's scroll position if controller is attached
-    if (_controller.isAttached && _activeSheet != ActiveSheet.none) {
-      _sheetScrollPositions[_activeSheet] = _controller.size;
-
-      // Save NearbyStopsSheet state if that's the current sheet
-      if (_activeSheet == ActiveSheet.nearbyStops) {
-          _savedNearbyStopsState = _getNearbyStopsState();
-      }
-    }
-
-    // Add to navigation history
-    if (_activeSheet != ActiveSheet.none && !newMarker) {
-      _navigationHistory.add(_activeSheet);
-    }
-
-
-    setState(() {
-      _activeSheet = newSheet;
-
-      // Restore scroll position
-      if (_controller.isAttached) {
-        double targetSize = _sheetScrollPositions[newSheet] ?? 0.3;
-        _controller.animateTo(
-          targetSize,
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
   }
 
   NearbyStopsState? _getNearbyStopsState() {
@@ -157,13 +117,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return null;
   }
 
-  // Initializes the map
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-    _customInfoWindowController.googleMapController = controller;
-  }
-
-  // Resets markers and creates new marker when pin is dropped by user
+  /// Resets markers and creates new marker when pin is dropped by user
   void setMarker(LatLng position) {
     MarkerId id = MarkerId(position.toString()); // Unique ID based on position
     _markers.clear();
@@ -173,11 +127,8 @@ class _SearchScreenState extends State<SearchScreen> {
     ));
   }
 
-  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
-  String? _selectedStopId;
-  Marker? _selectedStopMarker;
-
-  Future <void> showStopMarkers() async {
+  /// Shows nearby stops on map when button is toggled by user
+  Future<void> showStopMarkers() async {
     if (_showStops) {
       BitmapDescriptor? customMarkerIconTrain = await transportPathUtils.getResizedImage("assets/icons/PTV train Logo.png", 20, 20);
       BitmapDescriptor? customMarkerIconTram = await transportPathUtils.getResizedImage("assets/icons/PTV tram Logo.png", 20, 20);
@@ -252,6 +203,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
+                        height: 1.3,
                         shadows: <Shadow>[
                           Shadow(
                           offset: Offset(1, 1),
@@ -306,59 +258,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  // Retrieves address from coordinates of dropped pin
-  Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
-    try {
-      List<geocoding.Placemark> placemarks =
-          await geocoding.placemarkFromCoordinates(latitude, longitude);
-      if (placemarks.isNotEmpty) {
-        geocoding.Placemark place = placemarks[0];
-        // Return a string with the address (you can adjust what part of the address you want)
-        return "${place.name}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
-      }
-    } catch (e) {
-      print("Error getting address: $e");
-    }
-    return "Address not found"; // Return a default message if something goes wrong
-  }
-
-  Future<List<Transport>> splitDirection(Stop stop, pt_route.Route route) async {
-    String? routeId = route.id.toString();
-    List<RouteDirection> directions = [];
-    List<Transport> transportList = [];
-
-    // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().routeDirections(routeId);
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Early Exit
-    if (data.response == null) {
-      print(
-          "( search_screen.dart -> splitDirection ) -- Null Data response Improper Data");
-      return [];
-    }
-
-    // Populating Stops List
-    for (var direction in jsonResponse!["directions"]) {
-      int id = direction["direction_id"];
-      String name = direction["direction_name"];
-      String description = direction["route_direction_description"];
-      RouteDirection newDirection =
-          RouteDirection(id: id, name: name, description: description);
-
-      directions.add(newDirection);
-    }
-
-    for (var direction in directions) {
-      Transport newTransport = Transport.withStopRoute(stop, route, direction);
-      newTransport.routeType = RouteType.withId(id: route.type.type.id);
-      await newTransport.updateDepartures();
-      transportList.add(newTransport);
-    }
-
-    return transportList;
-  }
-
+  /// Loads route geo path and stops on map
   Future<void> loadTransportPath(bool isDirectionSpecified) async {
     LatLng stopPos = LatLng(widget.arguments.searchDetails!.stop!.latitude!, widget.arguments.searchDetails!.stop!.longitude!);
     _stopPosition = stopPos;
@@ -403,73 +303,89 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  // Handling choosing a new transport type in ToggleButtonsRow
+  /// Set the map's Marker and Camera to a new marker location
+  Future<void> _onLocationSelected(LatLng selectedLocation) async {
+    _circles.clear();
+    _polylines.clear();
+
+    // Get the address for the dropped marker
+    String address =
+    await mapUtils.getAddressFromCoordinates(selectedLocation.latitude, selectedLocation.longitude);
+    List<Stop> uniqueStops = await searchUtils.getStops(selectedLocation, "all", 300);
+
+    // Update the state with the new address
+    widget.arguments.searchDetails!.stops = uniqueStops;
+    widget.arguments.searchDetails!.markerPosition = selectedLocation;
+    widget.arguments.searchDetails!.locationController.text = address;
+    widget.arguments.searchDetails!.distance = 300;
+    widget.arguments.searchDetails!.transportType = "all";
+    _hasDroppedPin = true;
+
+    _customInfoWindowController.hideInfoWindow!();
+
+    final zoom = await mapController.getZoomLevel();
+
+    mapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: await mapUtils.calculateOffsetPosition(selectedLocation, 0.35, mapController),
+          zoom: zoom,
+        ),
+      ),
+    );
+
+    // Bring the user to the NearbyStopsSheet with the updated data
+    _changeSheet(ActiveSheet.nearbyStops, true); //todo: FIX ISSUE WHERE SEARCH FILTERS ARE STILL THE SAME BETWEEN DROPPED PINS
+
+    showStopMarkers();
+  }
+
+  /// Handles changes in transport type and distance filters on NearbyStopsSheet
   Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
     String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType;
     int oldDistance = widget.arguments.searchDetails!.distance;
     int distance = newDistance ?? oldDistance;
 
-    await _getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
+    List<Stop> uniqueStops = await searchUtils.getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
 
-    LatLngBounds bounds = await _calculateBoundsForMarkers(distance.toDouble());
+    if (oldDistance != newDistance && newDistance != null) {
+      LatLngBounds bounds = await mapUtils.calculateBoundsForMarkers(distance.toDouble(), widget.arguments.searchDetails!.markerPosition!);
 
-    // todo: when the camera reanimates, make it center properly on the pin again (at 0.7x the height of the screen)
-    mapController.moveCamera(
-      CameraUpdate.newLatLngBounds(bounds, 50), // Padding around the bounds (50 is arbitrary)
-    );
+      // First animate to the bounds to ensure all points are visible
+      mapController.moveCamera(
+        CameraUpdate.newLatLngBounds(bounds, 50),
+      );
 
+      // Then adjust the position so the marker is at 70% of height
+      await Future.delayed(Duration(milliseconds: 300)); // Wait for first animation to complete
+
+      final LatLng markerPosition = widget.arguments.searchDetails!.markerPosition!;
+      final zoom = await mapController.getZoomLevel();
+
+      // Calculate a point that will position our marker at 70% of the map height
+      mapController.moveCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: await mapUtils.calculateOffsetPosition(markerPosition, 0.3, mapController),
+            zoom: zoom,
+          ),
+        ),
+      );
+    }
+
+    widget.arguments.searchDetails!.stops = uniqueStops;
     widget.arguments.searchDetails!.distance = distance;
     widget.arguments.searchDetails!.transportType = transportType;
     await showStopMarkers();
 
   }
 
-  // Function to calculate the bounds that include all points within a given distance from _chosenPosition
-  Future<LatLngBounds> _calculateBoundsForMarkers(double distanceInMeters) async {
-    List<LatLng> allPoints = [];
-    LatLng chosenPosition = widget.arguments.searchDetails!.markerPosition!;
-
-    // Add the chosen position as the center point
-    allPoints.add(chosenPosition);
-
-    double latMin = chosenPosition.latitude;
-    double latMax = chosenPosition.latitude;
-    double lonMin = chosenPosition.longitude;
-    double lonMax = chosenPosition.longitude;
-
-    for (LatLng point in allPoints) {
-      double latDelta = point.latitude - chosenPosition.latitude;
-      double lonDelta = point.longitude - chosenPosition.longitude;
-
-      if (latDelta < latMin) latMin = point.latitude;
-      if (latDelta > latMax) latMax = point.latitude;
-
-      if (lonDelta < lonMin) lonMin = point.longitude;
-      if (lonDelta > lonMax) lonMax = point.longitude;
-    }
-
-    // Adjusting bounds to cover the given distance
-    double latDistance = distanceInMeters / 111000; // 111000 meters = 1 degree of latitude
-    double lonDistance = distanceInMeters / (111000 * cos(chosenPosition.latitude * pi / 180));
-
-    latMin -= latDistance;
-    latMax += latDistance;
-    lonMin -= lonDistance;
-    lonMax += lonDistance;
-
-    // Return the calculated bounds
-    return LatLngBounds(
-      southwest: LatLng(latMin, lonMin),
-      northeast: LatLng(latMax, lonMax),
-    );
-  }
-
-  // Handling tap on an item in NearbyStopsSheet
+  /// Handles tap on a route in NearbyStopsSheet
   Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
     // _showStops = false;
     _circles.clear();
     setMarker(widget.arguments.searchDetails!.markerPosition!);
-    List<Transport> listTransport = await splitDirection(stop, route);
+    List<Transport> listTransport = await searchUtils.splitDirection(stop, route);
 
     widget.arguments.searchDetails!.stop = stop;
     widget.arguments.searchDetails!.route = route;
@@ -484,6 +400,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _customInfoWindowController.hideInfoWindow!();
   }
 
+  /// Handles tap on a direction in StopDetailsSheet
   void _onTransportTapped(Transport transport) {
     widget.arguments.transport = transport;
 
@@ -491,120 +408,17 @@ class _SearchScreenState extends State<SearchScreen> {
     _changeSheet(ActiveSheet.transportDetails, false);
   }
 
+  /// Handles tap on a departure in StopDetailsSheet and TransportDetailsSheet
   void _onDepartureTapped(Departure departure, Transport transport) {
     widget.arguments.transport = transport;
-    _departure = departure;
+    widget.arguments.searchDetails!.departure = departure;
+    if (_activeSheet == ActiveSheet.stopDetails) {
+      loadTransportPath(true);
+    }
     _changeSheet(ActiveSheet.departureDetails, false);
   }
 
-  Future<void> _getStops(LatLng position, String transportType, int distance) async {
-    StopRouteLists stopRouteLists;
-
-    if (transportType == "all") {
-      stopRouteLists = await ptvService.fetchStopRoutePairs(
-        position,
-        maxDistance: distance,
-        maxResults: 50,
-      );
-    } else {
-      stopRouteLists = await ptvService.fetchStopRoutePairs(
-        position,
-        routeTypes: transportType,
-        maxDistance: distance,
-        maxResults: 50,
-      );
-    }
-
-    Set<String> uniqueStopIDs = {};
-    List<Stop> uniqueStops = [];
-
-    List<Stop> stopList = stopRouteLists.stops;
-    List<pt_route.Route> routeList = stopRouteLists.routes;
-
-    int stopIndex = 0;
-
-    for (var stop in stopList) {
-      if (!uniqueStopIDs.contains(stop.id.toString())) {
-        // Create a new stop object to avoid reference issues
-        Stop newStop = Stop(
-          id: stop.id,
-          name: stop.name,
-          latitude: stop.latitude,
-          longitude: stop.longitude,
-          distance: stop.distance,
-        );
-
-        newStop.routes = <pt_route.Route>[];
-        newStop.routeType = routeList[stopIndex].type;
-
-        uniqueStops.add(newStop);
-        uniqueStopIDs.add(stop.id.toString());
-      }
-
-      // Find the index of this stop in our uniqueStops list
-      int uniqueStopIndex = uniqueStops.indexWhere((s) => s.id == stop.id);
-      if (uniqueStopIndex != -1) {
-        uniqueStops[uniqueStopIndex].routes!.add(routeList[stopIndex]);
-      }
-
-      stopIndex++;
-    }
-
-    setState(() {
-      widget.arguments.searchDetails!.stops = uniqueStops;
-    });
-  }
-
-  // Sets the map's Marker and Camera to the Location
-  Future<void> _onLocationSelected(LatLng selectedLocation) async {
-    _circles.clear();
-    _polylines.clear();
-
-    // Get the address for the dropped marker
-    String address =
-    await getAddressFromCoordinates(selectedLocation.latitude, selectedLocation.longitude);
-    await _getStops(selectedLocation, "all", 300);
-
-    // Update the state with the new address
-    widget.arguments.searchDetails!.markerPosition = selectedLocation;
-    widget.arguments.searchDetails!.locationController.text = address;
-    widget.arguments.searchDetails!.distance = 300;
-    widget.arguments.searchDetails!.transportType = "all";
-    _hasDroppedPin = true;
-
-    _customInfoWindowController.hideInfoWindow!();
-
-    // Get the current map's zoom level and visible region
-    LatLngBounds visibleRegion = await mapController.getVisibleRegion();
-
-    // Calculate the height of the visible region in latitude degrees
-    double latitudeSpan = visibleRegion.northeast.latitude - visibleRegion.southwest.latitude;
-
-    // Calculate 70% from the top of the screen in latitude degrees
-    // Positive offset moves down from center (center is at 50%)
-    double verticalOffsetFactor = 0.15; // 70% from top = 20% from center upward = -0.4 from center
-    double latitudeOffset = latitudeSpan * verticalOffsetFactor;
-
-    // Create new camera position with adjusted latitude
-    CameraPosition newCameraPosition = CameraPosition(
-      target: LatLng(
-          selectedLocation.latitude - latitudeOffset, // Move upward from the marker
-          selectedLocation.longitude // Keep longitude the same for horizontal centering
-      ),
-      zoom: 16,
-    );
-
-    // Animate the camera to this position
-    await mapController.moveCamera(
-      CameraUpdate.newCameraPosition(newCameraPosition),
-    );
-
-    // Bring the user to the NearbyStopsSheet with the updated data
-    _changeSheet(ActiveSheet.nearbyStops, true); //todo: FIX ISSUE WHERE SEARCH FILTERS ARE STILL THE SAME BETWEEN DROPPED PINS
-
-    showStopMarkers();
-  }
-
+  /// Handles restoration/discarding of previous sheets on back button press
   void _handleBackButton() {
     ActiveSheet previousSheet;
 
@@ -615,6 +429,7 @@ class _SearchScreenState extends State<SearchScreen> {
         if (_navigationHistory.isNotEmpty && _navigationHistory.last == ActiveSheet.transportDetails) {
           previousSheet = ActiveSheet.transportDetails;
         } else {
+          loadTransportPath(false);
           previousSheet = ActiveSheet.stopDetails;
         }
         break;
@@ -669,6 +484,40 @@ class _SearchScreenState extends State<SearchScreen> {
     _changeSheet(previousSheet, false);
   }
 
+  /// Handles sheet transitions
+  void _changeSheet(ActiveSheet newSheet, bool newMarker) {
+    // Save current sheet's scroll position if controller is attached
+    if (_controller.isAttached && _activeSheet != ActiveSheet.none) {
+      _sheetScrollPositions[_activeSheet] = _controller.size;
+
+      // Save NearbyStopsSheet state if that's the current sheet
+      if (_activeSheet == ActiveSheet.nearbyStops) {
+        _savedNearbyStopsState = _getNearbyStopsState();
+      }
+    }
+
+    // Add to navigation history
+    if (_activeSheet != ActiveSheet.none && !newMarker) {
+      _navigationHistory.add(_activeSheet);
+    }
+
+
+    setState(() {
+      _activeSheet = newSheet;
+
+      // Restore scroll position
+      if (_controller.isAttached) {
+        double targetSize = _sheetScrollPositions[newSheet] ?? 0.3;
+        _controller.animateTo(
+          targetSize,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  /// Returns title of the current active sheet
   String _getSheetTitle() {
     switch (_activeSheet) {
       case ActiveSheet.stopDetails:
@@ -683,6 +532,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
+  /// Renders content of a given sheet
   Widget _getSheetContent(ScrollController scrollController) {
     switch (_activeSheet) {
       case ActiveSheet.stopDetails:
@@ -702,7 +552,6 @@ class _SearchScreenState extends State<SearchScreen> {
         return DepartureDetailsSheet(
           arguments: widget.arguments,
           scrollController: scrollController,
-          departure: _departure,
         );
       case ActiveSheet.nearbyStops:
       default:
@@ -729,7 +578,10 @@ class _SearchScreenState extends State<SearchScreen> {
           // Google Map
           Positioned.fill(
             child: GoogleMap(
-              onMapCreated: _onMapCreated,
+              onMapCreated: (GoogleMapController controller) {
+                mapController = controller;
+                _customInfoWindowController.googleMapController = controller;
+              },
               // Creates marker when user presses on screen
               onLongPress: (LatLng position) async {
                 await _onLocationSelected(position);
@@ -775,6 +627,8 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       ],
                     ),
+
+                    // Renders AppBar with title and back button when sheet is fully expanded
                     child: _isSheetFullyExpanded
                       ? Column(
                         children: [
@@ -807,6 +661,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
             ),
 
+          // Renders search bar, back button, and map buttons when sheet is unexpanded
           _isSheetFullyExpanded
             ? Container() // Hide search bar when sheet is fully expanded
             : Column(
@@ -814,7 +669,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 SizedBox(height: 60),
                 Row(
                   children: [
-                    // Back button with updated handler
+                    // Back button
                     SizedBox(width: 18),
                     GestureDetector(
                       onTap: _handleBackButton,
@@ -831,6 +686,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
                 if (_activeSheet == ActiveSheet.nearbyStops)
+                  // "Show Stops" button
                   ElevatedButton(
                     onPressed: () async {
                       setState(() {
@@ -864,9 +720,9 @@ class _SearchScreenState extends State<SearchScreen> {
             )
         ],
       ),
-      // Only call updateMainPage when necessary (e.g., when adding a new route)
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigation(
-        currentIndex: 1, // Search page is index 1
+        currentIndex: 1,
         updateMainPage: null,
       ),
     );

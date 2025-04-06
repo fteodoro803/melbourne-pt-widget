@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/departure_details_sheet.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../geopath_utils.dart';
+import '../utility/geopath_utils.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import '../screen_arguments.dart';
@@ -27,7 +27,6 @@ class TransportMap extends StatefulWidget {
 
 class _TransportMapState extends State<TransportMap> {
   late Transport transport;
-  late Departure _departure;
   bool _isDepartureSelected = false;
 
   // Google Maps controller and center position
@@ -93,7 +92,7 @@ class _TransportMapState extends State<TransportMap> {
 
   Future<void> _onDepartureTapped(Departure departure, Transport transport) async {
     setState(() {
-      _departure = departure;
+      widget.arguments.searchDetails!.departure = departure;
       _isDepartureSelected = true;
     });
   }
@@ -162,7 +161,7 @@ class _TransportMapState extends State<TransportMap> {
                   ],
                 ),
                 child: _isDepartureSelected
-                  ? DepartureDetailsSheet(arguments: widget.arguments, scrollController: scrollController, departure: _departure)
+                  ? DepartureDetailsSheet(arguments: widget.arguments, scrollController: scrollController)
                   : TransportDetailsSheet(arguments: widget.arguments, scrollController: scrollController, onDepartureTapped: _onDepartureTapped,)
               );
             },

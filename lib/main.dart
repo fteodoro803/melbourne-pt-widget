@@ -17,6 +17,7 @@ import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
 
+import "add_screens/find_routes_screen.dart";
 import "add_screens/search_screen.dart";
 import "add_screens/transport_map.dart";
 import "home_widget_service.dart";
@@ -66,6 +67,7 @@ class _MyAppState extends State<MyApp> {
           '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
+          '/findRoutesScreen': (context) => FindRoutesScreen(),
           '/selectLocationScreen': (context) => SelectLocationScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
@@ -207,6 +209,17 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text("Saved Routes"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FindRoutesScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -234,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => TransportMap(arguments: ScreenArguments.withSearchDetails(_transportList[index], _updateMainPage, SearchDetails([], [], [], TextEditingController())))
+                                builder: (context) => TransportMap(arguments: ScreenArguments.withSearchDetails(_transportList[index], _updateMainPage, SearchDetails(TextEditingController())))
                               ),
                             )
                         ),

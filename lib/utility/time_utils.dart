@@ -55,7 +55,7 @@ class TransportUtils {
       timeElement = timeString.substring(1, timeString.length - 2);
       timeOfDay = timeString.substring(timeString.length - 2, timeString.length);
 
-      return "$timeElement $timeOfDay";
+      return "$timeElement$timeOfDay";
     }
     else {
       return timeString;

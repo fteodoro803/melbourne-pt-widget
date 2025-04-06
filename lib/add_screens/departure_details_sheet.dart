@@ -6,20 +6,18 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_service.dart';
 import '../screen_arguments.dart';
-import '../time_utils.dart';
+import '../utility/time_utils.dart';
 import '../transport.dart';
 import '../widgets/transport_widgets.dart';
 
 class DepartureDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
-  final Departure departure;
 
   DepartureDetailsSheet({
     super.key,
     required this.arguments,
     required this.scrollController,
-    required this.departure,
   });
 
   @override
@@ -42,7 +40,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   }
 
   Future<void> fetchPattern() async {
-    _pattern = await ptvService.fetchPattern(transport, widget.departure);
+    _pattern = await ptvService.fetchPattern(transport, widget.arguments.searchDetails!.departure!);
 
     // Find the current stop index
     _currentStopIndex = _pattern.indexWhere(
@@ -72,7 +70,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   @override
   Widget build(BuildContext context) {
 
-    final departure = widget.departure;
+    final departure = widget.arguments.searchDetails!.departure!;
     final String estimatedDepartureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime ?? "No Data";
     final DepartureStatus status = TransportUtils.getDepartureStatus(
       departure.scheduledDepartureTime,
@@ -100,7 +98,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
     return Column(
       children: [
         // DraggableScrollableSheet Handle
-        if (!widget.arguments.searchDetails!.isSheetExpanded!)
+        if (!widget.arguments.searchDetails!.isSheetExpanded)
           HandleWidget(),
 
         Expanded(
@@ -177,12 +175,12 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                           SizedBox(height: 2),
                                           Padding(
                                             padding: const EdgeInsets.only(left: 2.0),
-                                            child: Text("Scheduled: ${widget.departure.scheduledDepartureTime}", style: TextStyle(fontSize: 13)),
+                                            child: Text("Scheduled: ${departure.scheduledDepartureTime}", style: TextStyle(fontSize: 13)),
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.only(left: 2.0),
                                             child: Text(
-                                              "Estimated: ${widget.departure.estimatedDepartureTime ?? 'N/A'}",
+                                              "Estimated: ${departure.estimatedDepartureTime ?? 'N/A'}",
                                               style: TextStyle(
                                                 color: TransportUtils.getColorForStatus(status.status),
                                                 fontSize: 13

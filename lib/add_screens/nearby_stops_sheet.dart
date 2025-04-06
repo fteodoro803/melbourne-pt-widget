@@ -3,7 +3,7 @@ import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
 import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../time_utils.dart';
+import '../utility/time_utils.dart';
 import '../widgets/screen_widgets.dart' as ScreenWidgets;
 import '../widgets/transport_widgets.dart';
 
@@ -226,7 +226,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     return Column(
       children: [
         // Draggable Scrollable Sheet Handle
-        if (!widget.arguments.searchDetails!.isSheetExpanded!)
+        if (!widget.arguments.searchDetails!.isSheetExpanded)
           HandleWidget(),
         // Address and toggleable transport type buttons
         Expanded(
@@ -283,168 +283,168 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                 );
 
                                 await showModalBottomSheet(
-                                    constraints: BoxConstraints(maxHeight: 500),
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return StatefulBuilder(
-                                          builder: (context, setModalState) {
-                                            // Get the current distance list based on the temp selected unit
-                                            final currentDistanceList = _tempSelectedUnit == "m" ? meterList : kilometerList;
+                                  constraints: BoxConstraints(maxHeight: 500),
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return StatefulBuilder(
+                                      builder: (context, setModalState) {
+                                        // Get the current distance list based on the temp selected unit
+                                        final currentDistanceList = _tempSelectedUnit == "m" ? meterList : kilometerList;
 
-                                            return Column(
-                                              mainAxisSize: MainAxisSize.min,
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 5),
+                                                child: Text("Distance:", style: TextStyle(fontSize: 18)),
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
-                                                Align(
-                                                  alignment: Alignment.topLeft,
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 5),
-                                                    child: Text("Distance:", style: TextStyle(fontSize: 18)),
+                                                Text("Within", style: TextStyle(fontSize: 22)),
+                                                SizedBox(width: 8.0),
+                                                Container(
+                                                  height: 130,
+                                                  width: 60,
+                                                  child: ListWheelScrollView.useDelegate(
+                                                    controller: _distanceScrollController,
+                                                    physics: FixedExtentScrollPhysics(),
+                                                    overAndUnderCenterOpacity: 0.5,
+                                                    itemExtent: 26,
+                                                    diameterRatio: 1.1,
+                                                    squeeze: 1.0,
+                                                    onSelectedItemChanged: (index) {
+                                                      setModalState(() {
+                                                        // Update the temp selected distance when it changes
+                                                        _tempSelectedDistance = currentDistanceList[index];
+                                                      });
+                                                    },
+                                                    childDelegate: ListWheelChildBuilderDelegate(
+                                                      builder: (context, index) {
+                                                        if (index < currentDistanceList.length) {
+                                                          return Text(
+                                                            currentDistanceList[index],
+                                                            style: TextStyle(fontSize: 22),
+                                                          );
+                                                        }
+                                                        return null;
+                                                      },
+                                                      childCount: currentDistanceList.length,
+                                                    ),
                                                   ),
                                                 ),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text("Within", style: TextStyle(fontSize: 22)),
-                                                    SizedBox(width: 8.0),
-                                                    Container(
-                                                      height: 130,
-                                                      width: 60,
-                                                      child: ListWheelScrollView.useDelegate(
-                                                        controller: _distanceScrollController,
-                                                        physics: FixedExtentScrollPhysics(),
-                                                        overAndUnderCenterOpacity: 0.5,
-                                                        itemExtent: 26,
-                                                        diameterRatio: 1.1,
-                                                        squeeze: 1.0,
-                                                        onSelectedItemChanged: (index) {
-                                                          setModalState(() {
-                                                            // Update the temp selected distance when it changes
-                                                            _tempSelectedDistance = currentDistanceList[index];
-                                                          });
-                                                        },
-                                                        childDelegate: ListWheelChildBuilderDelegate(
-                                                          builder: (context, index) {
-                                                            if (index < currentDistanceList.length) {
-                                                              return Text(
-                                                                currentDistanceList[index],
-                                                                style: TextStyle(fontSize: 22),
-                                                              );
-                                                            }
-                                                            return null;
-                                                          },
-                                                          childCount: currentDistanceList.length,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 130,
-                                                      width: 60,
-                                                      child: ListWheelScrollView.useDelegate(
-                                                        controller: _unitScrollController,
-                                                        physics: FixedExtentScrollPhysics(),
-                                                        overAndUnderCenterOpacity: 0.5,
-                                                        itemExtent: 26,
-                                                        diameterRatio: 1.1,
-                                                        squeeze: 1.0,
-                                                        onSelectedItemChanged: (index) {
-                                                          setModalState(() {
-                                                            String newUnit = distanceUnitsList[index];
-                                                            if (newUnit != _tempSelectedUnit) {
-                                                              _tempSelectedUnit = newUnit;
+                                                SizedBox(
+                                                  height: 130,
+                                                  width: 60,
+                                                  child: ListWheelScrollView.useDelegate(
+                                                    controller: _unitScrollController,
+                                                    physics: FixedExtentScrollPhysics(),
+                                                    overAndUnderCenterOpacity: 0.5,
+                                                    itemExtent: 26,
+                                                    diameterRatio: 1.1,
+                                                    squeeze: 1.0,
+                                                    onSelectedItemChanged: (index) {
+                                                      setModalState(() {
+                                                        String newUnit = distanceUnitsList[index];
+                                                        if (newUnit != _tempSelectedUnit) {
+                                                          _tempSelectedUnit = newUnit;
 
-                                                              // Get the new list based on the selected unit
-                                                              final newList = _tempSelectedUnit == "m" ? meterList : kilometerList;
+                                                          // Get the new list based on the selected unit
+                                                          final newList = _tempSelectedUnit == "m" ? meterList : kilometerList;
 
-                                                              // Set a reasonable default value in the new unit
-                                                              _tempSelectedDistance = _tempSelectedUnit == "m"
-                                                                  ? _initialSelectedMeters
-                                                                  : _initialSelectedKilometers;
+                                                          // Set a reasonable default value in the new unit
+                                                          _tempSelectedDistance = _tempSelectedUnit == "m"
+                                                              ? _initialSelectedMeters
+                                                              : _initialSelectedKilometers;
 
-                                                              // Reset the distance scroll controller
-                                                              _distanceScrollController.dispose();
-                                                              _distanceScrollController = FixedExtentScrollController(
-                                                                  initialItem: newList.indexOf(_tempSelectedDistance)
-                                                              );
-                                                            }
-                                                          });
-                                                        },
-                                                        childDelegate: ListWheelChildBuilderDelegate(
-                                                          builder: (context, index) {
-                                                            return Text(
-                                                              distanceUnitsList[index],
-                                                              style: TextStyle(fontSize: 22),
-                                                            );
-                                                          },
-                                                          childCount: distanceUnitsList.length,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 7),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    ElevatedButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(context);
-                                                        },
-                                                        child: Text("Cancel", style: TextStyle(color: Colors.grey))
-                                                    ),
-                                                    SizedBox(width: 8),
-                                                    ElevatedButton(
-                                                        onPressed: () {
-                                                          setModalState(() {
-                                                            // Reset to default values
-                                                            _tempSelectedUnit = _initialSelectedUnit;
-                                                            _tempSelectedDistance = _initialSelectedMeters;
-
-                                                            // Update the controllers to show the default values
-                                                            _distanceScrollController.dispose();
-                                                            _distanceScrollController = FixedExtentScrollController(
-                                                                initialItem: meterList.indexOf(_initialSelectedMeters)
-                                                            );
-                                                            _unitScrollController.jumpToItem(
-                                                                distanceUnitsList.indexOf(_initialSelectedUnit)
-                                                            );
-                                                          });
-
-                                                          setState(() {
-                                                            _selectedUnit = _initialSelectedUnit;
-                                                            _selectedDistance = _initialSelectedMeters;
-                                                          });
-                                                          _notifyStateChanged();
-
-                                                          Navigator.pop(context);
-                                                        },
-                                                        child: Text("Use Default", style: TextStyle(color: Colors.white))
-                                                    ),
-                                                    SizedBox(width: 8),
-                                                    ElevatedButton(
-                                                      onPressed: () async {
-                                                        int distanceInMeters = (_tempSelectedUnit == "m" ? int.parse(_tempSelectedDistance) : int.parse(_tempSelectedDistance) * 1000);
-                                                        await widget.onSearchFiltersChanged(newTransportType: null, newDistance: distanceInMeters);
-                                                        setState(() {
-                                                          // Save both the unit and distance values
-                                                          _selectedUnit = _tempSelectedUnit;
-                                                          _selectedDistance = _tempSelectedDistance;
-                                                        });
-                                                        _notifyStateChanged();
-                                                        Navigator.pop(context);
+                                                          // Reset the distance scroll controller
+                                                          _distanceScrollController.dispose();
+                                                          _distanceScrollController = FixedExtentScrollController(
+                                                              initialItem: newList.indexOf(_tempSelectedDistance)
+                                                          );
+                                                        }
+                                                      });
+                                                    },
+                                                    childDelegate: ListWheelChildBuilderDelegate(
+                                                      builder: (context, index) {
+                                                        return Text(
+                                                          distanceUnitsList[index],
+                                                          style: TextStyle(fontSize: 22),
+                                                        );
                                                       },
-                                                      child: Text("Confirm"),
+                                                      childCount: distanceUnitsList.length,
                                                     ),
-                                                  ],
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 45, right: 40, top: 0, bottom: 20),
-                                                  child: Text("\'Use Default\' automatically increases search radius until 20 results are found."),
+                                                  ),
                                                 ),
                                               ],
-                                            );
-                                          }
-                                      );
-                                    }
+                                            ),
+                                            SizedBox(height: 7),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Text("Cancel", style: TextStyle(color: Colors.grey))
+                                                ),
+                                                SizedBox(width: 8),
+                                                ElevatedButton(
+                                                    onPressed: () {
+                                                      setModalState(() {
+                                                        // Reset to default values
+                                                        _tempSelectedUnit = _initialSelectedUnit;
+                                                        _tempSelectedDistance = _initialSelectedMeters;
+
+                                                        // Update the controllers to show the default values
+                                                        _distanceScrollController.dispose();
+                                                        _distanceScrollController = FixedExtentScrollController(
+                                                            initialItem: meterList.indexOf(_initialSelectedMeters)
+                                                        );
+                                                        _unitScrollController.jumpToItem(
+                                                            distanceUnitsList.indexOf(_initialSelectedUnit)
+                                                        );
+                                                      });
+
+                                                      setState(() {
+                                                        _selectedUnit = _initialSelectedUnit;
+                                                        _selectedDistance = _initialSelectedMeters;
+                                                      });
+                                                      _notifyStateChanged();
+
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Text("Use Default", style: TextStyle(color: Colors.white))
+                                                ),
+                                                SizedBox(width: 8),
+                                                ElevatedButton(
+                                                  onPressed: () async {
+                                                    int distanceInMeters = (_tempSelectedUnit == "m" ? int.parse(_tempSelectedDistance) : int.parse(_tempSelectedDistance) * 1000);
+                                                    await widget.onSearchFiltersChanged(newTransportType: null, newDistance: distanceInMeters);
+                                                    setState(() {
+                                                      // Save both the unit and distance values
+                                                      _selectedUnit = _tempSelectedUnit;
+                                                      _selectedDistance = _tempSelectedDistance;
+                                                    });
+                                                    _notifyStateChanged();
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text("Confirm"),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 45, right: 40, top: 0, bottom: 20),
+                                              child: Text("\'Use Default\' automatically increases search radius until 20 results are found."),
+                                            ),
+                                          ],
+                                        );
+                                      }
+                                    );
+                                  }
                                 );
                               },
                             ),
@@ -685,7 +685,6 @@ class UnexpandedStopWidget extends StatelessWidget {
           ),
         ),
       ),
-    ],
-                                    );
+    ],);
   }
 }
