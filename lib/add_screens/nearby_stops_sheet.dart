@@ -46,16 +46,19 @@ class NearbyStopsSheet extends StatefulWidget {
   final Function(Stop, pt_route.Route) onStopTapped;
   final Function(NearbyStopsState) onStateChanged; // New callback
   final NearbyStopsState? initialState; // New parameter
+  final bool shouldResetFilters;
+
 
   const NearbyStopsSheet({
-    super.key,
+    Key? key,
     required this.arguments,
     required this.scrollController,
     required this.onSearchFiltersChanged,
     required this.onStopTapped,
     this.initialState,
     required this.onStateChanged,
-  });
+    this.shouldResetFilters = false,
+  }) : super(key: key);
 
   @override
   State<NearbyStopsSheet> createState() => NearbyStopsSheetState();
@@ -144,6 +147,28 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     });
   }
 
+  @override
+  void didUpdateWidget(NearbyStopsSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.shouldResetFilters && !oldWidget.shouldResetFilters) {
+      // Reset filters to default values
+      setState(() {
+        _selectedDistance = "300";
+        _selectedUnit = "m";
+        filters = <ToggleableFilter>{};
+        _transportTypeFilters = {
+          "all": true,
+          "tram": false,
+          "bus": false,
+          "train": false,
+          "vLine": false
+        };
+      });
+      _notifyStateChanged();
+    }
+  }
+
   // Add this method to your NearbyStopsSheet class
   void scrollToStopItem(int stopIndex) {
     // Calculate position to scroll to (header + item height * index)
@@ -196,26 +221,33 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
   void _handleTransportToggle(String transportType) {
     bool wasSelected = _transportTypeFilters[transportType]!;
     String newTransportToggled;
-    if (wasSelected) {
-      widget.onSearchFiltersChanged(newTransportType: "all", newDistance: null);
-      newTransportToggled = "all";
-    }
-    else {
-      widget.onSearchFiltersChanged(newTransportType: transportType, newDistance: null);
-      newTransportToggled = transportType;
-    }
-    setState(() {
-      for (var entry in _transportTypeFilters.entries) {
-        String type = entry.key;
-        if (type == newTransportToggled) {
-          _transportTypeFilters[type] = true;
-        }
-        else {
-          _transportTypeFilters[type] = false;
-        }
+
+    if (!(wasSelected && transportType == "all")) {
+      if (wasSelected) {
+        widget.onSearchFiltersChanged(
+            newTransportType: "all", newDistance: null);
+        newTransportToggled = "all";
       }
-    });
-    _notifyStateChanged();
+      else {
+        widget.onSearchFiltersChanged(
+            newTransportType: transportType, newDistance: null);
+        newTransportToggled = transportType;
+      }
+
+      setState(() {
+        for (var entry in _transportTypeFilters.entries) {
+          String type = entry.key;
+          if (type == newTransportToggled) {
+            _transportTypeFilters[type] = true;
+          }
+          else {
+            _transportTypeFilters[type] = false;
+          }
+        }
+      });
+      print(_transportTypeFilters);
+      _notifyStateChanged();
+    }
   }
 
   @override

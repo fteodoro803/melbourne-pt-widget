@@ -43,6 +43,7 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _isSheetFullyExpanded = false;
   bool _hasDroppedPin = false;
   bool _showStops = false;
+  bool _shouldResetFilters = false;
   ActiveSheet _activeSheet = ActiveSheet.none;
   Map<ActiveSheet, double> _sheetScrollPositions = {};
   List<ActiveSheet> _navigationHistory = [];
@@ -334,6 +335,10 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
 
+    setState(() {
+      _shouldResetFilters = true;
+    });
+
     // Bring the user to the NearbyStopsSheet with the updated data
     _changeSheet(ActiveSheet.nearbyStops, true); //todo: FIX ISSUE WHERE SEARCH FILTERS ARE STILL THE SAME BETWEEN DROPPED PINS
 
@@ -342,6 +347,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles changes in transport type and distance filters on NearbyStopsSheet
   Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
+    print(newTransportType);
     String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType;
     int oldDistance = widget.arguments.searchDetails!.distance;
     int distance = newDistance ?? oldDistance;
@@ -373,9 +379,11 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-    widget.arguments.searchDetails!.stops = uniqueStops;
-    widget.arguments.searchDetails!.distance = distance;
-    widget.arguments.searchDetails!.transportType = transportType;
+    setState(() {
+      widget.arguments.searchDetails!.stops = uniqueStops;
+      widget.arguments.searchDetails!.distance = distance;
+      widget.arguments.searchDetails!.transportType = transportType;
+    });
     await showStopMarkers();
 
   }
@@ -555,17 +563,29 @@ class _SearchScreenState extends State<SearchScreen> {
         );
       case ActiveSheet.nearbyStops:
       default:
-        return NearbyStopsSheet(
+        final sheet = NearbyStopsSheet(
           key: _nearbyStopsSheetKey,
           arguments: widget.arguments,
           scrollController: scrollController,
           onSearchFiltersChanged: _onSearchFiltersChanged,
           onStopTapped: _onStopTapped,
-          initialState: _savedNearbyStopsState,
+          initialState: _shouldResetFilters ? null : _savedNearbyStopsState,
           onStateChanged: (state) {
             _savedNearbyStopsState = state;
           },
+          shouldResetFilters: _shouldResetFilters,
         );
+
+        // Reset the flag after rendering
+        if (_shouldResetFilters) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            setState(() {
+              _shouldResetFilters = false;
+            });
+          });
+        }
+
+        return sheet;
     }
   }
 
