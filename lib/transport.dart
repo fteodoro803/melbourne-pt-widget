@@ -1,5 +1,5 @@
 import 'package:flutter_project/api_data.dart';
-import 'package:flutter_project/ptv_api_service.dart';
+import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';

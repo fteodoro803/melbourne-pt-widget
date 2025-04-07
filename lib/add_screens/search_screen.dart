@@ -8,7 +8,7 @@ import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api_data.dart';
 import '../geopath_utils.dart';
-import '../ptv_api_service.dart';
+import '../api/ptv_api_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
