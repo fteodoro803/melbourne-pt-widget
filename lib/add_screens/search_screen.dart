@@ -237,7 +237,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
           // First ensure the sheet is expanded enough to see the content
           _controller.animateTo(
-            0.4, // Adjust as needed
+            0.6, // Adjust as needed
             duration: Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );

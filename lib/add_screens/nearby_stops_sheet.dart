@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../ptv_info_classes/route_info.dart' as pt_route;
 import '../widgets/screen_widgets.dart' as ScreenWidgets;
@@ -90,6 +91,8 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
   late Map<String, bool> _transportTypeFilters = {};
 
+  final ItemScrollController itemScrollController = ItemScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -168,21 +171,21 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     }
   }
 
-  // Add this method to your NearbyStopsSheet class
   void scrollToStopItem(int stopIndex) {
-    // Calculate position to scroll to (header + item height * index)
-    double headerHeight = 152.0 + 28; // Adjust based on your header size
-    double itemHeight = 98.0;    // Adjust based on your item height
 
-    // Add 1 to account for the header item in the ListView.builder
-    double scrollPosition = headerHeight + (itemHeight * stopIndex);
+    setState(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (itemScrollController.isAttached) {
+          itemScrollController.scrollTo(
+              index: stopIndex,
+              duration: Duration(milliseconds: 100),
+              curve: Curves.easeInOut,
+              alignment: 0
+          );
+        }
+      });
+    });
 
-    // Use the DraggableScrollableSheet's controller
-    widget.scrollController.animateTo(
-      scrollPosition,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
   }
 
   NearbyStopsState getCurrentState() {
@@ -260,14 +263,13 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
           ScreenWidgets.HandleWidget(),
         // Address and toggleable transport type buttons
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            controller: widget.scrollController, // Use the same controller from parent
-            itemCount: widget.arguments.searchDetails!.stops.length + 1, // +1 for the header
-            itemBuilder: (context, index) {
-              // Header item
-              if (index == 0) {
-                return Padding(
+          child: CustomScrollView(
+            controller: widget.scrollController,
+            physics: ClampingScrollPhysics(),
+
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,17 +323,17 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                               children:
                               ToggleableFilter.values.map((ToggleableFilter result) {
                                 return FilterChip(
-                                  label: Text(result.name),
-                                  selected: filters.contains(result),
-                                  onSelected: (bool selected) {
-                                    setState(() {
-                                      if (selected) {
-                                        filters.add(result);
-                                      } else {
-                                        filters.remove(result);
-                                      }
-                                    });
-                                  }
+                                    label: Text(result.name),
+                                    selected: filters.contains(result),
+                                    onSelected: (bool selected) {
+                                      setState(() {
+                                        if (selected) {
+                                          filters.add(result);
+                                        } else {
+                                          filters.remove(result);
+                                        }
+                                      });
+                                    }
                                 );
                               }).toList(),
                             ),
@@ -340,61 +342,75 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                       ),
                     ],
                   ),
-                );
-              }
+                ),
+              ),
+              // Header item
 
-              // Stop items
-              final stopIndex = index - 1; // Adjust for header item
-              final stop = widget.arguments.searchDetails!.stops[stopIndex];
-              final bool? isExpanded = stop.isExpanded;
-              final routes = stop.routes ?? [];
-              final stopName = stop.name;
-              final distance = stop.distance;
-              final routeType = stop.routeType?.type.name ?? 'unknown';
+              SliverFillRemaining(
+                hasScrollBody: true,
+                fillOverscroll: true,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ScrollablePositionedList.builder(
+                    itemScrollController: itemScrollController,
+                    itemPositionsListener: ItemPositionsListener.create(),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(0.0),
+                    itemCount: widget.arguments.searchDetails!.stops.length,
+                    itemBuilder: (context, index) {
+                      // Stop items
+                      final stopIndex = index;
+                      final stop = widget.arguments.searchDetails!.stops[stopIndex];
+                      final bool? isExpanded = stop.isExpanded;
+                      final routes = stop.routes ?? [];
+                      final stopName = stop.name;
+                      final distance = stop.distance;
+                      final routeType = stop.routeType?.type.name ?? 'unknown';
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Card(
-                  color: isExpanded! ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
-                  margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),
-                  child: ListTile(
-                    visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                    dense: true,
-                    contentPadding: EdgeInsets.all(0),
-                    // Stop and route details
-                    title: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
+                      return Card(
+                        color: isExpanded! ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
+                        margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),
+                        child: ListTile(
+                          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                           dense: true,
-                          visualDensity: VisualDensity(horizontal: -3, vertical: 0),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
-                          title: !isExpanded
-                              ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
-                              : ExpandedStopWidget(stopName: stopName, distance: distance),
-                          leading: Image.asset(
-                            "assets/icons/PTV $routeType Logo.png",
-                            width: 40,
-                            height: 40,
-                          ),
-                          trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-                          onTap: () {
-                            setState(() {
-                              widget.arguments.searchDetails?.stops[stopIndex].isExpanded = !widget.arguments.searchDetails!.stops[stopIndex].isExpanded!;
-                            });
-                          }
-                        ),
+                          contentPadding: EdgeInsets.all(0),
+                          // Stop and route details
+                          title: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                dense: true,
+                                visualDensity: VisualDensity(horizontal: -3, vertical: 0),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                                title: !isExpanded
+                                    ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
+                                    : ExpandedStopWidget(stopName: stopName, distance: distance),
+                                leading: Image.asset(
+                                  "assets/icons/PTV $routeType Logo.png",
+                                  width: 40,
+                                  height: 40,
+                                ),
+                                trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                                onTap: () {
+                                  setState(() {
+                                    widget.arguments.searchDetails?.stops[stopIndex].isExpanded = !widget.arguments.searchDetails!.stops[stopIndex].isExpanded!;
+                                  });
+                                }
+                              ),
 
-                        if (isExpanded)...[
-                          Divider(height: 0,),
-                          ExpandedStopRoutesWidget(routes: routes, routeType: routeType, onStopTapped: widget.onStopTapped, stop: stop),
-                        ],
-                      ],
-                    ),
+                              if (isExpanded)...[
+                                Divider(height: 0,),
+                                ExpandedStopRoutesWidget(routes: routes, routeType: routeType, onStopTapped: widget.onStopTapped, stop: stop),
+                              ],
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              );
-            },
+              ),
+            ],
           ),
         ),
       ],
