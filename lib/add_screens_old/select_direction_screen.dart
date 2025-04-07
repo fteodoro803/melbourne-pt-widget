@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
-import 'package:flutter_project/api/ptv_api_service.dart';
+import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
 import 'package:flutter_project/database/database.dart' as db;
@@ -21,46 +20,24 @@ class SelectDirectionScreen extends StatefulWidget {
 
 class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   final String _screenName = "selectDirection";
-  final List<RouteDirection> _directions = [];
+  List<RouteDirection> _directions = [];
+  PtvService ptvService = PtvService();
   DevTools tools = DevTools();
 
   // Initialising State
   @override
   void initState() {
     super.initState();
-    fetchRouteDirections();
+    getDirections();
 
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
   }
 
-  void fetchRouteDirections() async {
-    String? routeId =
-        widget.arguments.transport.route?.id.toString(); // this seems a bit convoluted
-
-    // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().routeDirections(routeId!);
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Early Exit
-    if (data.response == null) {
-      print("NULL DATA RESPONSE --> Improper Location Data");
-      return;
-    }
-
-    // Populating Stops List
-    for (var direction in jsonResponse!["directions"]) {
-      // if (direction["route_id"] != widget.userSelections.stop?.route.id) {continue;}
-
-      int id = direction["direction_id"];
-      String name = direction["direction_name"];
-      String description = direction["route_direction_description"];
-      RouteDirection newDirection =
-          RouteDirection(id: id, name: name, description: description);
-
-      _directions.add(newDirection);
-    }
-
+  void getDirections() async {
+    int? routeId = widget.arguments.transport.route?.id;
+    List<RouteDirection> directions = await ptvService.fetchDirections(routeId!);
+    _directions = directions;
     setState(() {});
   }
 
@@ -71,11 +48,11 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       int id = _directions[index].id;
       String name = _directions[index].name;
       String description = _directions[index].description;
+
       Get.find<db.AppDatabase>().addDirection(id, name, description);
     }
     else {
       widget.arguments.transport.direction = null;
-
     }
   }
 

@@ -86,6 +86,35 @@ class PtvService {
   }
 
 // Direction Functions
+  Future<List<RouteDirection>> fetchDirections(int routeId) async {
+    List<RouteDirection> directionList = [];
+
+    // Fetching Data and converting to JSON
+    ApiData data = await PtvApiService().routeDirections(routeId.toString());
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Early Exit
+    if (data.response == null) {
+      print("( ptv_service.dart -> fetchDirections ) -- Null response");
+      return directionList;
+    }
+
+    // Populating Stops List
+    for (var direction in jsonResponse!["directions"]) {
+      // if (direction["route_id"] != widget.userSelections.stop?.route.id) {continue;}
+
+      int id = direction["direction_id"];
+      String name = direction["direction_name"];
+      String description = direction["route_direction_description"];
+
+      RouteDirection newDirection =
+      RouteDirection(id: id, name: name, description: description);
+
+      directionList.add(newDirection);
+    }
+
+    return directionList;
+  }
 
 // GeoPath Functions
   Future<List<LatLng>> fetchGeoPath(Route route) async {
