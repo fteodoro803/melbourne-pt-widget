@@ -63,13 +63,12 @@ class _SearchScreenState extends State<SearchScreen> {
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   Set<Circle> _circles = {};
-  late LatLng _stopPosition;
-  late LatLng _stopPositionAlongGeopath;
-  late List<LatLng> _geopath = [];
-  late List<Stop> _stops = [];
-  List<LatLng> _stopsAlongGeopath = [];
+  List<LatLng> _geoPath = [];
+  List<Departure> _pattern = [];
+
   final LatLng _initialPosition = const LatLng(-37.813812122509205,
       144.96358311072478); //todo: Change based on user's location
+
   final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
   String? _selectedStopId;
   Marker? _selectedStopMarker;
@@ -136,10 +135,10 @@ class _SearchScreenState extends State<SearchScreen> {
       BitmapDescriptor? customMarkerIconBus = await transportPathUtils.getResizedImage("assets/icons/PTV bus Logo.png", 20, 20);
       BitmapDescriptor? customMarkerIconVLine = await transportPathUtils.getResizedImage("assets/icons/PTV vLine Logo.png", 20, 20);
 
-      BitmapDescriptor? customMarkerIconTrainLarge = await transportPathUtils.getResizedImage("assets/icons/PTV train Logo.png", 30, 30);
-      BitmapDescriptor? customMarkerIconTramLarge = await transportPathUtils.getResizedImage("assets/icons/PTV tram Logo.png", 30, 30);
-      BitmapDescriptor? customMarkerIconBusLarge = await transportPathUtils.getResizedImage("assets/icons/PTV bus Logo.png", 30, 30);
-      BitmapDescriptor? customMarkerIconVLineLarge = await transportPathUtils.getResizedImage("assets/icons/PTV vLine Logo.png", 30, 30);
+      BitmapDescriptor? customMarkerIconTrainLarge = await transportPathUtils.getResizedImage("assets/icons/PTV train Logo Outlined.png", 35, 35);
+      BitmapDescriptor? customMarkerIconTramLarge = await transportPathUtils.getResizedImage("assets/icons/PTV tram Logo Outlined.png", 35, 35);
+      BitmapDescriptor? customMarkerIconBusLarge = await transportPathUtils.getResizedImage("assets/icons/PTV bus Logo Outlined.png", 35, 35);
+      BitmapDescriptor? customMarkerIconVLineLarge = await transportPathUtils.getResizedImage("assets/icons/PTV vLine Logo Outlined.png", 35, 35);
 
       setState(() {
         setMarker(widget.arguments.searchDetails!.markerPosition!);
@@ -173,7 +172,7 @@ class _SearchScreenState extends State<SearchScreen> {
               position: stopPosition,
               icon: customMarkerIcon!,
               consumeTapEvents: true,
-                // anchor: const Offset(0.5, 0.5),
+              // anchor: const Offset(0.5, 0.5),
               onTap: () {
                 // mapController.showMarkerInfoWindow(MarkerId(stop.name));
                 setState(() {
@@ -196,26 +195,41 @@ class _SearchScreenState extends State<SearchScreen> {
                     markerId: MarkerId(_selectedStopId!),
                     position: stopPosition,
                     icon: largeCustomMarkerIcon!,
+                    // anchor: const Offset(0.5, 0.5),
                     ),
                   );
 
                   _customInfoWindowController.addInfoWindow!(
-                    Text(stop.name,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w500,
-                        height: 1.3,
-                        shadows: <Shadow>[
-                          Shadow(
-                          offset: Offset(1, 1),
-                          blurRadius: 3.0,
-                          color: Color.fromARGB(0, 255, 255, 255),
+                    Row(
+                      children: [
+                        SizedBox(width: 205),
+                        SizedBox(
+                          width: 360-205,
+                          height: 36,
+                          // padding: const EdgeInsets.only(left: 150.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(stop.name,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                                height: 1.2,
+                                shadows: <Shadow>[
+                                  Shadow(
+                                  offset: Offset(1, 1),
+                                  blurRadius: 5.0,
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  ),
+                                ],
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.left,
+                            ),
                           ),
-                        ],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                     stopPosition, // Position of the info window
                   );
@@ -261,41 +275,52 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Loads route geo path and stops on map
   Future<void> loadTransportPath(bool isDirectionSpecified) async {
-    LatLng stopPos = LatLng(widget.arguments.searchDetails!.stop!.latitude!, widget.arguments.searchDetails!.stop!.longitude!);
-    _stopPosition = stopPos;
-    _stopPositionAlongGeopath = _stopPosition;
+    LatLng stopPosition;
+    List<Stop> stops = [];
+    stopPosition = LatLng(widget.arguments.searchDetails!.stop!.latitude!, widget.arguments.searchDetails!.stop!.longitude!);
+    List<Stop> allStopsAlongRoute = await ptvService.fetchStopsRoute(widget.arguments.searchDetails!.route!); // all stops along a given route
 
-    List<LatLng> geoPathList = await ptvService.fetchGeoPath(widget.arguments.searchDetails!.route!);
-
-    // Early exit if GeoPath is empty
-    if (geoPathList.isEmpty) {
+    // Early exit if GeoPath is empty // todo: also check if null!!!
+    if (_geoPath.isEmpty || _pattern.isEmpty || allStopsAlongRoute.isEmpty) {
       return;
     }
 
-    _geopath = geoPathList;
-    // List<Stop> stopList = await ptvService.fetchStopsAlongDirection(widget.arguments.searchDetails!.route!, widget.arguments.searchDetails!.route!.direction!);
-    List<Stop> stopList = await ptvService.fetchStopsRoute(widget.arguments.searchDetails!.route!);
-    _stops = stopList;
-    GeopathAndStops geoStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
-    GeopathAndStops geopathAndStops = geoStops;
+    // Only add stops that are in the pattern, in order provided
+    for (var d in _pattern) {
+      stops.add(allStopsAlongRoute[allStopsAlongRoute.indexWhere((stop) => stop.id == d.stopId)]);
+    }
 
-    _geopath = geopathAndStops.geopath;
-    _stopsAlongGeopath = geopathAndStops.stopsAlongGeopath;
-    _stopPositionAlongGeopath = geopathAndStops.stopPositionAlongGeopath;
+    List<LatLng> stopPositions = [];
+    LatLng chosenStopPositionAlongGeoPath = stopPosition;
+    List<LatLng> newGeoPath = [];
 
-    bool isReverseDirection = GeoPathUtils.reverseDirection(_geopath, _stops);
+    for (var stop in stops) {
+      var pos = LatLng(stop.latitude!, stop.longitude!);
+      stopPositions.add(pos);
+    }
+
+    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, stopPosition, allStopPositions: isDirectionSpecified ? null : stopPositions);
+
+    newGeoPath = geoPathAndStops.geoPathWithStops;
+    chosenStopPositionAlongGeoPath = geoPathAndStops.stopPositionAlongGeoPath;
+
+    if (!isDirectionSpecified) {
+      stopPositions = geoPathAndStops.stopsAlongGeoPath; // stops along route aligned with geoPath
+    }
+
+    bool isReverseDirection = isDirectionSpecified ? GeoPathUtils.reverseDirection(newGeoPath, stopPositions) : false;
 
     _markers = await transportPathUtils.setMarkers(
         _markers,
-        _stopsAlongGeopath,
-        _stopPositionAlongGeopath,
+        stopPositions,
+        stopPosition,
+        chosenStopPositionAlongGeoPath,
         isDirectionSpecified,
-        isReverseDirection
     );
     _polylines = await transportPathUtils.loadRoutePolyline(
         widget.arguments.searchDetails!.directions[0],
-        _geopath,
-        _stopPositionAlongGeopath,
+        newGeoPath,
+        chosenStopPositionAlongGeoPath,
         isDirectionSpecified,
         isReverseDirection
     );
@@ -390,7 +415,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles tap on a route in NearbyStopsSheet
   Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
-    // _showStops = false;
     _circles.clear();
     setMarker(widget.arguments.searchDetails!.markerPosition!);
     List<Transport> listTransport = await searchUtils.splitDirection(stop, route);
@@ -403,24 +427,34 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails!.directions.add(transport);
     }
 
+    _geoPath = await ptvService.fetchGeoPath(route); // get geoPath of route
+    _pattern = await ptvService.fetchPattern(listTransport[0], listTransport[0].departures![0]);
+
     loadTransportPath(false);
     _changeSheet(ActiveSheet.stopDetails, false);
     _customInfoWindowController.hideInfoWindow!();
   }
 
   /// Handles tap on a direction in StopDetailsSheet
-  void _onTransportTapped(Transport transport) {
+  Future<void> _onTransportTapped(Transport transport) async {
+    setMarker(widget.arguments.searchDetails!.markerPosition!);
     widget.arguments.transport = transport;
 
-    loadTransportPath(true);
     _changeSheet(ActiveSheet.transportDetails, false);
+
+    _pattern = await ptvService.fetchPattern(transport, transport.departures![0]);
+    loadTransportPath(true);
+
   }
 
   /// Handles tap on a departure in StopDetailsSheet and TransportDetailsSheet
-  void _onDepartureTapped(Departure departure, Transport transport) {
+  Future<void> _onDepartureTapped(Departure departure, Transport transport) async {
     widget.arguments.transport = transport;
     widget.arguments.searchDetails!.departure = departure;
+
     if (_activeSheet == ActiveSheet.stopDetails) {
+      setMarker(widget.arguments.searchDetails!.markerPosition!);
+      _pattern = await ptvService.fetchPattern(transport, departure);
       loadTransportPath(true);
     }
     _changeSheet(ActiveSheet.departureDetails, false);
@@ -437,6 +471,8 @@ class _SearchScreenState extends State<SearchScreen> {
         if (_navigationHistory.isNotEmpty && _navigationHistory.last == ActiveSheet.transportDetails) {
           previousSheet = ActiveSheet.transportDetails;
         } else {
+          setMarker(widget.arguments.searchDetails!.markerPosition!);
+          _polylines.clear();
           loadTransportPath(false);
           previousSheet = ActiveSheet.stopDetails;
         }
@@ -444,6 +480,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
       case ActiveSheet.transportDetails:
         previousSheet = ActiveSheet.stopDetails;
+        setMarker(widget.arguments.searchDetails!.markerPosition!);
+        _polylines.clear();
         // Restore transport path display
         loadTransportPath(false);
         break;
@@ -619,9 +657,9 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           CustomInfoWindow(
             controller: _customInfoWindowController,
-            height: 65,
-            width: 150,
-            offset: 5,
+            height: 36,
+            width: 360,
+            offset: 0,
           ),
 
           // Create DraggableScrollableSheet with nearby stop information if user has dropped pin
@@ -676,7 +714,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           Expanded(child: _getSheetContent(scrollController)),
                         ],
                       )
-                        : _getSheetContent(scrollController),
+                      : _getSheetContent(scrollController),
                   );
                 }
             ),
@@ -705,8 +743,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ],
                 ),
+
+                // "Show Stops" button
                 if (_activeSheet == ActiveSheet.nearbyStops)
-                  // "Show Stops" button
                   ElevatedButton(
                     onPressed: () async {
                       setState(() {

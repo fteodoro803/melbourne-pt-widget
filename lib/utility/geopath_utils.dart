@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/utility/time_utils.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -32,7 +31,7 @@ class GeoPathUtils {
     return LatLng(closestLatitude, closestLongitude);
   }
 
-  static LatLng findClosestPoint(LatLng center, List<LatLng> path) {
+  static LatLng generatePointOnGeoPath(LatLng center, List<LatLng> path) {
     double minDistance = double.infinity;
     LatLng closestPoint = path[0];
 
@@ -76,43 +75,43 @@ class GeoPathUtils {
     return (distanceAClosest + distanceBClosest - distanceAB).abs() < 0.001;
   }
 
-  static bool reverseDirection(List<LatLng> geopath, List<Stop> stops) {
-    LatLng firstGeopathPoint = geopath[0];
-    LatLng lastGeopathPoint = geopath[geopath.length - 1];
-    LatLng lastStopLocation = LatLng(stops[stops.length -1].latitude!, stops[0].longitude!);
-    return calculateDistance(lastStopLocation, firstGeopathPoint)
-        < calculateDistance(lastStopLocation, lastGeopathPoint);
+  static bool reverseDirection(List<LatLng> geopath, List<LatLng> stopPositions) {
+    LatLng firstGeoPathPoint = geopath[0];
+    LatLng lastGeoPathPoint = geopath[geopath.length - 1];
+    LatLng lastStopLocation = stopPositions[stopPositions.length - 1];
+    return calculateDistance(lastStopLocation, firstGeoPathPoint)
+        < calculateDistance(lastStopLocation, lastGeoPathPoint);
   }
 }
 
-class GeopathAndStops {
-  final List<LatLng> geopath;
-  final List<LatLng> stopsAlongGeopath;
-  final LatLng stopPositionAlongGeopath;
+class GeoPathAndStops {
+  final List<LatLng> geoPathWithStops;
+  final List<LatLng> stopsAlongGeoPath;
+  final LatLng stopPositionAlongGeoPath;
 
-  GeopathAndStops(this.geopath, this.stopsAlongGeopath, this.stopPositionAlongGeopath);
+  GeoPathAndStops(this.geoPathWithStops, this.stopsAlongGeoPath, this.stopPositionAlongGeoPath);
 }
 
 class TransportPathUtils {
   Future<Set<Polyline>> loadRoutePolyline(
-      Transport transport, List<LatLng> geopath,
-      LatLng stopPositionAlongGeopath,
+      Transport transport, List<LatLng> geoPath,
+      LatLng stopPositionAlongGeoPath,
       bool isDirectionSpecified,
       bool isReverseDirection
       ) async {
 
-    Set<Polyline> polylines = {};
-    List<LatLng> newGeopath = isReverseDirection ? geopath.reversed.toList() : geopath;
+    Set<Polyline> polyLines = {};
+    geoPath = isReverseDirection ? geoPath.reversed.toList() : geoPath;
 
-    int closestIndex = newGeopath.indexOf(stopPositionAlongGeopath);
+    int closestIndex = geoPath.indexOf(stopPositionAlongGeoPath); // Closest point on geoPath to stop to split the polyline
 
     // Separate the coordinates into previous and future journey
-    List<LatLng> previousRoute = newGeopath.sublist(0, closestIndex + 1);
-    List<LatLng> futureRoute = isDirectionSpecified ? newGeopath.sublist(closestIndex) : newGeopath;
+    List<LatLng> previousRoute = geoPath.sublist(0, closestIndex + 1);
+    List<LatLng> futureRoute = isDirectionSpecified ? geoPath.sublist(closestIndex) : geoPath;
 
     if (isDirectionSpecified) {
       // Add polyline for previous journey
-      polylines.add(Polyline(
+      polyLines.add(Polyline(
         polylineId: PolylineId('previous_route_polyline'),
         color: Color(0xFFB6B6B6),
         width: 6,
@@ -121,29 +120,30 @@ class TransportPathUtils {
     }
 
     // Add polyline for future journey
-    polylines.add(Polyline(
+    polyLines.add(Polyline(
       polylineId: PolylineId('future_route_polyline'),
       color: ColourUtils.hexToColour(transport.route!.colour!),
       width: 9,
       points: futureRoute,
     ));
 
-    return polylines;
+    return polyLines;
 
   }
 
   Future<Set<Marker>> setMarkers(
       Set<Marker> markers,
-      List<LatLng> stopsAlongGeopath,
-      LatLng stopPositionAlongGeopath,
+      List<LatLng> stopPositions,
+      LatLng stopPosition,
+      LatLng stopPositionAlongGeoPath,
       bool isDirectionSpecified,
-      bool isReverseDirection,
       ) async {
 
     Set<Marker> newMarkers = markers;
-    List<LatLng> newStopsAlongGeopath = isReverseDirection ? stopsAlongGeopath.reversed.toList() : stopsAlongGeopath;
 
-    BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 10, 10); // this doesn't work - they're all the same size
+    LatLng chosenStopPosition = isDirectionSpecified ? stopPosition : stopPositionAlongGeoPath;
+
+    BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 9, 9);
     BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 7, 7);
 
     BitmapDescriptor? customMarkerIcon = isDirectionSpecified
@@ -151,13 +151,13 @@ class TransportPathUtils {
         : customMarkerIconFuture;
     BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 20, 20);
 
-    for (var stop in newStopsAlongGeopath) {
-      if (stop == stopPositionAlongGeopath) {
+    for (var stop in stopPositions) {
+      if (stop == chosenStopPosition) {
         customMarkerIcon = customMarkerIconFuture;
         continue;
       }
       newMarkers.add(Marker(
-        markerId: MarkerId("$stop"),
+        markerId: MarkerId('$stop'),
         position: stop,
         icon: customMarkerIcon!,
         anchor: const Offset(0.5, 0.5),
@@ -165,8 +165,8 @@ class TransportPathUtils {
     }
 
     newMarkers.add(Marker(
-      markerId: MarkerId('center_marker'),
-      position: stopPositionAlongGeopath,
+      markerId: MarkerId('$chosenStopPosition'),
+      position: chosenStopPosition,
       icon: customStopMarkerIcon,
       anchor: const Offset(0.5, 0.5),
     ));
@@ -193,59 +193,43 @@ class TransportPathUtils {
   //   icon: customStopMarkerIcon,
   // ));
 
-  Future<GeopathAndStops> addStopsToGeoPath(List<Stop> stops, List<LatLng> geopath, LatLng chosenStopPosition) async {
-    List<LatLng> stopsAlongGeopath = [];
-    LatLng stopPositionAlongGeopath = chosenStopPosition;
-    List<Stop> newStops = [];
-    Set<int> uniqueStopNumbers = {};
+  Future<GeoPathAndStops> addStopsToGeoPath(List<LatLng> geoPath, LatLng chosenStopPosition, {List<LatLng>? allStopPositions}) async {
+    List<LatLng> stopsAlongGeoPath = [];
+    LatLng stopPositionAlongGeoPath = chosenStopPosition;
+    List<LatLng> stopPositions = [];
+    List<LatLng> newGeoPath = [...geoPath];
+    allStopPositions != null ? stopPositions = allStopPositions : stopPositions.add(chosenStopPosition);
 
-    for (var stop in stops) {
-      RegExp regExp = RegExp(r'#(\d+)');
+    int insertionIndex = 0;
+    for (var pos in stopPositions) {
+      var pointOnGeoPath = GeoPathUtils.generatePointOnGeoPath(pos, newGeoPath); // creates a point on the geoPath
+      stopsAlongGeoPath.add(pointOnGeoPath);
 
-      Match? match = regExp.firstMatch(stop.name);
+      // Find the correct index to insert the pointOnGeoPath
+      if (!newGeoPath.contains(pointOnGeoPath) && pos == chosenStopPosition) {
+        stopPositionAlongGeoPath = pointOnGeoPath;
 
-      if (match != null) {
-        int number = int.parse(match.group(1)!);
-        stop.number = number;
-        if (!uniqueStopNumbers.contains(number)) {
-          uniqueStopNumbers.add(number);
-          newStops.add(stop);
-        }
-      }
-    }
-    newStops.sort((a, b) => a.number!.compareTo(b.number!));
-
-    for (var stop in newStops) {
-      var stopPosition = LatLng(stop.latitude!, stop.longitude!);
-      var closestPoint = GeoPathUtils.findClosestPoint(stopPosition, geopath);
-      stopsAlongGeopath.add(closestPoint);
-
-      // Find the correct index to insert the closestPoint
-      if (!geopath.contains(closestPoint) && stopPosition == chosenStopPosition) {
-        stopPositionAlongGeopath = closestPoint;
-
-        // Find the two closest points in _geopath to insert between them
-        int insertionIndex = 0;
-        for (int i = 0; i < geopath.length - 1; i++) {
-          LatLng pointA = geopath[i];
-          LatLng pointB = geopath[i + 1];
+        // Find the two closest points in geoPath to insert between them
+        insertionIndex = 0;
+        for (int i = 0; i < newGeoPath.length - 1; i++) {
+          LatLng pointA = newGeoPath[i];
+          LatLng pointB = newGeoPath[i + 1];
 
           // If closestPoint is between pointA and pointB
-          if (GeoPathUtils.isBetween(closestPoint, pointA, pointB)) {
+          if (GeoPathUtils.isBetween(pointOnGeoPath, pointA, pointB)) {
             insertionIndex = i + 1;
             break;
           }
         }
 
         // Insert the closest point at the correct position
-        geopath.insert(insertionIndex, closestPoint);
+        newGeoPath.insert(insertionIndex, pointOnGeoPath);
       }
     }
 
-    print("Length of stops along geopath: ${stopsAlongGeopath.length}");
-
-    return GeopathAndStops(geopath, stopsAlongGeopath, stopPositionAlongGeopath);
+    return GeoPathAndStops(newGeoPath, stopsAlongGeoPath, stopPositionAlongGeoPath);
   }
+
 
   Future<BitmapDescriptor> getResizedImage(String assetPath, double width, double height) async {
     // Load the image from assets
