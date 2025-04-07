@@ -162,11 +162,11 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
   Future<void> onConfirmPressed(String selectedDistance, String selectedUnit) async {
     int distanceInMeters = (selectedUnit == "m" ? int.parse(selectedDistance) : int.parse(selectedDistance) * 1000);
-    await widget.onSearchFiltersChanged(newTransportType: null, newDistance: distanceInMeters);
 
     setState(() {
       _selectedUnit = selectedUnit;
       _selectedDistance = selectedDistance;
+      widget.onSearchFiltersChanged(newTransportType: null, newDistance: distanceInMeters);
     });
     _notifyStateChanged();
   }

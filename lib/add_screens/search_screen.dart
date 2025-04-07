@@ -152,7 +152,9 @@ class _SearchScreenState extends State<SearchScreen> {
       _tappedStopId = null;
 
       if (refresh) {
+        _nearbyStopMarkers = {};
         for (var stop in widget.arguments.searchDetails!.stops) {
+
           Marker newMarker = await createNearbyStopMarker(stop);
 
           _nearbyStopMarkers.add(newMarker);
@@ -444,8 +446,9 @@ class _SearchScreenState extends State<SearchScreen> {
       widget.arguments.searchDetails!.stops = uniqueStops;
       widget.arguments.searchDetails!.distance = distance;
       widget.arguments.searchDetails!.transportType = transportType;
+      showStopMarkers(true);
     });
-    await showStopMarkers(true);
+
 
   }
 
