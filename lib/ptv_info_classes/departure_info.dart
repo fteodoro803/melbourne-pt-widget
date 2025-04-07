@@ -34,6 +34,8 @@ class Departure {
       {required this.scheduledDepartureUTC,
       required this.estimatedDepartureUTC,
       required this.runRef,
+      required this.hasLowFloor,
+      required this.hasAirConditioning,
       this.stopId}) {
     // Adds and converts Departure to local Melbourne Time
     if (scheduledDepartureUTC != null) {

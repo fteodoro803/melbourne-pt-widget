@@ -51,25 +51,27 @@ class PtvService {
       String? runRef = departure["run_ref"]?.toString();
       int? stopId = departure["stop_id"];
 
-      Departure newDeparture = Departure(
-          scheduledDepartureUTC: scheduledDepartureUTC,
-          estimatedDepartureUTC: estimatedDepartureUTC,
-          runRef: runRef, stopId: stopId);
-
       // Get Vehicle descriptors per Departure
       var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
-      if (vehicleDescriptors != null && vehicleDescriptors
-          .toString()
-          .isNotEmpty) {
+      bool? hasLowFloor;
+      bool? hasAirConditioning;
+      if (vehicleDescriptors != null && vehicleDescriptors.toString().isNotEmpty) {
         // print("( ptv_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
 
-        newDeparture.hasLowFloor = vehicleDescriptors["low_floor"];
-        newDeparture.hasAirConditioning = vehicleDescriptors["air_conditioned"];
+        hasLowFloor = vehicleDescriptors["low_floor"];
+        hasAirConditioning = vehicleDescriptors["air_conditioned"];
       }
       else {
         print(
             "( ptv_service.dart -> fetchDepartures() ) -- runs for runRef $runRef is empty )");
       }
+
+      Departure newDeparture = Departure(
+          scheduledDepartureUTC: scheduledDepartureUTC,
+          estimatedDepartureUTC: estimatedDepartureUTC,
+          runRef: runRef, stopId: stopId,
+          hasAirConditioning: hasAirConditioning, hasLowFloor: hasLowFloor,
+      );
 
       departures.add(newDeparture);
     }
@@ -250,12 +252,21 @@ class PtvService {
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
       String? runRef = departure["run_ref"]?.toString();
       int? stopId = departure["stop_id"];
+      var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
+      bool? hasLowFloor;
+      bool? hasAirConditioning;
+      if (vehicleDescriptors != null && vehicleDescriptors.toString().isNotEmpty) {
+        hasLowFloor = vehicleDescriptors["low_floor"];
+        hasAirConditioning = vehicleDescriptors["air_conditioned"];
+      }
 
       Departure newDeparture = Departure(
           scheduledDepartureUTC: scheduledDepartureUTC,
           estimatedDepartureUTC: estimatedDepartureUTC,
           runRef: runRef,
           stopId: stopId,
+          hasLowFloor: hasLowFloor,
+          hasAirConditioning: hasAirConditioning
       );
 
       // Get Stop Name per Departure
