@@ -26,7 +26,7 @@ class TransportMap extends StatefulWidget {
 }
 
 class _TransportMapState extends State<TransportMap> {
-  late Transport transport;
+  late Transport _transport;
   bool _isDepartureSelected = false;
 
   // Google Maps controller and center position
@@ -35,12 +35,10 @@ class _TransportMapState extends State<TransportMap> {
   late double _zoom = 13;
 
   late LatLng _stopPosition;
-  late LatLng _stopPositionAlongGeopath;
   Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
-  late List<LatLng> _geopath = [];
-  late List<Stop> _stops = [];
-  List<LatLng> _stopsAlongGeopath = [];
+  Set<Polyline> _polyLines = {};
+  late List<LatLng> _geoPath = [];
+  late List<Departure> _pattern = [];
 
   PtvService ptvService = PtvService();
   TransportPathUtils transportPathUtils = TransportPathUtils();
@@ -48,47 +46,74 @@ class _TransportMapState extends State<TransportMap> {
   @override
   void initState() {
     super.initState();
-    transport = widget.arguments.transport;
+    _transport = widget.arguments.transport;
+    _stopPosition = LatLng(_transport.stop!.latitude!, _transport.stop!.longitude!);
+    _center = _stopPosition;
 
-    if (transport.stop?.latitude != null && transport.stop?.longitude != null) {
-      _center = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
-    }
-
-    // loadTransportPath();
+    fetchGeoPath();
   }
 
-  // Future<void> loadTransportPath() async {
-  //   _stopPosition = LatLng(transport.stop!.latitude!, transport.stop!.longitude!);
-  //   _stopPositionAlongGeopath = _stopPosition;
-  //
-  //   _geopath = await ptvService.fetchGeoPath(transport.route!);
-  //   _stops = await ptvService.fetchStopsRoute(transport.route!, direction: transport.direction!);
-  //   GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_stops, _geopath, _stopPosition);
-  //
-  //   _geopath = geoPathAndStops.geopath;
-  //   _stopsAlongGeopath = geoPathAndStops.stopsAlongGeoPath;
-  //   _stopPositionAlongGeopath = geoPathAndStops.stopPositionAlongGeoPath;
-  //
-  //   bool isReverseDirection = GeoPathUtils.reverseDirection(_geopath, _stops);
-  //
-  //   _markers = await transportPathUtils.setMarkers(
-  //       _markers,
-  //       _stopsAlongGeopath,
-  //       _stopPositionAlongGeopath,
-  //       true,
-  //       isReverseDirection,
-  //   );
-  //   _polylines = await transportPathUtils.loadRoutePolyline(
-  //       transport,
-  //       _geopath,
-  //       _stopPositionAlongGeopath,
-  //       true,
-  //       isReverseDirection,
-  //   );
-  //
-  //   setState(() {
-  //   });
-  // }
+  Future<void> fetchGeoPath() async {
+    _geoPath = await ptvService.fetchGeoPath(_transport.route!);
+    if (_transport.departures != null && _transport.departures!.isNotEmpty) {
+      _pattern = await ptvService.fetchPattern(_transport, _transport.departures?[0]);
+    }
+    else {
+      _pattern = [];
+    }
+
+    loadTransportPath();
+  }
+
+  /// Loads route geo path and stops on map
+  Future<void> loadTransportPath() async {
+    List<Stop> stops = [];
+    List<Stop> allStopsAlongRoute = await ptvService.fetchStopsRoute(_transport.route!); // all stops along a given route
+
+    // Early exit if GeoPath is empty // todo: also check if null!!!
+    if (_geoPath.isEmpty || _pattern.isEmpty || allStopsAlongRoute.isEmpty) {
+      return;
+    }
+
+    // Only add stops that are in the pattern, in order provided
+    for (var d in _pattern) {
+      stops.add(allStopsAlongRoute[allStopsAlongRoute.indexWhere((stop) => stop.id == d.stopId)]);
+    }
+
+    List<LatLng> stopPositions = [];
+    LatLng chosenStopPositionAlongGeoPath = _stopPosition;
+    List<LatLng> newGeoPath = [];
+
+    for (var stop in stops) {
+      var pos = LatLng(stop.latitude!, stop.longitude!);
+      stopPositions.add(pos);
+    }
+
+    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, _stopPosition);
+
+    newGeoPath = geoPathAndStops.geoPathWithStops;
+    chosenStopPositionAlongGeoPath = geoPathAndStops.stopPositionAlongGeoPath;
+
+    bool isReverseDirection = GeoPathUtils.reverseDirection(newGeoPath, stopPositions);
+
+    _markers = await transportPathUtils.setMarkers(
+      _markers,
+      stopPositions,
+      _stopPosition,
+      chosenStopPositionAlongGeoPath,
+      true,
+    );
+    _polyLines = await transportPathUtils.loadRoutePolyline(
+      _transport,
+      newGeoPath,
+      chosenStopPositionAlongGeoPath,
+      true,
+      isReverseDirection
+    );
+
+    setState(() {
+    });
+  }
 
   Future<void> _onDepartureTapped(Departure departure, Transport transport) async {
     setState(() {
@@ -115,7 +140,7 @@ class _TransportMapState extends State<TransportMap> {
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
               markers: _markers,
-              polylines: _polylines,
+              polylines: _polyLines,
             ),
           ),
 

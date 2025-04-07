@@ -227,7 +227,11 @@ class PtvService {
     print("(ptv_service.dart -> fetchRuns) -- Fetched Runs:\n$jsonResponse");
   }
 
-  Future<List<Departure>> fetchPattern(Transport transport, Departure departure) async {
+  Future<List<Departure>> fetchPattern(Transport transport, Departure? departure) async {
+    if (departure == null) {
+      return [];
+    }
+
     List<Departure> departures = [];
     String expands = "Stop";
     String? runRef = departure.runRef;

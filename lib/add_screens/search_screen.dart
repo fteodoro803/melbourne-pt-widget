@@ -428,7 +428,12 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     _geoPath = await ptvService.fetchGeoPath(route); // get geoPath of route
-    _pattern = await ptvService.fetchPattern(listTransport[0], listTransport[0].departures![0]);
+    if (listTransport.first.departures != null && listTransport.first.departures!.isNotEmpty) {
+      _pattern = await ptvService.fetchPattern(listTransport[0], listTransport[0].departures?[0]);
+    }
+    else {
+      _pattern = [];
+    }
 
     loadTransportPath(false);
     _changeSheet(ActiveSheet.stopDetails, false);
@@ -442,7 +447,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
     _changeSheet(ActiveSheet.transportDetails, false);
 
-    _pattern = await ptvService.fetchPattern(transport, transport.departures![0]);
+    if (transport.departures != null && transport.departures!.isNotEmpty) {
+      _pattern = await ptvService.fetchPattern(transport, transport.departures?[0]);
+    }
+    else {
+      _pattern = [];
+    }
+
     loadTransportPath(true);
 
   }
