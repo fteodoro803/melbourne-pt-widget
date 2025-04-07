@@ -291,7 +291,41 @@ class PtvService {
   }
 
 // Stop Functions
-  // todo Fetch Stops near a Location
+  // Fetch Stops
+  Future<List<Stop>> fetchStopsLocation(String location, int routeType, int maxDistance) async {
+    List<Stop> stopList = [];
+
+    // Fetching Data and converting to JSON
+    ApiData data = await PtvApiService().stops(
+        location, routeTypes: routeType.toString(), maxDistance: maxDistance.toString());
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Early Exit
+    if (data.response == null) {
+      print("( ptv_service.dart -> fetchStopsLocation ) -- null data response");
+      return stopList;
+    }
+
+    // Populating Stops List
+    for (var stop in jsonResponse!["stops"]) {
+      for (var route in stop["routes"]) {
+        if (route["route_type"] != routeType) {
+          continue;
+        }
+
+        int stopId = stop["stop_id"];
+        String stopName = stop["stop_name"];
+        double latitude = stop["stop_latitude"];
+        double longitude = stop["stop_longitude"];
+        double? distance = stop["stop_distance"];
+        Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude,
+            longitude: longitude, distance: distance);
+        stopList.add(newStop);
+      }
+    }
+
+    return stopList;
+  }
 
   // Fetch Stops along a Route
   Future<List<Stop>> fetchStopsRoute(Route route, {RouteDirection? direction}) async {

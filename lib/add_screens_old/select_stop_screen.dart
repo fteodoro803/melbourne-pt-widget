@@ -4,7 +4,6 @@ import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/database/helpers/stopHelpers.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as PTRoute;
@@ -25,7 +24,7 @@ class SelectStopScreen extends StatefulWidget {
 
 class _SelectStopScreenState extends State<SelectStopScreen> {
   final String _screenName = "SelectStop";
-  final List<Stop> _stops = [];
+  List<Stop> _stops = [];
   final List<PTRoute.Route> _routes = [];
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
@@ -43,7 +42,20 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     tools.printScreenState(_screenName, widget.arguments);
   }
 
-  // TEST get Routes
+
+  // Fetch Stops
+  Future<void> fetchStops() async {
+    String? location = widget.arguments.transport.location?.coordinates;
+    int? routeType = widget.arguments.transport.routeType?.id;
+    int maxDistance = 300;
+
+    List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType!, maxDistance);
+    _stops = stopList;
+
+    setState(() {});
+  }
+
+  // TEST get Routes, can delete this, move it to main on initialisation
   Future<void> getRoutes() async {
     List<PTRoute.Route> routeList = await ptvService.fetchRoutes();
 
@@ -56,56 +68,6 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
       await Get.find<db.AppDatabase>().addRoute(id, name, routeTypeId, status, number: number);
     }
-  }
-
-  // Fetch Stops            -- do tests to see if not null      // todo: move this to ptv service
-  Future<void> fetchStops() async {
-    String? location = widget.arguments.transport.location?.coordinates;
-    // print(location);
-    String? routeType = widget.arguments.transport.routeType?.id.toString();
-    // print(routeType);
-    String? maxDistance = "300";
-
-    // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().stops(location!, routeTypes: routeType, maxDistance: maxDistance);
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Early Exit
-    if (data.response == null) {
-      print("NULL DATA RESPONSE --> Improper Location Data");
-      return;
-    }
-
-    // Populating Stops List
-    for (var stop in jsonResponse!["stops"]) {
-      for (var route in stop["routes"]) {
-        if (route["route_type"] !=
-            widget.arguments.transport.routeType!.id) {
-          continue;
-        }
-
-        int stopId = stop["stop_id"];
-        String stopName = stop["stop_name"];
-        double latitude = stop["stop_latitude"];
-        double longitude = stop["stop_longitude"];
-        double? distance = stop["stop_distance"];
-        Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude, longitude: longitude, distance: distance);
-
-        String routeName = route["route_name"];
-        String routeNumber = route["route_number"].toString();
-        int routeId = route["route_id"];
-        int routeTypeId = route["route_type"];
-        RouteType routeType = RouteType.fromId(routeTypeId);
-        String status = "NULL -- TEST VALUE";     // todo fix this
-
-        PTRoute.Route newRoute = PTRoute.Route(name: routeName, number: routeNumber, id: routeId, type: routeType, status: status);
-
-        _stops.add(newStop);
-        _routes.add(newRoute);
-      }
-    }
-
-    setState(() {});
   }
 
   void setStopAndRoute(index) {
@@ -151,8 +113,10 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         itemCount: _stops.length,
         itemBuilder: (context, index) {
           final stopName = _stops[index].name;
-          final routeNumber = _routes[index].number;
-          final routeName = _routes[index].name;
+          // final routeNumber = _routes[index].number;
+          String routeNumber = "rNumber";     // get these from database
+          // final routeName = _routes[index].name;
+          String routeName = "rName";         // get these from database
 
           return ListTile(
             title: Text("$stopName: ($routeNumber)"),
