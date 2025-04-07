@@ -19,7 +19,7 @@ import 'nearby_stops_sheet.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import '../ptv_info_classes/route_info.dart' as pt_route;
-import 'package:flutter_project/google_service.dart';
+import 'package:flutter_project/services/google_service.dart';
 import 'suggestions_search.dart';
 
 enum ActiveSheet { none, nearbyStops, stopDetails, transportDetails, departureDetails }
