@@ -3,7 +3,6 @@ import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
 import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../utility/time_utils.dart';
 import '../widgets/screen_widgets.dart' as ScreenWidgets;
 import '../widgets/transport_widgets.dart';
 
@@ -245,7 +244,6 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
           }
         }
       });
-      print(_transportTypeFilters);
       _notifyStateChanged();
     }
   }
@@ -259,7 +257,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
       children: [
         // Draggable Scrollable Sheet Handle
         if (!widget.arguments.searchDetails!.isSheetExpanded)
-          HandleWidget(),
+          ScreenWidgets.HandleWidget(),
         // Address and toggleable transport type buttons
         Expanded(
           child: ListView.builder(
@@ -323,17 +321,17 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                               children:
                               ToggleableFilter.values.map((ToggleableFilter result) {
                                 return FilterChip(
-                                    label: Text(result.name),
-                                    selected: filters.contains(result),
-                                    onSelected: (bool selected) {
-                                      setState(() {
-                                        if (selected) {
-                                          filters.add(result);
-                                        } else {
-                                          filters.remove(result);
-                                        }
-                                      });
-                                    }
+                                  label: Text(result.name),
+                                  selected: filters.contains(result),
+                                  onSelected: (bool selected) {
+                                    setState(() {
+                                      if (selected) {
+                                        filters.add(result);
+                                      } else {
+                                        filters.remove(result);
+                                      }
+                                    });
+                                  }
                                 );
                               }).toList(),
                             ),
@@ -389,7 +387,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
                         if (isExpanded)...[
                           Divider(height: 0,),
-                          ExpandedStopRoutesWidget(routes: routes, routeType: routeType, widget: widget, stop: stop),
+                          ExpandedStopRoutesWidget(routes: routes, routeType: routeType, onStopTapped: widget.onStopTapped, stop: stop),
                         ],
                       ],
                     ),
@@ -568,176 +566,5 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
         );
       }
     );
-  }
-}
-
-class ExpandedStopRoutesWidget extends StatelessWidget {
-  const ExpandedStopRoutesWidget({
-    super.key,
-    required this.routes,
-    required this.routeType,
-    required this.widget,
-    required this.stop,
-  });
-
-  final List<pt_route.Route> routes;
-  final String routeType;
-  final NearbyStopsSheet widget;
-  final Stop stop;
-
-  @override
-  Widget build(BuildContext context) {
-    print(routes);
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
-      itemCount: routes.length,
-      itemBuilder: (context, routeIndex) {
-
-        final route = routes[routeIndex];
-        String routeLabel;
-        String? routeName;
-        if (routeType == "train") {
-          routeLabel = route.name;
-          routeName = null;
-        }
-        else if (routeType == "vLine") {
-          routeLabel = "V/Line";
-          routeName = route.name;
-        }
-        else {
-          routeLabel = route.number;
-          routeName = route.name;
-        }
-
-        return ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-          trailing: Icon(Icons.keyboard_arrow_right_outlined),
-          leading: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: route.colour != null
-                ? ColourUtils.hexToColour(route.colour!)
-                : Colors.grey,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: 280, // Limit the width to a maximum, or you can adjust the value
-              ),
-              child: Text(
-                routeLabel,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: route.textColour != null
-                    ? ColourUtils.hexToColour(route.textColour!)
-                    : Colors.black,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-          ),
-          title: routeName != null ? Text(routeName) : null,
-          onTap: () async {
-            await widget.onStopTapped(stop, route);
-          },
-        );
-      }
-    );
-  }
-}
-
-class ExpandedStopWidget extends StatelessWidget {
-  const ExpandedStopWidget({
-    super.key,
-    required this.stopName,
-    required this.distance,
-  });
-
-  final String stopName;
-  final double? distance;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-    children: [
-      Row(
-        children: [
-          Icon(Icons.location_pin, size: 20),
-          SizedBox(width: 4),
-          Expanded(
-            child: Text(
-              stopName,
-              style: TextStyle(fontSize: 17, height: 1.1, fontWeight: FontWeight.w700),
-
-            ),
-          ),
-        ],
-      ),
-      SizedBox(height: 6),
-      Row(
-        children: [
-          Icon(Icons.directions_walk, size: 20),
-          SizedBox(width: 4),
-          Text("${distance?.round()}m", style: TextStyle(fontSize: 17)),
-        ],
-      )
-    ],);
-  }
-}
-
-class UnexpandedStopWidget extends StatelessWidget {
-  const UnexpandedStopWidget({
-    super.key,
-    required this.stopName,
-    required this.routes,
-    required this.routeType,
-  });
-
-  final String stopName;
-  final List<pt_route.Route> routes;
-  final String routeType;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-    children: [
-      LocationWidget(textField: stopName, textSize: 18, scrollable: false),
-      Align(
-        alignment: Alignment.topLeft,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            spacing: 6,
-            children: routes.map((route) {
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: route.colour != null
-                      ? ColourUtils.hexToColour(route.colour!)
-                      : Colors.grey,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  routeType == "train" || routeType == "vLine"
-                      ? route.name
-                      : route.number,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: route.textColour != null
-                        ? ColourUtils.hexToColour(route.textColour!)
-                        : Colors.black,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-    ],);
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_project/widgets/departures_list.dart';
 import '../file_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../transport.dart';
+import '../widgets/screen_widgets.dart';
 import '../widgets/transport_widgets.dart';
 
 class StopDetailsSheet extends StatefulWidget {
@@ -80,7 +81,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     return Column(
       children: [
         // Draggable Scrollable Sheet Handle
-        if (!widget.arguments.searchDetails!.isSheetExpanded!)
+        if (!widget.arguments.searchDetails!.isSheetExpanded)
           HandleWidget(),
 
         // Stop and route details
@@ -275,7 +276,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                               // Display departures if they exist
                               if (departures != null && departures.isNotEmpty)
-                                DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false, onDepartureTapped: widget.onDepartureTapped,),
+                                DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false, scrollable: false, onDepartureTapped: widget.onDepartureTapped,),
 
                               // Display a message if no departures
                               if (departures == null || departures.isEmpty)

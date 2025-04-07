@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/departure_details_sheet.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../utility/geopath_utils.dart';
+import '../utility/map_utils.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import '../screen_arguments.dart';
@@ -96,15 +96,23 @@ class _TransportMapState extends State<TransportMap> {
 
     bool isReverseDirection = GeoPathUtils.reverseDirection(newGeoPath, stopPositions);
 
-    _markers = await transportPathUtils.setMarkers(
+    PolyLineMarkers polyLineMarkers = await transportPathUtils.setMarkers(
       _markers,
       stopPositions,
       _stopPosition,
       chosenStopPositionAlongGeoPath,
       true,
     );
+
+    Set<Marker> largeRouteMarkers = polyLineMarkers.largeMarkers;
+    Set<Marker> smallRouteMarkers = polyLineMarkers.smallMarkers;
+    Marker selectedStopMarker = polyLineMarkers.stopMarker;
+
+    _markers = {..._markers, ...largeRouteMarkers, ...smallRouteMarkers};
+    _markers.add(selectedStopMarker);
+
     _polyLines = await transportPathUtils.loadRoutePolyline(
-      _transport,
+      _transport.route!.colour!,
       newGeoPath,
       chosenStopPositionAlongGeoPath,
       true,

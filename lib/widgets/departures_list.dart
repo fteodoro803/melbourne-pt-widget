@@ -9,6 +9,7 @@ class DeparturesList extends StatefulWidget {
   final Transport transport;
   final bool lowFloorFilter;
   final bool airConditionerFilter;
+  final bool scrollable;
   final Function(Departure, Transport)? onDepartureTapped;
 
   const DeparturesList({
@@ -17,6 +18,7 @@ class DeparturesList extends StatefulWidget {
     required this.transport,
     required this.lowFloorFilter,
     required this.airConditionerFilter,
+    required this.scrollable,
     this.onDepartureTapped,
   });
 
@@ -36,7 +38,8 @@ class _DeparturesListState extends State<DeparturesList> {
 
     return ListView.builder(
         shrinkWrap: true,
-        controller: ScrollController(),
+        // controller: ScrollController(),
+      physics: widget.scrollable ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.only(
           top: 0.0,
           // right: 8.0,
