@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:get/get.dart';
-import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
-import 'package:flutter_project/database/database.dart' as db;
 
 class SelectRouteTypeScreen extends StatefulWidget {
   // Constructor
@@ -25,6 +21,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   final String _screenName = "SelectRouteType";
   final List<RouteType> _routeTypes = [];
   DevTools tools = DevTools();
+  PtvService ptvService = PtvService();
 
   // Initialising State
   @override
@@ -36,23 +33,12 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
     tools.printScreenState(_screenName, widget.arguments);
   }
 
-  // Fetches Routes and generates Map/Dictionary of PT Options               // I dont like how this logic is in the same file as the frontend rendering, find a way to split this
+  // Fetches Routes and generates Map/Dictionary of PT Options
   Future<void> fetchRouteTypes() async {
-    // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().routeTypes();
-    Map<String, dynamic>? jsonResponse = data.response;
+    List<String> routeTypes = await ptvService.fetchRouteTypes();
 
-    // Early Exit     // Make it display on screen if there is no data
-    if (data.response == null) {
-      print("NULL DATA RESPONSE --> Improper Location Data");
-      return;
-    }
-
-    // Populating RouteTypes List                                                         // add case for if 0
-    for (var entry in jsonResponse!["route_types"]) {
-      int id = entry["route_type"];
-      String name = entry["route_type_name"];
-
+    // Populating RouteTypes List
+    for (var name in routeTypes) {
       switch (name.toLowerCase()) {
         case "train":
           _routeTypes.add(RouteType.train);
@@ -62,16 +48,10 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
           _routeTypes.add(RouteType.bus);
         case "vline":
           _routeTypes.add(RouteType.vLine);
-
-          // reenable night bus later
-        // case "night bus":
+        // case "night bus":      // todo: re-enable night bus later
         //   _routeTypes.add(RouteTypeEnum.nightBus);
       }
-
-      // Add to database
-      // Get.find<AppDatabase>()(id, name, description);
-      Get.find<db.AppDatabase>().addRouteType(id, name);
-     }
+    }
 
     setState(() {});
   }

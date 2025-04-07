@@ -1,6 +1,7 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -10,6 +11,9 @@ import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'database/database.dart' as db;
+import 'package:get/get.dart';
 
 class StopRouteLists {
   List<Stop> stops;
@@ -247,6 +251,32 @@ class PtvService {
     return routeList;
   }
 
+// RouteType Functions
+  /// Fetches route types offered by PTV, and saves them to the database
+  Future<List<String>> fetchRouteTypes() async {
+    List<String> routeTypes = [];
+
+    ApiData data = await PtvApiService().routeTypes();
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Early Exit
+    if (data.response == null) {
+      print("( ptv_service.dart -> fetchRouteTypes ) -- null data response");
+      return routeTypes;
+    }
+
+    // Populating RouteTypes List
+    for (var entry in jsonResponse!["route_types"]) {
+      int id = entry["route_type"];
+      String name = entry["route_type_name"];
+      routeTypes.add(name);
+
+      // Add to database
+      Get.find<db.AppDatabase>().addRouteType(id, name);
+    }
+
+    return routeTypes;
+  }
 
 // Runs Functions
   Future<void> fetchRuns(Transport transport) async {
