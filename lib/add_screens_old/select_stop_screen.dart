@@ -7,8 +7,7 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart'
-    as PTRoute;
+import 'package:flutter_project/ptv_info_classes/route_info.dart' as PTRoute;
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // to avoid conflict with material's "Route"
 import 'package:get/get.dart';
 import 'package:flutter_project/ptv_database_classes/routeHelpers.dart';
@@ -37,8 +36,26 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     super.initState();
     fetchStops();
 
+    //test
+    getRoutes();
+
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
+  }
+
+  // TEST get Routes
+  Future<void> getRoutes() async {
+    List<PTRoute.Route> routeList = await ptvService.fetchRoutes();
+
+    for (var route in routeList) {
+      int id = route.id;
+      String name = route.name;
+      int routeTypeId = route.type.id;
+      int? number = int.tryParse(route.number);
+      String status = route.status;
+
+      await Get.find<db.AppDatabase>().addRoute(id, name, routeTypeId, status, number: number);
+    }
   }
 
   // Fetch Stops            -- do tests to see if not null      // todo: move this to ptv service
@@ -79,7 +96,9 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.fromId(routeTypeId);
-        PTRoute.Route newRoute = PTRoute.Route(name: routeName, number: routeNumber, id: routeId, type: routeType);
+        String status = "NULL -- TEST VALUE";     // todo fix this
+
+        PTRoute.Route newRoute = PTRoute.Route(name: routeName, number: routeNumber, id: routeId, type: routeType, status: status);
 
         _stops.add(newStop);
         _routes.add(newRoute);
@@ -97,10 +116,11 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeName = _routes[index].name;
     int routeTypeId = _routes[index].type.id;
     int? routeNumber;
+    String status = _routes[index].status;
     if (_routes[index].number.isNotEmpty) {
       routeNumber = int.tryParse(_routes[index].number);
     }
-    Get.find<db.AppDatabase>().addRoute(routeId, routeName, number: routeNumber, routeTypeId);
+    Get.find<db.AppDatabase>().addRoute(routeId, routeName, routeTypeId, status, number: routeNumber);
 
     int stopId = _stops[index].id;
     String stopName = _stops[index].name;

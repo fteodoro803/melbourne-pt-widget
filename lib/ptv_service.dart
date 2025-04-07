@@ -18,6 +18,8 @@ class StopRouteLists {
   StopRouteLists(this.stops, this.routes);
 }
 
+/// Handles calling the PTV API, converting to domain models, and storing to database
+
 class PtvService {
   Future<List<Departure>> fetchDepartures(String routeType, String stopId,
       String routeId,
@@ -135,9 +137,10 @@ class PtvService {
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.fromId(routeTypeId);
+        String status = "TEMPORARY";    // todo: fix this, or the logic of the class
 
         Route newRoute = Route(
-            name: routeName, number: routeNumber, id: routeId, type: routeType);
+            name: routeName, number: routeNumber, id: routeId, type: routeType, status: status);
 
         stops.add(newStop);
         routes.add(newRoute);
@@ -147,7 +150,35 @@ class PtvService {
     return StopRouteLists(stops, routes);
   }
 
-  // todo: fetch Routes
+  // Fetch Routes offered by PTV
+  Future<List<Route>> fetchRoutes({String? routeTypes}) async {
+    List<Route> routeList = [];
+
+    // Fetches stop data via PTV API
+    ApiData data = await PtvApiService().routes(routeTypes: routeTypes);
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Empty JSON Response
+    if (jsonResponse == null) {
+      print(
+          "(ptv_service.dart -> fetchRoutes) -- Null data response, Improper Location Data");
+      return routeList;
+    }
+
+    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
+    for (var route in jsonResponse["routes"]) {
+      int id = route["route_id"];
+      String name = route["route_name"];
+      String number = route["route_number"];
+      RouteType type = RouteType.fromId(route["route_type"]);
+      String status = route["route_service_status"]["description"];
+
+      Route newRoute = Route(id: id, name: name, number: number, type: type, status: status);
+      routeList.add(newRoute);
+    }
+
+    return routeList;
+  }
 
   // todo Fetch Stops near a Location
 

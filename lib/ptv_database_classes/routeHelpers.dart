@@ -12,7 +12,7 @@ class Colours {
 }
 
 extension RouteHelpers on AppDatabase {
-  Future<RoutesCompanion> createRouteCompanion({required int id, required String name, int? number, required int routeTypeId})
+  Future<RoutesCompanion> createRouteCompanion({required int id, required String name, int? number, required int routeTypeId, required String status})
   async {
     AppDatabase db = Get.find<AppDatabase>();
     String? routeType = await db.getRouteTypeNameFromRouteTypeId(routeTypeId);
@@ -23,14 +23,15 @@ extension RouteHelpers on AppDatabase {
       name: drift.Value(name),
       number: drift.Value(number),
       routeTypeId: drift.Value(routeTypeId),
-      lastUpdated: drift.Value(DateTime.now()),
       colour: drift.Value(routeColours.colour),
       textColour: drift.Value(routeColours.textColour),
+      status: drift.Value(status),
+      lastUpdated: drift.Value(DateTime.now()),
     );
   }
 
-  Future<void> addRoute(int id, String name, int routeTypeId, {int? number}) async {
-    RoutesCompanion route = await createRouteCompanion(id: id, name: name, number: number, routeTypeId: routeTypeId);
+  Future<void> addRoute(int id, String name, int routeTypeId, String status, {int? number}) async {
+    RoutesCompanion route = await createRouteCompanion(id: id, name: name, number: number, routeTypeId: routeTypeId, status: status);
     AppDatabase db = Get.find<AppDatabase>();
     db.insertRoute(route);
   }

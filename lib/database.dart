@@ -53,6 +53,7 @@ class Routes extends Table {
   TextColumn get colour => text()();
   TextColumn get textColour => text()();
   IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
+  TextColumn get status => text()();
   // TextColumn get routeTypeName => text().references(RouteTypes, #name)();
   // todo: add geopaths here
   DateTimeColumn get lastUpdated => dateTime()();

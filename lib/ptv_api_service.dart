@@ -72,6 +72,20 @@ class PtvApiService {
     return ApiData(url, response);
   }
 
+  // Get Routes
+  Future<ApiData> routes({String? routeTypes}) async {
+    String request = "/v3/routes";
+
+    // Parameter handling
+    Map<String, Object> parameters = {};
+    parameters = handleParameters(routeTypes: routeTypes);
+
+    Uri url = getURL(request, parameters: parameters);
+    Map<String, dynamic>? response = await getResponse(url);
+    // print("(ptv_api_service -> routes): response: $response");  // *test
+    return ApiData(url, response);
+  }
+
   // Get Route Directions
   Future<ApiData> routeDirections(String routeId) async {
     String request = "/v3/directions/route/$routeId";
