@@ -28,7 +28,7 @@ class CustomListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Transport transport = this.transport;
 
-    final departure = transport.departures?[0];
+    final departure = transport.departures != null && transport.departures!.isNotEmpty ? transport.departures![0] : null;
     final String estimatedDepartureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
     final DepartureStatus status = TransportUtils.getDepartureStatus(
       departure?.scheduledDepartureTime,

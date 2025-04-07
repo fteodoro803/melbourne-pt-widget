@@ -30,12 +30,14 @@ class NearbyStopsState {
   final String selectedUnit;
   final Set<ToggleableFilter> filters;
   final Map<String, bool> transportTypeFilters;
+  final int savedScrollIndex;
 
   NearbyStopsState({
     required this.selectedDistance,
     required this.selectedUnit,
     required this.filters,
     required this.transportTypeFilters,
+    required this.savedScrollIndex,
   });
 }
 
@@ -84,14 +86,15 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
   late FixedExtentScrollController _distanceScrollController;
   late FixedExtentScrollController _unitScrollController;
 
-  Set<ToggleableFilter> filters = <ToggleableFilter>{};
+  Set<ToggleableFilter> _filters = <ToggleableFilter>{};
 
-  bool get lowFloorFilter => filters.contains(ToggleableFilter.lowFloor);
-  bool get shelterFilter => filters.contains(ToggleableFilter.shelter);
+  bool get lowFloorFilter => _filters.contains(ToggleableFilter.lowFloor);
+  bool get shelterFilter => _filters.contains(ToggleableFilter.shelter);
 
   late Map<String, bool> _transportTypeFilters = {};
+  late int _savedScrollIndex;
 
-  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemScrollController _itemScrollController = ItemScrollController();
 
   @override
   void initState() {
@@ -103,12 +106,13 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     if (widget.initialState != null) {
       _selectedDistance = widget.initialState!.selectedDistance;
       _selectedUnit = widget.initialState!.selectedUnit;
-      filters = widget.initialState!.filters;
+      _filters = widget.initialState!.filters;
       _transportTypeFilters = widget.initialState!.transportTypeFilters;
+      _savedScrollIndex = widget.initialState!.savedScrollIndex;
     } else {
       _selectedDistance = _initialSelectedMeters;
       _selectedUnit = _initialSelectedUnit;
-      filters = <ToggleableFilter>{};
+      _filters = <ToggleableFilter>{};
       _transportTypeFilters = {
         "all": true,
         "tram": false,
@@ -116,7 +120,9 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
         "train": false,
         "vLine": false
       };
+      _savedScrollIndex = 0;
     }
+    scrollToStopItem(_savedScrollIndex);
 
     _tempSelectedDistance = _selectedDistance;
     _tempSelectedUnit = _selectedUnit;
@@ -158,7 +164,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
       setState(() {
         _selectedDistance = "300";
         _selectedUnit = "m";
-        filters = <ToggleableFilter>{};
+        _filters = <ToggleableFilter>{};
         _transportTypeFilters = {
           "all": true,
           "tram": false,
@@ -166,17 +172,20 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
           "train": false,
           "vLine": false
         };
+        _savedScrollIndex = 0;
+        _itemScrollController.jumpTo(
+            index: 0,
+            alignment: 0
+        );
       });
-      _notifyStateChanged();
     }
   }
 
   void scrollToStopItem(int stopIndex) {
-
     setState(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (itemScrollController.isAttached) {
-          itemScrollController.scrollTo(
+        if (_itemScrollController.isAttached) {
+          _itemScrollController.scrollTo(
               index: stopIndex,
               duration: Duration(milliseconds: 100),
               curve: Curves.easeInOut,
@@ -185,15 +194,15 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
         }
       });
     });
-
   }
 
   NearbyStopsState getCurrentState() {
     return NearbyStopsState(
       selectedDistance: _selectedDistance,
       selectedUnit: _selectedUnit,
-      filters: filters,
+      filters: _filters,
       transportTypeFilters: _transportTypeFilters,
+      savedScrollIndex: _savedScrollIndex,
     );
   }
 
@@ -215,8 +224,9 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     widget.onStateChanged(NearbyStopsState(
       selectedDistance: _selectedDistance,
       selectedUnit: _selectedUnit,
-      filters: filters,
+      filters: _filters,
       transportTypeFilters: _transportTypeFilters,
+      savedScrollIndex: _savedScrollIndex,
     ));
   }
 
@@ -324,13 +334,13 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                               ToggleableFilter.values.map((ToggleableFilter result) {
                                 return FilterChip(
                                     label: Text(result.name),
-                                    selected: filters.contains(result),
+                                    selected: _filters.contains(result),
                                     onSelected: (bool selected) {
                                       setState(() {
                                         if (selected) {
-                                          filters.add(result);
+                                          _filters.add(result);
                                         } else {
-                                          filters.remove(result);
+                                          _filters.remove(result);
                                         }
                                       });
                                     }
@@ -352,7 +362,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ScrollablePositionedList.builder(
-                    itemScrollController: itemScrollController,
+                    itemScrollController: _itemScrollController,
                     itemPositionsListener: ItemPositionsListener.create(),
                     shrinkWrap: true,
                     padding: const EdgeInsets.all(0.0),
@@ -393,8 +403,10 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                 trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
                                 onTap: () {
                                   setState(() {
+                                    _savedScrollIndex = stopIndex;
                                     widget.arguments.searchDetails?.stops[stopIndex].isExpanded = !widget.arguments.searchDetails!.stops[stopIndex].isExpanded!;
                                   });
+                                  _notifyStateChanged();
                                 }
                               ),
 
