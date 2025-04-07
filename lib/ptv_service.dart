@@ -21,7 +21,7 @@ class StopRouteLists {
 class PtvService {
   Future<List<Departure>> fetchDepartures(String routeType, String stopId,
       String routeId,
-      {String? directionId, String? maxResults = "20", String? expands = "All"}) async {
+      {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
     List<Departure> departures = [];
 
     // Fetches departure data via PTV API
@@ -49,11 +49,12 @@ class PtvService {
       DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
       String? runRef = departure["run_ref"]?.toString();
+      int? stopId = departure["stop_id"];
 
       Departure newDeparture = Departure(
           scheduledDepartureUTC: scheduledDepartureUTC,
           estimatedDepartureUTC: estimatedDepartureUTC,
-          runRef: runRef);
+          runRef: runRef, stopId: stopId);
 
       // Get Vehicle descriptors per Departure
       var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
@@ -63,6 +64,7 @@ class PtvService {
         // print("( ptv_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
 
         newDeparture.hasLowFloor = vehicleDescriptors["low_floor"];
+        newDeparture.hasAirConditioning = vehicleDescriptors["air_conditioned"];
       }
       else {
         print(

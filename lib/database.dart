@@ -4,6 +4,36 @@ import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
+// todo: add disruptions (it comes with Departures i think)
+
+// todo: think about whether columns here should be nullable, because all the swagger api shows is that they are
+// todo: find a way to have them delete/be replaced some time after their departure time
+class Departures extends Table {
+  // IntColumn get id => integer().autoIncrement()();
+
+  // Departure Times (UTC and formatted Melbourne times)
+  DateTimeColumn get scheduledDepartureUtc => dateTime().nullable()();
+  DateTimeColumn get estimatedDepartureUtc => dateTime().nullable()();
+  TextColumn get scheduledDeparture => text().nullable()();       // ie. 12:30pm
+  TextColumn get estimatedDeparture => text().nullable()();
+
+  // Vehicle Descriptors
+  TextColumn get runRef => text().nullable()();
+  BoolColumn get hasLowFloor => boolean().nullable()();
+  BoolColumn get hasAirConditioning => boolean().nullable()();
+
+  // Stop, Route, and Direction Identifiers
+  IntColumn get stopId => integer().references(Stops, #id).nullable()();
+  IntColumn get routeId => integer().references(Routes, #id).nullable()();
+  IntColumn get directionId => integer().references(Directions, #id).nullable()();
+
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  // todo: maybe its primary foreign key should be the runref? what if it's null?
+  @override
+  Set<Column> get primaryKey => {scheduledDeparture, runRef, directionId};
+}
+
 class Directions extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
@@ -14,12 +44,14 @@ class Directions extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+// todo: Patterns
+
 class Routes extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
-  IntColumn get number => integer().nullable()();
-  TextColumn get colour => text().nullable()();        // todo: make this non nullable
-  TextColumn get textColour => text().nullable()();    // todo: make this non nullable
+  IntColumn get number => integer().nullable()();     // trains don't have numbers
+  TextColumn get colour => text()();
+  TextColumn get textColour => text()();
   IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
   // TextColumn get routeTypeName => text().references(RouteTypes, #name)();
   // todo: add geopaths here
@@ -44,6 +76,10 @@ class Stops extends Table {
   IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
+  // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine
+  // todo: zone, and inFreeTramZone (in stops along route) -- stops["stop_ticket"]["zone"] | stops["stop_ticket"]["is_free_fare_zone"]
+  TextColumn get zone => text().nullable()();     // only obtainable if using stopsAlongRoutes, but not stopsNearLocation
+  BoolColumn get isFreeFareZone => boolean().nullable()();
   DateTimeColumn get lastUpdated => dateTime()();
 
   @override
@@ -54,7 +90,7 @@ class Stops extends Table {
 //   IntColumn get routeId =>
 // }
 
-@DriftDatabase(tables: [Directions, RouteTypes, Routes, Stops])
+@DriftDatabase(tables: [Departures, Directions, RouteTypes, Routes, Stops])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -74,6 +110,19 @@ class AppDatabase extends _$AppDatabase {
       ),
       // If you need web support, see https://drift.simonbinder.eu/platforms/web/
     );
+  }
+
+  // Departure Functions
+  /// Adds a departure to the database, if it doesn't already exist,
+  /// or if it has past the "expiry" time
+  Future<void> insertDeparture(DeparturesCompanion departure) async {
+    // final exists = await (select(departures)
+    //   ..where((d) => d.id.equals(departure.id.value))).getSingleOrNull();
+    // if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+    //   into(departures).insertOnConflictUpdate(departure);
+    // }
+    into(departures).insertOnConflictUpdate(departure);
+    // into(departures).insert(departure);
   }
 
   // Direction Functions
@@ -125,4 +174,9 @@ class AppDatabase extends _$AppDatabase {
       into(stops).insertOnConflictUpdate(stop);
     }
   }
+
+  // Table Functions
+  // Future<void> clearData() async {
+  //   await delete(departures).go();
+  // }
 }

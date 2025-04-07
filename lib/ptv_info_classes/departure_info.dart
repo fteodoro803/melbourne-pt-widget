@@ -21,6 +21,7 @@ class Departure {
   // Vehicle Descriptions
   String? runRef;
   bool? hasLowFloor;
+  bool? hasAirConditioning;
 
   // Stop Description     // todo: i feel like there's a smarter way to do this. Stop name being here seems redundant. It's only used in fetchPattern.
   String? stopName;

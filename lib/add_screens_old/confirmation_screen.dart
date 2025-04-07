@@ -79,7 +79,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       );
     }
 
-    return Scaffold(
+    else {
+      return Scaffold(
       appBar: AppBar(
         title: Text("Confirmation"),
         centerTitle: true,
