@@ -41,7 +41,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     tools.printScreenState(_screenName, widget.arguments);
   }
 
-  // Fetch Stops            -- do tests to see if not null
+  // Fetch Stops            -- do tests to see if not null      // todo: move this to ptv service
   Future<void> fetchStops() async {
     String? location = widget.arguments.transport.location?.coordinates;
     // print(location);
