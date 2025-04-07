@@ -5,8 +5,8 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:get/get.dart';
-import 'package:flutter_project/ptv_database_classes/routeTypeHelpers.dart';
-import 'package:flutter_project/database.dart' as db;
+import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
+import 'package:flutter_project/database/database.dart' as db;
 
 class SelectRouteTypeScreen extends StatefulWidget {
   // Constructor

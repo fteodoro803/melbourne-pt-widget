@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/ptv_database_classes/stopHelpers.dart';
+import 'package:flutter_project/database/helpers/stopHelpers.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_api_service.dart';
@@ -10,8 +10,8 @@ import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as PTRoute;
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // to avoid conflict with material's "Route"
 import 'package:get/get.dart';
-import 'package:flutter_project/ptv_database_classes/routeHelpers.dart';
-import 'package:flutter_project/database.dart' as db;
+import 'package:flutter_project/database/helpers/routeHelpers.dart';
+import 'package:flutter_project/database/database.dart' as db;
 
 class SelectStopScreen extends StatefulWidget {
   const SelectStopScreen({super.key, required this.arguments});

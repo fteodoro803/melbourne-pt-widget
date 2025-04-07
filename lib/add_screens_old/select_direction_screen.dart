@@ -5,9 +5,9 @@ import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_api_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
-import 'package:flutter_project/database.dart' as db;
+import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
-import 'package:flutter_project/ptv_database_classes/directionHelpers.dart';
+import 'package:flutter_project/database/helpers/directionHelpers.dart';
 
 class SelectDirectionScreen extends StatefulWidget {
   const SelectDirectionScreen({super.key, required this.arguments});

@@ -10,9 +10,9 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'ptv_service.dart';
 
-import 'ptv_database_classes/departureHelpers.dart';
+import 'database/helpers/departureHelpers.dart';
 import 'package:drift/drift.dart';
-import 'database.dart' as db;
+import 'database/database.dart' as db;
 import 'package:get/get.dart';
 
 part 'transport.g.dart';

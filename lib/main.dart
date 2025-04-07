@@ -6,7 +6,7 @@ import "package:flutter_project/add_screens_old/select_location_screen.dart";
 import "package:flutter_project/add_screens_old/select_direction_screen.dart";
 import "package:flutter_project/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/add_screens_old/select_stop_screen.dart";
-import "package:flutter_project/database.dart";
+import "package:flutter_project/database/database.dart";
 import "package:flutter_project/widgets/bottom_navigation_bar.dart";
 import "package:flutter_project/widgets/custom_list_tile.dart";
 import "package:flutter_project/screen_arguments.dart";
@@ -30,6 +30,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   Get.put(AppDatabase());
+
+  // todo: maybe call fetchRoutes here?
 
   // // Loads Config
   // await GlobalConfiguration().loadFromAsset("config");
