@@ -50,7 +50,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     List<Stop> newStops = [];
     List<PTRoute.Route> newRoutes = [];
 
-    List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType!, maxDistance);
+    // List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType: routeType!, maxDistance: maxDistance);
+    List<Stop> stopList = await ptvService.fetchStopsLocation(location!);
     List<PTRoute.Route> routeList;
     print("select stop screen -- StopList: $stopList");
 

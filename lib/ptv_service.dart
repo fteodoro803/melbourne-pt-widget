@@ -317,13 +317,14 @@ class PtvService {
 
 // Stop Functions
   /// Fetch Stops, and links it to its Route, and saves to database
-  Future<List<Stop>> fetchStopsLocation(String location, int routeType, int maxDistance) async {
+  Future<List<Stop>> fetchStopsLocation(String location,
+      {int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
     List<Future> futures = [];    // holds all Futures for database async operations
 
     // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().stops(
-        location, routeTypes: routeType.toString(), maxDistance: maxDistance.toString());
+    ApiData data = await PtvApiService().stopsLocation(
+        location, routeTypes: routeType?.toString(), maxDistance: maxDistance?.toString());
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
@@ -336,6 +337,7 @@ class PtvService {
     for (var stop in jsonResponse!["stops"]) {
       int stopId = stop["stop_id"];
       String stopName = stop["stop_name"];
+      int routeType = stop["route_type"];
       double latitude = stop["stop_latitude"];
       double longitude = stop["stop_longitude"];
       double? distance = stop["stop_distance"];
@@ -420,7 +422,7 @@ class PtvService {
     }
 
     // Fetches stop data via PTV API
-    ApiData data = await PtvApiService().stops(
+    ApiData data = await PtvApiService().stopsLocation(
       locationString,
       maxResults: maxResults.toString(),
       maxDistance: maxDistance.toString(),
