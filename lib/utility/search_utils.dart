@@ -1,7 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../api_data.dart';
-import '../ptv_api_service.dart';
+import '../api/ptv_api_service.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/route_info.dart' as pt_route;
 import '../ptv_info_classes/route_type_info.dart';
@@ -41,7 +41,7 @@ class SearchUtils {
 
     for (var direction in directions) {
       Transport newTransport = Transport.withStopRoute(stop, route, direction);
-      newTransport.routeType = RouteType.withId(id: route.type.type.id);
+      newTransport.routeType = RouteType.fromId(route.type.id);
       await newTransport.updateDepartures();
       transportList.add(newTransport);
     }

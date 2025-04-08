@@ -56,7 +56,7 @@ class _TransportMapState extends State<TransportMap> {
   Future<void> fetchGeoPath() async {
     _geoPath = await ptvService.fetchGeoPath(_transport.route!);
     if (_transport.departures != null && _transport.departures!.isNotEmpty) {
-      _pattern = await ptvService.fetchPattern(_transport, _transport.departures?[0]);
+      _pattern = await ptvService.fetchPattern(_transport, _transport.departures![0]);
     }
     else {
       _pattern = [];

@@ -8,7 +8,7 @@ import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/google_service.dart';
+import 'package:flutter_project/services/google_service.dart';
 
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/stop_info.dart';
@@ -185,8 +185,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Generates marker for a nearby stop
   Future<Marker> createNearbyStopMarker(Stop stop) async {
-    BitmapDescriptor? customMarkerIcon = await transportPathUtils.getResizedImage("assets/icons/PTV ${stop.routeType?.type.name} Logo.png", 20, 20);
-    BitmapDescriptor? largeCustomMarkerIcon = await transportPathUtils.getResizedImage("assets/icons/PTV ${stop.routeType?.type.name} Logo Outlined.png", 35, 35);
+    BitmapDescriptor? customMarkerIcon = await transportPathUtils.getResizedImage("assets/icons/PTV ${stop.routeType?.name} Logo.png", 20, 20);
+    BitmapDescriptor? largeCustomMarkerIcon = await transportPathUtils.getResizedImage("assets/icons/PTV ${stop.routeType?.name} Logo Outlined.png", 35, 35);
 
     LatLng stopPosition = LatLng(stop.latitude!, stop.longitude!);
 
@@ -468,7 +468,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     _geoPath = await ptvService.fetchGeoPath(route); // get geoPath of route
     if (listTransport.first.departures != null && listTransport.first.departures!.isNotEmpty) {
-      _pattern = await ptvService.fetchPattern(listTransport[0], listTransport[0].departures?[0]);
+      _pattern = await ptvService.fetchPattern(listTransport[0], listTransport[0].departures![0]);
     }
     else {
       _pattern = [];
@@ -487,7 +487,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _changeSheet(ActiveSheet.transportDetails, false);
 
     if (transport.departures != null && transport.departures!.isNotEmpty) {
-      _pattern = await ptvService.fetchPattern(transport, transport.departures?[0]);
+      _pattern = await ptvService.fetchPattern(transport, transport.departures![0]);
     }
     else {
       _pattern = [];

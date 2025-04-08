@@ -155,6 +155,11 @@ class PtvService {
 // Pattern Functions
   Future<List<Departure>> fetchPattern(Transport transport, Departure departure) async {
     List<Departure> departures = [];
+
+    // if (departure == null) {
+    //   return [];
+    // }
+
     String expands = "Stop";
     String? runRef = departure.runRef;
     RouteType? routeType = transport.routeType;
