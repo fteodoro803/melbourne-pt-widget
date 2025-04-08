@@ -745,7 +745,10 @@ class _SearchScreenState extends State<SearchScreen> {
                             children: [
                               IconButton(
                                 icon: Icon(Icons.arrow_back_ios_new),
-                                onPressed: () => _handleBackButton(),
+                                onPressed: () {
+                                  scrollController.jumpTo(0);
+                                  _handleBackButton();
+                                }
                               ),
                               Expanded(
                                 child: Text(
@@ -756,7 +759,10 @@ class _SearchScreenState extends State<SearchScreen> {
                               ),
                               IconButton(
                                 icon: Icon(Icons.location_pin),
-                                onPressed: () => _controller.jumpTo(0.6),
+                                onPressed: () {
+                                  _controller.jumpTo(0.6);
+                                  scrollController.jumpTo(0);
+                                } ,
                               ),
                             ],
                           ),

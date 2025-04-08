@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/widgets/departures_list.dart';
 import '../file_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../transport.dart';
+import '../widgets/departure_card.dart';
 import '../widgets/save_transport_sheet.dart';
 import '../widgets/screen_widgets.dart';
 import '../widgets/transport_widgets.dart';
@@ -188,7 +188,19 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                               // Display departures if they exist
                               if (departures != null && departures.isNotEmpty)
-                                DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false, scrollable: false, onDepartureTapped: widget.onDepartureTapped,),
+
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  padding: const EdgeInsets.all(0.0),
+                                  itemCount: departures.length > 2 ? 2 : departures.length,
+                                  itemBuilder: (context, index) {
+                                    final departure = departures[index];
+                                    return DepartureCard(transport: widget.arguments.transport, departure: departure, onDepartureTapped: widget.onDepartureTapped);
+                                  },
+                                ),
+
+                                // DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false, scrollable: false, onDepartureTapped: widget.onDepartureTapped,),
 
                               // Display a message if no departures
                               if (departures == null || departures.isEmpty)

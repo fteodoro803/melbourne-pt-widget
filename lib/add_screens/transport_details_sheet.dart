@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../file_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../screen_arguments.dart';
-import '../widgets/departures_list.dart';
+import '../widgets/departure_card.dart';
 import '../transport.dart';
 import '../widgets/screen_widgets.dart';
 import '../widgets/transport_widgets.dart';
@@ -31,6 +31,8 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
   late Transport transport;
   Map<String, bool> filters = {};
 
+  ScrollController listController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +42,8 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
       "Low Floor": false,
     };
     checkSaved();
+
+
   }
 
   // Function to check if transport is saved
@@ -67,6 +71,17 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
+
+    List<Departure>? filteredDepartures = widget.arguments.transport.departures;
+    if (filters['Low Floor'] == true) {
+      filteredDepartures = filteredDepartures?.where((departure) => departure.hasLowFloor == filters['Low Floor']).toList();
+    }
+
+    listController.addListener(() {
+      if (listController.offset <= 0) {
+        widget.scrollController.jumpTo(0);
+      }
+    });
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -204,13 +219,16 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                 fillOverscroll: true,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: DeparturesList(
-                    departuresLength: 30,
-                    transport: transport,
-                    lowFloorFilter: filters['Low Floor']!,
-                    airConditionerFilter: filters['Air Conditioning']!,
-                    scrollable: true,
-                    onDepartureTapped: widget.onDepartureTapped,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    controller: listController,
+                    physics: AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(0.0),
+                    itemCount: filteredDepartures!.length > 30 ? 30 : filteredDepartures.length,
+                    itemBuilder: (context, index) {
+                      final departure = filteredDepartures?[index];
+                      return DepartureCard(transport: widget.arguments.transport, departure: departure!, onDepartureTapped: widget.onDepartureTapped);
+                    },
                   ),
                 ),
               ),

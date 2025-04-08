@@ -81,6 +81,8 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
   late int _savedScrollIndex;
 
   final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
+
 
   @override
   void initState() {
@@ -217,6 +219,19 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
 
     String address = widget.arguments.searchDetails!.locationController.text;
 
+    // Add listener to the ItemPositionsListener
+    _itemPositionsListener.itemPositions.addListener(() {
+      final firstVisibleItem = _itemPositionsListener.itemPositions.value.isNotEmpty
+          ? _itemPositionsListener.itemPositions.value.first
+          : null;
+
+      if (firstVisibleItem != null) {
+        if (firstVisibleItem.index == 0 && firstVisibleItem.itemLeadingEdge > 0) {
+          widget.scrollController.jumpTo(0);
+        }
+      }
+    });
+
     return Column(
       children: [
         // Draggable Scrollable Sheet Handle
@@ -308,7 +323,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ScrollablePositionedList.builder(
                     itemScrollController: _itemScrollController,
-                    itemPositionsListener: ItemPositionsListener.create(),
+                    itemPositionsListener: _itemPositionsListener,
                     shrinkWrap: true,
                     padding: const EdgeInsets.all(0.0),
                     itemCount: widget.arguments.searchDetails!.stops.length,

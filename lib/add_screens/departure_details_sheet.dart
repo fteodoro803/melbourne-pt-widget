@@ -31,7 +31,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   late List<Departure> _pattern = [];
   late int _currentStopIndex;
 
-  final ItemScrollController itemScrollController = ItemScrollController();
+  ItemScrollController itemScrollController = ItemScrollController();
+  ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
+
 
   @override
   void initState() {
@@ -55,17 +57,20 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
 
     setState(() {});
 
+
     // Scroll to the item after the build is complete
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(Duration(milliseconds: 100));
       if (itemScrollController.isAttached) {
         itemScrollController.scrollTo(
-            index: _currentStopIndex,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            alignment: 0
+          index: _currentStopIndex,
+          duration: Duration(milliseconds: 100),
+          curve: Curves.easeInOut,
+          alignment: 0,
         );
       }
     });
+
   }
 
   @override
@@ -95,6 +100,20 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
         timeString = "In ${timeToDeparture['minutes']!} min";
       }
     }
+
+    // Add listener to the ItemPositionsListener
+    _itemPositionsListener.itemPositions.addListener(() {
+      final firstVisibleItem = _itemPositionsListener.itemPositions.value.isNotEmpty
+          ? _itemPositionsListener.itemPositions.value.first
+          : null;
+      print(firstVisibleItem);
+
+      if (firstVisibleItem != null) {
+        if (firstVisibleItem.index == 0 && firstVisibleItem.itemLeadingEdge > 0) {
+          widget.scrollController.jumpTo(0);
+        }
+      }
+    });
 
     return Column(
       children: [
@@ -212,7 +231,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ScrollablePositionedList.builder(
                     itemScrollController: itemScrollController,
-                    itemPositionsListener: ItemPositionsListener.create(),
+                    itemPositionsListener: _itemPositionsListener,
                     shrinkWrap: true,
                     padding: const EdgeInsets.all(0.0),
                     itemCount: _pattern.length,
