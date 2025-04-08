@@ -25,7 +25,7 @@ class SelectStopScreen extends StatefulWidget {
 class _SelectStopScreenState extends State<SelectStopScreen> {
   final String _screenName = "SelectStop";
   List<Stop> _stops = [];
-  final List<PTRoute.Route> _routes = [];
+  List<PTRoute.Route> _routes = [];
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
 
@@ -33,41 +33,50 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   @override
   void initState() {
     super.initState();
-    fetchStops();
-
-    //test
-    getRoutes();
+    getStopsAndRoutes();
 
     // Debug Printing
     tools.printScreenState(_screenName, widget.arguments);
   }
 
 
-  // Fetch Stops
-  Future<void> fetchStops() async {
+  // Fetch each Route that each Stop is on
+  Future<void> getStopsAndRoutes() async {
     String? location = widget.arguments.transport.location?.coordinates;
     int? routeType = widget.arguments.transport.routeType?.id;
     int maxDistance = 300;
 
+    // Create temporary lists to hold the new data
+    List<Stop> newStops = [];
+    List<PTRoute.Route> newRoutes = [];
+
     List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType!, maxDistance);
-    _stops = stopList;
+    List<PTRoute.Route> routeList;
+    print("select stop screen -- StopList: $stopList");
 
-    setState(() {});
-  }
+    // Create a list to hold all route fetch operations
+    List<Future<void>> routeFetchOperations = [];
 
-  // TEST get Routes, can delete this, move it to main on initialisation
-  Future<void> getRoutes() async {
-    List<PTRoute.Route> routeList = await ptvService.fetchRoutes();
+    for (var stop in stopList) {
+      // Add the future operation to our list instead of awaiting it immediately
+      routeFetchOperations.add(ptvService.fetchRoutesFromStop(stop.id).then((routeList) {
+        print("select stop screen -- RouteList for Stop${stop.id} $routeList");
 
-    for (var route in routeList) {
-      int id = route.id;
-      String name = route.name;
-      int routeTypeId = route.type.id;
-      int? number = int.tryParse(route.number);
-      String status = route.status;
-
-      await Get.find<db.AppDatabase>().addRoute(id, name, routeTypeId, status, number: number);
+        for (var route in routeList) {
+          newStops.add(stop);
+          newRoutes.add(route);
+        }
+      }));
     }
+
+    // Wait for ALL route fetch operations to complete
+    await Future.wait(routeFetchOperations);
+
+    // Now that everything is complete, update the actual data and state
+    setState(() {
+      _stops = newStops;
+      _routes = newRoutes;
+    });
   }
 
   void setStopAndRoute(index) {
@@ -77,12 +86,9 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     int routeId = _routes[index].id;
     String routeName = _routes[index].name;
     int routeTypeId = _routes[index].type.id;
-    int? routeNumber;
+    String routeNumber = _routes[index].number;
     String status = _routes[index].status;
-    if (_routes[index].number.isNotEmpty) {
-      routeNumber = int.tryParse(_routes[index].number);
-    }
-    Get.find<db.AppDatabase>().addRoute(routeId, routeName, routeTypeId, status, number: routeNumber);
+    Get.find<db.AppDatabase>().addRoute(routeId, routeName,routeNumber , routeTypeId, status);
 
     int stopId = _stops[index].id;
     String stopName = _stops[index].name;
@@ -92,18 +98,11 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
   }
 
-  Future<void> testFetchStopRoutePairs(LatLng location) async {
-    StopRouteLists stopRouteLists = await ptvService.fetchStopRoutePairs(location);
-    print("stopRouteLists.routes (${stopRouteLists.routes.length}) = \n${stopRouteLists.routes}");
-    print("stopRouteLists.stops (${stopRouteLists.stops.length}) = \n${stopRouteLists.stops}");
-
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Select Stop:"),
+        title: Text("Select Stop & Route:"),
         centerTitle: true,
       ),
 
@@ -113,10 +112,10 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         itemCount: _stops.length,
         itemBuilder: (context, index) {
           final stopName = _stops[index].name;
-          // final routeNumber = _routes[index].number;
-          String routeNumber = "rNumber";     // get these from database
-          // final routeName = _routes[index].name;
-          String routeName = "rName";         // get these from database
+          final routeNumber = _routes[index].number;
+          // String routeNumber = "rNumber";     // get these from database
+          final routeName = _routes[index].name;
+          // String routeName = "rName";         // get these from database
 
           return ListTile(
             title: Text("$stopName: ($routeNumber)"),

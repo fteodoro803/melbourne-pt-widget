@@ -27,6 +27,7 @@ class Departures extends Table {
   IntColumn get routeId => integer().references(Routes, #id).nullable()();
   IntColumn get directionId => integer().references(Directions, #id).nullable()();
 
+  // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 
   // todo: maybe its primary foreign key should be the runref? what if it's null?
@@ -38,6 +39,7 @@ class Directions extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get description => text()();
+  // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 
   @override
@@ -49,7 +51,8 @@ class Directions extends Table {
 class Routes extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
-  IntColumn get number => integer().nullable()();     // trains don't have numbers
+  // IntColumn get number => integer().nullable()();     // trains don't have numbers
+  TextColumn get number => text()();                    // todo: convert this to int?
   TextColumn get colour => text()();
   TextColumn get textColour => text()();
   IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
@@ -81,17 +84,32 @@ class Stops extends Table {
   // todo: zone, and inFreeTramZone (in stops along route) -- stops["stop_ticket"]["zone"] | stops["stop_ticket"]["is_free_fare_zone"]
   TextColumn get zone => text().nullable()();     // only obtainable if using stopsAlongRoutes, but not stopsNearLocation
   BoolColumn get isFreeFareZone => boolean().nullable()();
+
+  // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};
 }
 
+// Linking Tables
+/// Represents the many-to-many relationship between Stops and Routes.
+/// One stop can serve multiple routes, and one route can have multiple stops.
+class RouteStops extends Table {
+  IntColumn get routeId => integer().references(Routes, #id)();
+  IntColumn get stopId => integer().references(Stops, #id)();
+  // BoolColumn get isTemporary => boolean()();
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {routeId, stopId};
+}
+
 // class GeoPaths extends Table {
 //   IntColumn get routeId =>
 // }
 
-@DriftDatabase(tables: [Departures, Directions, RouteTypes, Routes, Stops])
+@DriftDatabase(tables: [Departures, Directions, RouteTypes, Routes, Stops, RouteStops])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -112,6 +130,8 @@ class AppDatabase extends _$AppDatabase {
       // If you need web support, see https://drift.simonbinder.eu/platforms/web/
     );
   }
+
+  // todo: move these functions to their respective helpers maybe?
 
   // Departure Functions
   /// Adds a departure to the database, if it doesn't already exist,
@@ -173,6 +193,20 @@ class AppDatabase extends _$AppDatabase {
     final exists = await (select(stops)..where((d) => d.id.equals(stop.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
       into(stops).insertOnConflictUpdate(stop);
+    }
+  }
+
+  // RouteStops Functions
+  Future<void> insertRouteStopLink(RouteStopsCompanion routeStop) async {
+
+    final exists = await (select(routeStops)
+      ..where((l) =>
+      l.routeId.equals(routeStop.routeId.value) &
+      l.stopId.equals(routeStop.stopId.value))
+    ).getSingleOrNull();
+
+    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+      await into(routeStops).insertOnConflictUpdate(routeStop);
     }
   }
 

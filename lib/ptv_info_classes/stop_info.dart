@@ -9,7 +9,7 @@ part 'stop_info.g.dart';
 class Stop {
   int id;      // convert this to integer ~note
   String name;      //~note what happens if in an api call, these are null?
-  List<Route>? routes;
+  List<Route>? routes;      // todo: turn this into a method: get Routes from a Stop
   RouteType? routeType;
 
   // todo: maybe use the Location class; im not sure if these should be here

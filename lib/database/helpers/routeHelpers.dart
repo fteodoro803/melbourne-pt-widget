@@ -12,7 +12,7 @@ class Colours {
 }
 
 extension RouteHelpers on AppDatabase {
-  Future<RoutesCompanion> createRouteCompanion({required int id, required String name, int? number, required int routeTypeId, required String status})
+  Future<RoutesCompanion> createRouteCompanion({required int id, required String name, required String number, required int routeTypeId, required String status})
   async {
     AppDatabase db = Get.find<AppDatabase>();
     String? routeType = await db.getRouteTypeNameFromRouteTypeId(routeTypeId);
@@ -30,15 +30,16 @@ extension RouteHelpers on AppDatabase {
     );
   }
 
-  Future<void> addRoute(int id, String name, int routeTypeId, String status, {int? number}) async {
+  Future<void> addRoute(int id, String name, String number, int routeTypeId, String status) async {
     RoutesCompanion route = await createRouteCompanion(id: id, name: name, number: number, routeTypeId: routeTypeId, status: status);
     AppDatabase db = Get.find<AppDatabase>();
-    db.insertRoute(route);
+    await db.insertRoute(route);
   }
 
   /// Sets a route's colours based on its type.
   /// Uses predefined colour palette with fallbacks for routes.
-  Colours setRouteColour(String routeType, {String? name, int? number}) {
+  // todo: move this to domain model
+  Colours setRouteColour(String routeType, {String? name, String? number}) {
     String colour;
     String textColour;
     routeType = routeType.toLowerCase(); // Normalise case for matching

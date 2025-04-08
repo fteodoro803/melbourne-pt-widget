@@ -1,7 +1,9 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
+import 'package:flutter_project/database/helpers/stopHelpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -218,6 +220,7 @@ class PtvService {
   }
 
 // Route Functions
+  /// Fetches all routes offered by PTV, and saves them to the database
   Future<List<Route>> fetchRoutes({String? routeTypes}) async {
     List<Route> routeList = [];
 
@@ -228,7 +231,7 @@ class PtvService {
     // Empty JSON Response
     if (jsonResponse == null) {
       print(
-          "(ptv_service.dart -> fetchRoutes) -- Null data response, Improper Location Data");
+          "(ptv_service.dart -> fetchRoutes) -- Null data response");
       return routeList;
     }
 
@@ -247,6 +250,23 @@ class PtvService {
           status: status);
       routeList.add(newRoute);
     }
+
+    return routeList;
+  }
+
+  /// Fetches routes according to a stop, from the database.
+  /// Maps the databases' routes to domain's route
+  Future<List<Route>> fetchRoutesFromStop(int stopId) async {
+    final dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
+
+    // Map each database route to the domain model
+    List<Route> routeList = dbRoutes.map((dbRoute) => Route(
+        id: dbRoute.id,
+        name: dbRoute.name,
+        number: dbRoute.number,
+        type: RouteType.fromId(dbRoute.routeTypeId),
+        status: dbRoute.status,
+    )).toList();
 
     return routeList;
   }
@@ -291,9 +311,10 @@ class PtvService {
   }
 
 // Stop Functions
-  // Fetch Stops
+  /// Fetch Stops, and links it to its Route, and saves to database
   Future<List<Stop>> fetchStopsLocation(String location, int routeType, int maxDistance) async {
     List<Stop> stopList = [];
+    List<Future> futures = [];    // holds all Futures for database async operations
 
     // Fetching Data and converting to JSON
     ApiData data = await PtvApiService().stops(
@@ -306,23 +327,32 @@ class PtvService {
       return stopList;
     }
 
-    // Populating Stops List
+    // Populating stops list and adding them to Database
     for (var stop in jsonResponse!["stops"]) {
+      int stopId = stop["stop_id"];
+      String stopName = stop["stop_name"];
+      double latitude = stop["stop_latitude"];
+      double longitude = stop["stop_longitude"];
+      double? distance = stop["stop_distance"];
+      Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude,
+          longitude: longitude, distance: distance);
+
+      stopList.add(newStop);
+      futures.add(Get.find<db.AppDatabase>().addStop(stopId, stopName, routeType, latitude, longitude));
+
+      // Adds route-stop relationship to database
       for (var route in stop["routes"]) {
         if (route["route_type"] != routeType) {
           continue;
         }
 
-        int stopId = stop["stop_id"];
-        String stopName = stop["stop_name"];
-        double latitude = stop["stop_latitude"];
-        double longitude = stop["stop_longitude"];
-        double? distance = stop["stop_distance"];
-        Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude,
-            longitude: longitude, distance: distance);
-        stopList.add(newStop);
+        int routeId = route["route_id"];
+        futures.add(Get.find<db.AppDatabase>().addRouteStop(routeId, stopId));
       }
     }
+
+    // Wait for all Futures to complete
+    await Future.wait(futures);
 
     return stopList;
   }
@@ -350,7 +380,7 @@ class PtvService {
     // Empty JSON Response
     if (jsonResponse == null) {
       print(
-          "(ptv_service.dart -> fetchStopsAlongDirection) -- Null data response, Improper Location Data");
+          "(ptv_service.dart -> fetchStopsAlongDirection) -- Null data response");
       return stopList;
     }
 
