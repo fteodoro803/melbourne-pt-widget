@@ -10,21 +10,12 @@ import '../transport.dart';
 import '../widgets/screen_widgets.dart';
 import '../widgets/transport_widgets.dart';
 
-enum ResultsFilter {
-  airConditioning(name: "Air Conditioning"),
-  lowFloor(name: "Low Floor");
-
-  final String name;
-
-  const ResultsFilter({required this.name});
-}
-
 class TransportDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
   final ScrollController scrollController;
   final Function(Departure, Transport) onDepartureTapped;
 
-  TransportDetailsSheet({
+  const TransportDetailsSheet({
     super.key,
     required this.arguments,
     required this.scrollController,
@@ -38,13 +29,16 @@ class TransportDetailsSheet extends StatefulWidget {
 class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
   late bool _isSaved = false;
   late Transport transport;
-
-  Set<ResultsFilter> filters = <ResultsFilter>{};
+  Map<String, bool> filters = {};
 
   @override
   void initState() {
     super.initState();
     transport = widget.arguments.transport;
+    filters = {
+      "Air Conditioning": false,
+      "Low Floor": false,
+    };
     checkSaved();
   }
 
@@ -58,8 +52,11 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
   }
 
   // Function to save or delete transport
-  Future<void> handleSave(bool isSaved) async {
-    if (isSaved) {
+  Future<void> _handleSave() async {
+    setState(() {
+      _isSaved = !_isSaved;
+    });
+    if (_isSaved) {
       await append(transport);  // Add transport to saved list
       widget.arguments.callback();
     } else {
@@ -67,9 +64,6 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
       widget.arguments.callback();
     }
   }
-
-  bool get lowFloorFilter => filters.contains(ResultsFilter.lowFloor);
-  bool get airConditionerFilter => filters.contains(ResultsFilter.airConditioning);
 
   @override
   Widget build(BuildContext context) {
@@ -118,8 +112,15 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                                     Expanded(
                                       child: Column(
                                         children: [
-                                          Align(alignment: Alignment.topLeft, child: Text("Towards ${transport.direction!.name}", style: TextStyle(fontSize: 16, height: 1.4))),
-                                          // SizedBox(height: 4),
+                                          Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Text("Towards ${transport.direction!.name}",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                height: 1.4
+                                              )
+                                            )
+                                          ),
 
                                           ListTile(
                                             contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
@@ -133,27 +134,23 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                                                   GestureDetector(
                                                     child: Icon(Icons.info, color: Color(
                                                         0xFF4F82FF)),
-                                                    onTap: ()  {
+                                                    onTap: () {
                                                     },
                                                   ),
                                                   SizedBox(width: 6),
                                                   GestureDetector(
                                                     child: Icon(Icons.warning_outlined, color: Color(
                                                         0xFFF6833C)),
-                                                    onTap: ()  {
+                                                    onTap: () {
                                                     },
                                                   ),
                                                   SizedBox(width: 4),
                                                   GestureDetector(
-                                                    child: FavoriteButton(isSaved: _isSaved),
-                                                    onTap: ()  {
-                                                      setState(() {
-                                                        _isSaved = !_isSaved;
-                                                      });
-
-                                                      handleSave(_isSaved);
+                                                    onTap: () {
+                                                      _handleSave();
                                                       SaveTransportService.renderSnackBar(context, _isSaved);
                                                     },
+                                                    child: FavoriteButton(isSaved: _isSaved),
                                                   ),
                                                 ],
                                               ),
@@ -176,19 +173,15 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                       // Search filters
                       Wrap(
                         spacing: 5.0,
-                        children: ResultsFilter.values.map((ResultsFilter result) {
+                        children: filters.entries.map((MapEntry<String,bool> filter) {
                           return FilterChip(
-                              label: Text(result.name),
-                              selected: filters.contains(result),
-                              onSelected: (bool selected) {
-                                setState(() {
-                                  if (selected) {
-                                    filters.add(result);
-                                  } else {
-                                    filters.remove(result);
-                                  }
-                                });
-                              }
+                            label: Text(filter.key),
+                            selected: filter.value,
+                            onSelected: (bool selected) {
+                              setState(() {
+                                filters[filter.key] = !filters[filter.key]!;
+                              });
+                            }
                           );
                         }).toList(),
                       ),
@@ -204,7 +197,8 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                   ),
                 ),
               ),
-              // Departures list section that will take remaining space
+
+              // Departures list section
               SliverFillRemaining(
                 hasScrollBody: true,
                 fillOverscroll: true,
@@ -213,8 +207,8 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                   child: DeparturesList(
                     departuresLength: 30,
                     transport: transport,
-                    lowFloorFilter: lowFloorFilter,
-                    airConditionerFilter: airConditionerFilter,
+                    lowFloorFilter: filters['Low Floor']!,
+                    airConditionerFilter: filters['Air Conditioning']!,
                     scrollable: true,
                     onDepartureTapped: widget.onDepartureTapped,
                   ),
