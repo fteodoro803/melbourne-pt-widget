@@ -8,7 +8,7 @@ import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api_data.dart';
 import '../geopath_utils.dart';
-import '../ptv_api_service.dart';
+import '../api/ptv_api_service.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_info_classes/stop_info.dart';
@@ -19,7 +19,7 @@ import 'nearby_stops_sheet.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import '../ptv_info_classes/route_info.dart' as pt_route;
-import 'package:flutter_project/google_service.dart';
+import 'package:flutter_project/services/google_service.dart';
 import 'suggestions_search.dart';
 
 enum ActiveSheet { none, nearbyStops, stopDetails, transportDetails, departureDetails }

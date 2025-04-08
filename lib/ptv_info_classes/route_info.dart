@@ -1,5 +1,6 @@
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 
@@ -17,13 +18,15 @@ class Route {
 
   RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
   RouteType type;
+  // List<Stop> stops;      // todo: consider adding a list of stops?
+  String status;
 
   /// Creates a route object, and matches its details to its respective colour.
   Route(
       {required this.id,
       required this.name,
       required this.number,
-      required this.type}) {
+      required this.type, required this.status}) {
     setRouteColour(type.name);
   }
 

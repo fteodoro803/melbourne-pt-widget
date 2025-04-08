@@ -1,5 +1,5 @@
 import 'package:flutter_project/api_data.dart';
-import 'package:flutter_project/ptv_api_service.dart';
+import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_info_classes/location_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
@@ -9,6 +9,11 @@ import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'ptv_service.dart';
+
+import 'database/helpers/departureHelpers.dart';
+import 'package:drift/drift.dart';
+import 'database/database.dart' as db;
+import 'package:get/get.dart';
 
 part 'transport.g.dart';
 
@@ -66,8 +71,25 @@ class Transport {
 
     // Gets Departures and saves to instance
     PtvService ptvService = PtvService();
+    int departureCount = 3;
     departures = await ptvService.fetchDepartures(
-        routeType, stopId, routeId, directionId: directionId);
+        routeType, stopId, routeId, directionId: directionId, maxResults: departureCount.toString());
+
+    // Saves Departures to Database
+    if (departures != null && departures!.isNotEmpty) {
+      for (var departure in departures!) {
+        DateTime? scheduledUTC = departure.scheduledDepartureUTC;
+        DateTime? estimatedUTC = departure.estimatedDepartureUTC;
+        String? runRef = departure.runRef;
+        int? stopId = departure.stopId;
+        int? routeId = route?.id;
+        int? directionId = direction?.id;
+        bool? hasLowFloor = departure.hasLowFloor;
+        bool? hasAirConditioning = departure.hasAirConditioning;
+
+        await Get.find<db.AppDatabase>().addDeparture(scheduledUTC, estimatedUTC, runRef, stopId, routeId, directionId, hasLowFloor, hasAirConditioning);
+      }
+    }
 
     // print("( transport.dart -> updatedDepartures() ) -- Updated Departures: \n $departures");
 

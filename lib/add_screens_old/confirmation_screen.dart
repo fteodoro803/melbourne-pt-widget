@@ -47,7 +47,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   // Updates UI as a result of Update Departures
   Future<void> _initialiseDepartures() async {
     // print("( confirmation_screen.dart -> _initialiseDepartures() ) -- transportList = $transportList");
-    for (int i=0; i<transportList.length; i++) {
+    for (int i = 0; i < transportList.length; i++) {
       // print("( confirmation_screen.dart -> _initialiseDepartures() ) -- transportList[$i] = ${transportList[i]}");
       await transportList[i].updateDepartures();
     }
@@ -79,25 +79,28 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Confirmation"),
-        centerTitle: true,
-      ),
+    else {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Confirmation"),
+          centerTitle: true,
+        ),
 
-      body: ListView.builder(
-        itemCount: transportList.length,
-        itemBuilder: (context, index) {
-          final transport = transportList[index];
-          return CustomListTile(
-              transport: transport,
-              onTap: () async {
-                await append(transportList[index]);
-                widget.arguments.callback(); // calls the screen arguments callback function
-                Navigator.popUntil(context, ModalRoute.withName("/"));
-              });
-        },
-      ),
-    );
+        body: ListView.builder(
+          itemCount: transportList.length,
+          itemBuilder: (context, index) {
+            final transport = transportList[index];
+            return CustomListTile(
+                transport: transport,
+                onTap: () async {
+                  await append(transportList[index]);
+                  widget.arguments
+                      .callback(); // calls the screen arguments callback function
+                  Navigator.popUntil(context, ModalRoute.withName("/"));
+                });
+          },
+        ),
+      );
+    }
   }
 }

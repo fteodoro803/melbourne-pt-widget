@@ -1,5 +1,5 @@
 import 'package:flutter_project/api_data.dart';
-import 'package:flutter_project/google_api_service.dart';
+import 'package:flutter_project/api/google_api_service.dart';
 
 class GoogleService {
   GoogleApiService googleApi = GoogleApiService();
