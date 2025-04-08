@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/route_direction_info.dart' as pt_route;
 import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../time_utils.dart';
+import '../ptv_info_classes/stop_info.dart';
+import '../utility/time_utils.dart';
 
 class LocationWidget extends StatelessWidget {
   const LocationWidget({
@@ -114,34 +115,13 @@ class RouteWidget extends StatelessWidget {
             child: Text(
               direction?.name ?? "No Data",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
           ),
       ],
-    );
-  }
-}
-
-class HandleWidget extends StatelessWidget {
-  const HandleWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Container(
-        height: 5,
-        width: 40,
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
     );
   }
 }
@@ -292,11 +272,16 @@ class DeparturesStringWidget extends StatelessWidget {
                     if (index == 0)
                       Text(
                         "At ",
-                        style: TextStyle(height: 1.1),
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
                     Text(
-                      departureTime,
-                      style: TextStyle(height: 1.1),
+                      TransportUtils.trimTime(departureTime),
+                      style: TextStyle(
+                        fontSize: 16,
+                        // fontWeight: FontWeight.w600,
+                      ),
                     ),
                     if (hasLowFloor) ...[
                       SizedBox(width: 3),
@@ -311,7 +296,9 @@ class DeparturesStringWidget extends StatelessWidget {
                       Text(
                         // "•",
                         "and",
-                        style: TextStyle(height: 1.1),
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
                       SizedBox(width: 4),
                     ],
@@ -320,6 +307,177 @@ class DeparturesStringWidget extends StatelessWidget {
               }
           ),
       ],
+    );
+  }
+}
+
+
+class ExpandedStopWidget extends StatelessWidget {
+  const ExpandedStopWidget({
+    super.key,
+    required this.stopName,
+    required this.distance,
+  });
+
+  final String stopName;
+  final double? distance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(Icons.location_pin, size: 20),
+            SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                stopName,
+                style: TextStyle(fontSize: 17, height: 1.1, fontWeight: FontWeight.w700),
+
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 6),
+        Row(
+          children: [
+            Icon(Icons.directions_walk, size: 20),
+            SizedBox(width: 4),
+            Text("${distance?.round()}m", style: TextStyle(fontSize: 17)),
+          ],
+        )
+      ],);
+  }
+}
+
+class UnexpandedStopWidget extends StatelessWidget {
+  const UnexpandedStopWidget({
+    super.key,
+    required this.stopName,
+    required this.routes,
+    required this.routeType,
+  });
+
+  final String stopName;
+  final List<pt_route.Route> routes;
+  final String routeType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        LocationWidget(textField: stopName, textSize: 18, scrollable: false),
+        Align(
+          alignment: Alignment.topLeft,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              spacing: 6,
+              children: routes.map((route) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: route.colour != null
+                        ? ColourUtils.hexToColour(route.colour!)
+                        : Colors.grey,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    routeType == "train" || routeType == "vLine"
+                        ? route.name
+                        : route.number,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: route.textColour != null
+                          ? ColourUtils.hexToColour(route.textColour!)
+                          : Colors.black,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],);
+  }
+}
+
+class ExpandedStopRoutesWidget extends StatelessWidget {
+  const ExpandedStopRoutesWidget({
+    super.key,
+    required this.routes,
+    required this.routeType,
+    required this.onStopTapped,
+    required this.stop,
+  });
+
+  final List<pt_route.Route> routes;
+  final String routeType;
+  final Function(Stop stop, pt_route.Route route) onStopTapped;
+  final Stop stop;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        itemCount: routes.length,
+        itemBuilder: (context, routeIndex) {
+
+          final route = routes[routeIndex];
+          String routeLabel;
+          String? routeName;
+          if (routeType == "train") {
+            routeLabel = route.name;
+            routeName = null;
+          }
+          else if (routeType == "vLine") {
+            routeLabel = "V/Line";
+            routeName = route.name;
+          }
+          else {
+            routeLabel = route.number;
+            routeName = route.name;
+          }
+
+          return ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+            trailing: Icon(Icons.keyboard_arrow_right_outlined),
+            leading: Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: route.colour != null
+                    ? ColourUtils.hexToColour(route.colour!)
+                    : Colors.grey,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 280, // Limit the width to a maximum, or you can adjust the value
+                ),
+                child: Text(
+                  routeLabel,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: route.textColour != null
+                        ? ColourUtils.hexToColour(route.textColour!)
+                        : Colors.black,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+            title: routeName != null ? Text(routeName) : null,
+            onTap: () async {
+              await onStopTapped(stop, route);
+            },
+          );
+        }
     );
   }
 }

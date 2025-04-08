@@ -1,8 +1,8 @@
 // Arguments for the AddScreens
 
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart' as PTRoute;
+import 'package:flutter_project/ptv_info_classes/departure_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,16 +11,18 @@ class SearchDetails {
   LatLng? markerPosition;
   int distance = 300;
   String transportType = "all";
-  Stop? stop;
-  bool? isSheetExpanded = false;
-  PTRoute.Route? route;
+  bool isSheetExpanded = false;
   TextEditingController locationController;
 
-  List<Stop> stops;
-  List<PTRoute.Route> routes;
-  List<Transport> directions;
+  Stop? stop;
+  pt_route.Route? route;
+  Departure? departure;
 
-  SearchDetails(this.stops, this.routes, this.directions, this.locationController);
+  List<Stop> stops = [];
+  List<pt_route.Route> routes = [];
+  List<Transport> directions = [];
+
+  SearchDetails(this.locationController);
 }
 
 class ScreenArguments {

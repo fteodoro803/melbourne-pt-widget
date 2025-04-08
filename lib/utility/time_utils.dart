@@ -37,14 +37,14 @@ class TransportUtils {
   static Color getColorForStatus(String status) {
     switch (status) {
       case "Delayed":
-        return Color(0xFFCA6868); // Red for late
+        return Color(0xFFC57070); // Red for late
       case "Early":
         return Color(0xFFC5B972); // Yellow for early
       case "On time":
-        return Color(0xFF71CA63); // Yellow for early
+        return Color(0xFF8ECF93); // Yellow for early
       case "Scheduled":
       default:
-        return Colors.white; // Green for on-time or default
+        return Color(0xFFB8B8B8); // Green for on-time or default
     }
   }
 
@@ -55,7 +55,7 @@ class TransportUtils {
       timeElement = timeString.substring(1, timeString.length - 2);
       timeOfDay = timeString.substring(timeString.length - 2, timeString.length);
 
-      return "$timeElement $timeOfDay";
+      return "$timeElement$timeOfDay";
     }
     else {
       return timeString;
@@ -150,7 +150,7 @@ class TimeUtils {
         return "Now";
       }
       else {
-        String minutes = timeMap['minutes'].toString() ?? "";
+        String minutes = timeMap['minutes'].toString();
         return "$minutes min";
       }
     } else {

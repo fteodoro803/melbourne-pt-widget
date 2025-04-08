@@ -47,7 +47,7 @@ class BottomNavigation extends StatelessWidget {
               arguments: ScreenArguments.withSearchDetails(
                   Transport(),
                   updateMainPage!,
-                  SearchDetails([], [], [], TextEditingController())
+                  SearchDetails(TextEditingController())
               ),
             );
             break;

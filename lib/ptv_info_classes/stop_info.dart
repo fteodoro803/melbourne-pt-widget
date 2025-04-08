@@ -11,6 +11,8 @@ class Stop {
   String name;      //~note what happens if in an api call, these are null?
   List<Route>? routes;      // todo: turn this into a method: get Routes from a Stop
   RouteType? routeType;
+  int? number;
+  bool? isExpanded = false;
 
   // todo: maybe use the Location class; im not sure if these should be here
   double? latitude;
