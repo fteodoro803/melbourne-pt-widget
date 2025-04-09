@@ -50,8 +50,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     List<Stop> newStops = [];
     List<PTRoute.Route> newRoutes = [];
 
-    // List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType: routeType!, maxDistance: maxDistance);
-    List<Stop> stopList = await ptvService.fetchStopsLocation(location!);
+    List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType: routeType!, maxDistance: maxDistance);
+    // List<Stop> stopList = await ptvService.fetchStopsLocation(location!);
     List<PTRoute.Route> routeList;
     print("select stop screen -- StopList: $stopList");
 
@@ -95,7 +95,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    Get.find<db.AppDatabase>().addStop(stopId, stopName, routeTypeId, latitude!, longitude!);
+    Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude!, longitude!);
 
   }
 

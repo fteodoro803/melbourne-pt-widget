@@ -4,6 +4,7 @@ import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
 import 'package:flutter_project/database/helpers/stopHelpers.dart';
+import 'package:flutter_project/database/helpers/stopRouteTypesHelpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -226,6 +227,7 @@ class PtvService {
 
 // Route Functions
   /// Fetches all routes offered by PTV, and saves them to the database
+  // todo: make all routes go to database (move from main to here)
   Future<List<Route>> fetchRoutes({String? routeTypes}) async {
     List<Route> routeList = [];
 
@@ -337,7 +339,7 @@ class PtvService {
     for (var stop in jsonResponse!["stops"]) {
       int stopId = stop["stop_id"];
       String stopName = stop["stop_name"];
-      int routeType = stop["route_type"];
+      int selectedRouteType = stop["route_type"];
       double latitude = stop["stop_latitude"];
       double longitude = stop["stop_longitude"];
       double? distance = stop["stop_distance"];
@@ -345,11 +347,15 @@ class PtvService {
           longitude: longitude, distance: distance);
 
       stopList.add(newStop);
-      futures.add(Get.find<db.AppDatabase>().addStop(stopId, stopName, routeType, latitude, longitude));
+      futures.add(Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude, longitude));
 
       // Adds route-stop relationship to database
       for (var route in stop["routes"]) {
-        if (route["route_type"] != routeType) {
+        // todo: add stop-routeType relationship to database
+        int currRouteTypeId = route["route_type"];
+        futures.add(Get.find<db.AppDatabase>().addStopRouteType(stopId, currRouteTypeId));
+
+        if (route["route_type"] != selectedRouteType) {
           continue;
         }
 

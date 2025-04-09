@@ -77,7 +77,7 @@ class RouteTypes extends Table {
 class Stops extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
-  IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
+  // IntColumn get routeTypeId => integer().references(RouteTypes, #id)();      // todo: make a StopRouteTypes
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
   // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine
@@ -105,11 +105,23 @@ class RouteStops extends Table {
   Set<Column> get primaryKey => {routeId, stopId};
 }
 
+/// Represents the many-to-many relationship between Stops and Route Types.
+/// One stop can serve trams and buses, and one route type can go to multiple stops.
+class StopRouteTypes extends Table {
+  IntColumn get stopId => integer().references(Stops, #id)();
+  IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
+  // BoolColumn get isTemporary => boolean()();
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {stopId, routeTypeId};
+}
+
 // class GeoPaths extends Table {
 //   IntColumn get routeId =>
 // }
 
-@DriftDatabase(tables: [Departures, Directions, RouteTypes, Routes, Stops, RouteStops])
+@DriftDatabase(tables: [Departures, Directions, RouteTypes, Routes, Stops, RouteStops, StopRouteTypes])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -135,7 +147,7 @@ class AppDatabase extends _$AppDatabase {
 
   // Departure Functions
   /// Adds a departure to the database, if it doesn't already exist,
-  /// or if it has past the "expiry" time
+  /// or if it has passed the "expiry" time
   Future<void> insertDeparture(DeparturesCompanion departure) async {
     // final exists = await (select(departures)
     //   ..where((d) => d.id.equals(departure.id.value))).getSingleOrNull();
@@ -148,7 +160,7 @@ class AppDatabase extends _$AppDatabase {
 
   // Direction Functions
   /// Adds a direction to the database, if it doesn't already exist,
-  /// or if it has past the "expiry" time
+  /// or if it has passed the "expiry" time
   Future<void> insertDirection(DirectionsCompanion direction) async {
     final exists = await (select(directions)
       ..where((d) => d.id.equals(direction.id.value))).getSingleOrNull();
@@ -159,7 +171,7 @@ class AppDatabase extends _$AppDatabase {
 
   // RouteType Functions
   /// Adds a route type to the database, if it doesn't already exist,
-  /// or if it has past the "expiry" time
+  /// or if it has passed the "expiry" time
   Future<void> insertRouteType(RouteTypesCompanion routeType) async {
     final exists = await (select(routeTypes)
       ..where((d) => d.id.equals(routeType.id.value))).getSingleOrNull();
@@ -178,7 +190,7 @@ class AppDatabase extends _$AppDatabase {
 
   // Route Functions
   /// Adds a route to the database, if it doesn't already exist,
-  /// or if it has past the "expiry" time
+  /// or if it has passed the "expiry" time
   Future<void> insertRoute(RoutesCompanion route) async {
     final exists = await (select(routes)..where((d) => d.id.equals(route.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
@@ -188,9 +200,9 @@ class AppDatabase extends _$AppDatabase {
 
   // Stop Functions
   /// Adds a stop to the database, if it doesn't already exist,
-  /// or if it has past the "expiry" time
+  /// or if it has passed the "expiry" time
   Future<void> insertStop(StopsCompanion stop) async {
-    final exists = await (select(stops)..where((d) => d.id.equals(stop.id.value))).getSingleOrNull();
+    final exists = await (select(stops)..where((d) => (d.id.equals(stop.id.value)))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
       into(stops).insertOnConflictUpdate(stop);
     }
@@ -198,7 +210,6 @@ class AppDatabase extends _$AppDatabase {
 
   // RouteStops Functions
   Future<void> insertRouteStopLink(RouteStopsCompanion routeStop) async {
-
     final exists = await (select(routeStops)
       ..where((l) =>
       l.routeId.equals(routeStop.routeId.value) &
@@ -210,7 +221,20 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  // Table Functions
+  // StopRouteTypes Functions
+  Future<void> insertStopRouteTypeLink(StopRouteTypesCompanion stopRouteType) async {
+    final exists = await (select(stopRouteTypes)
+      ..where((l) =>
+      l.stopId.equals(stopRouteType.stopId.value) &
+      l.routeTypeId.equals(stopRouteType.routeTypeId.value))
+    ).getSingleOrNull();
+
+    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+      await into(stopRouteTypes).insertOnConflictUpdate(stopRouteType);
+    }
+  }
+
+// Table Functions
   // Future<void> clearData() async {
   //   await delete(departures).go();
   // }
