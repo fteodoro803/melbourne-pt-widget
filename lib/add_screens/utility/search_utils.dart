@@ -87,43 +87,6 @@ class SearchUtils {
       );
     }
 
-    // Set<String> uniqueStopIDs = {};
-    // List<Stop> uniqueStops = [];
-    //
-    // List<Stop> stopList = stopRouteLists.stops;
-    // List<pt_route.Route> routeList = stopRouteLists.routes;
-    //
-    // int stopIndex = 0;
-    //
-    // for (var stop in stopList) {
-    //   if (!uniqueStopIDs.contains(stop.id.toString())) {
-    //     // Create a new stop object to avoid reference issues
-    //     Stop newStop = Stop(
-    //       id: stop.id,
-    //       name: stop.name,
-    //       latitude: stop.latitude,
-    //       longitude: stop.longitude,
-    //       distance: stop.distance,
-    //     );
-    //
-    //     newStop.routes = <pt_route.Route>[];
-    //     newStop.routeType = routeList[stopIndex].type;
-    //
-    //     uniqueStops.add(newStop);
-    //     uniqueStopIDs.add(stop.id.toString());
-    //   }
-    //
-    //   // Find the index of this stop in our uniqueStops list
-    //   int uniqueStopIndex = uniqueStops.indexWhere((s) => s.id == stop.id);
-    //   if (uniqueStopIndex != -1) {
-    //     uniqueStops[uniqueStopIndex].routes!.add(routeList[stopIndex]);
-    //   }
-    //
-    //   stopIndex++;
-    // }
-
-    //   List<Stop> uniqueStops = [];
-
     List<Stop> uniqueStops = [];
     Set<UniqueStop> uniqueStopsSet= {};
 
@@ -166,50 +129,3 @@ class SearchUtils {
     return uniqueStops;
   }
 }
-
-//   List<Stop> uniqueStops = [];
-//
-//   Set<UniqueStop> uniqueStopsSet= {};
-//
-//   List<Stop> stopList = stopRouteLists.stops;
-//   List<pt_route.Route> routeList = stopRouteLists.routes;
-//
-//   int stopIndex = 0;
-//
-//   for (var stop in stopList) {
-//   RouteType routeType = routeList[stopIndex].type;
-//
-//   // if (!uniqueStopIDs.contains(stop.id.toString())) {
-//   if (!uniqueStopsSet.contains(UniqueStop(stop.id.toString(), routeType))) {
-//   // Create a new stop object to avoid reference issues
-//   Stop newStop = Stop(
-//   id: stop.id,
-//   name: stop.name,
-//   latitude: stop.latitude,
-//   longitude: stop.longitude,
-//   distance: stop.distance,
-//   );
-//
-//   newStop.routes = <pt_route.Route>[];
-//   newStop.routeType = routeList[stopIndex].type;
-//
-//   uniqueStops.add(newStop);
-//   // uniqueStopIDs.add(stop.id.toString());
-//
-//   uniqueStopsSet.add(UniqueStop(stop.id.toString(), routeType));
-//   }
-//
-//   // Find the index of this stop in our uniqueStops list
-//   int uniqueStopIndex = uniqueStops.indexWhere((s) => s.id == stop.id);
-//   if (uniqueStopIndex != -1) {
-//   if (routeList[stopIndex].type == uniqueStops[uniqueStopIndex].routeType) {
-//   uniqueStops[uniqueStopIndex].routes!.add(routeList[stopIndex]);
-//   }
-//
-//   }
-//
-//   stopIndex++;
-//   }
-//
-//   return uniqueStops;
-// }

@@ -47,6 +47,45 @@ class LocationWidget extends StatelessWidget {
   }
 }
 
+class RouteLabelContainer extends StatelessWidget {
+  const RouteLabelContainer({
+    super.key,
+    required this.route,
+  });
+
+  final pt_route.Route route;
+
+  @override
+  Widget build(BuildContext context) {
+    String routeType = route.type.name;
+    String routeLabel = TransportUtils.getLabel(route, routeType);
+    Color routeColour = ColourUtils.hexToColour(route.colour!);
+    Color routeTextColour = ColourUtils.hexToColour(route.textColour!);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: route.colour != null
+            ? routeColour
+            : Colors.grey,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        routeLabel,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: route.textColour != null
+              ? routeTextColour
+              : Colors.black,
+        ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+    );
+  }
+}
+
 class RouteWidget extends StatelessWidget {
   const RouteWidget({
     super.key,

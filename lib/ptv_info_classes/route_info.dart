@@ -1,6 +1,5 @@
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 
@@ -15,6 +14,7 @@ class Route {
   String number;        // todo: should this be an int? Maybe nullable, since train doesnt have a number
   String? colour;       // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
   String? textColour;   // Hex colour code for text
+  String? gtfsId;
 
   RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
   RouteType type;
@@ -26,7 +26,7 @@ class Route {
       {required this.id,
       required this.name,
       required this.number,
-      required this.type, required this.status}) {
+      required this.type, required this.status, required this.gtfsId}) {
     setRouteColour(type.name);
   }
 
