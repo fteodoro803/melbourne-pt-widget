@@ -7,8 +7,6 @@ import "package:flutter_project/add_screens_old/select_direction_screen.dart";
 import "package:flutter_project/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/add_screens_old/select_stop_screen.dart";
 import "package:flutter_project/database/database.dart";
-import "package:flutter_project/database/helpers/routeHelpers.dart";
-import "package:flutter_project/ptv_info_classes/route_info.dart" as PTRoute;
 import "package:flutter_project/ptv_service.dart";
 import "package:flutter_project/widgets/bottom_navigation_bar.dart";
 import "package:flutter_project/widgets/custom_list_tile.dart";
@@ -24,7 +22,6 @@ import 'package:flutter_project/dev/test_screen.dart';
 import "add_screens/find_routes_screen.dart";
 import "add_screens/search_screen.dart";
 import "add_screens/transport_map.dart";
-import "database/database.dart" as db;
 import "home_widget_service.dart";
 
 import 'package:get/get.dart';
@@ -148,27 +145,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _initialisePTVData() async {
     // todo: add logic to skip this, if it's already been done
-    await getAllRouteTypes();
-    await getAllRoutes();
-  }
-
-  Future<void> getAllRouteTypes() async {
     await ptvService.fetchRouteTypes();
-  }
-
-  // todo: I feel like this shouldnt be in main because it interacts with the database
-  Future<void> getAllRoutes() async {
-    List<PTRoute.Route> routeList = await ptvService.fetchRoutes();
-
-    for (var route in routeList) {
-      int id = route.id;
-      String name = route.name;
-      String number = route.number;
-      int routeTypeId = route.type.id;
-      String status = route.status;
-
-      await Get.find<db.AppDatabase>().addRoute(id, name, number, routeTypeId, status);
-    }
+    await ptvService.fetchRoutes();
   }
 
   // Reads the saved transport data from a file and converts it into a list of Transport objects.
