@@ -1,9 +1,11 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
 import 'package:flutter_project/database/helpers/stopHelpers.dart';
+import 'package:flutter_project/database/helpers/stopRouteTypesHelpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -246,20 +248,29 @@ class PtvService {
       String name = route["route_name"];
       String number = route["route_number"];
       RouteType type = RouteType.fromId(route["route_type"]);
-      String status = route["route_service_status"]["description"];
       String gtfsId = route["route_gtfs_id"];
+      String status = route["route_service_status"]["description"];
 
       Route newRoute = Route(id: id,
           name: name,
           number: number,
           type: type,
-          status: status,
-          gtfsId: gtfsId
-      );
+          gtfsId: gtfsId,
+          status: status);
       routeList.add(newRoute);
+
+      // Add to Database
+      await Get.find<db.AppDatabase>().addRoute(id, name, number, type.id, gtfsId, status);
     }
 
     return routeList;
+  }
+
+  /// Fetches routes from database, by search name.
+  Future<List<Route>> searchRoutes({String? query, RouteType? routeType}) async {
+    final dbRouteList = await Get.find<db.AppDatabase>().getRoutes(search: query, routeType: routeType?.id);
+    List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
+    return domainRouteList;
   }
 
   /// Fetches routes according to a stop, from the database.
@@ -267,15 +278,8 @@ class PtvService {
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
     final dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
 
-    // Map each database route to the domain model
-    List<Route> routeList = dbRoutes.map((dbRoute) => Route(
-        id: dbRoute.id,
-        name: dbRoute.name,
-        number: dbRoute.number,
-        type: RouteType.fromId(dbRoute.routeTypeId),
-        gtfsId: null,     // todo: un null this later
-        status: dbRoute.status,
-    )).toList();
+    // Convert Route's database model to domain model
+    List<Route> routeList = dbRoutes.map(Route.fromDb).toList();
 
     return routeList;
   }
@@ -321,13 +325,13 @@ class PtvService {
 
 // Stop Functions
   /// Fetch Stops, and links it to its Route, and saves to database
-  Future<List<Stop>> fetchStopsLocation(String location, int routeType, int maxDistance) async {
+  Future<List<Stop>> fetchStopsLocation(String location, {int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
     List<Future> futures = [];    // holds all Futures for database async operations
 
     // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().stops(
-        location, routeTypes: routeType.toString(), maxDistance: maxDistance.toString());
+    ApiData data = await PtvApiService().stopsLocation(
+        location, routeTypes: routeType?.toString(), maxDistance: maxDistance?.toString());
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
@@ -340,6 +344,7 @@ class PtvService {
     for (var stop in jsonResponse!["stops"]) {
       int stopId = stop["stop_id"];
       String stopName = stop["stop_name"];
+      int selectedRouteType = stop["route_type"];
       double latitude = stop["stop_latitude"];
       double longitude = stop["stop_longitude"];
       double? distance = stop["stop_distance"];
@@ -347,11 +352,15 @@ class PtvService {
           longitude: longitude, distance: distance);
 
       stopList.add(newStop);
-      futures.add(Get.find<db.AppDatabase>().addStop(stopId, stopName, routeType, latitude, longitude));
+      futures.add(Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude, longitude));
 
       // Adds route-stop relationship to database
       for (var route in stop["routes"]) {
-        if (route["route_type"] != routeType) {
+        // todo: add stop-routeType relationship to database
+        int currRouteTypeId = route["route_type"];
+        futures.add(Get.find<db.AppDatabase>().addStopRouteType(stopId, currRouteTypeId));
+
+        if (route["route_type"] != selectedRouteType) {
           continue;
         }
 
@@ -424,7 +433,7 @@ class PtvService {
     }
 
     // Fetches stop data via PTV API
-    ApiData data = await PtvApiService().stops(
+    ApiData data = await PtvApiService().stopsLocation(
       locationString,
       maxResults: maxResults.toString(),
       maxDistance: maxDistance.toString(),
@@ -461,9 +470,9 @@ class PtvService {
         String routeName = route["route_name"];
         String routeNumber = route["route_number"].toString();
         int routeId = route["route_id"];
-        String gtfsId = route["route_gtfs_id"];
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.fromId(routeTypeId);
+        String gtfsId = "TEMPORARY"; // todo: fix this
         String status = "TEMPORARY"; // todo: fix this, or the logic of the class
 
         Route newRoute = Route(

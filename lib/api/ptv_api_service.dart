@@ -96,7 +96,7 @@ class PtvApiService {
   }
 
   // Get Stops around a Location
-  Future<ApiData> stops(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
+  Future<ApiData> stopsLocation(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
     String request = "/v3/stops/location/$location";
 
     // Parameter handling

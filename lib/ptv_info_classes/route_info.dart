@@ -2,6 +2,7 @@ import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
+import 'package:flutter_project/database/database.dart' as db;
 
 part 'route_info.g.dart';
 
@@ -14,19 +15,20 @@ class Route {
   String number;        // todo: should this be an int? Maybe nullable, since train doesnt have a number
   String? colour;       // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
   String? textColour;   // Hex colour code for text
-  String? gtfsId;
+  RouteType type;
+  String gtfsId;
+  String status;
 
   RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
-  RouteType type;
   // List<Stop> stops;      // todo: consider adding a list of stops?
-  String status;
+
 
   /// Creates a route object, and matches its details to its respective colour.
   Route(
       {required this.id,
       required this.name,
       required this.number,
-      required this.type, required this.status, required this.gtfsId}) {
+      required this.type, required this.gtfsId, required this.status}) {
     setRouteColour(type.name);
   }
 
@@ -104,6 +106,7 @@ class Route {
         "\tID: $id\t"
         "\tName: $name\t"
         "\tNumber: $number\n"
+        "\tType: ${type.name}\t"
         "\tColour: $colour\t"
         "\tTextColour: $textColour\n";
 
@@ -117,4 +120,16 @@ class Route {
   /// Methods for JSON Serialization.
   factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
   Map<String, dynamic> toJson() => _$RouteToJson(this);
+
+  /// Factory constructor to create a Route from a database RoutesData object.
+  factory Route.fromDb(db.Route dbRoute) {
+    return Route(
+      id: dbRoute.id,
+      name: dbRoute.name,
+      number: dbRoute.number,
+      type: RouteType.fromId(dbRoute.routeTypeId),
+      gtfsId: dbRoute.gtfsId,
+      status: dbRoute.status,
+    );
+  }
 }

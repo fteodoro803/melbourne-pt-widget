@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/database/helpers/stopHelpers.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as PTRoute;
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // to avoid conflict with material's "Route"
 import 'package:get/get.dart';
 import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/database/database.dart' as db;
@@ -49,20 +46,20 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     // Create temporary lists to hold the new data
     List<Stop> newStops = [];
     List<PTRoute.Route> newRoutes = [];
-
-    List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType!, maxDistance);
-    List<PTRoute.Route> routeList;
-    print("select stop screen -- StopList: $stopList");
-
-    // Create a list to hold all route fetch operations
-    List<Future<void>> routeFetchOperations = [];
+    List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType: routeType!, maxDistance: maxDistance);
+    List<Future<void>> routeFetchOperations = [];      // holds all route fetch operations
 
     for (var stop in stopList) {
-      // Add the future operation to our list instead of awaiting it immediately
+
+      // Add the future operation to list instead of awaiting it immediately
       routeFetchOperations.add(ptvService.fetchRoutesFromStop(stop.id).then((routeList) {
         print("select stop screen -- RouteList for Stop${stop.id} $routeList");
 
         for (var route in routeList) {
+          if (route.type.id != routeType) {
+            continue;
+          }
+
           newStops.add(stop);
           newRoutes.add(route);
         }
@@ -87,14 +84,15 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeName = _routes[index].name;
     int routeTypeId = _routes[index].type.id;
     String routeNumber = _routes[index].number;
+    String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
-    Get.find<db.AppDatabase>().addRoute(routeId, routeName,routeNumber , routeTypeId, status);
+    Get.find<db.AppDatabase>().addRoute(routeId, routeName,routeNumber , routeTypeId, gtfsId, status);
 
     int stopId = _stops[index].id;
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    Get.find<db.AppDatabase>().addStop(stopId, stopName, routeTypeId, latitude!, longitude!);
+    Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude!, longitude!);
 
   }
 
