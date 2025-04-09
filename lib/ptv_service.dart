@@ -1,6 +1,7 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
 import 'package:flutter_project/database/helpers/stopHelpers.dart';
@@ -227,7 +228,6 @@ class PtvService {
 
 // Route Functions
   /// Fetches all routes offered by PTV, and saves them to the database
-  // todo: make all routes go to database (move from main to here)
   Future<List<Route>> fetchRoutes({String? routeTypes}) async {
     List<Route> routeList = [];
 
@@ -256,6 +256,9 @@ class PtvService {
           type: type,
           status: status);
       routeList.add(newRoute);
+
+      // Add to Database
+      await Get.find<db.AppDatabase>().addRoute(id, name, number, type.id, status);
     }
 
     return routeList;
@@ -319,8 +322,7 @@ class PtvService {
 
 // Stop Functions
   /// Fetch Stops, and links it to its Route, and saves to database
-  Future<List<Stop>> fetchStopsLocation(String location,
-      {int? routeType, int? maxDistance}) async {
+  Future<List<Stop>> fetchStopsLocation(String location, {int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
     List<Future> futures = [];    // holds all Futures for database async operations
 
