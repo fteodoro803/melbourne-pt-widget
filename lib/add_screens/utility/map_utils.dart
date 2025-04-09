@@ -11,7 +11,7 @@ import 'package:geocoding/geocoding.dart' as geocoding;
 class GeoPathAndStops {
   final List<LatLng> geoPathWithStops;
   final List<LatLng> stopsAlongGeoPath;
-  final LatLng stopPositionAlongGeoPath;
+  final LatLng? stopPositionAlongGeoPath;
 
   GeoPathAndStops(this.geoPathWithStops, this.stopsAlongGeoPath, this.stopPositionAlongGeoPath);
 }
@@ -19,8 +19,8 @@ class GeoPathAndStops {
 class PolyLineMarkers {
   final Set<Marker> largeMarkers;
   final Set<Marker> smallMarkers;
-  final Marker stopMarker;
 
+  final Marker? stopMarker;
   final Marker? firstMarker;
   final Marker? lastMarker;
 
@@ -179,16 +179,21 @@ class GeoPathUtils {
 
 
 class TransportPathUtils {
-  Future<Set<Polyline>> loadRoutePolyline(String routeColour, List<LatLng> geoPath, LatLng stopPositionAlongGeoPath, bool isDirectionSpecified, bool isReverseDirection) async {
+  Future<Set<Polyline>> loadRoutePolyline(String routeColour, List<LatLng> geoPath, bool isDirectionSpecified, bool isReverseDirection, {LatLng? stopPositionAlongGeoPath}) async {
 
     Set<Polyline> polyLines = {};
     geoPath = isReverseDirection ? geoPath.reversed.toList() : geoPath;
+    List<LatLng> previousRoute = [];
+    List<LatLng> futureRoute = List.from(geoPath);
+    int? closestIndex;
 
-    int closestIndex = geoPath.indexOf(stopPositionAlongGeoPath); // Closest point on geoPath to stop to split the polyline
+    if (stopPositionAlongGeoPath != null) {
+      closestIndex = geoPath.indexOf(stopPositionAlongGeoPath);
 
-    // Separate the coordinates into previous and future journey
-    List<LatLng> previousRoute = geoPath.sublist(0, closestIndex + 1);
-    List<LatLng> futureRoute = isDirectionSpecified ? geoPath.sublist(closestIndex) : geoPath;
+      // Separate the coordinates into previous and future journey
+      previousRoute = geoPath.sublist(0, closestIndex + 1);
+      futureRoute = isDirectionSpecified ? geoPath.sublist(closestIndex) : geoPath;
+    }
 
     if (isDirectionSpecified) {
       // Add polyline for previous journey
@@ -215,18 +220,20 @@ class TransportPathUtils {
   Future<PolyLineMarkers> setMarkers(
       Set<Marker> markers,
       List<LatLng> stopPositions,
-      LatLng stopPosition,
-      LatLng stopPositionAlongGeoPath,
       bool isDirectionSpecified,
+      {
+        LatLng? stopPosition,
+        LatLng? stopPositionAlongGeoPath,
+      }
       ) async {
 
     Set<Marker> largeMarkers = {};
     Set<Marker> smallMarkers = {};
-    Marker stopMarker;
+    Marker? stopMarker;
     Marker firstMarker;
     Marker lastMarker;
 
-    LatLng chosenStopPosition = isDirectionSpecified ? stopPosition : stopPositionAlongGeoPath;
+    LatLng? chosenStopPosition = isDirectionSpecified ? stopPosition : stopPositionAlongGeoPath;
 
     BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 9, 9);
     BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 7, 7);
@@ -263,13 +270,15 @@ class TransportPathUtils {
       }
     }
 
-    stopMarker = Marker(
-      markerId: MarkerId('$chosenStopPosition'),
-      position: chosenStopPosition,
-      icon: customStopMarkerIcon,
-      anchor: const Offset(0.5, 0.5),
-      consumeTapEvents: true,
-    );
+    if (stopPosition != null) {
+      stopMarker = Marker(
+        markerId: MarkerId('$chosenStopPosition'),
+        position: chosenStopPosition!,
+        icon: customStopMarkerIcon,
+        anchor: const Offset(0.5, 0.5),
+        consumeTapEvents: true,
+      );
+    }
 
     firstMarker = Marker(
       markerId: MarkerId('${stopPositions.first}'),
@@ -291,12 +300,12 @@ class TransportPathUtils {
     return PolyLineMarkers(largeMarkers, smallMarkers, stopMarker, firstMarker, lastMarker);
   }
 
-  Future<GeoPathAndStops> addStopsToGeoPath(List<LatLng> geoPath, LatLng chosenStopPosition, {List<LatLng>? allStopPositions}) async {
+  Future<GeoPathAndStops> addStopsToGeoPath(List<LatLng> geoPath, {LatLng? chosenStopPosition, List<LatLng>? allStopPositions}) async {
     List<LatLng> stopsAlongGeoPath = [];
-    LatLng stopPositionAlongGeoPath = chosenStopPosition;
+    LatLng? stopPositionAlongGeoPath = chosenStopPosition;
     List<LatLng> stopPositions = [];
     List<LatLng> newGeoPath = [...geoPath];
-    allStopPositions != null ? stopPositions = allStopPositions : stopPositions.add(chosenStopPosition);
+    allStopPositions != null ? stopPositions = allStopPositions : stopPositions.add(chosenStopPosition!);
 
     int insertionIndex = 0;
     for (var pos in stopPositions) {

@@ -89,24 +89,24 @@ class _TransportMapState extends State<TransportMap> {
       stopPositions.add(pos);
     }
 
-    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, _stopPosition);
+    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, chosenStopPosition: _stopPosition);
 
     newGeoPath = geoPathAndStops.geoPathWithStops;
-    chosenStopPositionAlongGeoPath = geoPathAndStops.stopPositionAlongGeoPath;
+    chosenStopPositionAlongGeoPath = geoPathAndStops.stopPositionAlongGeoPath!;
 
     bool isReverseDirection = GeoPathUtils.reverseDirection(newGeoPath, stopPositions);
 
     PolyLineMarkers polyLineMarkers = await transportPathUtils.setMarkers(
       _markers,
       stopPositions,
-      _stopPosition,
-      chosenStopPositionAlongGeoPath,
+      stopPosition: _stopPosition,
+      stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
       true,
     );
 
     Set<Marker> largeRouteMarkers = polyLineMarkers.largeMarkers;
     Set<Marker> smallRouteMarkers = polyLineMarkers.smallMarkers;
-    Marker selectedStopMarker = polyLineMarkers.stopMarker;
+    Marker selectedStopMarker = polyLineMarkers.stopMarker!;
     Marker firstStopMarker = polyLineMarkers.firstMarker!;
     Marker lastStopMarker = polyLineMarkers.lastMarker!;
 
@@ -118,7 +118,7 @@ class _TransportMapState extends State<TransportMap> {
     _polyLines = await transportPathUtils.loadRoutePolyline(
       _transport.route!.colour!,
       newGeoPath,
-      chosenStopPositionAlongGeoPath,
+      stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
       true,
       isReverseDirection
     );
