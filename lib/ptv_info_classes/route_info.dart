@@ -30,6 +30,17 @@ class Route {
     setRouteColour(type.name);
   }
 
+  // Override == operator to compare routes based on the routeNumber.
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Route && other.id == id;
+  }
+
+  // Override hashCode based on routeNumber for proper comparison in collections like Set
+  @override
+  int get hashCode => id.hashCode;
+
   /// Sets a route's colours based on its type.
   /// Uses predefined colour palette with fallbacks for routes.
   // todo: convert the string routeType to a RouteTypeEnum
