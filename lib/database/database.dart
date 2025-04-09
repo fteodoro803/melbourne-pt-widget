@@ -51,13 +51,12 @@ class Directions extends Table {
 class Routes extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
-  // IntColumn get number => integer().nullable()();     // trains don't have numbers
   TextColumn get number => text()();                    // todo: convert this to int?
   TextColumn get colour => text()();
   TextColumn get textColour => text()();
   IntColumn get routeTypeId => integer().references(RouteTypes, #id)();
+  TextColumn get gtfsId => text()();
   TextColumn get status => text()();
-  // TextColumn get routeTypeName => text().references(RouteTypes, #name)();
   // todo: add geopaths here
   DateTimeColumn get lastUpdated => dateTime()();
 
@@ -77,7 +76,6 @@ class RouteTypes extends Table {
 class Stops extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
-  // IntColumn get routeTypeId => integer().references(RouteTypes, #id)();      // todo: make a StopRouteTypes
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
   // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine

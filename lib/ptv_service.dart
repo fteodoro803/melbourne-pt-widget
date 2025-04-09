@@ -248,17 +248,19 @@ class PtvService {
       String name = route["route_name"];
       String number = route["route_number"];
       RouteType type = RouteType.fromId(route["route_type"]);
+      String gtfsId = route["route_gtfs_id"];
       String status = route["route_service_status"]["description"];
 
       Route newRoute = Route(id: id,
           name: name,
           number: number,
           type: type,
+          gtfsId: gtfsId,
           status: status);
       routeList.add(newRoute);
 
       // Add to Database
-      await Get.find<db.AppDatabase>().addRoute(id, name, number, type.id, status);
+      await Get.find<db.AppDatabase>().addRoute(id, name, number, type.id, gtfsId, status);
     }
 
     return routeList;
@@ -275,6 +277,7 @@ class PtvService {
         name: dbRoute.name,
         number: dbRoute.number,
         type: RouteType.fromId(dbRoute.routeTypeId),
+        gtfsId: dbRoute.gtfsId,
         status: dbRoute.status,
     )).toList();
 
@@ -469,6 +472,7 @@ class PtvService {
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.fromId(routeTypeId);
+        String gtfsId = "TEMPORARY"; // todo: fix this
         String status = "TEMPORARY"; // todo: fix this, or the logic of the class
 
         Route newRoute = Route(
@@ -476,6 +480,7 @@ class PtvService {
             number: routeNumber,
             id: routeId,
             type: routeType,
+            gtfsId: gtfsId,
             status: status);
 
         stops.add(newStop);
