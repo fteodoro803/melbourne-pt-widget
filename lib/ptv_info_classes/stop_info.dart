@@ -10,7 +10,7 @@ class Stop {
   int id;      // convert this to integer ~note
   String name;      //~note what happens if in an api call, these are null?
   List<Route>? routes;      // todo: turn this into a method: get Routes from a Stop
-  RouteType? routeType;
+  RouteType? routeType;      // todo, turn this to a list
   int? number;
   bool? isExpanded = false;
 
