@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../widgets/screen_widgets.dart' as ScreenWidgets;
+import 'widgets/screen_widgets.dart' as ScreenWidgets;
 
 class FindRoutesScreen extends StatefulWidget {
 

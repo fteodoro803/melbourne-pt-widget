@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/widgets/transport_widgets.dart';
+import 'transport_widgets.dart';
 
-import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../screen_arguments.dart';
-import '../transport.dart';
+import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
+import 'package:flutter_project/screen_arguments.dart';
+import 'package:flutter_project/transport.dart';
 
 class SaveTransportSheet extends StatefulWidget {
   final SearchDetails searchDetails;

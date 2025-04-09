@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 
 class BackButtonWidget extends StatelessWidget {
   const BackButtonWidget({

@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_project/utility/time_utils.dart';
+import 'time_utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;

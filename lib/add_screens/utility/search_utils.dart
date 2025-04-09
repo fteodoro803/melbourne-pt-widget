@@ -1,13 +1,13 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../api_data.dart';
-import '../api/ptv_api_service.dart';
-import '../ptv_info_classes/route_direction_info.dart';
-import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../ptv_info_classes/route_type_info.dart';
-import '../ptv_info_classes/stop_info.dart';
-import '../ptv_service.dart';
-import '../transport.dart';
+import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/api/ptv_api_service.dart';
+import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
+import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
+import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/transport.dart';
 
 class SearchUtils {
   PtvService ptvService = PtvService();

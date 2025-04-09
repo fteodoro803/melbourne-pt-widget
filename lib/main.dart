@@ -10,8 +10,8 @@ import "package:flutter_project/database/database.dart";
 import "package:flutter_project/database/helpers/routeHelpers.dart";
 import "package:flutter_project/ptv_info_classes/route_info.dart" as PTRoute;
 import "package:flutter_project/ptv_service.dart";
-import "package:flutter_project/widgets/bottom_navigation_bar.dart";
-import "package:flutter_project/widgets/custom_list_tile.dart";
+import "package:flutter_project/add_screens/widgets/bottom_navigation_bar.dart";
+import "package:flutter_project/add_screens/widgets/custom_list_tile.dart";
 import "package:flutter_project/screen_arguments.dart";
 // add cupertino for apple version
 

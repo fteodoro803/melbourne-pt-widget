@@ -14,11 +14,11 @@ import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import '../ptv_info_classes/route_info.dart' as pt_route;
 
-import '../utility/map_utils.dart';
-import '../utility/search_utils.dart';
+import 'utility/map_utils.dart';
+import 'utility/search_utils.dart';
 
-import '../widgets/bottom_navigation_bar.dart';
-import '../widgets/screen_widgets.dart';
+import 'widgets/bottom_navigation_bar.dart';
+import 'widgets/screen_widgets.dart';
 
 import 'departure_details_sheet.dart';
 import 'nearby_stops_sheet.dart';
