@@ -84,7 +84,7 @@ class CustomListTile extends StatelessWidget {
                 ? Container(
                   padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                   decoration: BoxDecoration(
-                    color: TransportUtils.getColorForStatus(status.status),
+                    color: ColourUtils.getColorForStatus(status.status),
                     borderRadius: BorderRadius.circular(12)
                   ),
                   child: Text(

@@ -1,7 +1,7 @@
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart' as pt_route;
+import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import '../utility/time_utils.dart';
@@ -56,12 +56,14 @@ class RouteWidget extends StatelessWidget {
   });
 
   final pt_route.Route route;
-  final pt_route.RouteDirection? direction;
+  final RouteDirection? direction;
   final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
     String routeType = route.type.name;
+    String routeLabel = TransportUtils.getLabel(route, routeType);
+
     return Row(
       children: [
         Image.asset(
@@ -80,10 +82,7 @@ class RouteWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            routeType == "train" ||
-                routeType == "vLine"
-                ? route.name
-                : route.number,
+            routeLabel,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -197,7 +196,7 @@ class MinutesUntilDepartureWidget extends StatelessWidget {
         style: TextStyle(
         fontSize: 16, // Smaller font size for "Now"
         fontWeight: FontWeight.w600,
-        color: TransportUtils.getColorForStatus(departureStatus.status),
+        color: ColourUtils.getColorForStatus(departureStatus.status),
       height: 1.1,
       ),
     );
@@ -277,7 +276,7 @@ class DeparturesStringWidget extends StatelessWidget {
                         ),
                       ),
                     Text(
-                      TransportUtils.trimTime(departureTime),
+                      TimeUtils.trimTime(departureTime),
                       style: TextStyle(
                         fontSize: 16,
                         // fontWeight: FontWeight.w600,
@@ -375,6 +374,9 @@ class UnexpandedStopWidget extends StatelessWidget {
             child: Row(
               spacing: 6,
               children: routes.map((route) {
+
+                String routeLabel = TransportUtils.getLabel(route, routeType);
+
                 return Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
@@ -384,9 +386,7 @@ class UnexpandedStopWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    routeType == "train" || routeType == "vLine"
-                        ? route.name
-                        : route.number,
+                    routeLabel,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -428,20 +428,8 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
         itemBuilder: (context, routeIndex) {
 
           final route = routes[routeIndex];
-          String routeLabel;
-          String? routeName;
-          if (routeType == "train") {
-            routeLabel = route.name;
-            routeName = null;
-          }
-          else if (routeType == "vLine") {
-            routeLabel = "V/Line";
-            routeName = route.name;
-          }
-          else {
-            routeLabel = route.number;
-            routeName = route.name;
-          }
+          String routeLabel = TransportUtils.getLabel(route, routeType);
+          String? routeName = TransportUtils.getName(route, routeType);
 
           return ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),

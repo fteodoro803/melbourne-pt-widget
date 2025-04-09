@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
+
 class DepartureStatus {
   final String status;
   final int? timeDifference;
@@ -33,33 +35,33 @@ class TransportUtils {
     }
   }
 
-  // Function to return color based on departure status
-  static Color getColorForStatus(String status) {
-    switch (status) {
-      case "Delayed":
-        return Color(0xFFC57070); // Red for late
-      case "Early":
-        return Color(0xFFC5B972); // Yellow for early
-      case "On time":
-        return Color(0xFF8ECF93); // Yellow for early
-      case "Scheduled":
-      default:
-        return Color(0xFFB8B8B8); // Green for on-time or default
+  static getLabel(pt_route.Route route, String routeType) {
+    String routeLabel;
+    if (routeType == "train") {
+      routeLabel = route.name;
     }
-  }
-
-  static String trimTime(String timeString) {
-    String timeElement;
-    String timeOfDay;
-    if (timeString[0] == "0") {
-      timeElement = timeString.substring(1, timeString.length - 2);
-      timeOfDay = timeString.substring(timeString.length - 2, timeString.length);
-
-      return "$timeElement$timeOfDay";
+    else if (routeType == "vLine") {
+      routeLabel = "V/Line";
     }
     else {
-      return timeString;
+      routeLabel = route.number;
+      if (routeLabel == "") {
+        List<String> nameComponents = route.name.split(' ');
+        routeLabel = nameComponents[0];
+      }
     }
+    return routeLabel;
+  }
+
+  static getName(pt_route.Route route, String routeType) {
+    String? routeName;
+    if (routeType == "train") {
+      routeName = null;
+    }
+    else {
+      routeName = route.name;
+    }
+    return routeName;
   }
 }
 
@@ -157,6 +159,20 @@ class TimeUtils {
       return null;
     }
   }
+
+  static String trimTime(String timeString) {
+    String timeElement;
+    String timeOfDay;
+    if (timeString[0] == "0") {
+      timeElement = timeString.substring(1, timeString.length - 2);
+      timeOfDay = timeString.substring(timeString.length - 2, timeString.length);
+
+      return "$timeElement$timeOfDay";
+    }
+    else {
+      return timeString;
+    }
+  }
 }
 
 class ColourUtils {
@@ -172,5 +188,20 @@ class ColourUtils {
 
     // Convert hex string to integer and create Color object
     return Color(int.parse('0x$hexColour'));
+  }
+
+  // Function to return color based on departure status
+  static Color getColorForStatus(String status) {
+    switch (status) {
+      case "Delayed":
+        return Color(0xFFC57070); // Red for late
+      case "Early":
+        return Color(0xFFC5B972); // Yellow for early
+      case "On time":
+        return Color(0xFF8ECF93); // Yellow for early
+      case "Scheduled":
+      default:
+        return Color(0xFFB8B8B8); // Green for on-time or default
+    }
   }
 }

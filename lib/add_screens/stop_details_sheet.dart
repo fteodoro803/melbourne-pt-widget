@@ -196,7 +196,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                   itemCount: departures.length > 2 ? 2 : departures.length,
                                   itemBuilder: (context, index) {
                                     final departure = departures[index];
-                                    return DepartureCard(transport: widget.arguments.transport, departure: departure, onDepartureTapped: widget.onDepartureTapped);
+                                    return DepartureCard(transport: transport, departure: departure, onDepartureTapped: widget.onDepartureTapped);
                                   },
                                 ),
 

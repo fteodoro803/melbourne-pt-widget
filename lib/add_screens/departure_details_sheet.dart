@@ -85,9 +85,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
     Map<String, int>? timeToDeparture = TimeUtils.timeDifference(estimatedDepartureTime);
 
 
-    String timeString = "At ${TransportUtils.trimTime(estimatedDepartureTime)}";
+    String timeString = "At ${TimeUtils.trimTime(estimatedDepartureTime)}";
     if (timeToDeparture!['days']! < 0 || timeToDeparture['hours']! < 0) {
-      timeString = "Departed ${TransportUtils.trimTime(estimatedDepartureTime)}";
+      timeString = "Departed ${TimeUtils.trimTime(estimatedDepartureTime)}";
     }
     else if (timeToDeparture['days'] == 0 && timeToDeparture['hours'] == 0) {
       if (timeToDeparture['minutes'] == 0) {
@@ -180,7 +180,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                               padding: EdgeInsets.symmetric(vertical: 1, horizontal: 6),
                                               decoration: BoxDecoration(
 
-                                                color: TransportUtils.getColorForStatus(status.status),
+                                                color: ColourUtils.getColorForStatus(status.status),
                                                 borderRadius: BorderRadius.circular(8)
                                               ),
                                               child: Text(
@@ -202,7 +202,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                               child: Text(
                                                 "Estimated: ${departure.estimatedDepartureTime ?? 'N/A'}",
                                                 style: TextStyle(
-                                                  color: TransportUtils.getColorForStatus(status.status),
+                                                  color: ColourUtils.getColorForStatus(status.status),
                                                   fontSize: 13
                                               ),),
                                             ),
@@ -249,7 +249,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                         child: ListTile(
                           leading: SizedBox(
                             width: 55,
-                            child: Text(TransportUtils.trimTime(departureTime), style: TextStyle(fontSize: 12),),
+                            child: Text(TimeUtils.trimTime(departureTime), style: TextStyle(fontSize: 12),),
                           ),
                           title: Row(
                             children: [

@@ -44,35 +44,35 @@ class _DepartureCardState extends State<DepartureCard> {
             Text(
               "${status.status}",
               style: TextStyle(
-                color: TransportUtils.getColorForStatus(status.status),
+                color: ColourUtils.getColorForStatus(status.status),
               ),
             ),
             if (status.timeDifference != null)
               Text(
                 " ${status.timeDifference} min",
                 style: TextStyle(
-                  color: TransportUtils.getColorForStatus(status.status),
+                  color: ColourUtils.getColorForStatus(status.status),
                 ),
               ),
             Text(
               " • ",
               style: TextStyle(
-                color: TransportUtils.getColorForStatus(status.status),
+                color: ColourUtils.getColorForStatus(status.status),
               ),
             ),
             if (minutesUntilNextDepartureString != null)...[
               Text(
-                TransportUtils.trimTime(scheduledDepartureTime),
+                TimeUtils.trimTime(scheduledDepartureTime),
                 style: TextStyle(
-                  color: TransportUtils.getColorForStatus(status.status),
+                  color: ColourUtils.getColorForStatus(status.status),
                   decoration: status.timeDifference != null ? TextDecoration.lineThrough : null,
-                  decorationColor: TransportUtils.getColorForStatus(status.status),
+                  decorationColor: ColourUtils.getColorForStatus(status.status),
                 ),
               ),
               Text(
                 " • ",
                 style: TextStyle(
-                  color: TransportUtils.getColorForStatus(status.status),
+                  color: ColourUtils.getColorForStatus(status.status),
                 ),
               ),
             ],
@@ -93,14 +93,14 @@ class _DepartureCardState extends State<DepartureCard> {
           minutesUntilNextDepartureString,
           style: TextStyle(
             fontSize: 15,
-            color: TransportUtils.getColorForStatus(status.status),
+            color: ColourUtils.getColorForStatus(status.status),
           ),
         )
             : Text(
-          TransportUtils.trimTime(scheduledDepartureTime),
+          TimeUtils.trimTime(scheduledDepartureTime),
           style: TextStyle(
             fontSize: 15,
-            color: TransportUtils.getColorForStatus(status.status),
+            color: ColourUtils.getColorForStatus(status.status),
           ),
         ),
         onTap: () {
