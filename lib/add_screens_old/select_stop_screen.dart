@@ -49,20 +49,20 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     // Create temporary lists to hold the new data
     List<Stop> newStops = [];
     List<PTRoute.Route> newRoutes = [];
-
-    List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType!, maxDistance);
-    List<PTRoute.Route> routeList;
-    print("select stop screen -- StopList: $stopList");
-
-    // Create a list to hold all route fetch operations
-    List<Future<void>> routeFetchOperations = [];
+    List<Stop> stopList = await ptvService.fetchStopsLocation(location!, routeType: routeType!, maxDistance: maxDistance);
+    List<Future<void>> routeFetchOperations = [];      // holds all route fetch operations
 
     for (var stop in stopList) {
-      // Add the future operation to our list instead of awaiting it immediately
+
+      // Add the future operation to list instead of awaiting it immediately
       routeFetchOperations.add(ptvService.fetchRoutesFromStop(stop.id).then((routeList) {
         print("select stop screen -- RouteList for Stop${stop.id} $routeList");
 
         for (var route in routeList) {
+          if (route.type.id != routeType) {
+            continue;
+          }
+
           newStops.add(stop);
           newRoutes.add(route);
         }
@@ -94,7 +94,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    Get.find<db.AppDatabase>().addStop(stopId, stopName, routeTypeId, latitude!, longitude!);
+    Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude!, longitude!);
 
   }
 
