@@ -31,10 +31,35 @@ extension RouteHelpers on AppDatabase {
     );
   }
 
-  Future<void> addRoute(int id, String name, String number, int routeTypeId, String gtfsId, String status) async {
-    RoutesCompanion route = await createRouteCompanion(id: id, name: name, number: number, routeTypeId: routeTypeId, gtfsId: gtfsId, status: status);
+  Future<void> addRoute(int id, String name, String number, int routeType, String gtfsId, String status) async {
+    RoutesCompanion route = await createRouteCompanion(id: id, name: name, number: number, routeTypeId: routeType, gtfsId: gtfsId, status: status);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertRoute(route);
+  }
+
+  /// Gets routes according to name.
+  Future<List<Route>> getRoutes({String? search, int? routeType}) async {
+    AppDatabase db = Get.find<AppDatabase>();
+
+    drift.SimpleSelectStatement<$RoutesTable, Route> query;
+    if (search != null && search.isNotEmpty && routeType != null) {
+      query = db.select(db.routes)
+      ..where((tbl) => tbl.name.contains(search) & tbl.routeTypeId.equals(routeType));
+    }
+    else if (routeType != null) {
+      query = db.select(db.routes)
+        ..where((tbl) => tbl.routeTypeId.equals(routeType));
+    }
+    else if (search != null && search.isNotEmpty) {
+      query = db.select(db.routes)
+        ..where((tbl) => tbl.name.contains(search));
+    }
+    else {
+      query = db.select(db.routes);
+    }
+
+    final result = await query.get();
+    return result;
   }
 
   /// Sets a route's colours based on its type.
