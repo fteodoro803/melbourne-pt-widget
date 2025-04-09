@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/route_details_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import '../ptv_info_classes/route_info.dart' as pt_route;
 import '../ptv_service.dart';
@@ -327,7 +328,15 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                           )
                         : null,
                       subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId ?? "No GTFS Id") : null,
-                      trailing: Icon(Icons.arrow_forward_ios, size: 14)
+                      trailing: Icon(Icons.arrow_forward_ios, size: 14),
+                      onTap: () =>
+                        // Navigate to TransportDetailsScreen with transport data
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RouteDetailsScreen(route: route)
+                          ),
+                        )
                     )
                   );
                 }

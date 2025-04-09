@@ -281,10 +281,10 @@ class _SearchScreenState extends State<SearchScreen> {
       stopPositions.add(pos);
     }
 
-    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, stopPosition, allStopPositions: isDirectionSpecified ? null : stopPositions);
+    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, chosenStopPosition: stopPosition, allStopPositions: isDirectionSpecified ? null : stopPositions);
 
     newGeoPath = geoPathAndStops.geoPathWithStops;
-    chosenStopPositionAlongGeoPath = geoPathAndStops.stopPositionAlongGeoPath;
+    chosenStopPositionAlongGeoPath = geoPathAndStops.stopPositionAlongGeoPath!;
 
     if (!isDirectionSpecified) {
       stopPositions = geoPathAndStops.stopsAlongGeoPath; // stops along route aligned with geoPath
@@ -295,14 +295,14 @@ class _SearchScreenState extends State<SearchScreen> {
     PolyLineMarkers polyLineMarkers = await transportPathUtils.setMarkers(
       _markers,
       stopPositions,
-      stopPosition,
-      chosenStopPositionAlongGeoPath,
+      stopPosition: stopPosition,
+      stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
       isDirectionSpecified,
     );
 
     _largeRouteMarkers = polyLineMarkers.largeMarkers;
     _smallRouteMarkers = polyLineMarkers.smallMarkers;
-    _stopMarker = polyLineMarkers.stopMarker;
+    _stopMarker = polyLineMarkers.stopMarker!;
     _firstMarker = polyLineMarkers.firstMarker;
     _lastMarker = polyLineMarkers.lastMarker;
 
@@ -318,7 +318,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _polyLines = await transportPathUtils.loadRoutePolyline(
       widget.arguments.searchDetails!.route!.colour!,
       newGeoPath,
-      chosenStopPositionAlongGeoPath,
+      stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
       isDirectionSpecified,
       isReverseDirection
     );
