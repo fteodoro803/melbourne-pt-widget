@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 extension StopHelpers on AppDatabase {
   Future<StopsCompanion> createStopCompanion({required int id, required String name, required double latitude, required double longitude})
   async {
-    return StopsCompanion(
+    return StopsTableCompanion(
       id: drift.Value(id),
       name: drift.Value(name),
       // routeTypeId: drift.Value(routeTypeId),
