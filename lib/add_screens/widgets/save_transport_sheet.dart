@@ -34,7 +34,7 @@ class _SaveTransportSheetState extends State<SaveTransportSheet> {
     super.initState();
     route = widget.searchDetails.route!;
     stopName = widget.searchDetails.stop!.name;
-    transportList = widget.searchDetails.directions;
+    transportList = widget.searchDetails.directions!;
     tempSavedList = List.from(widget.savedList);
   }
 

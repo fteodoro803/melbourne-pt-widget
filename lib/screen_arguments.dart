@@ -9,31 +9,30 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class SearchDetails {
   LatLng? markerPosition;
-  int distance = 300;
-  String transportType = "all"; //  remove this
-  bool isSheetExpanded = false;
-  TextEditingController locationController; // remove this
+  String? address;
 
-  Stop? stop; // when stop is selected
-  pt_route.Route? route; // when stop is selected
-  Transport? transport; // when transport is selected
-  Departure? departure; // when departure is selected
+  int? distance;
+  String? transportType;
 
-  List<Stop> stops = []; // when location is selected
-  List<pt_route.Route> routes = []; // remove this
-  List<Transport> directions = []; // when stop is selected
+  bool? isSheetExpanded = false;
 
-  SearchDetails(this.locationController);
+  Stop? stop;
+  pt_route.Route? route;
+  Transport? transport;
+  Departure? departure;
+
+  List<Stop>? stops;
+  List<Transport>? directions;
+
+  SearchDetails();
 }
 
 class ScreenArguments {
   Transport? transport;    // data for new Transport option
   VoidCallback callback;  // function to be called from child screen
-  SearchDetails? searchDetails;
 
-  ScreenArguments(this.transport, this.callback);
-  ScreenArguments.withSearchDetails2(this.callback, this.searchDetails);
-  ScreenArguments.withSearchDetails(this.transport, this.callback, this.searchDetails);
+  ScreenArguments(this.callback);
+  ScreenArguments.withTransport(this.transport, this.callback);
 
   // ScreenArguments.withSearchDetails(this.searchDetails);
 }

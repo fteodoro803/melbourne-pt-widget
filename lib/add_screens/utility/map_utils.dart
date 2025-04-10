@@ -51,7 +51,6 @@ class MapUtils {
     );
   }
 
-
   /// Function to calculate the bounds that include all points within a given distance from _chosenPosition
   Future<LatLngBounds> calculateBoundsForMarkers(double distanceInMeters, LatLng markerPosition) async {
     List<LatLng> allPoints = [];
@@ -92,7 +91,6 @@ class MapUtils {
     );
   }
 
-
   /// Retrieves address from coordinates of dropped pin
   Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
     try {
@@ -109,21 +107,7 @@ class MapUtils {
     return "Address not found"; // Return a default message if something goes wrong
   }
 
-
-  static Set<Marker> resetMarkers(LatLng markerPosition) {
-    Set<Marker> newMarkers = {};
-
-    MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
-
-    newMarkers.add(Marker(
-      markerId: id,
-      position: markerPosition,
-      consumeTapEvents: true,
-    ));
-    return newMarkers;
-  }
-
-
+  /// Checks if polyline marker visibility should change
   bool didZoomChange(double oldZoom, double newZoom) {
 
     bool wasSmallHidden;
@@ -160,14 +144,14 @@ class MapUtils {
     return !(wasSmallHidden == hideSmall && wasLargeHidden == hideLarge);
   }
 
-
+  /// Changes polyline marker visibility on zoom change
   Set<Marker> onZoomChange(Set<Marker> markers, double zoom, PolyLineMarkers polyLineMarkers, LatLng markerPosition) {
 
     Set<Marker> newMarkers = {};
 
     if (zoom < zoomThresholdLarge) {
 
-      newMarkers = resetMarkers(markerPosition);
+      newMarkers = TransportPathUtils.resetMarkers(markerPosition);
       if (polyLineMarkers.stopMarker != null) {
         newMarkers.add(polyLineMarkers.stopMarker!);
       }
@@ -175,7 +159,7 @@ class MapUtils {
       newMarkers.add(polyLineMarkers.lastMarker);
 
     } else if (zoom < zoomThresholdSmall && zoom >= zoomThresholdLarge) {
-      newMarkers = resetMarkers(markerPosition);
+      newMarkers = TransportPathUtils.resetMarkers(markerPosition);
       if (polyLineMarkers.stopMarker != null) {
         newMarkers.add(polyLineMarkers.stopMarker!);
       }
@@ -193,6 +177,8 @@ class MapUtils {
 }
 
 class GeoPathUtils {
+
+  /// Helper function to find the point in a geoPath that is closest to a given point
   static LatLng findClosestPointOnLine(LatLng center, LatLng p1, LatLng p2) {
     // Calculate the vector from p1 to p2
     double dx = p2.longitude - p1.longitude;
@@ -212,6 +198,7 @@ class GeoPathUtils {
     return LatLng(closestLatitude, closestLongitude);
   }
 
+  /// Helper function to find the projected position of a point directly on the geoPath
   static LatLng generatePointOnGeoPath(LatLng center, List<LatLng> path) {
     double minDistance = double.infinity;
     LatLng closestPoint = path[0];
@@ -232,6 +219,7 @@ class GeoPathUtils {
     return closestPoint;
   }
 
+  /// Helper function to calculate the distance between two points
   static double calculateDistance(LatLng point1, LatLng point2) {
     // Use the Haversine formula or a simpler Euclidean distance calculation
     var lat1 = point1.latitude;
@@ -256,6 +244,7 @@ class GeoPathUtils {
     return (distanceAClosest + distanceBClosest - distanceAB).abs() < 0.001;
   }
 
+  /// Helper function to determine whether a the transport path and markers should be reversed
   static bool reverseDirection(List<LatLng> geopath, List<LatLng> stopPositions) {
     LatLng firstGeoPathPoint = geopath[0];
     LatLng lastGeoPathPoint = geopath[geopath.length - 1];
@@ -267,6 +256,20 @@ class GeoPathUtils {
 
 
 class TransportPathUtils {
+  /// Returns set of markers with only location pin marker
+  static Set<Marker> resetMarkers(LatLng markerPosition) {
+    Set<Marker> newMarkers = {};
+
+    MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
+
+    newMarkers.add(Marker(
+      markerId: id,
+      position: markerPosition,
+      consumeTapEvents: true,
+    ));
+    return newMarkers;
+  }
+
   Future<Set<Polyline>> loadRoutePolyline(String routeColour, List<LatLng> geoPath, bool isDirectionSpecified, bool isReverseDirection, {LatLng? stopPositionAlongGeoPath}) async {
 
     Set<Polyline> polyLines = {};

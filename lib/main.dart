@@ -233,7 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FindRoutesScreen(arguments: ScreenArguments.withSearchDetails2(_updateMainPage, SearchDetails(TextEditingController()))),
+                MaterialPageRoute(builder: (context) => FindRoutesScreen(arguments: ScreenArguments(_updateMainPage)),
               ));
             },
           ),
@@ -265,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => TransportMap(arguments: ScreenArguments.withSearchDetails(_transportList[index], _updateMainPage, SearchDetails(TextEditingController())))
+                                builder: (context) => TransportMap(arguments: ScreenArguments.withTransport(_transportList[index], _updateMainPage))
                               ),
                             )
                         ),

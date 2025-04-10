@@ -5,10 +5,8 @@ import 'package:flutter_project/add_screens/widgets/screen_widgets.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
-import '../../screen_arguments.dart';
 
 class RouteDetailsSheet extends StatefulWidget {
-  final ScreenArguments arguments;
   final pt_route.Route route;
   final String direction;
   final List<SuburbStops> suburbStops;
@@ -18,7 +16,6 @@ class RouteDetailsSheet extends StatefulWidget {
 
   const RouteDetailsSheet({
     super.key,
-    required this.arguments,
     required this.scrollController,
     required this.route,
     required this.suburbStops,

@@ -11,6 +11,7 @@ import '../widgets/transport_widgets.dart';
 class StopDetailsSheet extends StatefulWidget {
 
   final ScreenArguments arguments;
+  final SearchDetails searchDetails;
   final ScrollController scrollController;
   final Function(Transport) onTransportTapped;
   final Function(Departure, Transport) onDepartureTapped;
@@ -18,6 +19,7 @@ class StopDetailsSheet extends StatefulWidget {
   const StopDetailsSheet({
     super.key,
     required this.arguments,
+    required this.searchDetails,
     required this.scrollController,
     required this.onTransportTapped,
     required this.onDepartureTapped
@@ -36,7 +38,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   Future<void> initializeSavedList() async {
     List<bool> tempSavedList = [];
 
-    for (var transport in widget.arguments.searchDetails!.directions) {
+    for (var transport in widget.searchDetails.directions!) {
       // Check if the transport is already saved
       bool isSaved = await isTransportSaved(transport);
       tempSavedList.add(isSaved);
@@ -50,7 +52,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    _transports = widget.arguments.searchDetails!.directions;
+    _transports = widget.searchDetails.directions!;
     initializeSavedList();
   }
 
@@ -79,7 +81,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   Widget build(BuildContext context) {
 
     // List<Transport> transportsList = widget.arguments.searchDetails!.directions.where((t) => t.departures != null && t.departures!.isNotEmpty).toList();
-    List<Transport> transportsList = widget.arguments.searchDetails!.directions;
+    List<Transport> transportsList = widget.searchDetails.directions!;
 
 
     if (_savedList.isEmpty) {
@@ -89,7 +91,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     return Column(
       children: [
         // Draggable Scrollable Sheet Handle
-        if (!widget.arguments.searchDetails!.isSheetExpanded)
+        if (!widget.searchDetails.isSheetExpanded!)
           HandleWidget(),
 
         // Stop and route details
@@ -104,7 +106,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    LocationWidget(textField: widget.arguments.searchDetails!.stop!.name, textSize: 18, scrollable: true),
+                    LocationWidget(textField: widget.searchDetails.stop!.name, textSize: 18, scrollable: true),
 
                     // Stop location
                     ListTile(
@@ -124,7 +126,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                             ),
                           ),
                           SizedBox(width: 10),
-                          RouteWidget(route: widget.arguments.searchDetails!.route!, scrollable: false,),
+                          RouteWidget(route: widget.searchDetails.route!, scrollable: false,),
                         ],
                       ),
                       trailing: GestureDetector(
@@ -135,7 +137,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                             context: context,
                             builder: (BuildContext context) {
                               return SaveTransportSheet(
-                                searchDetails: widget.arguments.searchDetails!,
+                                searchDetails: widget.searchDetails,
                                 savedList: _savedList,
                                 onConfirmPressed: _onConfirmPressed,
                               );

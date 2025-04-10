@@ -32,7 +32,7 @@ class RouteDetailsScreen extends StatefulWidget {
   RouteDetailsScreen({
     super.key,
     required this.route,
-    required this.arguments
+    required this.arguments,
   });
 
   @override
@@ -40,6 +40,8 @@ class RouteDetailsScreen extends StatefulWidget {
 }
 
 class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
+
+  SearchDetails searchDetails = SearchDetails();
 
   bool _isStopSelected = false;
 
@@ -70,12 +72,12 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
   Future<void> _onStopSelected(Stop stop) async {
     List<Transport> listTransport = await searchUtils.splitDirection(stop, _route);
 
-    widget.arguments.searchDetails!.stop = stop;
-    widget.arguments.searchDetails!.route = _route;
+    searchDetails.stop = stop;
+    searchDetails.route = _route;
 
-    widget.arguments.searchDetails!.directions.clear();
+    searchDetails.directions = [];
     for (var transport in listTransport) {
-      widget.arguments.searchDetails!.directions.add(transport);
+      searchDetails.directions!.add(transport);
     }
 
     setState(() {
@@ -271,10 +273,10 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
                   ],
                 ),
                 child: _isStopSelected
-                  ? StopDetailsSheet(onDepartureTapped: _onDepartureTapped, onTransportTapped: _onTransportTapped, scrollController: scrollController, arguments: widget.arguments)
+                  ? StopDetailsSheet(onDepartureTapped: _onDepartureTapped, onTransportTapped: _onTransportTapped, scrollController: scrollController, searchDetails: searchDetails, arguments: widget.arguments)
                   : _direction == null
                     ? Center(child: CircularProgressIndicator())
-                    : RouteDetailsSheet(scrollController: scrollController, route: _route, direction: _direction!, arguments: widget.arguments, changeDirection: _changeDirection, suburbStops: _suburbStops, onStopTapped: _onStopSelected,),
+                    : RouteDetailsSheet(scrollController: scrollController, route: _route, direction: _direction!, changeDirection: _changeDirection, suburbStops: _suburbStops, onStopTapped: _onStopSelected,),
               );
             }
           )

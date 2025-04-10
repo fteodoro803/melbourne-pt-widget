@@ -26,6 +26,8 @@ class TransportMap extends StatefulWidget {
 }
 
 class _TransportMapState extends State<TransportMap> {
+  SearchDetails searchDetails = SearchDetails();
+
   late Transport _transport;
   bool _isDepartureSelected = false;
 
@@ -129,7 +131,7 @@ class _TransportMapState extends State<TransportMap> {
 
   Future<void> _onDepartureTapped(Departure departure, Transport transport) async {
     setState(() {
-      widget.arguments.searchDetails!.departure = departure;
+      searchDetails.departure = departure;
       _isDepartureSelected = true;
     });
   }
@@ -198,8 +200,8 @@ class _TransportMapState extends State<TransportMap> {
                   ],
                 ),
                 child: _isDepartureSelected
-                  ? DepartureDetailsSheet(arguments: widget.arguments, scrollController: scrollController)
-                  : TransportDetailsSheet(arguments: widget.arguments, scrollController: scrollController, onDepartureTapped: _onDepartureTapped,)
+                  ? DepartureDetailsSheet(searchDetails: searchDetails, scrollController: scrollController)
+                  : TransportDetailsSheet(arguments: widget.arguments, searchDetails: searchDetails, scrollController: scrollController, onDepartureTapped: _onDepartureTapped,)
               );
             },
           ),

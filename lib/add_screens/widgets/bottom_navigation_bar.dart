@@ -44,11 +44,7 @@ class BottomNavigation extends StatelessWidget {
             Navigator.pushNamed(
               context,
               '/searchScreen',
-              arguments: ScreenArguments.withSearchDetails(
-                  Transport(),
-                  updateMainPage!,
-                  SearchDetails(TextEditingController())
-              ),
+              arguments: ScreenArguments(updateMainPage!),
             );
             break;
 
@@ -56,7 +52,7 @@ class BottomNavigation extends StatelessWidget {
             Navigator.pushNamed(
               context,
               '/selectRouteTypeScreen',
-              arguments: ScreenArguments(Transport(), updateMainPage!),
+              arguments: ScreenArguments.withTransport(Transport(), updateMainPage!),
             );
             break;
         }

@@ -43,7 +43,7 @@ class NearbyStopsState {
 }
 
 class NearbyStopsSheet extends StatefulWidget {
-  final ScreenArguments arguments;
+  final SearchDetails searchDetails;
   final ScrollController scrollController;
   final Function({int? newDistance, String? newTransportType}) onSearchFiltersChanged;
   final Function(Stop, pt_route.Route) onStopTapped;
@@ -54,7 +54,7 @@ class NearbyStopsSheet extends StatefulWidget {
 
   const NearbyStopsSheet({
     Key? key,
-    required this.arguments,
+    required this.searchDetails,
     required this.scrollController,
     required this.onSearchFiltersChanged,
     required this.onStopTapped,
@@ -217,7 +217,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
   @override
   Widget build(BuildContext context) {
 
-    String address = widget.arguments.searchDetails!.locationController.text;
+    String address = widget.searchDetails.address!;
 
     // Add listener to the ItemPositionsListener
     _itemPositionsListener.itemPositions.addListener(() {
@@ -235,7 +235,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
     return Column(
       children: [
         // Draggable Scrollable Sheet Handle
-        if (!widget.arguments.searchDetails!.isSheetExpanded)
+        if (!widget.searchDetails.isSheetExpanded!)
           ScreenWidgets.HandleWidget(),
         // Address and toggleable transport type buttons
         Expanded(
@@ -326,11 +326,11 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                     itemPositionsListener: _itemPositionsListener,
                     shrinkWrap: true,
                     padding: const EdgeInsets.all(0.0),
-                    itemCount: widget.arguments.searchDetails!.stops.length,
+                    itemCount: widget.searchDetails.stops!.length,
                     itemBuilder: (context, index) {
                       // Stop items
                       final stopIndex = index;
-                      final stop = widget.arguments.searchDetails!.stops[stopIndex];
+                      final stop = widget.searchDetails.stops![stopIndex];
                       final bool? isExpanded = stop.isExpanded;
                       final routes = stop.routes ?? [];
                       final stopName = stop.name;
@@ -364,7 +364,7 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
                                 onTap: () {
                                   setState(() {
                                     _savedScrollIndex = stopIndex;
-                                    widget.arguments.searchDetails?.stops[stopIndex].isExpanded = !widget.arguments.searchDetails!.stops[stopIndex].isExpanded!;
+                                    widget.searchDetails.stops![stopIndex].isExpanded = !widget.searchDetails.stops![stopIndex].isExpanded!;
                                   });
                                   _notifyStateChanged();
                                 }

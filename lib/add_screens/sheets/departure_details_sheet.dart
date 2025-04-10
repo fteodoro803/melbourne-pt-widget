@@ -12,12 +12,12 @@ import '../widgets/screen_widgets.dart';
 import '../widgets/transport_widgets.dart';
 
 class DepartureDetailsSheet extends StatefulWidget {
-  final ScreenArguments arguments;
+  final SearchDetails searchDetails;
   final ScrollController scrollController;
 
   DepartureDetailsSheet({
     super.key,
-    required this.arguments,
+    required this.searchDetails,
     required this.scrollController,
   });
 
@@ -38,12 +38,12 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    transport = widget.arguments.transport!;
+    transport = widget.searchDetails.transport!;
     fetchPattern();
   }
 
   Future<void> fetchPattern() async {
-    _pattern = await ptvService.fetchPattern(transport, widget.arguments.searchDetails!.departure!);
+    _pattern = await ptvService.fetchPattern(transport, widget.searchDetails.departure!);
 
     // Find the current stop index
     _currentStopIndex = _pattern.indexWhere(
@@ -76,7 +76,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   @override
   Widget build(BuildContext context) {
 
-    final departure = widget.arguments.searchDetails!.departure!;
+    final departure = widget.searchDetails.departure!;
     final String estimatedDepartureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime ?? "No Data";
     final DepartureStatus status = TransportUtils.getDepartureStatus(
       departure.scheduledDepartureTime,
@@ -106,7 +106,6 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
       final firstVisibleItem = _itemPositionsListener.itemPositions.value.isNotEmpty
           ? _itemPositionsListener.itemPositions.value.first
           : null;
-      print(firstVisibleItem);
 
       if (firstVisibleItem != null) {
         if (firstVisibleItem.index == 0 && firstVisibleItem.itemLeadingEdge > 0) {
@@ -118,7 +117,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
     return Column(
       children: [
         // DraggableScrollableSheet Handle
-        if (!widget.arguments.searchDetails!.isSheetExpanded)
+        if (!widget.searchDetails.isSheetExpanded!)
           HandleWidget(),
 
         Expanded(

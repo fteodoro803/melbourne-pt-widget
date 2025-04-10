@@ -36,7 +36,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
 
-  final String _screenName = "SelectLocation";
+  SearchDetails searchDetails = SearchDetails();
 
   // DraggableScrollableSheet state management
   final DraggableScrollableController _controller = DraggableScrollableController();
@@ -66,9 +66,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Set<Polyline> _polyLines = {};
   Set<Circle> _circles = {};
   List<LatLng> _geoPath = [];
-  List<Departure> _pattern = [];
   List<Stop> _stopsAlongRoute = [];
-
   Set<Marker> _nearbyStopMarkers = {};
 
   late PolyLineMarkers _polyLineMarkers;
@@ -94,28 +92,24 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Listen for changes in the sheet's size
     _controller.addListener(() {
-      if (_controller.size >= 0.85) {
-        if (!_isSheetFullyExpanded) {
-          setState(() {
-            _controller.jumpTo(1.0);
-            _isSheetFullyExpanded = true;
-            widget.arguments.searchDetails!.isSheetExpanded = true;
-          });
-        }
-      } else if (_controller.size < 0.85) {
-        if (_isSheetFullyExpanded) {
-          setState(() {
-            _controller.jumpTo(0.6);
-            _isSheetFullyExpanded = false;
-            widget.arguments.searchDetails!.isSheetExpanded = false;
-          });
-        }
+      if (_controller.size >= 0.75 && !_isSheetFullyExpanded) {
+        setState(() {
+          _controller.jumpTo(1.0);
+          _isSheetFullyExpanded = true;
+          searchDetails.isSheetExpanded = true;
+        });
+
+      } else if (_controller.size < 0.95 &&  _isSheetFullyExpanded) {
+        setState(() {
+          _controller.jumpTo(0.6);
+          _isSheetFullyExpanded = false;
+          searchDetails.isSheetExpanded = false;
+        });
       }
     });
 
-    widget.arguments.searchDetails?.distance = 300;
-    widget.arguments.searchDetails?.transportType = "all";
-    tools.printScreenState(_screenName, widget.arguments);
+    searchDetails.distance = 300;
+    searchDetails.transportType = "all";
   }
 
   NearbyStopsState? _getNearbyStopsState() {
@@ -133,7 +127,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       if (refresh) {
         _nearbyStopMarkers = {};
-        for (var stop in widget.arguments.searchDetails!.stops) {
+        for (var stop in searchDetails.stops!) {
           Marker newMarker = await createNearbyStopMarker(stop);
 
           _nearbyStopMarkers.add(newMarker);
@@ -141,24 +135,24 @@ class _SearchScreenState extends State<SearchScreen> {
       }
 
       setState(() {
-        _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
+        _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
         _markers = {..._markers, ..._nearbyStopMarkers};
 
         _circles.clear();
         _circles.add(
           Circle(
             circleId: CircleId("circle"),
-            center: widget.arguments.searchDetails!.markerPosition!,
+            center: searchDetails.markerPosition!,
             fillColor: Colors.blue.withValues(alpha: 0.2),
             strokeWidth: 0,
-            radius: widget.arguments.searchDetails!.distance.toDouble(),
+            radius: searchDetails.distance!.toDouble(),
             )
         );
       });
     }
     else {
       _circles.clear();
-      _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
+      _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
     }
   }
 
@@ -179,7 +173,7 @@ class _SearchScreenState extends State<SearchScreen> {
         setState(() {
 
           // Set isExpanded to false for every other nearby stop
-          for (var s in widget.arguments.searchDetails!.stops) {
+          for (var s in searchDetails.stops!) {
             s.isExpanded = false;
           }
           stop.isExpanded = true;
@@ -213,7 +207,7 @@ class _SearchScreenState extends State<SearchScreen> {
           );
 
           // Find the index of the tapped stop
-          int stopIndex = widget.arguments.searchDetails!.stops.indexOf(stop);
+          int stopIndex = searchDetails.stops!.indexOf(stop);
 
           // First ensure the sheet is expanded enough to see the content
           _controller.animateTo(
@@ -237,18 +231,15 @@ class _SearchScreenState extends State<SearchScreen> {
   Future<void> loadTransportPath(bool isDirectionSpecified) async {
     LatLng stopPosition;
     List<Stop> stops = [];
-    stopPosition = LatLng(widget.arguments.searchDetails!.stop!.latitude!, widget.arguments.searchDetails!.stop!.longitude!);
-    List<Stop> allStopsAlongRoute = await ptvService.fetchStopsRoute(widget.arguments.searchDetails!.route!); // all stops along a given route
+    stopPosition = LatLng(searchDetails.stop!.latitude!, searchDetails.stop!.longitude!);
 
     // Early exit if GeoPath is empty // todo: also check if null!!!
-    if (_geoPath.isEmpty || _pattern.isEmpty || allStopsAlongRoute.isEmpty) {
+    if (_geoPath.isEmpty || _stopsAlongRoute.isEmpty) {
       return;
     }
 
     // Only add stops that are in the pattern, in order provided
-    for (var d in _pattern) {
-      stops.add(allStopsAlongRoute[allStopsAlongRoute.indexWhere((stop) => stop.id == d.stopId)]);
-    }
+    stops = _stopsAlongRoute.where((s) => s.stopSequence != 0).toList();
 
     List<LatLng> stopPositions = [];
     LatLng chosenStopPositionAlongGeoPath = stopPosition;
@@ -284,7 +275,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _markers.add(_polyLineMarkers.lastMarker);
 
     _polyLines = await transportPathUtils.loadRoutePolyline(
-      widget.arguments.searchDetails!.route!.colour!,
+      searchDetails.route!.colour!,
       newGeoPath,
       stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
       isDirectionSpecified,
@@ -300,7 +291,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (_activeSheet != ActiveSheet.nearbyStops && _activeSheet != ActiveSheet.none && _currentZoom != position.zoom) {
       if (mapUtils.didZoomChange(_currentZoom, position.zoom)) {
         setState(() {
-          _markers = mapUtils.onZoomChange(_markers, position.zoom, _polyLineMarkers, widget.arguments.searchDetails!.markerPosition!);
+          _markers = mapUtils.onZoomChange(_markers, position.zoom, _polyLineMarkers, searchDetails.markerPosition!);
           _currentZoom = position.zoom;
         });
       }
@@ -322,11 +313,11 @@ class _SearchScreenState extends State<SearchScreen> {
     List<Stop> uniqueStops = await searchUtils.getStops(selectedLocation, "all", 300);
 
     // Update the state with the new address
-    widget.arguments.searchDetails!.stops = uniqueStops;
-    widget.arguments.searchDetails!.markerPosition = selectedLocation;
-    widget.arguments.searchDetails!.locationController.text = address;
-    widget.arguments.searchDetails!.distance = 300;
-    widget.arguments.searchDetails!.transportType = "all";
+    searchDetails.stops = uniqueStops;
+    searchDetails.markerPosition = selectedLocation;
+    searchDetails.address = address;
+    searchDetails.distance = 300;
+    searchDetails.transportType = "all";
     _hasDroppedPin = true;
 
     _customInfoWindowController.hideInfoWindow!();
@@ -354,14 +345,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles changes in transport type and distance filters on NearbyStopsSheet
   Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
-    String transportType = newTransportType ?? widget.arguments.searchDetails!.transportType;
-    int oldDistance = widget.arguments.searchDetails!.distance;
+    String transportType = newTransportType ?? searchDetails.transportType!;
+    int oldDistance = searchDetails.distance!;
     int distance = newDistance ?? oldDistance;
 
-    List<Stop> uniqueStops = await searchUtils.getStops(widget.arguments.searchDetails!.markerPosition!, transportType, distance);
+    List<Stop> uniqueStops = await searchUtils.getStops(searchDetails.markerPosition!, transportType, distance);
 
     if (oldDistance != newDistance && newDistance != null) {
-      LatLngBounds bounds = await mapUtils.calculateBoundsForMarkers(distance.toDouble(), widget.arguments.searchDetails!.markerPosition!);
+      LatLngBounds bounds = await mapUtils.calculateBoundsForMarkers(distance.toDouble(), searchDetails.markerPosition!);
 
       // First animate to the bounds to ensure all points are visible
       mapController.moveCamera(
@@ -371,7 +362,7 @@ class _SearchScreenState extends State<SearchScreen> {
       // Then adjust the position so the marker is at 70% of height
       await Future.delayed(Duration(milliseconds: 300)); // Wait for first animation to complete
 
-      final LatLng markerPosition = widget.arguments.searchDetails!.markerPosition!;
+      final LatLng markerPosition = searchDetails.markerPosition!;
       final zoom = await mapController.getZoomLevel();
 
       // Calculate a point that will position our marker at 70% of the map height
@@ -386,9 +377,9 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() {
-      widget.arguments.searchDetails!.stops = uniqueStops;
-      widget.arguments.searchDetails!.distance = distance;
-      widget.arguments.searchDetails!.transportType = transportType;
+      searchDetails.stops = uniqueStops;
+      searchDetails.distance = distance;
+      searchDetails.transportType = transportType;
       showStopMarkers(true);
     });
 
@@ -398,23 +389,23 @@ class _SearchScreenState extends State<SearchScreen> {
   /// Handles tap on a route in NearbyStopsSheet
   Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
     _circles.clear();
-    _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
+    _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
     List<Transport> listTransport = await searchUtils.splitDirection(stop, route);
 
-    widget.arguments.searchDetails!.stop = stop;
-    widget.arguments.searchDetails!.route = route;
+    searchDetails.stop = stop;
+    searchDetails.route = route;
 
-    widget.arguments.searchDetails!.directions.clear();
+    searchDetails.directions = [];
     for (var transport in listTransport) {
-      widget.arguments.searchDetails!.directions.add(transport);
+      searchDetails.directions!.add(transport);
     }
 
     _geoPath = await ptvService.fetchGeoPath(route); // get geoPath of route
-    if (listTransport.first.departures != null && listTransport.first.departures!.isNotEmpty) {
-      _pattern = await ptvService.fetchPattern(listTransport[0], listTransport[0].departures![0]);
+    if (listTransport.isNotEmpty) {
+      _stopsAlongRoute = await ptvService.fetchStopsRoute(listTransport[0].route!, direction: listTransport[0].direction);
     }
     else {
-      _pattern = [];
+      _stopsAlongRoute = [];
     }
 
     loadTransportPath(false);
@@ -424,17 +415,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles tap on a direction in StopDetailsSheet
   Future<void> _onTransportTapped(Transport transport) async {
-    _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
-    widget.arguments.transport = transport;
+    _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
+    searchDetails.transport = transport;
 
     _changeSheet(ActiveSheet.transportDetails, false);
-
-    if (transport.departures != null && transport.departures!.isNotEmpty) {
-      _pattern = await ptvService.fetchPattern(transport, transport.departures![0]);
-    }
-    else {
-      _pattern = [];
-    }
+    _stopsAlongRoute = await ptvService.fetchStopsRoute(transport.route!, direction: transport.direction);
 
     loadTransportPath(true);
 
@@ -442,12 +427,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles tap on a departure in StopDetailsSheet and TransportDetailsSheet
   Future<void> _onDepartureTapped(Departure departure, Transport transport) async {
-    widget.arguments.transport = transport;
-    widget.arguments.searchDetails!.departure = departure;
+    searchDetails.transport = transport;
+    searchDetails.departure = departure;
 
     if (_activeSheet == ActiveSheet.stopDetails) {
-      _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
-      _pattern = await ptvService.fetchPattern(transport, departure);
+      _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
+      _stopsAlongRoute = await ptvService.fetchStopsRoute(transport.route!, direction: transport.direction);
       loadTransportPath(true);
     }
     _changeSheet(ActiveSheet.departureDetails, false);
@@ -464,7 +449,7 @@ class _SearchScreenState extends State<SearchScreen> {
         if (_navigationHistory.isNotEmpty && _navigationHistory.last == ActiveSheet.transportDetails) {
           previousSheet = ActiveSheet.transportDetails;
         } else {
-          _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
+          _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
           _polyLines.clear();
           loadTransportPath(false);
           previousSheet = ActiveSheet.stopDetails;
@@ -473,7 +458,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       case ActiveSheet.transportDetails:
         previousSheet = ActiveSheet.stopDetails;
-        _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
+        _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
         _polyLines.clear();
         // Restore transport path display
         loadTransportPath(false);
@@ -483,7 +468,7 @@ class _SearchScreenState extends State<SearchScreen> {
         previousSheet = ActiveSheet.nearbyStops;
         // Clear polylines and restore marker
         _polyLines.clear();
-        _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
+        _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
         showStopMarkers(false);
         break;
 
@@ -577,6 +562,7 @@ class _SearchScreenState extends State<SearchScreen> {
       case ActiveSheet.stopDetails:
         return StopDetailsSheet(
           arguments: widget.arguments,
+          searchDetails: searchDetails,
           scrollController: scrollController,
           onTransportTapped: _onTransportTapped,
           onDepartureTapped: _onDepartureTapped,
@@ -584,19 +570,20 @@ class _SearchScreenState extends State<SearchScreen> {
       case ActiveSheet.transportDetails:
         return TransportDetailsSheet(
           arguments: widget.arguments,
+          searchDetails: searchDetails,
           scrollController: scrollController,
           onDepartureTapped: _onDepartureTapped,
         );
       case ActiveSheet.departureDetails:
         return DepartureDetailsSheet(
-          arguments: widget.arguments,
+          searchDetails: searchDetails,
           scrollController: scrollController,
         );
       case ActiveSheet.nearbyStops:
       default:
         final sheet = NearbyStopsSheet(
           key: _nearbyStopsSheetKey,
-          arguments: widget.arguments,
+          searchDetails: searchDetails,
           scrollController: scrollController,
           onSearchFiltersChanged: _onSearchFiltersChanged,
           onStopTapped: _onStopTapped,

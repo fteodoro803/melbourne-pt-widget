@@ -12,12 +12,14 @@ import '../widgets/transport_widgets.dart';
 
 class TransportDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
+  final SearchDetails searchDetails;
   final ScrollController scrollController;
   final Function(Departure, Transport) onDepartureTapped;
 
   const TransportDetailsSheet({
     super.key,
     required this.arguments,
+    required this.searchDetails,
     required this.scrollController,
     required this.onDepartureTapped
   });
@@ -89,7 +91,7 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
       children: [
 
         // DraggableScrollableSheet Handle
-        if (!widget.arguments.searchDetails!.isSheetExpanded)
+        if (!widget.searchDetails.isSheetExpanded!)
           HandleWidget(),
 
         Expanded(
