@@ -95,7 +95,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
   }
 
   Future<void> getRoutes() async {
-    List<pt_route.Route> routes = await ptvService.fetchRoutes();
+    List<pt_route.Route> routes = await ptvService.searchRoutes();
 
     // Sort the list
     routes.sort((a, b) {
@@ -171,7 +171,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
 
     if (routeType == "bus") {
       for (var route in _allRoutes) {
-        String gtfsIdPrefix = _getGTFSIdPrefix(route.gtfsId!);
+        String gtfsIdPrefix = _getGTFSIdPrefix(route.gtfsId);
 
         for (var filter in busFilters.entries) {
           if (filter.value && gtfsIdPrefix == filter.key.id) {
@@ -184,7 +184,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
 
     else if (routeType == "vLine") {
       for (var route in _allRoutes) {
-        String gtfsIdPrefix = _getGTFSIdPrefix(route.gtfsId!);
+        String gtfsIdPrefix = _getGTFSIdPrefix(route.gtfsId);
 
         for (var filter in vLineFilters.entries) {
           if (filter.value && gtfsIdPrefix == filter.key.id) {
@@ -327,7 +327,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                             )
                           )
                         : null,
-                      subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId ?? "No GTFS Id") : null,
+                      subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId) : null,
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
                       onTap: () =>
                         // Navigate to TransportDetailsScreen with transport data

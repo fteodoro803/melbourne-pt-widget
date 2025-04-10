@@ -13,6 +13,7 @@ class Stop {
   RouteType? routeType;      // todo, turn this to a list
   int? number;
   bool? isExpanded = false;
+  int? stopSequence;
 
   // todo: maybe use the Location class; im not sure if these should be here
   double? latitude;
@@ -20,7 +21,7 @@ class Stop {
   double? distance;
   String? suburb;
 
-  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance});
+  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence});
 
   @override
   String toString() {
@@ -31,7 +32,9 @@ class Stop {
         "\tLongitude: $longitude\n"
         "\tDistance: $distance\n"
         "\tRoutes: $routes\n"
-        "\tRouteType: $routeType\n";
+        "\tRouteType: $routeType\n"
+        "\tStopSequence: $stopSequence\n"
+        "\tSuburb: $suburb\n";
   }
 
   // Methods for JSON Serialization

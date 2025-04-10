@@ -6,7 +6,19 @@ import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
+import '../ptv_info_classes/route_direction_info.dart';
 import '../ptv_service.dart';
+
+class SuburbStops {
+  final String suburb;
+  List<Stop> stops;
+  bool isExpanded = true;
+
+  SuburbStops({
+    required this.suburb,
+    required this.stops
+  });
+}
 
 class RouteDetailsScreen extends StatefulWidget {
   final pt_route.Route route;
@@ -25,6 +37,9 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
   late pt_route.Route _route;
   List<Stop> _stops = [];
   List<LatLng> _geoPath = [];
+  List<SuburbStops> _suburbStops = [];
+  List<RouteDirection> _directions = [];
+  String? _direction;
 
   PtvService ptvService = PtvService();
   TransportPathUtils transportPathUtils = TransportPathUtils();
@@ -41,12 +56,66 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
   final LatLng _center = const LatLng(-37.813812122509205,
       144.96358311072478); //todo: Change based on user's location;
 
+  Future<void> _changeDirection() async {
+    setState(() {
+      for (var suburb in _suburbStops) {
+        suburb.stops = suburb.stops.reversed.toList();
+      }
+      _suburbStops = _suburbStops.reversed.toList();
+      _direction = _direction == _directions[0].name ? _directions[1].name : _directions[0].name;
+    });
+  }
 
   Future<void> getStopsAlongRoute() async {
-    List<Stop> stops = await ptvService.fetchStopsRoute(_route);
+    List<RouteDirection> directions = await ptvService.fetchDirections(_route.id);
+    List<Stop> stops;
+    String? direction;
+
+    if (directions.isNotEmpty) {
+      direction = directions[0].name;
+      stops = await ptvService.fetchStopsRoute(_route, direction: directions[0]);
+      stops = stops.where((s) => s.stopSequence != 0).toList();
+    }
+    else {
+      stops = await ptvService.fetchStopsRoute(_route);
+    }
+
     List<LatLng> geoPath = await ptvService.fetchGeoPath(_route);
 
+    List<SuburbStops> suburbStopsList = [];
+    String? previousSuburb;
+    List<Stop> stopsInSuburb = [];
+    String? currentSuburb;
+
+    for (var stop in stops) {
+      currentSuburb = stop.suburb!;
+
+      Stop newStop = Stop(
+        id: stop.id,
+        name: stop.name,
+        latitude: stop.latitude,
+        longitude: stop.longitude,
+        distance: stop.distance,
+        stopSequence: stop.stopSequence,
+        suburb: stop.suburb,
+      );
+
+      if (previousSuburb == null || currentSuburb == previousSuburb) {
+        stopsInSuburb.add(newStop);
+      }
+      else {
+        suburbStopsList.add(SuburbStops(suburb: previousSuburb, stops: List<Stop>.from(stopsInSuburb)));
+        stopsInSuburb = [newStop];
+      }
+
+      previousSuburb = currentSuburb;
+    }
+    suburbStopsList.add(SuburbStops(suburb: previousSuburb!, stops: stopsInSuburb));
+
     setState(() {
+      _directions = directions;
+      _direction = direction;
+      _suburbStops = suburbStopsList;
       _stops = stops;
       _geoPath = geoPath;
     });
@@ -163,24 +232,63 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
                     HandleWidget(),
                     Expanded(
                       child: ListView(
-                        padding: EdgeInsets.zero,
+                        padding: EdgeInsets.all(16),
                         controller: scrollController,
                         physics: ClampingScrollPhysics(),
                         children: [
                           RouteWidget(route: _route, scrollable: false,),
-                          Text(_route.name),
+                          SizedBox(height: 4),
+                          ListTile(
+                            title: Text("To: ${_direction}", style: TextStyle(fontSize: 18)),
+                            trailing: GestureDetector(
+                              child: Icon(Icons.compare_arrows),
+                              onTap: _changeDirection
+                            )
+                          ),
+                          // Text(_route.name, style: TextStyle(fontSize: 18)),
                           Divider(),
+
                           Card(
                             color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                            margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                            margin: EdgeInsets.symmetric(vertical: 4),
                             child: Column(
-                              children: _stops.map((stop) {
-                                return ListTile(
-                                  visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                                  dense: true,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  title: Text(stop.name, style: TextStyle(fontSize: 16)),
-                                  trailing: Icon(Icons.keyboard_arrow_right),
+                              children: _suburbStops.map((suburb) {
+                                return Column(
+                                  children: [
+                                    Container(
+                                      color: Theme.of(context).colorScheme.secondaryContainer, // You can use any color here
+                                      child: ListTile(
+                                        dense: true,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                                        title: Text(
+                                          suburb.suburb,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500
+                                          ),
+                                        ),
+                                        trailing: GestureDetector(
+                                          child: Icon(Icons.keyboard_arrow_down_sharp, size: 30),
+                                          onTap: () {
+                                            setState(() {
+                                              suburb.isExpanded = !suburb.isExpanded;
+                                            });
+                                          },
+                                        )
+                                      ),
+                                    ),
+                                    if (suburb.isExpanded)
+                                      ...suburb.stops.map((stop) {
+                                        return ListTile(
+                                          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                                          dense: true,
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),
+                                          title: Text(stop.name, style: TextStyle(fontSize: 15)),
+                                          trailing: Icon(Icons.keyboard_arrow_right),
+                                          onTap: () {}
+                                        );
+                                      }),
+                                  ]
                                 );
                               }).toList(),
                             ),

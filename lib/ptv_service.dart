@@ -408,9 +408,17 @@ class PtvService {
       String name = stop["stop_name"];
       double latitude = stop["stop_latitude"];
       double longitude = stop["stop_longitude"];
+      String suburb = stop["stop_suburb"];
+      int stopSequence = stop["stop_sequence"];
 
       Stop newStop = Stop(
-          id: id, name: name, latitude: latitude, longitude: longitude);
+          id: id,
+          name: name,
+          latitude: latitude,
+          longitude: longitude,
+          suburb: suburb,
+          stopSequence: stopSequence,
+      );
       stopList.add(newStop);
     }
 
