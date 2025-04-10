@@ -78,6 +78,7 @@ class StopsTable extends Table {
   TextColumn get name => text()();
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
+  IntColumn get sequence => integer().nullable()();
   // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine
   // todo: zone, and inFreeTramZone (in stops along route) -- stops["stop_ticket"]["zone"] | stops["stop_ticket"]["is_free_fare_zone"]
   TextColumn get zone => text().nullable()();     // only obtainable if using stopsAlongRoutes, but not stopsNearLocation

@@ -15,7 +15,7 @@ class Route {
   String? colour;       // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
   String? textColour;   // Hex colour code for text
 
-  RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
+  RouteDirection? direction;      // todo: turn this to a list of directions a route can go through
   RouteType type;
   // List<Stop> stops;      // todo: consider adding a list of stops?
   String gtfsId;

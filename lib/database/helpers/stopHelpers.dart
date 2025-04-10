@@ -3,7 +3,7 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension StopHelpers on AppDatabase {
-  Future<StopsCompanion> createStopCompanion({required int id, required String name, required double latitude, required double longitude})
+  Future<StopsTableCompanion> createStopCompanion({required int id, required String name, required double latitude, required double longitude, int? sequence})
   async {
     return StopsTableCompanion(
       id: drift.Value(id),
@@ -11,12 +11,13 @@ extension StopHelpers on AppDatabase {
       // routeTypeId: drift.Value(routeTypeId),
       latitude: drift.Value(latitude),
       longitude: drift.Value(longitude),
+      sequence: drift.Value(sequence),
       lastUpdated: drift.Value(DateTime.now()),
     );
   }
 
-  Future<void> addStop(int id, String name, double latitude, double longitude) async {
-    StopsCompanion stop = await createStopCompanion(id: id, name: name, latitude: latitude, longitude: longitude);
+  Future<void> addStop(int id, String name, double latitude, double longitude, {int? sequence}) async {
+    StopsTableCompanion stop = await createStopCompanion(id: id, name: name, latitude: latitude, longitude: longitude, sequence: sequence);
     AppDatabase db = Get.find<AppDatabase>();
     db.insertStop(stop);
   }
