@@ -1,7 +1,7 @@
+// Patched SearchScreen using SheetNavigator
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:custom_info_window/custom_info_window.dart';
-
 import 'package:flutter_project/add_screens/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
@@ -9,22 +9,17 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/services/google_service.dart';
-
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/stop_info.dart';
 import '../ptv_info_classes/route_info.dart' as pt_route;
-
 import 'utility/map_utils.dart';
 import 'utility/search_utils.dart';
-
 import 'widgets/bottom_navigation_bar.dart';
 import 'widgets/screen_widgets.dart';
-
 import 'departure_details_sheet.dart';
 import 'nearby_stops_sheet.dart';
 import 'suggestions_search.dart';
-
-enum ActiveSheet { none, nearbyStops, stopDetails, transportDetails, departureDetails }
+import 'widgets/sheet_navigator.dart'; // <-- import the new SheetNavigator
 
 class SearchScreen extends StatefulWidget {
   final ScreenArguments arguments;
@@ -35,33 +30,24 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final String _screenName = "SelectLocation";
-
-  // DraggableScrollableSheet state management
-  final DraggableScrollableController _controller = DraggableScrollableController();
-  bool _isSheetFullyExpanded = false;
-  bool _hasDroppedPin = false;
-  bool _showStops = false;
-  bool _shouldResetFilters = false;
-  ActiveSheet _activeSheet = ActiveSheet.none;
-  Map<ActiveSheet, double> _sheetScrollPositions = {};
-  List<ActiveSheet> _navigationHistory = [];
+  final GlobalKey<SheetNavigatorState> _sheetNavigatorKey = GlobalKey<SheetNavigatorState>();
   final GlobalKey<NearbyStopsSheetState> _nearbyStopsSheetKey = GlobalKey<NearbyStopsSheetState>();
   NearbyStopsState? _savedNearbyStopsState;
 
-  // Utility
-  DevTools tools = DevTools();
-  PtvService ptvService = PtvService();
-  GoogleService googleService = GoogleService();
-  TransportPathUtils transportPathUtils = TransportPathUtils();
-  SearchUtils searchUtils = SearchUtils();
-  MapUtils mapUtils = MapUtils();
+  final DevTools tools = DevTools();
+  final PtvService ptvService = PtvService();
+  final GoogleService googleService = GoogleService();
+  final TransportPathUtils transportPathUtils = TransportPathUtils();
+  final SearchUtils searchUtils = SearchUtils();
+  final MapUtils mapUtils = MapUtils();
 
-  // Google Map
   late GoogleMapController mapController;
+  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
+
   Set<Marker> _markers = {};
   Set<Polyline> _polyLines = {};
   Set<Circle> _circles = {};
+
   List<LatLng> _geoPath = [];
   List<Departure> _pattern = [];
 
@@ -69,63 +55,98 @@ class _SearchScreenState extends State<SearchScreen> {
   Set<Marker> _largeRouteMarkers = {};
   Set<Marker> _smallRouteMarkers = {};
   late Marker _stopMarker;
-  late Marker? _firstMarker;
-  late Marker? _lastMarker;
+  Marker? _firstMarker;
+  Marker? _lastMarker;
 
-  double _currentZoom = 15.0; // Default zoom level
-  final double _zoomThresholdLarge = 12.8; // Zoom level threshold to hide the marker
+  double _currentZoom = 15.0;
+  final double _zoomThresholdLarge = 12.8;
   final double _zoomThresholdSmall = 13.4;
 
-  final LatLng _initialPosition = const LatLng(-37.813812122509205,
-      144.96358311072478); //todo: Change based on user's location
+  final LatLng _initialPosition = LatLng(-37.813812122509205, 144.96358311072478);
 
-  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
+  bool _hasDroppedPin = false;
+  bool _showStops = false;
+  bool _shouldResetFilters = false;
+
   String? _tappedStopId;
   Marker? _tappedStopMarker;
-
-
-  @override
-  void dispose() {
-    _customInfoWindowController.dispose();
-    super.dispose();
-  }
 
   @override
   void initState() {
     super.initState();
-
-    // Listen for changes in the sheet's size
-    _controller.addListener(() {
-      if (_controller.size >= 0.85) {
-        if (!_isSheetFullyExpanded) {
-          setState(() {
-            _controller.jumpTo(1.0);
-            _isSheetFullyExpanded = true;
-            widget.arguments.searchDetails!.isSheetExpanded = true;
-          });
-        }
-      } else if (_controller.size < 0.85) {
-        if (_isSheetFullyExpanded) {
-          setState(() {
-            _controller.jumpTo(0.6);
-            _isSheetFullyExpanded = false;
-            widget.arguments.searchDetails!.isSheetExpanded = false;
-          });
-        }
-      }
-    });
-
     widget.arguments.searchDetails?.distance = 300;
     widget.arguments.searchDetails?.transportType = "all";
-    tools.printScreenState(_screenName, widget.arguments);
+    tools.printScreenState("SelectLocation", widget.arguments);
   }
 
-  NearbyStopsState? _getNearbyStopsState() {
-    if (_nearbyStopsSheetKey.currentState != null) {
-      return _nearbyStopsSheetKey.currentState!.getCurrentState();
+  void _handleBackButton() {
+    final nav = _sheetNavigatorKey.currentState;
+    if (nav == null) return;
+
+    if (nav.sheetHistory.isNotEmpty) {
+      nav.popSheet();
+      // Delay to ensure sheet change happens before you check the current one
+      Future.delayed(const Duration(milliseconds: 100), () {
+        final current = _sheetNavigatorKey.currentState?.currentSheet;
+        if (current == 'nearbyStops') {
+          setState(() {
+            _polyLines.clear();
+            resetMarkers();
+            showStopMarkers(false);
+          });
+        }
+      });
+    } else if (_hasDroppedPin){
+      setState(() {
+        _hasDroppedPin = false;
+        _markers.clear();
+        _circles.clear();
+        _polyLines.clear();
+        _customInfoWindowController.hideInfoWindow!();
+      });
+    } else {
+      // Second back press (no sheet, no map) -> Exit SearchScreen
+      Navigator.of(context).pop();
     }
-    return null;
   }
+
+  Widget _buildSheets() {
+    return SheetNavigator(
+      key: _sheetNavigatorKey,
+      initialSheet: 'nearbyStops',
+      sheets: {
+        'nearbyStops': (ctx, scroll) => NearbyStopsSheet(
+          key: _nearbyStopsSheetKey,
+          arguments: widget.arguments,
+          scrollController: scroll,
+          onSearchFiltersChanged: _onSearchFiltersChanged,
+          onStopTapped: _onStopTapped,
+          initialState: _shouldResetFilters ? null : _savedNearbyStopsState,
+          onStateChanged: (state) => _savedNearbyStopsState = state,
+          shouldResetFilters: _shouldResetFilters,
+        ),
+        'stopDetails': (ctx, scroll) => StopDetailsSheet(
+          arguments: widget.arguments,
+          scrollController: scroll,
+          onTransportTapped: _onTransportTapped,
+          onDepartureTapped: _onDepartureTapped,
+        ),
+        'transportDetails': (ctx, scroll) => TransportDetailsSheet(
+          arguments: widget.arguments,
+          scrollController: scroll,
+          onDepartureTapped: _onDepartureTapped,
+        ),
+        'departureDetails': (ctx, scroll) => DepartureDetailsSheet(
+          arguments: widget.arguments,
+          scrollController: scroll,
+        ),
+      },
+      onSheetChanged: (sheet) {
+        if (sheet == 'nearbyStops') showStopMarkers(true);
+      },
+    );
+  }
+
 
   /// Resets markers and creates new marker when pin is dropped by user
   void resetMarkers() {
@@ -237,10 +258,9 @@ class _SearchScreenState extends State<SearchScreen> {
           // Find the index of the tapped stop
           int stopIndex = widget.arguments.searchDetails!.stops.indexOf(stop);
 
-          // First ensure the sheet is expanded enough to see the content
-          _controller.animateTo(
-            0.6, // Adjust as needed
-            duration: Duration(milliseconds: 300),
+          _sheetNavigatorKey.currentState?.controller.animateTo(
+            0.6,
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
 
@@ -329,7 +349,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles zoom and camera move events
   void _onCameraMove(CameraPosition position) {
-    if (_activeSheet != ActiveSheet.nearbyStops && _activeSheet != ActiveSheet.none && _currentZoom != position.zoom) {
+    final currentSheet = _sheetNavigatorKey.currentState?.currentSheet;
+
+    if (currentSheet != 'nearbyStops' && _currentZoom != position.zoom) {
       _currentZoom = position.zoom;
       if (_currentZoom < _zoomThresholdLarge) {
         setState(() {
@@ -404,7 +426,7 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     // Bring the user to the NearbyStopsSheet with the updated data
-    _changeSheet(ActiveSheet.nearbyStops, true);
+    _sheetNavigatorKey.currentState?.pushSheet('nearbyStops');
 
     showStopMarkers(true);
   }
@@ -475,7 +497,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     loadTransportPath(false);
-    _changeSheet(ActiveSheet.stopDetails, false);
+    _sheetNavigatorKey.currentState?.pushSheet('stopDetails');
     _customInfoWindowController.hideInfoWindow!();
   }
 
@@ -484,7 +506,7 @@ class _SearchScreenState extends State<SearchScreen> {
     resetMarkers();
     widget.arguments.transport = transport;
 
-    _changeSheet(ActiveSheet.transportDetails, false);
+    _sheetNavigatorKey.currentState?.pushSheet('transportDetails');
 
     if (transport.departures != null && transport.departures!.isNotEmpty) {
       _pattern = await ptvService.fetchPattern(transport, transport.departures![0]);
@@ -492,9 +514,7 @@ class _SearchScreenState extends State<SearchScreen> {
     else {
       _pattern = [];
     }
-
     loadTransportPath(true);
-
   }
 
   /// Handles tap on a departure in StopDetailsSheet and TransportDetailsSheet
@@ -502,202 +522,30 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.arguments.transport = transport;
     widget.arguments.searchDetails!.departure = departure;
 
-    if (_activeSheet == ActiveSheet.stopDetails) {
+    final currentSheet = _sheetNavigatorKey.currentState?.currentSheet;
+
+    if (currentSheet == 'stopDetails') {
       resetMarkers();
       _pattern = await ptvService.fetchPattern(transport, departure);
       loadTransportPath(true);
     }
-    _changeSheet(ActiveSheet.departureDetails, false);
+    _sheetNavigatorKey.currentState?.pushSheet('departureDetails');
   }
 
-  /// Handles restoration/discarding of previous sheets on back button press
-  void _handleBackButton() {
-    ActiveSheet previousSheet;
-
-    // Handle different scenarios depending on the current active sheet
-    switch (_activeSheet) {
-      case ActiveSheet.departureDetails:
-      // Check if the last visited sheet was transportDetails
-        if (_navigationHistory.isNotEmpty && _navigationHistory.last == ActiveSheet.transportDetails) {
-          previousSheet = ActiveSheet.transportDetails;
-        } else {
-          resetMarkers();
-          _polyLines.clear();
-          loadTransportPath(false);
-          previousSheet = ActiveSheet.stopDetails;
-        }
-        break;
-
-      case ActiveSheet.transportDetails:
-        previousSheet = ActiveSheet.stopDetails;
-        resetMarkers();
-        _polyLines.clear();
-        // Restore transport path display
-        loadTransportPath(false);
-        break;
-
-      case ActiveSheet.stopDetails:
-        previousSheet = ActiveSheet.nearbyStops;
-        // Clear polylines and restore marker
-        _polyLines.clear();
-        resetMarkers();
-        showStopMarkers(false);
-        break;
-
-      case ActiveSheet.nearbyStops:
-        if (_isSheetFullyExpanded) {
-          _controller.jumpTo(0.6);
-          return;
-        }
-        previousSheet = ActiveSheet.none;
-        _hasDroppedPin = false;
-        _markers.clear();
-        _circles.clear();
-        _customInfoWindowController.hideInfoWindow!();
-        break;
-
-      default:
-        Navigator.pop(context);
-        return;
-    }
-
-    // Remove the current sheet from history if it matches the last one
-    if (_navigationHistory.isNotEmpty && _navigationHistory.last == _activeSheet) {
-      _navigationHistory.removeLast();
-    }
-
-    // Handle the case where we might have skipped sheets (e.g., direct transition to departureDetails)
-    if (_navigationHistory.isNotEmpty &&
-        previousSheet != _navigationHistory.last &&
-        _navigationHistory.contains(previousSheet)) {
-      // Clean up history by removing any sheets that are not in the path
-      while (_navigationHistory.isNotEmpty && _navigationHistory.last != previousSheet) {
-        _navigationHistory.removeLast();
-      }
-    }
-
-    // Perform the sheet change
-    _changeSheet(previousSheet, false);
-  }
-
-  /// Handles sheet transitions
-  void _changeSheet(ActiveSheet newSheet, bool newMarker) {
-    // Save current sheet's scroll position if controller is attached
-    if (_controller.isAttached && _activeSheet != ActiveSheet.none) {
-      _sheetScrollPositions[_activeSheet] = _controller.size;
-
-      // Save NearbyStopsSheet state if that's the current sheet
-      if (_activeSheet == ActiveSheet.nearbyStops) {
-        _savedNearbyStopsState = _getNearbyStopsState();
-      }
-    }
-
-    // Add to navigation history
-    if (_activeSheet != ActiveSheet.none && !newMarker) {
-      _navigationHistory.add(_activeSheet);
-    }
-
-
-    setState(() {
-      _activeSheet = newSheet;
-
-      // Restore scroll position
-      if (_controller.isAttached) {
-        double targetSize = _sheetScrollPositions[newSheet] ?? 0.3;
-        _controller.animateTo(
-          targetSize,
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  /// Returns title of the current active sheet
-  String _getSheetTitle() {
-    switch (_activeSheet) {
-      case ActiveSheet.stopDetails:
-        return "Stop Details";
-      case ActiveSheet.transportDetails:
-        return "Transport Details";
-      case ActiveSheet.departureDetails:
-        return "Departure Details";
-      case ActiveSheet.nearbyStops:
-      default:
-        return "Nearby Stops";
-    }
-  }
-
-  /// Renders content of a given sheet
-  Widget _getSheetContent(ScrollController scrollController) {
-    switch (_activeSheet) {
-      case ActiveSheet.stopDetails:
-        return StopDetailsSheet(
-          arguments: widget.arguments,
-          scrollController: scrollController,
-          onTransportTapped: _onTransportTapped,
-          onDepartureTapped: _onDepartureTapped,
-        );
-      case ActiveSheet.transportDetails:
-        return TransportDetailsSheet(
-          arguments: widget.arguments,
-          scrollController: scrollController,
-          onDepartureTapped: _onDepartureTapped,
-        );
-      case ActiveSheet.departureDetails:
-        return DepartureDetailsSheet(
-          arguments: widget.arguments,
-          scrollController: scrollController,
-        );
-      case ActiveSheet.nearbyStops:
-      default:
-        final sheet = NearbyStopsSheet(
-          key: _nearbyStopsSheetKey,
-          arguments: widget.arguments,
-          scrollController: scrollController,
-          onSearchFiltersChanged: _onSearchFiltersChanged,
-          onStopTapped: _onStopTapped,
-          initialState: _shouldResetFilters ? null : _savedNearbyStopsState,
-          onStateChanged: (state) {
-            _savedNearbyStopsState = state;
-          },
-          shouldResetFilters: _shouldResetFilters,
-        );
-
-        // Reset the flag after rendering
-        if (_shouldResetFilters) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            setState(() {
-              _shouldResetFilters = false;
-            });
-          });
-        }
-
-        return sheet;
-    }
-  }
-
-  // Rendering
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Google Map
           Positioned.fill(
             child: GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
+              onMapCreated: (controller) {
                 mapController = controller;
                 _customInfoWindowController.googleMapController = controller;
               },
-              // Creates marker when user presses on screen
-              onLongPress: (LatLng position) async {
-                await _onLocationSelected(position);
-              },
+              onLongPress: _onLocationSelected,
               onCameraMove: _onCameraMove,
-              // Set initial position and zoom of map
-              initialCameraPosition:
-                  CameraPosition(target: _initialPosition, zoom: _currentZoom),
+              initialCameraPosition: CameraPosition(target: _initialPosition, zoom: _currentZoom),
               markers: _markers,
               polylines: _polyLines,
               circles: _circles,
@@ -709,81 +557,13 @@ class _SearchScreenState extends State<SearchScreen> {
             width: 360,
             offset: 0,
           ),
-
-          // Create DraggableScrollableSheet with nearby stop information if user has dropped pin
-          if (_hasDroppedPin)
-            DraggableScrollableSheet(
-              controller: _controller,
-              initialChildSize: 0.6,
-              minChildSize: 0.15,
-              maxChildSize: 1.0,
-              expand: true,
-              shouldCloseOnMinExtent: false,
-                builder: (context, scrollController) {
-                  return Container(
-
-                    // DraggableScrollableSheet shadow
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(red: 0, green: 0, blue: 0, alpha: 0.1),
-                          spreadRadius: 1,
-                          blurRadius: 7,
-                          offset: Offset(0, -2),
-                        ),
-                      ],
-                    ),
-
-                    // Renders AppBar with title and back button when sheet is fully expanded
-                    child: _isSheetFullyExpanded
-                      ? Column(
-                        children: [
-                          SizedBox(height: 50),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new),
-                                onPressed: () {
-                                  scrollController.jumpTo(0);
-                                  _handleBackButton();
-                                }
-                              ),
-                              Expanded(
-                                child: Text(
-                                  _getSheetTitle(),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.location_pin),
-                                onPressed: () {
-                                  _controller.jumpTo(0.6);
-                                  scrollController.jumpTo(0);
-                                } ,
-                              ),
-                            ],
-                          ),
-                          Divider(),
-                          Expanded(child: _getSheetContent(scrollController)),
-                        ],
-                      )
-                      : _getSheetContent(scrollController),
-                  );
-                }
-            ),
-
-          // Renders search bar, back button, and map buttons when sheet is unexpanded
-          _isSheetFullyExpanded
-            ? Container() // Hide search bar when sheet is fully expanded
-            : Column(
+          if (_hasDroppedPin) _buildSheets(),
+          if (!(_sheetNavigatorKey.currentState?.isExpanded ?? false))
+            Column(
               children: [
                 SizedBox(height: 60),
                 Row(
                   children: [
-                    // Back button
                     SizedBox(width: 18),
                     GestureDetector(
                       onTap: _handleBackButton,
@@ -799,43 +579,34 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ],
                 ),
-
-                // "Show Stops" button
-                if (_activeSheet == ActiveSheet.nearbyStops)
-                  ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        _showStops = !_showStops;
-                      });
-                      await showStopMarkers(_nearbyStopMarkers.isEmpty ? true : false);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
-                      backgroundColor: !_showStops ?
-                        Theme.of(context).colorScheme.surfaceContainerHighest :
-                        Theme.of(context).colorScheme.primaryContainer,
-                      minimumSize: Size(40, 40),
-                      ),
-                    child: SizedBox(
-                      height: 40,
-                      width: 40,
-                      child: Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.location_pin),
-                            Icon(Icons.tram),
-                          ],
-                        ),
-                      ),
-                    )
-
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() => _showStops = !_showStops);
+                    await showStopMarkers(_nearbyStopMarkers.isEmpty);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 14),
+                    backgroundColor: !_showStops
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                        : Theme.of(context).colorScheme.primaryContainer,
+                    minimumSize: Size(40, 40),
                   ),
+                  child: SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.location_pin),
+                        Icon(Icons.tram),
+                      ],
+                    ),
+                  ),
+                ),
               ],
-            )
+            ),
         ],
       ),
-      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigation(
         currentIndex: 1,
         updateMainPage: null,
