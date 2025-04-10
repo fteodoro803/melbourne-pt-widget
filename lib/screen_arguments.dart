@@ -27,12 +27,16 @@ class SearchDetails {
   Departure? departure;
 
   SearchDetails();
+  SearchDetails.withRoute(this.route);
+  SearchDetails.withTransport(this.transport);
 }
 
 class ScreenArguments {
   Transport? transport;    // data for new Transport option
   VoidCallback callback;  // function to be called from child screen
+  pt_route.Route? route;
 
   ScreenArguments(this.callback);
   ScreenArguments.withTransport(this.transport, this.callback);
+  ScreenArguments.withRoute(this.route, this.callback);
 }

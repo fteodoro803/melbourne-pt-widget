@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/route_details_screen.dart';
+import 'package:flutter_project/add_screens/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import '../ptv_info_classes/route_info.dart' as pt_route;
@@ -47,6 +47,7 @@ class FindRoutesScreen extends StatefulWidget {
 }
 
 class _FindRoutesScreenState extends State<FindRoutesScreen> {
+  SearchDetails searchDetails = SearchDetails();
   TextEditingController _searchController = TextEditingController();
 
   Map<String, bool> _transportTypeFilters = {};
@@ -333,10 +334,14 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                       subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId) : null,
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
                       onTap: () {
+                        widget.arguments.route = route;
                         Navigator.push(
                           context,
+                          // MaterialPageRoute(
+                          //     builder: (context) => RouteDetailsScreen(arguments: widget.arguments, route: route)
+                          // ),
                           MaterialPageRoute(
-                              builder: (context) => RouteDetailsScreen(arguments: widget.arguments, route: route)
+                              builder: (context) => SearchScreen(arguments: widget.arguments, showTransportDetails: false, showRouteDetails: true,)
                           ),
                         );
                       },

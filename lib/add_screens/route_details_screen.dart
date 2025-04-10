@@ -267,11 +267,11 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
                     ),
                   ],
                 ),
-                child: _isStopSelected
-                  ? StopDetailsSheet(onDepartureTapped: _onDepartureTapped, onTransportTapped: _onTransportTapped, scrollController: scrollController, searchDetails: searchDetails, arguments: widget.arguments)
-                  : _direction == null
-                    ? Center(child: CircularProgressIndicator())
-                    : RouteDetailsSheet(scrollController: scrollController, route: _route, direction: _direction!, changeDirection: _changeDirection, suburbStops: _suburbStops, onStopTapped: _onStopSelected,),
+                // child: _isStopSelected
+                //   ? StopDetailsSheet(onDepartureTapped: _onDepartureTapped, onTransportTapped: _onTransportTapped, scrollController: scrollController, searchDetails: searchDetails, arguments: widget.arguments)
+                //   : _direction == null
+                //     ? Center(child: CircularProgressIndicator())
+                //     : RouteDetailsSheet(scrollController: scrollController, route: _route, direction: _direction!, changeDirection: _changeDirection, suburbStops: _suburbStops, onStopTapped: _onStopSelected,),
               );
             }
           )

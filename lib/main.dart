@@ -81,7 +81,10 @@ class _MyAppState extends State<MyApp> {
                   as ScreenArguments),
           '/searchScreen': (context) => SearchScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
-              as ScreenArguments),
+              as ScreenArguments,
+              showRouteDetails: false,
+              showTransportDetails: false,
+          ),
           '/selectStopScreen': (context) => SelectStopScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
@@ -262,12 +265,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           onDismiss: () => {removeTransport(_transportList[index]), _updateMainPage()},
                           onTap: () =>
                           // Navigate to TransportDetailsScreen with transport data
+                          //   Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //       builder: (context) => TransportMap(arguments: ScreenArguments.withTransport(_transportList[index], _updateMainPage))
+                          //     ),
+                          //   )
                             Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TransportMap(arguments: ScreenArguments.withTransport(_transportList[index], _updateMainPage))
-                              ),
-                            )
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SearchScreen(arguments: ScreenArguments.withTransport(_transportList[index], _updateMainPage), showTransportDetails: true, showRouteDetails: false,)
+                            ),
+                          )
                         ),
                       ),
                     ],

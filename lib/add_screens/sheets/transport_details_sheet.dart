@@ -38,7 +38,7 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    transport = widget.arguments.transport!;
+    transport = widget.searchDetails.transport!;
     filters = {
       "Air Conditioning": false,
       "Low Floor": false,
@@ -74,7 +74,7 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
   @override
   Widget build(BuildContext context) {
 
-    List<Departure>? filteredDepartures = widget.arguments.transport!.departures;
+    List<Departure>? filteredDepartures = widget.searchDetails.transport!.departures;
     if (filters['Low Floor'] == true) {
       filteredDepartures = filteredDepartures?.where((departure) => departure.hasLowFloor == filters['Low Floor']).toList();
     }
@@ -229,7 +229,7 @@ class _TransportDetailsSheetState extends State<TransportDetailsSheet> {
                     itemCount: filteredDepartures!.length > 30 ? 30 : filteredDepartures.length,
                     itemBuilder: (context, index) {
                       final departure = filteredDepartures?[index];
-                      return DepartureCard(transport: widget.arguments.transport!, departure: departure!, onDepartureTapped: widget.onDepartureTapped);
+                      return DepartureCard(transport: widget.searchDetails.transport!, departure: departure!, onDepartureTapped: widget.onDepartureTapped);
                     },
                   ),
                 ),
