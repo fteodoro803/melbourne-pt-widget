@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import '../file_service.dart';
-import '../ptv_info_classes/departure_info.dart';
-import '../transport.dart';
-import 'widgets/departure_card.dart';
-import 'widgets/save_transport_sheet.dart';
-import 'widgets/screen_widgets.dart';
-import 'widgets/transport_widgets.dart';
+import '../../file_service.dart';
+import '../../ptv_info_classes/departure_info.dart';
+import '../../transport.dart';
+import '../widgets/departure_card.dart';
+import '../widgets/save_transport_sheet.dart';
+import '../widgets/screen_widgets.dart';
+import '../widgets/transport_widgets.dart';
 
 class StopDetailsSheet extends StatefulWidget {
 
@@ -78,6 +78,10 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   @override
   Widget build(BuildContext context) {
 
+    // List<Transport> transportsList = widget.arguments.searchDetails!.directions.where((t) => t.departures != null && t.departures!.isNotEmpty).toList();
+    List<Transport> transportsList = widget.arguments.searchDetails!.directions;
+
+
     if (_savedList.isEmpty) {
       return CircularProgressIndicator();
     }
@@ -144,7 +148,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                     // Departures for each direction
                     Column(
-                      children: widget.arguments.searchDetails!.directions.map((transport) {
+                      children: transportsList.map((transport) {
                         var departures = transport.departures;
 
                         return Padding(
@@ -199,8 +203,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                     return DepartureCard(transport: transport, departure: departure, onDepartureTapped: widget.onDepartureTapped);
                                   },
                                 ),
-
-                                // DeparturesList(departuresLength: 2, transport: transport, lowFloorFilter: false, airConditionerFilter: false, scrollable: false, onDepartureTapped: widget.onDepartureTapped,),
 
                               // Display a message if no departures
                               if (departures == null || departures.isEmpty)

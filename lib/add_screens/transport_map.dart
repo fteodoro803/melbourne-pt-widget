@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/departure_details_sheet.dart';
-import 'package:flutter_project/add_screens/transport_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheets/departure_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheets/transport_details_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'utility/map_utils.dart';
 import '../ptv_info_classes/departure_info.dart';
@@ -46,7 +46,7 @@ class _TransportMapState extends State<TransportMap> {
   @override
   void initState() {
     super.initState();
-    _transport = widget.arguments.transport;
+    _transport = widget.arguments.transport!;
     _stopPosition = LatLng(_transport.stop!.latitude!, _transport.stop!.longitude!);
     _center = _stopPosition;
 
@@ -107,8 +107,8 @@ class _TransportMapState extends State<TransportMap> {
     Set<Marker> largeRouteMarkers = polyLineMarkers.largeMarkers;
     Set<Marker> smallRouteMarkers = polyLineMarkers.smallMarkers;
     Marker selectedStopMarker = polyLineMarkers.stopMarker!;
-    Marker firstStopMarker = polyLineMarkers.firstMarker!;
-    Marker lastStopMarker = polyLineMarkers.lastMarker!;
+    Marker firstStopMarker = polyLineMarkers.firstMarker;
+    Marker lastStopMarker = polyLineMarkers.lastMarker;
 
     _markers = {..._markers, ...largeRouteMarkers, ...smallRouteMarkers};
     _markers.add(selectedStopMarker);

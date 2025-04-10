@@ -35,7 +35,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   }
 
   void getDirections() async {
-    int? routeId = widget.arguments.transport.route?.id;
+    int? routeId = widget.arguments.transport!.route?.id;
     List<RouteDirection> directions = await ptvService.fetchDirections(routeId!);
     _directions = directions;
     setState(() {});
@@ -43,7 +43,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
 
   void setDirection(int? index) {
     if (index != null) {
-      widget.arguments.transport.direction = _directions[index];
+      widget.arguments.transport!.direction = _directions[index];
 
       int id = _directions[index].id;
       String name = _directions[index].name;
@@ -52,7 +52,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       Get.find<db.AppDatabase>().addDirection(id, name, description);
     }
     else {
-      widget.arguments.transport.direction = null;
+      widget.arguments.transport!.direction = null;
     }
   }
 
@@ -74,9 +74,9 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
                 itemCount: _directions.length,
                 itemBuilder: (context, index) {
                   final directionName =
-                      _directions[index].name ?? "Null directionName";
+                      _directions[index].name;
                   final directionId =
-                      _directions[index].id ?? "Null directionId";
+                      _directions[index].id;
 
                   return ListTile(
                     title: Text("$directionName ($directionId)"),

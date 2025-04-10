@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 
-import 'package:flutter_project/add_screens/stop_details_sheet.dart';
-import 'package:flutter_project/add_screens/transport_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheets/stop_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheets/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
@@ -20,9 +20,9 @@ import 'utility/search_utils.dart';
 import 'widgets/bottom_navigation_bar.dart';
 import 'widgets/screen_widgets.dart';
 
-import 'departure_details_sheet.dart';
-import 'nearby_stops_sheet.dart';
-import 'suggestions_search.dart';
+import 'sheets/departure_details_sheet.dart';
+import 'sheets/nearby_stops_sheet.dart';
+import 'widgets/suggestions_search.dart';
 
 enum ActiveSheet { none, nearbyStops, stopDetails, transportDetails, departureDetails }
 
@@ -35,14 +35,17 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+
   final String _screenName = "SelectLocation";
 
   // DraggableScrollableSheet state management
   final DraggableScrollableController _controller = DraggableScrollableController();
+
   bool _isSheetFullyExpanded = false;
   bool _hasDroppedPin = false;
   bool _showStops = false;
   bool _shouldResetFilters = false;
+
   ActiveSheet _activeSheet = ActiveSheet.none;
   Map<ActiveSheet, double> _sheetScrollPositions = {};
   List<ActiveSheet> _navigationHistory = [];
@@ -64,17 +67,13 @@ class _SearchScreenState extends State<SearchScreen> {
   Set<Circle> _circles = {};
   List<LatLng> _geoPath = [];
   List<Departure> _pattern = [];
+  List<Stop> _stopsAlongRoute = [];
 
   Set<Marker> _nearbyStopMarkers = {};
-  Set<Marker> _largeRouteMarkers = {};
-  Set<Marker> _smallRouteMarkers = {};
-  late Marker _stopMarker;
-  late Marker? _firstMarker;
-  late Marker? _lastMarker;
+
+  late PolyLineMarkers _polyLineMarkers;
 
   double _currentZoom = 15.0; // Default zoom level
-  final double _zoomThresholdLarge = 12.8; // Zoom level threshold to hide the marker
-  final double _zoomThresholdSmall = 13.4;
 
   final LatLng _initialPosition = const LatLng(-37.813812122509205,
       144.96358311072478); //todo: Change based on user's location
@@ -82,7 +81,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
   String? _tappedStopId;
   Marker? _tappedStopMarker;
-
 
   @override
   void dispose() {
@@ -127,24 +125,6 @@ class _SearchScreenState extends State<SearchScreen> {
     return null;
   }
 
-  /// Resets markers and creates new marker when pin is dropped by user
-  void resetMarkers() {
-    _markers.clear();
-
-    LatLng position = widget.arguments.searchDetails!.markerPosition!;
-    MarkerId id = MarkerId(position.toString()); // Unique ID based on position
-
-    _markers.add(Marker(
-      markerId: id,
-      position: position,
-      consumeTapEvents: true,
-      infoWindow: InfoWindow(
-        snippet: "Marker",
-        title: "Marker"
-      ),
-    ));
-  }
-
   /// Shows nearby stops on map when button is toggled by user
   Future<void> showStopMarkers(bool refresh) async {
     if (_showStops) {
@@ -154,7 +134,6 @@ class _SearchScreenState extends State<SearchScreen> {
       if (refresh) {
         _nearbyStopMarkers = {};
         for (var stop in widget.arguments.searchDetails!.stops) {
-
           Marker newMarker = await createNearbyStopMarker(stop);
 
           _nearbyStopMarkers.add(newMarker);
@@ -162,7 +141,7 @@ class _SearchScreenState extends State<SearchScreen> {
       }
 
       setState(() {
-        resetMarkers();
+        _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
         _markers = {..._markers, ..._nearbyStopMarkers};
 
         _circles.clear();
@@ -179,7 +158,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
     else {
       _circles.clear();
-      resetMarkers();
+      _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
     }
   }
 
@@ -225,8 +204,7 @@ class _SearchScreenState extends State<SearchScreen> {
             icon: largeCustomMarkerIcon,
             consumeTapEvents: true,
             // anchor: const Offset(0.5, 0.5),
-          ),
-          );
+          ));
 
           // Render the info window of the tapped stop
           _customInfoWindowController.addInfoWindow!(
@@ -292,7 +270,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     bool isReverseDirection = isDirectionSpecified ? GeoPathUtils.reverseDirection(newGeoPath, stopPositions) : false;
 
-    PolyLineMarkers polyLineMarkers = await transportPathUtils.setMarkers(
+    _polyLineMarkers = await transportPathUtils.setMarkers(
       _markers,
       stopPositions,
       stopPosition: stopPosition,
@@ -300,20 +278,10 @@ class _SearchScreenState extends State<SearchScreen> {
       isDirectionSpecified,
     );
 
-    _largeRouteMarkers = polyLineMarkers.largeMarkers;
-    _smallRouteMarkers = polyLineMarkers.smallMarkers;
-    _stopMarker = polyLineMarkers.stopMarker!;
-    _firstMarker = polyLineMarkers.firstMarker;
-    _lastMarker = polyLineMarkers.lastMarker;
-
-    _markers = {..._markers, ..._largeRouteMarkers, ..._smallRouteMarkers};
-    _markers.add(_stopMarker);
-    if (_firstMarker != null) {
-      _markers.add(_firstMarker!);
-    }
-    if (_lastMarker != null) {
-      _markers.add(_lastMarker!);
-    }
+    _markers = {..._markers, ..._polyLineMarkers.largeMarkers, ..._polyLineMarkers.smallMarkers};
+    _markers.add(_polyLineMarkers.stopMarker!);
+    _markers.add(_polyLineMarkers.firstMarker);
+    _markers.add(_polyLineMarkers.lastMarker);
 
     _polyLines = await transportPathUtils.loadRoutePolyline(
       widget.arguments.searchDetails!.route!.colour!,
@@ -330,35 +298,10 @@ class _SearchScreenState extends State<SearchScreen> {
   /// Handles zoom and camera move events
   void _onCameraMove(CameraPosition position) {
     if (_activeSheet != ActiveSheet.nearbyStops && _activeSheet != ActiveSheet.none && _currentZoom != position.zoom) {
-      _currentZoom = position.zoom;
-      if (_currentZoom < _zoomThresholdLarge) {
+      if (mapUtils.didZoomChange(_currentZoom, position.zoom)) {
         setState(() {
-          resetMarkers();
-          _markers.add(_stopMarker);
-          if (_firstMarker != null) {
-            _markers.add(_firstMarker!);
-          }
-          if (_lastMarker != null) {
-            _markers.add(_lastMarker!);
-          }
-        });
-      } else if (_currentZoom < _zoomThresholdSmall && _currentZoom >= _zoomThresholdLarge) {
-        setState(() {
-          resetMarkers();
-          _markers.add(_stopMarker);
-          if (_firstMarker != null) {
-            _markers.add(_firstMarker!);
-          }
-          if (_lastMarker != null) {
-            _markers.add(_lastMarker!);
-          }
-          _markers = {..._markers, ..._largeRouteMarkers};
-        });
-      }
-      else {
-        // Re-add the marker when zoom is above the threshold
-        setState(() {
-          _markers = {..._markers, ..._smallRouteMarkers, ..._largeRouteMarkers};
+          _markers = mapUtils.onZoomChange(_markers, position.zoom, _polyLineMarkers, widget.arguments.searchDetails!.markerPosition!);
+          _currentZoom = position.zoom;
         });
       }
     }
@@ -455,7 +398,7 @@ class _SearchScreenState extends State<SearchScreen> {
   /// Handles tap on a route in NearbyStopsSheet
   Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
     _circles.clear();
-    resetMarkers();
+    _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
     List<Transport> listTransport = await searchUtils.splitDirection(stop, route);
 
     widget.arguments.searchDetails!.stop = stop;
@@ -481,7 +424,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles tap on a direction in StopDetailsSheet
   Future<void> _onTransportTapped(Transport transport) async {
-    resetMarkers();
+    _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
     widget.arguments.transport = transport;
 
     _changeSheet(ActiveSheet.transportDetails, false);
@@ -503,7 +446,7 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.arguments.searchDetails!.departure = departure;
 
     if (_activeSheet == ActiveSheet.stopDetails) {
-      resetMarkers();
+      _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
       _pattern = await ptvService.fetchPattern(transport, departure);
       loadTransportPath(true);
     }
@@ -521,7 +464,7 @@ class _SearchScreenState extends State<SearchScreen> {
         if (_navigationHistory.isNotEmpty && _navigationHistory.last == ActiveSheet.transportDetails) {
           previousSheet = ActiveSheet.transportDetails;
         } else {
-          resetMarkers();
+          _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
           _polyLines.clear();
           loadTransportPath(false);
           previousSheet = ActiveSheet.stopDetails;
@@ -530,7 +473,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       case ActiveSheet.transportDetails:
         previousSheet = ActiveSheet.stopDetails;
-        resetMarkers();
+        _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
         _polyLines.clear();
         // Restore transport path display
         loadTransportPath(false);
@@ -540,7 +483,7 @@ class _SearchScreenState extends State<SearchScreen> {
         previousSheet = ActiveSheet.nearbyStops;
         // Clear polylines and restore marker
         _polyLines.clear();
-        resetMarkers();
+        _markers = MapUtils.resetMarkers(widget.arguments.searchDetails!.markerPosition!);
         showStopMarkers(false);
         break;
 

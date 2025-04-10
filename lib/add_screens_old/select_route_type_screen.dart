@@ -57,7 +57,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   }
 
   void setRouteType(int index) {
-    widget.arguments.transport.routeType = _routeTypes[index];
+    widget.arguments.transport!.routeType = _routeTypes[index];
   }
 
   // Rendering
@@ -74,7 +74,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
         // old
         itemCount: _routeTypes.length,
         itemBuilder: (context, index) {
-          final routeTypeName = _routeTypes[index].name ?? "Unknown RouteType";
+          final routeTypeName = _routeTypes[index].name;
 
           return ListTile(
             title: Text(routeTypeName),

@@ -57,12 +57,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
   Future<void> _setTransportList() async {
     // print("( confirmation_screen.dart -> _setTransportList() ) -- direction = ${widget.arguments.transport.direction}");
-    if (widget.arguments.transport.direction != null) {
+    if (widget.arguments.transport!.direction != null) {
       final transport = widget.arguments.transport;
-      transportList.add(transport);
+      transportList.add(transport!);
     } else {
       // print("( confirmation_screen.dart -> _setTransportList() ) -- splitting transport by direction");
-      transportList = await widget.arguments.transport.splitByDirection();
+      transportList = await widget.arguments.transport!.splitByDirection();
       // print("( confirmation_screen.dart -> _setTransportList() ) -- done splitting transport by direction: $transportList");
     }
 

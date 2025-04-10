@@ -21,14 +21,18 @@ class PolyLineMarkers {
   final Set<Marker> smallMarkers;
 
   final Marker? stopMarker;
-  final Marker? firstMarker;
-  final Marker? lastMarker;
+  final Marker firstMarker;
+  final Marker lastMarker;
 
   PolyLineMarkers(this.largeMarkers, this.smallMarkers, this.stopMarker, this.firstMarker, this.lastMarker);
 }
 
 class MapUtils {
-  // Helper method to calculate a position that will place our marker at the specified height ratio
+
+  double zoomThresholdLarge = 12.8; // Zoom level threshold to hide the marker
+  double zoomThresholdSmall = 13.4;
+
+  /// Helper method to calculate a position that will place our marker at the specified height ratio
   Future<LatLng> calculateOffsetPosition(LatLng markerPosition, double heightRatio, GoogleMapController controller) async {
     // Get the visible region to determine map dimensions
     LatLngBounds visibleRegion = await controller.getVisibleRegion();
@@ -47,7 +51,8 @@ class MapUtils {
     );
   }
 
-  // Function to calculate the bounds that include all points within a given distance from _chosenPosition
+
+  /// Function to calculate the bounds that include all points within a given distance from _chosenPosition
   Future<LatLngBounds> calculateBoundsForMarkers(double distanceInMeters, LatLng markerPosition) async {
     List<LatLng> allPoints = [];
     LatLng chosenPosition = markerPosition;
@@ -87,7 +92,8 @@ class MapUtils {
     );
   }
 
-  // Retrieves address from coordinates of dropped pin
+
+  /// Retrieves address from coordinates of dropped pin
   Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
     try {
       List<geocoding.Placemark> placemarks =
@@ -102,6 +108,88 @@ class MapUtils {
     }
     return "Address not found"; // Return a default message if something goes wrong
   }
+
+
+  static Set<Marker> resetMarkers(LatLng markerPosition) {
+    Set<Marker> newMarkers = {};
+
+    MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
+
+    newMarkers.add(Marker(
+      markerId: id,
+      position: markerPosition,
+      consumeTapEvents: true,
+    ));
+    return newMarkers;
+  }
+
+
+  bool didZoomChange(double oldZoom, double newZoom) {
+
+    bool wasSmallHidden;
+    bool wasLargeHidden;
+    bool hideSmall;
+    bool hideLarge;
+
+    if (oldZoom < zoomThresholdSmall && oldZoom >= zoomThresholdLarge ) {
+      wasSmallHidden = true;
+      wasLargeHidden = false;
+    }
+    else if (oldZoom < zoomThresholdLarge ) {
+      wasSmallHidden = true;
+      wasLargeHidden = true;
+    }
+    else {
+      wasSmallHidden = false;
+      wasLargeHidden = false;
+    }
+
+    if (newZoom < zoomThresholdSmall && newZoom >= zoomThresholdLarge ) {
+      hideSmall = true;
+      hideLarge = false;
+    }
+    else if (newZoom < zoomThresholdLarge ) {
+      hideSmall = true;
+      hideLarge = true;
+    }
+    else {
+      hideSmall = false;
+      hideLarge = false;
+    }
+
+    return !(wasSmallHidden == hideSmall && wasLargeHidden == hideLarge);
+  }
+
+
+  Set<Marker> onZoomChange(Set<Marker> markers, double zoom, PolyLineMarkers polyLineMarkers, LatLng markerPosition) {
+
+    Set<Marker> newMarkers = {};
+
+    if (zoom < zoomThresholdLarge) {
+
+      newMarkers = resetMarkers(markerPosition);
+      if (polyLineMarkers.stopMarker != null) {
+        newMarkers.add(polyLineMarkers.stopMarker!);
+      }
+      newMarkers.add(polyLineMarkers.firstMarker);
+      newMarkers.add(polyLineMarkers.lastMarker);
+
+    } else if (zoom < zoomThresholdSmall && zoom >= zoomThresholdLarge) {
+      newMarkers = resetMarkers(markerPosition);
+      if (polyLineMarkers.stopMarker != null) {
+        newMarkers.add(polyLineMarkers.stopMarker!);
+      }
+      newMarkers.add(polyLineMarkers.firstMarker);
+      newMarkers.add(polyLineMarkers.lastMarker);
+      newMarkers = {...newMarkers, ...polyLineMarkers.largeMarkers};
+    }
+    else {
+      // Re-add the marker when zoom is above the threshold
+      newMarkers = {...markers, ...polyLineMarkers.smallMarkers, ...polyLineMarkers.largeMarkers};
+    }
+    return newMarkers;
+  }
+
 }
 
 class GeoPathUtils {

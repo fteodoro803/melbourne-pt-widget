@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/route_details_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
+import 'package:flutter_project/screen_arguments.dart';
 import '../ptv_info_classes/route_info.dart' as pt_route;
 import '../ptv_service.dart';
 import 'widgets/screen_widgets.dart' as ScreenWidgets;
@@ -34,9 +35,11 @@ enum VLineFilter {
 }
 
 class FindRoutesScreen extends StatefulWidget {
+  final ScreenArguments arguments;
 
   FindRoutesScreen({
     super.key,
+    required this.arguments
   });
 
   @override
@@ -334,7 +337,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => RouteDetailsScreen(route: route)
+                              builder: (context) => RouteDetailsScreen(arguments: widget.arguments, route: route)
                           ),
                         )
                     )

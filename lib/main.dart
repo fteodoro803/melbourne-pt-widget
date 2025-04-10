@@ -73,7 +73,9 @@ class _MyAppState extends State<MyApp> {
           '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
-          '/findRoutesScreen': (context) => FindRoutesScreen(),
+          '/findRoutesScreen': (context) => FindRoutesScreen(
+              arguments: ModalRoute.of(context)!.settings.arguments
+                  as ScreenArguments),
           '/selectLocationScreen': (context) => SelectLocationScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
@@ -231,8 +233,8 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FindRoutesScreen()),
-              );
+                MaterialPageRoute(builder: (context) => FindRoutesScreen(arguments: ScreenArguments.withSearchDetails2(_updateMainPage, SearchDetails(TextEditingController()))),
+              ));
             },
           ),
         ],

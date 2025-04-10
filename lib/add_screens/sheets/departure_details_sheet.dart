@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../ptv_info_classes/departure_info.dart';
-import '../ptv_service.dart';
-import '../screen_arguments.dart';
-import 'utility/time_utils.dart';
-import '../transport.dart';
-import 'widgets/screen_widgets.dart';
-import 'widgets/transport_widgets.dart';
+import '../../ptv_info_classes/departure_info.dart';
+import '../../ptv_service.dart';
+import '../../screen_arguments.dart';
+import '../utility/time_utils.dart';
+import '../../transport.dart';
+import '../widgets/screen_widgets.dart';
+import '../widgets/transport_widgets.dart';
 
 class DepartureDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;
@@ -38,7 +38,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    transport = widget.arguments.transport;
+    transport = widget.arguments.transport!;
     fetchPattern();
   }
 
