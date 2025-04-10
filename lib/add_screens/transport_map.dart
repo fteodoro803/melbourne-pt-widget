@@ -91,9 +91,9 @@ class _TransportMapState extends State<TransportMap> {
       stopPositions.add(pos);
     }
 
-    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, chosenStopPosition: _stopPosition);
+    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopToGeoPath(_geoPath, _stopPosition);
 
-    newGeoPath = geoPathAndStops.geoPathWithStops;
+    newGeoPath = geoPathAndStops.geoPathWithStop;
     chosenStopPositionAlongGeoPath = geoPathAndStops.stopPositionAlongGeoPath!;
 
     bool isReverseDirection = GeoPathUtils.reverseDirection(newGeoPath, stopPositions);
@@ -102,7 +102,6 @@ class _TransportMapState extends State<TransportMap> {
       _markers,
       stopPositions,
       stopPosition: _stopPosition,
-      stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
       true,
     );
 

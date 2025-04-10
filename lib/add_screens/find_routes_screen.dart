@@ -332,14 +332,14 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                         : null,
                       subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId) : null,
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
-                      onTap: () =>
-                        // Navigate to TransportDetailsScreen with transport data
+                      onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => RouteDetailsScreen(arguments: widget.arguments, route: route)
                           ),
-                        )
+                        );
+                      },
                     )
                   );
                 }

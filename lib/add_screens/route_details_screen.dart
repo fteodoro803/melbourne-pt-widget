@@ -165,11 +165,6 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
       stopPositions.add(pos);
     }
 
-    GeoPathAndStops geoPathAndStops = await transportPathUtils.addStopsToGeoPath(_geoPath, allStopPositions: stopPositions);
-
-    List<LatLng> newGeoPath = geoPathAndStops.geoPathWithStops;
-    stopPositions = geoPathAndStops.stopsAlongGeoPath; // stops along route aligned with geoPath
-
     PolyLineMarkers polyLineMarkers = await transportPathUtils.setMarkers(
       _markers,
       stopPositions,
@@ -187,7 +182,7 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
 
     _polyLines = await transportPathUtils.loadRoutePolyline(
       _route.colour!,
-      newGeoPath,
+      _geoPath,
       false,
       false
     );

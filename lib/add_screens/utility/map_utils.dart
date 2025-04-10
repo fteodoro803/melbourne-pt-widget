@@ -7,13 +7,15 @@ import 'time_utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
+import '../../ptv_info_classes/stop_info.dart';
+
 
 class GeoPathAndStops {
-  final List<LatLng> geoPathWithStops;
-  final List<LatLng> stopsAlongGeoPath;
+  final List<LatLng> geoPathWithStop;
+  // final List<LatLng> stopsAlongGeoPath;
   final LatLng? stopPositionAlongGeoPath;
 
-  GeoPathAndStops(this.geoPathWithStops, this.stopsAlongGeoPath, this.stopPositionAlongGeoPath);
+  GeoPathAndStops(this.geoPathWithStop, this.stopPositionAlongGeoPath);
 }
 
 class PolyLineMarkers {
@@ -174,6 +176,39 @@ class MapUtils {
     return newMarkers;
   }
 
+  // map_utils.dart
+  Future<Marker> createNearbyStopMarker({
+    required Stop stop,
+    required BitmapDescriptor icon,
+    required void Function() onTap,
+  }) async {
+    return Marker(
+      markerId: MarkerId(stop.id.toString()),
+      position: LatLng(stop.latitude!, stop.longitude!),
+      icon: icon,
+      consumeTapEvents: true,
+      onTap: onTap,
+    );
+  }
+
+  Future<Set<Marker>> generateNearbyStopMarkers({
+    required List<Stop> stops,
+    required Future<BitmapDescriptor> Function(Stop stop) getIcon,
+    required void Function(Stop stop) onTapStop,
+  }) async {
+    final Set<Marker> markers = {};
+    for (var stop in stops) {
+      final icon = await getIcon(stop);
+      final marker = await createNearbyStopMarker(
+        stop: stop,
+        icon: icon,
+        onTap: () => onTapStop(stop),
+      );
+      markers.add(marker);
+    }
+    return markers;
+  }
+
 }
 
 class GeoPathUtils {
@@ -314,9 +349,7 @@ class TransportPathUtils {
       bool isDirectionSpecified,
       {
         LatLng? stopPosition,
-        LatLng? stopPositionAlongGeoPath,
-      }
-      ) async {
+      }) async {
 
     Set<Marker> largeMarkers = {};
     Set<Marker> smallMarkers = {};
@@ -324,7 +357,6 @@ class TransportPathUtils {
     Marker firstMarker;
     Marker lastMarker;
 
-    LatLng? chosenStopPosition = isDirectionSpecified ? stopPosition : stopPositionAlongGeoPath;
 
     BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 9, 9);
     BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 7, 7);
@@ -337,10 +369,10 @@ class TransportPathUtils {
     bool isLargeMarker = isDirectionSpecified ? false : true;
 
     for (var stop in stopPositions) {
-      if (stop != chosenStopPosition && (stop == stopPositions.first || stop == stopPositions.last)) {
+      if (stop != stopPosition && (stop == stopPositions.first || stop == stopPositions.last)) {
         continue;
       }
-      if (stop == chosenStopPosition) {
+      if (stop == stopPosition) {
         customMarkerIcon = customMarkerIconFuture;
         isLargeMarker = true;
         continue;
@@ -363,8 +395,8 @@ class TransportPathUtils {
 
     if (stopPosition != null) {
       stopMarker = Marker(
-        markerId: MarkerId('$chosenStopPosition'),
-        position: chosenStopPosition!,
+        markerId: MarkerId('$stopPosition'),
+        position: stopPosition,
         icon: customStopMarkerIcon,
         anchor: const Offset(0.5, 0.5),
         consumeTapEvents: true,
@@ -391,41 +423,26 @@ class TransportPathUtils {
     return PolyLineMarkers(largeMarkers, smallMarkers, stopMarker, firstMarker, lastMarker);
   }
 
-  Future<GeoPathAndStops> addStopsToGeoPath(List<LatLng> geoPath, {LatLng? chosenStopPosition, List<LatLng>? allStopPositions}) async {
-    List<LatLng> stopsAlongGeoPath = [];
-    LatLng? stopPositionAlongGeoPath = chosenStopPosition;
-    List<LatLng> stopPositions = [];
+  Future<GeoPathAndStops> addStopToGeoPath(List<LatLng> geoPath, LatLng chosenStopPosition) async {
+    LatLng? stopPositionAlongGeoPath = GeoPathUtils.generatePointOnGeoPath(chosenStopPosition, geoPath);
     List<LatLng> newGeoPath = [...geoPath];
-    allStopPositions != null ? stopPositions = allStopPositions : stopPositions.add(chosenStopPosition!);
 
     int insertionIndex = 0;
-    for (var pos in stopPositions) {
-      var pointOnGeoPath = GeoPathUtils.generatePointOnGeoPath(pos, newGeoPath); // creates a point on the geoPath
-      stopsAlongGeoPath.add(pointOnGeoPath);
+    for (int i = 0; i < newGeoPath.length - 1; i++) {
+      LatLng pointA = newGeoPath[i];
+      LatLng pointB = newGeoPath[i + 1];
 
-      // Find the correct index to insert the pointOnGeoPath
-      if (!newGeoPath.contains(pointOnGeoPath) && pos == chosenStopPosition) {
-        stopPositionAlongGeoPath = pointOnGeoPath;
-
-        // Find the two closest points in geoPath to insert between them
-        insertionIndex = 0;
-        for (int i = 0; i < newGeoPath.length - 1; i++) {
-          LatLng pointA = newGeoPath[i];
-          LatLng pointB = newGeoPath[i + 1];
-
-          // If closestPoint is between pointA and pointB
-          if (GeoPathUtils.isBetween(pointOnGeoPath, pointA, pointB)) {
-            insertionIndex = i + 1;
-            break;
-          }
-        }
-
-        // Insert the closest point at the correct position
-        newGeoPath.insert(insertionIndex, pointOnGeoPath);
+      // If closestPoint is between pointA and pointB
+      if (GeoPathUtils.isBetween(stopPositionAlongGeoPath, pointA, pointB)) {
+        insertionIndex = i + 1;
+        break;
       }
     }
 
-    return GeoPathAndStops(newGeoPath, stopsAlongGeoPath, stopPositionAlongGeoPath);
+    // Insert the closest point at the correct position
+    newGeoPath.insert(insertionIndex, stopPositionAlongGeoPath);
+
+    return GeoPathAndStops(newGeoPath, stopPositionAlongGeoPath);
   }
 
   Future<BitmapDescriptor> getResizedImage(String assetPath, double width, double height) async {

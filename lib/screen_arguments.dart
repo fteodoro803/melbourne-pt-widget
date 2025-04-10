@@ -16,13 +16,15 @@ class SearchDetails {
 
   bool? isSheetExpanded = false;
 
+  // Progressively narrowing down the search
+  List<Stop>? stops;
+  List<pt_route.Route>? routes;
   Stop? stop;
   pt_route.Route? route;
+  List<Stop>? stopsAlongRoute;
+  List<Transport>? directions;
   Transport? transport;
   Departure? departure;
-
-  List<Stop>? stops;
-  List<Transport>? directions;
 
   SearchDetails();
 }
@@ -33,6 +35,4 @@ class ScreenArguments {
 
   ScreenArguments(this.callback);
   ScreenArguments.withTransport(this.transport, this.callback);
-
-  // ScreenArguments.withSearchDetails(this.searchDetails);
 }
