@@ -454,7 +454,7 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
 
   final List<pt_route.Route> routes;
   final String routeType;
-  final Function(Stop stop, pt_route.Route route) onStopTapped;
+  final Function(Stop, pt_route.Route, bool) onStopTapped;
   final Stop stop;
 
   @override
@@ -501,7 +501,7 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
             ),
             title: routeName != null ? Text(routeName) : null,
             onTap: () async {
-              await onStopTapped(stop, route);
+              await onStopTapped(stop, route, true);
             },
           );
         }

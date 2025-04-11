@@ -8,22 +8,12 @@ import '../../ptv_info_classes/route_info.dart' as pt_route;
 import '../../ptv_info_classes/stop_info.dart';
 import '../../ptv_service.dart';
 import '../../screen_arguments.dart';
-
-class SuburbStops {
-  final String suburb;
-  List<Stop> stops;
-  bool isExpanded = true;
-
-  SuburbStops({
-    required this.suburb,
-    required this.stops
-  });
-}
+import '../utility/search_utils.dart';
 
 class RouteDetailsSheet extends StatefulWidget {
   final SearchDetails searchDetails;
   final ScrollController scrollController;
-  final Function(Stop stop, pt_route.Route route) onStopTapped;
+  final Function(Stop, pt_route.Route, bool) onStopTapped;
 
   const RouteDetailsSheet({
     super.key,
@@ -37,59 +27,18 @@ class RouteDetailsSheet extends StatefulWidget {
 }
 
 class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
+  late pt_route.Route _route;
   List<SuburbStops>? _suburbStops;
   String? _direction;
   late List<RouteDirection> _directions;
   PtvService ptvService = PtvService();
+  SearchUtils searchUtils = SearchUtils();
 
-  Future<void> setSuburbStops() async {
-    List<RouteDirection> directions = await ptvService.fetchDirections(widget.searchDetails.route!.id);
-    List<Stop> stops;
-    String? direction;
-
-    if (directions.isNotEmpty) {
-      direction = directions[0].name;
-      stops = await ptvService.fetchStopsRoute(widget.searchDetails.route!, direction: directions[0]);
-      stops = stops.where((s) => s.stopSequence != 0).toList();
-    }
-    else {
-      stops = await ptvService.fetchStopsRoute(widget.searchDetails.route!);
-    }
-
-    List<SuburbStops> suburbStopsList = [];
-    String? previousSuburb;
-    List<Stop> stopsInSuburb = [];
-    String? currentSuburb;
-
-    for (var stop in stops) {
-      currentSuburb = stop.suburb!;
-
-      Stop newStop = Stop(
-        id: stop.id,
-        name: stop.name,
-        latitude: stop.latitude,
-        longitude: stop.longitude,
-        distance: stop.distance,
-        stopSequence: stop.stopSequence,
-        suburb: stop.suburb,
-      );
-
-      if (previousSuburb == null || currentSuburb == previousSuburb) {
-        stopsInSuburb.add(newStop);
-      }
-      else {
-        suburbStopsList.add(SuburbStops(suburb: previousSuburb, stops: List<Stop>.from(stopsInSuburb)));
-        stopsInSuburb = [newStop];
-      }
-
-      previousSuburb = currentSuburb;
-    }
-    suburbStopsList.add(SuburbStops(suburb: previousSuburb!, stops: stopsInSuburb));
-
+  Future<void> getSuburbStops() async {
+    List<Stop> stopsAlongRoute = _route.stopsAlongRoute!;
+    List<SuburbStops> suburbStops = await searchUtils.getSuburbStops(stopsAlongRoute, _route);
     setState(() {
-      _directions = directions;
-      _direction = direction;
-      _suburbStops = suburbStopsList;
+      _suburbStops = suburbStops;
     });
   }
 
@@ -106,8 +55,13 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   @override
   void initState() {
     super.initState();
+    _route = widget.searchDetails.route!;
+    _directions = _route.directions!;
+    if (_directions.isNotEmpty) {
+      _direction = _directions[0].name;
+    }
 
-    setSuburbStops();
+    getSuburbStops();
   }
 
   @override
@@ -130,7 +84,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                   RouteWidget(route: route!, scrollable: false,),
                   SizedBox(height: 4),
                   ListTile(
-                      title: Text("To: ${_direction}", style: TextStyle(fontSize: 18)),
+                      title: Text("To: $_direction", style: TextStyle(fontSize: 18)),
                       trailing: GestureDetector(
                           child: Icon(Icons.compare_arrows),
                           onTap: () {
@@ -179,7 +133,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                                       title: Text(stop.name, style: TextStyle(fontSize: 15)),
                                       trailing: Icon(Icons.keyboard_arrow_right),
                                       onTap: () async {
-                                        await widget.onStopTapped(stop, widget.searchDetails.route!);
+                                        await widget.onStopTapped(stop, widget.searchDetails.route!, false);
                                       }
                                   );
                                 }),

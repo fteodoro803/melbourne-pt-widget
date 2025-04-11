@@ -38,7 +38,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   Future<void> initializeSavedList() async {
     List<bool> tempSavedList = [];
 
-    for (var transport in widget.searchDetails.directions!) {
+    for (var transport in widget.searchDetails.transportList!) {
       // Check if the transport is already saved
       bool isSaved = await isTransportSaved(transport);
       tempSavedList.add(isSaved);
@@ -52,7 +52,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    _transports = widget.searchDetails.directions!;
+    _transports = widget.searchDetails.transportList!;
     initializeSavedList();
   }
 
@@ -81,7 +81,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   Widget build(BuildContext context) {
 
     // List<Transport> transportsList = widget.arguments.searchDetails!.directions.where((t) => t.departures != null && t.departures!.isNotEmpty).toList();
-    List<Transport> transportsList = widget.searchDetails.directions!;
+    List<Transport> transportsList = widget.searchDetails.transportList!;
 
 
     if (_savedList.isEmpty) {

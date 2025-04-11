@@ -46,7 +46,7 @@ class NearbyStopsSheet extends StatefulWidget {
   final SearchDetails searchDetails;
   final ScrollController scrollController;
   final Function({int? newDistance, String? newTransportType}) onSearchFiltersChanged;
-  final Function(Stop, pt_route.Route) onStopTapped;
+  final Function(Stop, pt_route.Route, bool) onStopTapped;
   final Function(NearbyStopsState) onStateChanged; // New callback
   final NearbyStopsState? initialState; // New parameter
   final bool shouldResetFilters;

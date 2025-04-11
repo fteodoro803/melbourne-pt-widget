@@ -29,6 +29,17 @@ class UniqueStop {
   String toString() => '($id, $type)';
 }
 
+class SuburbStops {
+  final String suburb;
+  List<Stop> stops;
+  bool isExpanded = true;
+
+  SuburbStops({
+    required this.suburb,
+    required this.stops
+  });
+}
+
 class SearchUtils {
   PtvService ptvService = PtvService();
 
@@ -127,5 +138,57 @@ class SearchUtils {
     }
 
     return uniqueStops;
+  }
+
+  Future<List<RouteDirection>> getRouteDirections(int routeId) async {
+    return await ptvService.fetchDirections(routeId);
+  }
+
+  Future<List<Stop>> getStopsAlongRoute(List<RouteDirection> directions, pt_route.Route route) async {
+    List<Stop> stops = [];
+    if (directions.isNotEmpty) {
+      stops = await ptvService.fetchStopsRoute(route, direction: directions[0]);
+      stops = stops.where((s) => s.stopSequence != 0).toList();
+    }
+    else {
+      stops = await ptvService.fetchStopsRoute(route);
+    }
+
+    return stops;
+  }
+
+  Future<List<SuburbStops>> getSuburbStops(List<Stop> stopsAlongRoute, pt_route.Route route) async {
+
+    List<SuburbStops> suburbStopsList = [];
+    String? previousSuburb;
+    List<Stop> stopsInSuburb = [];
+    String? currentSuburb;
+
+    for (var stop in stopsAlongRoute) {
+      currentSuburb = stop.suburb!;
+
+      Stop newStop = Stop(
+        id: stop.id,
+        name: stop.name,
+        latitude: stop.latitude,
+        longitude: stop.longitude,
+        distance: stop.distance,
+        stopSequence: stop.stopSequence,
+        suburb: stop.suburb,
+      );
+
+      if (previousSuburb == null || currentSuburb == previousSuburb) {
+        stopsInSuburb.add(newStop);
+      }
+      else {
+        suburbStopsList.add(SuburbStops(suburb: previousSuburb, stops: List<Stop>.from(stopsInSuburb)));
+        stopsInSuburb = [newStop];
+      }
+
+      previousSuburb = currentSuburb;
+    }
+    suburbStopsList.add(SuburbStops(suburb: previousSuburb!, stops: stopsInSuburb));
+
+    return suburbStopsList;
   }
 }

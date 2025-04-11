@@ -21,7 +21,6 @@ import 'package:flutter_project/dev/test_screen.dart';
 
 import "add_screens/find_routes_screen.dart";
 import "add_screens/search_screen.dart";
-import "add_screens/transport_map.dart";
 import "home_widget_service.dart";
 
 import 'package:get/get.dart';
@@ -64,12 +63,11 @@ class _MyAppState extends State<MyApp> {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey, brightness: Brightness.dark),
           useMaterial3: true,
         ),
-        home: const MyHomePage(title: 'Demo Home Page'),
-        // home: const TestScreen(),       // Test Screen for Devs
+        initialRoute: '/',
 
         // Pages/Screens
         routes: {
-          // '/': (context) => const MyHomePage(title: "Demo Home Page"),
+          '/': (context) => const MyHomePage(title: "Demo Home Page"),
           '/selectRouteTypeScreen': (context) => SelectRouteTypeScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
@@ -82,8 +80,7 @@ class _MyAppState extends State<MyApp> {
           '/searchScreen': (context) => SearchScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
               as ScreenArguments,
-              showRouteDetails: false,
-              showTransportDetails: false,
+              searchDetails: SearchDetails(),
           ),
           '/selectStopScreen': (context) => SelectStopScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
@@ -94,9 +91,6 @@ class _MyAppState extends State<MyApp> {
           '/confirmationScreen': (context) => ConfirmationScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
-          '/transportMapScreen': (context) => TransportMap(
-              arguments: ModalRoute.of(context)!.settings.arguments
-              as ScreenArguments),
           '/testScreen': (context) => const TestScreen(),
         });
   }
@@ -264,17 +258,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           dismissible: true,
                           onDismiss: () => {removeTransport(_transportList[index]), _updateMainPage()},
                           onTap: () =>
-                          // Navigate to TransportDetailsScreen with transport data
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //       builder: (context) => TransportMap(arguments: ScreenArguments.withTransport(_transportList[index], _updateMainPage))
-                          //     ),
-                          //   )
                             Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SearchScreen(arguments: ScreenArguments.withTransport(_transportList[index], _updateMainPage), showTransportDetails: true, showRouteDetails: false,)
+                                builder: (context) => SearchScreen(arguments: ScreenArguments(_updateMainPage), searchDetails: SearchDetails.withTransport(_transportList[index]))
                             ),
                           )
                         ),

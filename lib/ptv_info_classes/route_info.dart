@@ -1,5 +1,6 @@
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 import 'package:flutter_project/database/database.dart' as db;
@@ -18,6 +19,9 @@ class Route {
   RouteType type;
   String gtfsId;
   String status;
+
+  List<RouteDirection>? directions;
+  List<Stop>? stopsAlongRoute;
 
   RouteDirection? direction;      // todo: seems like an unused variable, maybe delete it?
   // List<Stop> stops;      // todo: consider adding a list of stops?

@@ -28,9 +28,13 @@ import 'widgets/suggestions_search.dart';
 
 class SearchScreen extends StatefulWidget {
   final ScreenArguments arguments;
-  final bool showRouteDetails;
-  final bool showTransportDetails;
-  const SearchScreen({super.key, required this.arguments, required this.showRouteDetails, required this.showTransportDetails});
+  final SearchDetails searchDetails;
+
+  const SearchScreen({
+    super.key,
+    required this.arguments,
+    required this.searchDetails
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -38,15 +42,12 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
 
-  SearchDetails searchDetails = SearchDetails();
+  late SearchDetails _searchDetails;
 
-  // DraggableScrollableSheet state management
-  final DraggableScrollableController _controller
-      = DraggableScrollableController();
-
-  bool _hasDroppedPin = false;
+  bool _showSheet = false;
   bool _showStops = false;
   bool _shouldResetFilters = false;
+  bool? _enableSearch;
 
   final GlobalKey<SheetNavigatorState> _sheetNavigatorKey = GlobalKey<SheetNavigatorState>();
   final GlobalKey<NearbyStopsSheetState> _nearbyStopsSheetKey
@@ -67,7 +68,6 @@ class _SearchScreenState extends State<SearchScreen> {
   Set<Polyline> _polyLines = {};
   Set<Circle> _circles = {};
   List<LatLng> _geoPath = [];
-  List<Stop> _stopsAlongRoute = [];
   Set<Marker> _nearbyStopMarkers = {};
 
   late PolyLineMarkers _polyLineMarkers;
@@ -91,143 +91,184 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    searchDetails.distance = 300;
-    searchDetails.transportType = "all";
-    tools.printScreenState("SelectLocation", widget.arguments);
+    _searchDetails = widget.searchDetails;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.showRouteDetails) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_searchDetails.route != null
+          && (_enableSearch == false || _enableSearch == null)) {
+        _enableSearch = false;
+
+        await _initialiseGeoPathForRoute(true);
+        await _loadTransportPath(false);
+
         setState(() {
-          _hasDroppedPin = true;
+          _showSheet = true;
         });
-        searchDetails.route = widget.arguments.route;
-        _sheetNavigatorKey.currentState?.pushSheet('routeDetails');
-      } else if (widget.showTransportDetails) {
-        searchDetails.transport = widget.arguments.transport;
+
+        _sheetNavigatorKey.currentState?.pushSheet('Route Details');
+
+      } else if (_searchDetails.transport != null
+          && (_enableSearch == false || _enableSearch == null)) {
+        _enableSearch = false;
+        _searchDetails.stop = _searchDetails.transport!.stop;
+        _searchDetails.route = _searchDetails.transport!.route;
+
+        await _initialiseGeoPathForRoute(true);
+        await _loadTransportPath(true);
+
         setState(() {
-          _hasDroppedPin = true;
+          _showSheet = true;
         });
-        _sheetNavigatorKey.currentState?.pushSheet('transportDetails');
+
+        _sheetNavigatorKey.currentState?.pushSheet('Transport Details');
+      }
+      else {
+        setState(() {
+          _enableSearch = true;
+          _searchDetails.distance = 300;
+          _searchDetails.transportType = "all";
+        });
       }
     });
   }
 
-  void _handleBackButton() {
-    final nav = _sheetNavigatorKey.currentState;
-    if (nav == null) return;
-
-    final currentSheet = nav.currentSheet;
-
-    if (currentSheet == 'stopDetails') {
-      setState(() {
-        _polyLines.clear();
-        _stopsAlongRoute.clear();
-        _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
-      });
-      nav.popSheet();
-      return;
+  Future<void> _initialiseGeoPathForRoute(bool newRoute) async {
+    if (_searchDetails.route!.directions == null || _searchDetails.route!.directions!.isEmpty) {
+      _searchDetails.route!.directions = await ptvService.fetchDirections(_searchDetails.route!.id);
     }
-
-    if (currentSheet == 'nearbyStops') {
-      setState(() {
-        _hasDroppedPin = false;
-        _markers.clear();
-        _circles.clear();
-        _nearbyStopMarkers.clear();
-      });
-      return;
+    if (_searchDetails.route!.stopsAlongRoute == null || _searchDetails.route!.stopsAlongRoute!.isEmpty) {
+      _searchDetails.route!.stopsAlongRoute =
+        await searchUtils.getStopsAlongRoute(
+          _searchDetails.route!.directions!, _searchDetails.route!);
     }
-
-    if (nav.sheetHistory.isNotEmpty) {
-      final prevSheet = nav.sheetHistory.last;
-      // If going back to stopDetails from transport or departure, remove direction
-      if (prevSheet == 'stopDetails' &&
-          (currentSheet == 'transportDetails' || currentSheet == 'departureDetails')) {
-        loadTransportPath(false); // reload without direction
-      }
-      nav.popSheet();
-    } else {
-      Navigator.pop(context);
+    if (newRoute) {
+      _geoPath = await ptvService.fetchGeoPath(_searchDetails.route!);
     }
   }
 
-  Widget _buildSheets() {
-    return SheetNavigator(
-      key: _sheetNavigatorKey,
-      initialSheet: widget.showTransportDetails ? 'transportDetails' : widget.showRouteDetails ? 'routeDetails' : 'nearbyStops',
-      sheets: {
-        'nearbyStops': (ctx, scroll) => NearbyStopsSheet(
-          key: _nearbyStopsSheetKey,
-          searchDetails: searchDetails,
-          scrollController: scroll,
-          onSearchFiltersChanged: _onSearchFiltersChanged,
-          onStopTapped: _onStopTapped,
-          initialState: _shouldResetFilters ? null : _savedNearbyStopsState,
-          onStateChanged: (state) => _savedNearbyStopsState = state,
-          shouldResetFilters: _shouldResetFilters,
-        ),
-        'routeDetails': (ctx, scroll) => RouteDetailsSheet(
-          searchDetails: searchDetails,
-          scrollController: scroll,
-          onStopTapped: _onStopTapped,
-        ),
-        'stopDetails': (ctx, scroll) => StopDetailsSheet(
-          searchDetails: searchDetails,
-          arguments: widget.arguments,
-          scrollController: scroll,
-          onTransportTapped: _onTransportTapped,
-          onDepartureTapped: _onDepartureTapped,
-        ),
-        'transportDetails': (ctx, scroll) => TransportDetailsSheet(
-          searchDetails: searchDetails,
-          arguments: widget.arguments,
-          scrollController: scroll,
-          onDepartureTapped: _onDepartureTapped,
-        ),
-        'departureDetails': (ctx, scroll) => DepartureDetailsSheet(
-          searchDetails: searchDetails,
-          scrollController: scroll,
-        ),
-      },
-      onSheetChanged: (sheet) {
-        if (sheet == 'nearbyStops') showStopMarkers(true);
-      },
+  void _handleSheetExpansion(bool isExpanded) {
+    setState(() {
+      widget.searchDetails.isSheetExpanded = isExpanded;
+    });
+  }
+
+  /// Loads route geo path and stops on map
+  Future<void> _loadTransportPath(bool isDirectionSpecified) async {
+
+    // Early exit if GeoPath is empty
+    if (_geoPath.isEmpty || _searchDetails.route!.stopsAlongRoute == null
+        || _searchDetails.route!.stopsAlongRoute!.isEmpty) {
+      return;
+    }
+
+    LatLng? stopPosition;
+
+    if (_searchDetails.stop != null) {
+      stopPosition = LatLng(
+          _searchDetails.stop!.latitude!, _searchDetails.stop!.longitude!);
+    }
+
+    List<LatLng> stopPositions = [];
+    LatLng? chosenStopPositionAlongGeoPath = stopPosition;
+    List<LatLng> newGeoPath = [..._geoPath];
+
+    for (var stop in _searchDetails.route!.stopsAlongRoute!) {
+      var pos = LatLng(stop.latitude!, stop.longitude!);
+      stopPositions.add(pos);
+    }
+
+    if (stopPosition != null) {
+      GeoPathAndStops geoPathAndStop
+      = await transportPathUtils.addStopToGeoPath(_geoPath, stopPosition);
+
+      newGeoPath = geoPathAndStop.geoPathWithStop;
+      chosenStopPositionAlongGeoPath = geoPathAndStop.stopPositionAlongGeoPath!;
+    }
+
+    bool isReverseDirection = isDirectionSpecified
+        ? GeoPathUtils.reverseDirection(newGeoPath, stopPositions)
+        : false;
+
+    _polyLineMarkers = await transportPathUtils.setMarkers(
+      _markers,
+      stopPositions,
+      stopPosition: stopPosition,
+      isDirectionSpecified,
     );
+
+    _markers = {
+      ..._markers,
+      ..._polyLineMarkers.largeMarkers,
+      ..._polyLineMarkers.smallMarkers
+    };
+    if (_polyLineMarkers.stopMarker != null) {
+      _markers.add(_polyLineMarkers.stopMarker!);
+
+    }
+    _markers.add(_polyLineMarkers.firstMarker);
+    _markers.add(_polyLineMarkers.lastMarker);
+
+    _polyLines = await transportPathUtils.loadRoutePolyline(
+        _searchDetails.route!.colour!,
+        newGeoPath,
+        stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
+        isDirectionSpecified,
+        isReverseDirection
+    );
+
+    setState(() {
+    });
   }
 
-  NearbyStopsState? _getNearbyStopsState() {
-    if (_nearbyStopsSheetKey.currentState != null) {
-      return _nearbyStopsSheetKey.currentState!.getCurrentState();
+  /// Handles zoom and camera move events
+  void _onCameraMove(CameraPosition position) {
+    final currentSheet = _sheetNavigatorKey.currentState?.currentSheet;
+
+    if (currentSheet != 'Nearby Stops'
+        && currentSheet != null
+        && _currentZoom != position.zoom) {
+      if (mapUtils.didZoomChange(_currentZoom, position.zoom)) {
+        setState(() {
+          _markers = mapUtils.onZoomChange(
+              _markers, position.zoom,
+              _polyLineMarkers,
+              _searchDetails.markerPosition
+          );
+          _currentZoom = position.zoom;
+        });
+      }
     }
-    return null;
+    else {
+      _customInfoWindowController.onCameraMove!();
+    }
   }
 
   /// Shows nearby stops on map when button is toggled by user
-  Future<void> showStopMarkers(bool refresh) async {
+  Future<void> _showStopMarkers(bool refresh) async {
     if (_showStops) {
       _tappedStopId = null;
 
       if (refresh) {
         _nearbyStopMarkers = await mapUtils.generateNearbyStopMarkers(
-          stops: searchDetails.stops!,
+          stops: _searchDetails.stops!,
           getIcon: (stop) => transportPathUtils.getResizedImage(
               "assets/icons/PTV ${stop.routeType!.name} Logo.png", 20, 20),
-          onTapStop: handleStopTapOnMap,
+          onTapStop: _handleStopTapOnMap,
         );
       }
 
       setState(() {
         _markers = TransportPathUtils.resetMarkers(
-            searchDetails.markerPosition!);
+            _searchDetails.markerPosition!);
         _markers = {..._markers, ..._nearbyStopMarkers};
         _circles.clear();
         _circles.add(
           Circle(
             circleId: CircleId("circle"),
-            center: searchDetails.markerPosition!,
-            fillColor: Colors.blue.withOpacity(0.2),
+            center: _searchDetails.markerPosition!,
+            fillColor: Colors.blue.withValues(alpha: 0.2),
             strokeWidth: 0,
-            radius: searchDetails.distance!.toDouble(),
+            radius: _searchDetails.distance!.toDouble(),
           ),
         );
       });
@@ -236,17 +277,17 @@ class _SearchScreenState extends State<SearchScreen> {
         _customInfoWindowController.hideInfoWindow!();
         _circles.clear();
         _markers = TransportPathUtils.resetMarkers(
-            searchDetails.markerPosition!);
+            _searchDetails.markerPosition!);
       });
     }
   }
 
-  void handleStopTapOnMap(Stop stop) async {
+  void _handleStopTapOnMap(Stop stop) async {
     final largeIcon = await transportPathUtils.getResizedImage(
         "assets/icons/PTV ${stop.routeType?.name} Logo Outlined.png", 35, 35);
 
     setState(() {
-      for (var s in searchDetails.stops!) {
+      for (var s in _searchDetails.stops!) {
         s.isExpanded = false;
       }
       stop.isExpanded = true;
@@ -273,7 +314,7 @@ class _SearchScreenState extends State<SearchScreen> {
         LatLng(stop.latitude!, stop.longitude!),
       );
 
-      int stopIndex = searchDetails.stops!.indexOf(stop);
+      int stopIndex = _searchDetails.stops!.indexOf(stop);
 
       _sheetNavigatorKey.currentState?.animateSheetTo(0.6);
 
@@ -281,90 +322,6 @@ class _SearchScreenState extends State<SearchScreen> {
         _nearbyStopsSheetKey.currentState?.scrollToStopItem(stopIndex);
       });
     });
-  }
-
-  /// Loads route geo path and stops on map
-  Future<void> loadTransportPath(bool isDirectionSpecified) async {
-    LatLng stopPosition;
-    List<Stop> stops = [];
-    stopPosition = LatLng(
-        searchDetails.stop!.latitude!, searchDetails.stop!.longitude!);
-
-    // Early exit if GeoPath is empty // todo: also check if null!!!
-    if (_geoPath.isEmpty || _stopsAlongRoute.isEmpty) {
-      return;
-    }
-
-    stops = _stopsAlongRoute.where((s) => s.stopSequence != 0).toList();
-
-    List<LatLng> stopPositions = [];
-    LatLng chosenStopPositionAlongGeoPath = stopPosition;
-    List<LatLng> newGeoPath = [];
-
-    for (var stop in stops) {
-      var pos = LatLng(stop.latitude!, stop.longitude!);
-      stopPositions.add(pos);
-    }
-
-    GeoPathAndStops geoPathAndStop
-      = await transportPathUtils.addStopToGeoPath(_geoPath, stopPosition);
-
-    newGeoPath = geoPathAndStop.geoPathWithStop;
-    chosenStopPositionAlongGeoPath = geoPathAndStop.stopPositionAlongGeoPath!;
-
-    bool isReverseDirection = isDirectionSpecified
-      ? GeoPathUtils.reverseDirection(newGeoPath, stopPositions)
-      : false;
-
-    _polyLineMarkers = await transportPathUtils.setMarkers(
-      _markers,
-      stopPositions,
-      stopPosition: stopPosition,
-      isDirectionSpecified,
-    );
-
-    _markers = {
-      ..._markers,
-      ..._polyLineMarkers.largeMarkers,
-      ..._polyLineMarkers.smallMarkers
-    };
-    _markers.add(_polyLineMarkers.stopMarker!);
-    _markers.add(_polyLineMarkers.firstMarker);
-    _markers.add(_polyLineMarkers.lastMarker);
-
-    _polyLines = await transportPathUtils.loadRoutePolyline(
-      searchDetails.route!.colour!,
-      newGeoPath,
-      stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
-      isDirectionSpecified,
-      isReverseDirection
-    );
-
-    setState(() {
-    });
-  }
-
-  /// Handles zoom and camera move events
-  void _onCameraMove(CameraPosition position) {
-    final currentSheet = _sheetNavigatorKey.currentState?.currentSheet;
-
-    if (currentSheet != 'nearbyStops'
-        && currentSheet != null
-        && _currentZoom != position.zoom) {
-      if (mapUtils.didZoomChange(_currentZoom, position.zoom)) {
-        setState(() {
-          _markers = mapUtils.onZoomChange(
-              _markers, position.zoom,
-              _polyLineMarkers,
-              searchDetails.markerPosition!
-          );
-          _currentZoom = position.zoom;
-        });
-      }
-    }
-    else {
-      _customInfoWindowController.onCameraMove!();
-    }
   }
 
   /// Set the map's Marker and Camera to a new marker location
@@ -380,12 +337,12 @@ class _SearchScreenState extends State<SearchScreen> {
         selectedLocation, "all", 300);
 
     // Update the state with the new address
-    searchDetails.stops = uniqueStops;
-    searchDetails.markerPosition = selectedLocation;
-    searchDetails.address = address;
-    searchDetails.distance = 300;
-    searchDetails.transportType = "all";
-    _hasDroppedPin = true;
+    _searchDetails.stops = uniqueStops;
+    _searchDetails.markerPosition = selectedLocation;
+    _searchDetails.address = address;
+    _searchDetails.distance = 300;
+    _searchDetails.transportType = "all";
+    _showSheet = true;
 
     _customInfoWindowController.hideInfoWindow!();
 
@@ -406,23 +363,23 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     // Bring the user to the NearbyStopsSheet with the updated data
-    _sheetNavigatorKey.currentState?.pushSheet('nearbyStops');
+    _sheetNavigatorKey.currentState?.pushSheet('Nearby Stops');
 
-    showStopMarkers(true);
+    _showStopMarkers(true);
   }
 
   /// Handles changes in transport type and distance filters on NearbyStopsSheet
   Future<void> _onSearchFiltersChanged({String? newTransportType, int? newDistance}) async {
-    String transportType = newTransportType ?? searchDetails.transportType!;
-    int oldDistance = searchDetails.distance!;
+    String transportType = newTransportType ?? _searchDetails.transportType!;
+    int oldDistance = _searchDetails.distance!;
     int distance = newDistance ?? oldDistance;
 
     List<Stop> uniqueStops = await searchUtils.getStops(
-        searchDetails.markerPosition!, transportType, distance);
+        _searchDetails.markerPosition!, transportType, distance);
 
     if (oldDistance != newDistance && newDistance != null) {
       LatLngBounds bounds = await mapUtils.calculateBoundsForMarkers(
-          distance.toDouble(), searchDetails.markerPosition!);
+          distance.toDouble(), _searchDetails.markerPosition!);
 
       // First animate to the bounds to ensure all points are visible
       mapController.moveCamera(
@@ -432,7 +389,7 @@ class _SearchScreenState extends State<SearchScreen> {
       // Then adjust the position so the marker is at 70% of height
       await Future.delayed(Duration(milliseconds: 300)); // Wait for first animation to complete
 
-      final LatLng markerPosition = searchDetails.markerPosition!;
+      final LatLng markerPosition = _searchDetails.markerPosition!;
       final zoom = await mapController.getZoomLevel();
 
       // Calculate a point that will position our marker at 70% of the map height
@@ -448,70 +405,151 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() {
-      searchDetails.stops = uniqueStops;
-      searchDetails.distance = distance;
-      searchDetails.transportType = transportType;
-      showStopMarkers(true);
+      _searchDetails.stops = uniqueStops;
+      _searchDetails.distance = distance;
+      _searchDetails.transportType = transportType;
+      _showStopMarkers(true);
     });
 
 
   }
 
   /// Handles tap on a route in NearbyStopsSheet
-  Future<void> _onStopTapped(Stop stop, pt_route.Route route) async {
+  Future<void> _onStopSelected(Stop stop, pt_route.Route route, bool newRoute) async {
     _circles.clear();
-    _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!); // todo: add geopath to routedetails
+    _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
     List<Transport> listTransport =
       await searchUtils.splitDirection(stop, route);
 
-    searchDetails.stop = stop;
-    searchDetails.route = route;
+    _searchDetails.stop = stop;
+    _searchDetails.route = route;
 
-    searchDetails.directions = [];
+    _searchDetails.transportList = [];
     for (var transport in listTransport) {
-      searchDetails.directions!.add(transport);
+      _searchDetails.transportList!.add(transport);
     }
 
-    _geoPath = await ptvService.fetchGeoPath(route); // get geoPath of route
-    if (listTransport.isNotEmpty) {
-      _stopsAlongRoute = await ptvService.fetchStopsRoute(
-          listTransport[0].route!, direction: listTransport[0].direction);
-    }
-    else {
-      _stopsAlongRoute = [];
-    }
+    await _initialiseGeoPathForRoute(newRoute);
 
-    loadTransportPath(false);
-    _sheetNavigatorKey.currentState?.pushSheet('stopDetails');
+    _loadTransportPath(false);
+    _sheetNavigatorKey.currentState?.pushSheet('Stop Details');
     _customInfoWindowController.hideInfoWindow!();
   }
 
   /// Handles tap on a direction in StopDetailsSheet
-  Future<void> _onTransportTapped(Transport transport) async {
-    _markers = TransportPathUtils.resetMarkers(searchDetails.markerPosition!);
-    searchDetails.transport = transport;
+  Future<void> _onTransportSelected(Transport transport) async {
+    _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition!);
+    _searchDetails.transport = transport;
 
-    _sheetNavigatorKey.currentState?.pushSheet('transportDetails');
-    _stopsAlongRoute = await ptvService.fetchStopsRoute(
-        transport.route!, direction: transport.direction);
+    _sheetNavigatorKey.currentState?.pushSheet('Transport Details');
 
-    loadTransportPath(true);
+    _loadTransportPath(true);
 
   }
 
   /// Handles tap on a departure in StopDetailsSheet and TransportDetailsSheet
-  Future<void> _onDepartureTapped(Departure departure, Transport transport) async {
-    searchDetails.transport = transport;
-    searchDetails.departure = departure;
+  Future<void> _onDepartureSelected(Departure departure, Transport transport) async {
+    _searchDetails.transport = transport;
+    _searchDetails.departure = departure;
 
-    if (_sheetNavigatorKey.currentState?.currentSheet == 'stopDetails') {
-      _markers = TransportPathUtils.resetMarkers(
-          searchDetails.markerPosition!);
-      _stopsAlongRoute = await ptvService.fetchStopsRoute(
-          transport.route!, direction: transport.direction);
-      loadTransportPath(true);
+    if (_sheetNavigatorKey.currentState?.currentSheet == 'Stop Details') {
+
+      _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+      _loadTransportPath(true);
     }
-    _sheetNavigatorKey.currentState?.pushSheet('departureDetails');
+    _sheetNavigatorKey.currentState?.pushSheet('Departure Details');
+  }
+
+  Widget _buildSheets() {
+    return SheetNavigator(
+      key: _sheetNavigatorKey,
+      initialSheet: _searchDetails.transport != null
+          ? 'Transport Details'
+          : _searchDetails.route != null
+            ? 'Route Details'
+            : 'Nearby Stops',
+      sheets: {
+        'Nearby Stops': (ctx, scroll) => NearbyStopsSheet(
+          key: _nearbyStopsSheetKey,
+          searchDetails: _searchDetails,
+          scrollController: scroll,
+          onSearchFiltersChanged: _onSearchFiltersChanged,
+          onStopTapped: _onStopSelected,
+          initialState: _shouldResetFilters ? null : _savedNearbyStopsState,
+          onStateChanged: (state) => _savedNearbyStopsState = state,
+          shouldResetFilters: _shouldResetFilters,
+        ),
+        'Route Details': (ctx, scroll) => RouteDetailsSheet(
+          searchDetails: _searchDetails,
+          scrollController: scroll,
+          onStopTapped: _onStopSelected,
+        ),
+        'Stop Details': (ctx, scroll) => StopDetailsSheet(
+          searchDetails: _searchDetails,
+          arguments: widget.arguments,
+          scrollController: scroll,
+          onTransportTapped: _onTransportSelected,
+          onDepartureTapped: _onDepartureSelected,
+        ),
+        'Transport Details': (ctx, scroll) => TransportDetailsSheet(
+          searchDetails: _searchDetails,
+          arguments: widget.arguments,
+          scrollController: scroll,
+          onDepartureTapped: _onDepartureSelected,
+        ),
+        'Departure Details': (ctx, scroll) => DepartureDetailsSheet(
+          searchDetails: _searchDetails,
+          scrollController: scroll,
+        ),
+      },
+      onSheetChanged: (sheet) {
+        if (sheet == 'Nearby Stops') _showStopMarkers(true);
+      },
+      handleSheetExpansion: _handleSheetExpansion,
+    );
+  }
+
+  void _handleBackButton() {
+    final nav = _sheetNavigatorKey.currentState;
+
+    // If we're viewing a sheet
+    if (nav != null) {
+      final currentSheet = nav.currentSheet;
+
+      if (currentSheet == 'Nearby Stops') {
+        // If we're at the root level sheet (Nearby Stops)
+        setState(() {
+          _showSheet = false;
+          _markers.clear();
+          _circles.clear();
+          _nearbyStopMarkers.clear();
+        });
+
+        return;
+      }
+
+      // If we're in a nested sheet
+      if (nav.sheetHistory.isNotEmpty) {
+        final prevSheet = nav.sheetHistory.last;
+        // Handle sheet-specific logic
+        if (prevSheet == 'Stop Details' &&
+            (currentSheet == 'Transport Details' || currentSheet == 'Departure Details')) {
+          _loadTransportPath(false); // reload without direction
+        }
+        if (prevSheet == 'Nearby Stops' && currentSheet == 'Stop Details') {
+          setState(() {
+            _polyLines.clear();
+            _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+          });
+        }
+        nav.popSheet();
+        return;
+      }
+    }
+
+    // If no sheets are active or we can't handle it with the sheet navigator
+    // Force navigation to home
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
 
   // Rendering
@@ -551,7 +589,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: BackButtonWidget(),
                   ),
                   SizedBox(width: 10),
-                  if (!widget.showTransportDetails && !widget.showRouteDetails)
+                  if (_enableSearch != null && _enableSearch == true)
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
@@ -561,11 +599,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                 ],
               ),
-              if (_hasDroppedPin && !widget.showTransportDetails && !widget.showRouteDetails)
+              if (_showSheet && _enableSearch != null && _enableSearch == true)
                 ElevatedButton(
                   onPressed: () async {
                     setState(() => _showStops = !_showStops);
-                    await showStopMarkers(_nearbyStopMarkers.isEmpty);
+                    await _showStopMarkers(_nearbyStopMarkers.isEmpty);
                   },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 14),
@@ -588,7 +626,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
             ],
           ),
-          if (_hasDroppedPin) _buildSheets(),
+          if (_showSheet) _buildSheets(),
         ],
       ),
       bottomNavigationBar: BottomNavigation(

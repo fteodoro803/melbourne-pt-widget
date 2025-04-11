@@ -147,7 +147,7 @@ class MapUtils {
   }
 
   /// Changes polyline marker visibility on zoom change
-  Set<Marker> onZoomChange(Set<Marker> markers, double zoom, PolyLineMarkers polyLineMarkers, LatLng markerPosition) {
+  Set<Marker> onZoomChange(Set<Marker> markers, double zoom, PolyLineMarkers polyLineMarkers, LatLng? markerPosition) {
 
     Set<Marker> newMarkers = {};
 
@@ -292,16 +292,20 @@ class GeoPathUtils {
 
 class TransportPathUtils {
   /// Returns set of markers with only location pin marker
-  static Set<Marker> resetMarkers(LatLng markerPosition) {
+  static Set<Marker> resetMarkers(LatLng? markerPosition) {
+
     Set<Marker> newMarkers = {};
 
-    MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
+    if (markerPosition != null) {
+      MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
 
-    newMarkers.add(Marker(
-      markerId: id,
-      position: markerPosition,
-      consumeTapEvents: true,
-    ));
+      newMarkers.add(Marker(
+        markerId: id,
+        position: markerPosition,
+        consumeTapEvents: true,
+      ));
+    }
+
     return newMarkers;
   }
 
