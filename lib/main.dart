@@ -20,6 +20,7 @@ import 'package:flutter_project/file_service.dart';
 import 'package:flutter_project/dev/test_screen.dart';
 
 import "add_screens/find_routes_screen.dart";
+import "add_screens/search_details.dart";
 import "add_screens/search_screen.dart";
 import "home_widget_service.dart";
 
@@ -81,6 +82,7 @@ class _MyAppState extends State<MyApp> {
               arguments: ModalRoute.of(context)!.settings.arguments
               as ScreenArguments,
               searchDetails: SearchDetails(),
+              enableSearch: true,
           ),
           '/selectStopScreen': (context) => SelectStopScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
@@ -261,7 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SearchScreen(arguments: ScreenArguments(_updateMainPage), searchDetails: SearchDetails.withTransport(_transportList[index]))
+                                builder: (context) => SearchScreen(arguments: ScreenArguments(_updateMainPage), searchDetails: SearchDetails.withTransport(_transportList[index]), enableSearch: false)
                             ),
                           )
                         ),

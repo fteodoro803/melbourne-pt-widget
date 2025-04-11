@@ -35,22 +35,20 @@ class MapUtils {
   double zoomThresholdSmall = 13.4;
 
   /// Helper method to calculate a position that will place our marker at the specified height ratio
-  Future<LatLng> calculateOffsetPosition(LatLng markerPosition, double heightRatio, GoogleMapController controller) async {
-    // Get the visible region to determine map dimensions
+  Future<LatLng> calculateOffsetPosition(
+      LatLng center, double verticalFraction, GoogleMapController controller) async {
+    // Get the current visible region
     LatLngBounds visibleRegion = await controller.getVisibleRegion();
 
-    // Calculate the total span of visible latitude
+    // Calculate the latitude span of the visible region
     double latSpan = visibleRegion.northeast.latitude - visibleRegion.southwest.latitude;
 
-    // Calculate offset needed to position marker at heightRatio (0.7) of screen height
-    // For 0.7 (70% from top), we need to move the center up by (0.5 - (1-0.7)) = 0.2 of the screen
-    double latOffset = latSpan * (0.5 - (1 - heightRatio));
+    // Calculate the offset needed to move the center to the desired vertical position
+    // 0.5 is the center of the screen, so we calculate relative to that
+    double latOffset = (0.5 - verticalFraction) * latSpan;
 
-    // Create new position with the same longitude but adjusted latitude
-    return LatLng(
-      markerPosition.latitude + latOffset,
-      markerPosition.longitude,
-    );
+    // Return the new center position with the calculated offset
+    return LatLng(center.latitude + latOffset, center.longitude);
   }
 
   /// Function to calculate the bounds that include all points within a given distance from _chosenPosition
@@ -209,6 +207,74 @@ class MapUtils {
     return markers;
   }
 
+  Future<void> moveCameraToFitRadiusWithVerticalOffset({
+    required GoogleMapController controller,
+    required LatLng center,
+    required double radiusInMeters,
+    double verticalOffsetRatio = 0.65,
+  }) async {
+    // Step 1: Calculate bounds around the center point for the given radius
+    LatLngBounds bounds = await calculateBoundsForMarkers(
+      radiusInMeters,
+      center,
+    );
+
+    // Step 2: Move camera to those bounds to determine the correct zoom
+    await controller.moveCamera(CameraUpdate.newLatLngBounds(bounds, 60));
+    await Future.delayed(Duration(milliseconds: 250));
+
+    // Step 3: Get the calculated zoom level after the fit
+    final zoom = await controller.getZoomLevel();
+
+    // Step 4: Offset the center vertically to apply the desired marker height position
+    final adjustedCenter = await calculateOffsetPosition(
+      center,
+      verticalOffsetRatio,
+      controller,
+    );
+
+    // Step 5: Animate camera to final position with same zoom
+    await controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: adjustedCenter,
+          zoom: zoom,
+        ),
+      ),
+    );
+  }
+
+  // Helper method to calculate bounds that include all points in the polyline
+  static LatLngBounds calculatePolylineBounds(List<LatLng> points) {
+    double minLat = 90.0, maxLat = -90.0;
+    double minLng = 180.0, maxLng = -180.0;
+
+    for (var point in points) {
+      if (point.latitude < minLat) minLat = point.latitude;
+      if (point.latitude > maxLat) maxLat = point.latitude;
+      if (point.longitude < minLng) minLng = point.longitude;
+      if (point.longitude > maxLng) maxLng = point.longitude;
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+  }
+
+  static LatLng calculatePolylineCenter(List<LatLng> points) {
+    double sumLat = 0.0, sumLng = 0.0;
+
+    for (var point in points) {
+      sumLat += point.latitude;
+      sumLng += point.longitude;
+    }
+
+    return LatLng(
+      sumLat / points.length,
+      sumLng / points.length,
+    );
+  }
 }
 
 class GeoPathUtils {

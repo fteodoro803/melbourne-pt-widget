@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/search_details.dart';
 import 'package:flutter_project/add_screens/sheets/route_details_sheet.dart';
 import 'package:flutter_project/add_screens/widgets/sheet_navigator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/services/google_service.dart';
 
 import '../ptv_info_classes/departure_info.dart';
 import '../ptv_info_classes/stop_info.dart';
@@ -29,11 +29,13 @@ import 'widgets/suggestions_search.dart';
 class SearchScreen extends StatefulWidget {
   final ScreenArguments arguments;
   final SearchDetails searchDetails;
+  final bool enableSearch;
 
   const SearchScreen({
     super.key,
     required this.arguments,
-    required this.searchDetails
+    required this.searchDetails,
+    required this.enableSearch
   });
 
   @override
@@ -47,7 +49,6 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _showSheet = false;
   bool _showStops = false;
   bool _shouldResetFilters = false;
-  bool? _enableSearch;
 
   final GlobalKey<SheetNavigatorState> _sheetNavigatorKey = GlobalKey<SheetNavigatorState>();
   final GlobalKey<NearbyStopsSheetState> _nearbyStopsSheetKey
@@ -57,7 +58,6 @@ class _SearchScreenState extends State<SearchScreen> {
   // Utility
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
-  GoogleService googleService = GoogleService();
   TransportPathUtils transportPathUtils = TransportPathUtils();
   SearchUtils searchUtils = SearchUtils();
   MapUtils mapUtils = MapUtils();
@@ -95,8 +95,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_searchDetails.route != null
-          && (_enableSearch == false || _enableSearch == null)) {
-        _enableSearch = false;
+          && widget.enableSearch == false) {
 
         await _initialiseGeoPathForRoute(true);
         await _loadTransportPath(false);
@@ -108,8 +107,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _sheetNavigatorKey.currentState?.pushSheet('Route Details');
 
       } else if (_searchDetails.transport != null
-          && (_enableSearch == false || _enableSearch == null)) {
-        _enableSearch = false;
+          && widget.enableSearch == false) {
         _searchDetails.stop = _searchDetails.transport!.stop;
         _searchDetails.route = _searchDetails.transport!.route;
 
@@ -121,13 +119,6 @@ class _SearchScreenState extends State<SearchScreen> {
         });
 
         _sheetNavigatorKey.currentState?.pushSheet('Transport Details');
-      }
-      else {
-        setState(() {
-          _enableSearch = true;
-          _searchDetails.distance = 300;
-          _searchDetails.transportType = "all";
-        });
       }
     });
   }
@@ -146,9 +137,10 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
+
   void _handleSheetExpansion(bool isExpanded) {
     setState(() {
-      widget.searchDetails.isSheetExpanded = isExpanded;
+      _searchDetails.isSheetExpanded = isExpanded;
     });
   }
 
@@ -215,6 +207,43 @@ class _SearchScreenState extends State<SearchScreen> {
         isDirectionSpecified,
         isReverseDirection
     );
+
+    if (_polyLines.isNotEmpty && _geoPath.isNotEmpty) {
+      // Calculate bounds that encompass all points in the polyline
+      LatLngBounds bounds = MapUtils.calculatePolylineBounds(_geoPath);
+
+      // First animate to bounds to make sure all points are visible
+      await mapController.animateCamera(
+        CameraUpdate.newLatLngBounds(bounds, 50), // 50px padding
+      );
+
+      // Wait for first animation to complete
+      await Future.delayed(Duration(milliseconds: 300));
+
+      // Get the current zoom level after fitting to bounds
+      final zoom = await mapController.getZoomLevel();
+
+      // Calculate the center point of the polyline
+      LatLng center = MapUtils.calculatePolylineCenter(_geoPath);
+
+      // Calculate offset to position the center point at about 45% of screen height
+      // (between your 0.3 and 0.6 target window)
+      LatLng adjustedCenter = await mapUtils.calculateOffsetPosition(
+          center,
+          0.45, // Position in the middle of your 0.3-0.6 window
+          mapController
+      );
+
+      // Animate to the new adjusted position
+      await mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: adjustedCenter,
+            zoom: zoom,
+          ),
+        ),
+      );
+    }
 
     setState(() {
     });
@@ -326,9 +355,16 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Set the map's Marker and Camera to a new marker location
   Future<void> _onLocationSelected(LatLng selectedLocation) async {
+    if (!widget.enableSearch) {
+      return;
+    }
+
+    _searchDetails = SearchDetails();
+
     _circles.clear();
     _polyLines.clear();
     _nearbyStopMarkers.clear();
+    _markers.clear();
 
     // Get the address for the dropped marker
     String address = await mapUtils.getAddressFromCoordinates(
@@ -340,22 +376,15 @@ class _SearchScreenState extends State<SearchScreen> {
     _searchDetails.stops = uniqueStops;
     _searchDetails.markerPosition = selectedLocation;
     _searchDetails.address = address;
-    _searchDetails.distance = 300;
-    _searchDetails.transportType = "all";
-    _showSheet = true;
 
+    _showSheet = true;
     _customInfoWindowController.hideInfoWindow!();
 
-    final zoom = await mapController.getZoomLevel();
-
-    mapController.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: await mapUtils.calculateOffsetPosition(
-              selectedLocation, 0.35, mapController),
-          zoom: zoom,
-        ),
-      ),
+    await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
+      controller: mapController,
+      center: _searchDetails.markerPosition!,
+      radiusInMeters: _searchDetails.distance!.toDouble(),
+      verticalOffsetRatio: 0.65,
     );
 
     setState(() {
@@ -377,40 +406,19 @@ class _SearchScreenState extends State<SearchScreen> {
     List<Stop> uniqueStops = await searchUtils.getStops(
         _searchDetails.markerPosition!, transportType, distance);
 
-    if (oldDistance != newDistance && newDistance != null) {
-      LatLngBounds bounds = await mapUtils.calculateBoundsForMarkers(
-          distance.toDouble(), _searchDetails.markerPosition!);
-
-      // First animate to the bounds to ensure all points are visible
-      mapController.moveCamera(
-        CameraUpdate.newLatLngBounds(bounds, 50),
-      );
-
-      // Then adjust the position so the marker is at 70% of height
-      await Future.delayed(Duration(milliseconds: 300)); // Wait for first animation to complete
-
-      final LatLng markerPosition = _searchDetails.markerPosition!;
-      final zoom = await mapController.getZoomLevel();
-
-      // Calculate a point that will position our marker at 70% of the map height
-      mapController.moveCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: await mapUtils.calculateOffsetPosition(
-                markerPosition, 0.3, mapController),
-            zoom: zoom,
-          ),
-        ),
-      );
-    }
-
     setState(() {
       _searchDetails.stops = uniqueStops;
       _searchDetails.distance = distance;
       _searchDetails.transportType = transportType;
       _showStopMarkers(true);
     });
-
+    if (oldDistance != newDistance && newDistance != null) {
+      await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
+        controller: mapController,
+        center: _searchDetails.markerPosition!,
+        radiusInMeters: _searchDetails.distance!.toDouble(),
+        verticalOffsetRatio: 0.65,
+      );    }
 
   }
 
@@ -468,6 +476,13 @@ class _SearchScreenState extends State<SearchScreen> {
           : _searchDetails.route != null
             ? 'Route Details'
             : 'Nearby Stops',
+      // initialSheetSizes: {
+      //   'Nearby Stops': 0.2,
+      //   'Route Details': 0.4,
+      //   'Stop Details': 0.6,
+      //   'Transport Details': 0.4,
+      //   'Departure Details': 0.4
+      // },
       sheets: {
         'Nearby Stops': (ctx, scroll) => NearbyStopsSheet(
           key: _nearbyStopsSheetKey,
@@ -519,6 +534,7 @@ class _SearchScreenState extends State<SearchScreen> {
       if (currentSheet == 'Nearby Stops') {
         // If we're at the root level sheet (Nearby Stops)
         setState(() {
+          _searchDetails = SearchDetails();
           _showSheet = false;
           _markers.clear();
           _circles.clear();
@@ -538,6 +554,8 @@ class _SearchScreenState extends State<SearchScreen> {
         }
         if (prevSheet == 'Nearby Stops' && currentSheet == 'Stop Details') {
           setState(() {
+            _searchDetails.stop = null;
+            _searchDetails.route = null;
             _polyLines.clear();
             _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
           });
@@ -549,7 +567,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // If no sheets are active or we can't handle it with the sheet navigator
     // Force navigation to home
-    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
   }
 
   // Rendering
@@ -589,7 +611,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: BackButtonWidget(),
                   ),
                   SizedBox(width: 10),
-                  if (_enableSearch != null && _enableSearch == true)
+                  if (widget.enableSearch == true)
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
@@ -599,7 +621,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                 ],
               ),
-              if (_showSheet && _enableSearch != null && _enableSearch == true)
+              if (_showSheet && widget.enableSearch == true)
                 ElevatedButton(
                   onPressed: () async {
                     setState(() => _showStops = !_showStops);

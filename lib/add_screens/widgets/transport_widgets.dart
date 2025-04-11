@@ -349,7 +349,6 @@ class DeparturesStringWidget extends StatelessWidget {
   }
 }
 
-
 class ExpandedStopWidget extends StatelessWidget {
   const ExpandedStopWidget({
     super.key,

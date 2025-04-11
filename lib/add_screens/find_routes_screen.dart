@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/search_details.dart';
 import 'package:flutter_project/add_screens/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import 'package:flutter_project/screen_arguments.dart';
@@ -337,7 +337,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SearchScreen(arguments: widget.arguments, searchDetails: SearchDetails.withRoute(route))
+                              builder: (context) => SearchScreen(arguments: widget.arguments, searchDetails: SearchDetails.withRoute(route), enableSearch: false,)
                           ),
                         );
                       },
