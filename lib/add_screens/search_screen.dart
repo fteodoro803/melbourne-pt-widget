@@ -59,7 +59,6 @@ class _SearchScreenState extends State<SearchScreen> {
   // Utility
   DevTools tools = DevTools();
   PtvService ptvService = PtvService();
-  TransportPathUtils transportPathUtils = TransportPathUtils();
   SearchUtils searchUtils = SearchUtils();
   MapUtils mapUtils = MapUtils();
 
@@ -93,11 +92,15 @@ class _SearchScreenState extends State<SearchScreen> {
     _searchDetails = widget.searchDetails;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(Duration(milliseconds: 100)); // wait for mapController to be initialized
+
       if (_searchDetails.route != null
           && widget.enableSearch == false) {
 
         await _initialiseGeoPathForRoute(true);
         await _loadTransportPath(false);
+
+        _currentZoom = await mapController.getZoomLevel();
 
         setState(() {
           _showSheet = true;
@@ -107,6 +110,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       } else if (_searchDetails.transport != null
           && widget.enableSearch == false) {
+
         _searchDetails.stop = _searchDetails.transport!.stop;
         _searchDetails.route = _searchDetails.transport!.route;
 
@@ -154,7 +158,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     transportPath?.setDirection(isDirectionSpecified);
     await transportPath?.loadTransportPath();
-    _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+    _markers = MapUtils.resetMarkers(_searchDetails.markerPosition);
     _markers = {..._markers, ...transportPath?.markers ?? {}};
 
     if (transportPath!.polyLines.isNotEmpty && _geoPath.isNotEmpty) {
@@ -177,7 +181,7 @@ class _SearchScreenState extends State<SearchScreen> {
       if (mapUtils.didZoomChange(_currentZoom, position.zoom)) {
         setState(() {
           transportPath?.onZoomChange(position.zoom);
-          _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+          _markers = MapUtils.resetMarkers(_searchDetails.markerPosition);
           _markers = {..._markers, ...transportPath?.markers ?? {}};
           _currentZoom = position.zoom;
         });
@@ -196,14 +200,14 @@ class _SearchScreenState extends State<SearchScreen> {
       if (refresh) {
         _nearbyStopMarkers = await mapUtils.generateNearbyStopMarkers(
           stops: _searchDetails.stops!,
-          getIcon: (stop) => transportPathUtils.getResizedImage(
+          getIcon: (stop) => mapUtils.getResizedImage(
               "assets/icons/PTV ${stop.routeType!.name} Logo.png", 20, 20),
           onTapStop: _handleStopTapOnMap,
         );
       }
 
       setState(() {
-        _markers = TransportPathUtils.resetMarkers(
+        _markers = MapUtils.resetMarkers(
             _searchDetails.markerPosition!);
         _markers = {..._markers, ..._nearbyStopMarkers};
         _circles.clear();
@@ -221,14 +225,14 @@ class _SearchScreenState extends State<SearchScreen> {
       setState(() {
         _customInfoWindowController.hideInfoWindow!();
         _circles.clear();
-        _markers = TransportPathUtils.resetMarkers(
+        _markers = MapUtils.resetMarkers(
             _searchDetails.markerPosition!);
       });
     }
   }
 
   void _handleStopTapOnMap(Stop stop) async {
-    final largeIcon = await transportPathUtils.getResizedImage(
+    final largeIcon = await mapUtils.getResizedImage(
         "assets/icons/PTV ${stop.routeType?.name} Logo Outlined.png", 35, 35);
 
     setState(() {
@@ -341,7 +345,7 @@ class _SearchScreenState extends State<SearchScreen> {
   /// Handles tap on a route in NearbyStopsSheet
   Future<void> _onStopSelected(Stop stop, pt_route.Route route, bool newRoute) async {
     _circles.clear();
-    _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+    _markers = MapUtils.resetMarkers(_searchDetails.markerPosition);
     List<Transport> listTransport =
       await searchUtils.splitDirection(stop, route);
 
@@ -362,7 +366,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles tap on a direction in StopDetailsSheet
   Future<void> _onTransportSelected(Transport transport) async {
-    _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition!);
+    _markers = MapUtils.resetMarkers(_searchDetails.markerPosition!);
     _searchDetails.transport = transport;
 
     _sheetNavigatorKey.currentState?.pushSheet('Transport Details');
@@ -378,7 +382,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     if (_sheetNavigatorKey.currentState?.currentSheet == 'Stop Details') {
 
-      _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+      _markers = MapUtils.resetMarkers(_searchDetails.markerPosition);
       _loadTransportPath(true);
     }
     _sheetNavigatorKey.currentState?.pushSheet('Departure Details');
@@ -475,7 +479,7 @@ class _SearchScreenState extends State<SearchScreen> {
             _searchDetails.stop = null;
             _searchDetails.route = null;
             transportPath = null;
-            _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+            _markers = MapUtils.resetMarkers(_searchDetails.markerPosition);
           });
         }
         nav.popSheet();

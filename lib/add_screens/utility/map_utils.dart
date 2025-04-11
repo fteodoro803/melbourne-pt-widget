@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'time_utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -314,6 +313,51 @@ class MapUtils {
       ),
     );
   }
+
+  Future<BitmapDescriptor> getResizedImage(String assetPath, double width, double height) async {
+    // Load the image from assets
+    final ByteData data = await rootBundle.load(assetPath);
+    final List<int> bytes = data.buffer.asUint8List();
+
+    // Decode the image
+    final ui.Image image = await decodeImageFromList(Uint8List.fromList(bytes));
+
+    // Resize the image using a canvas
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder, Rect.fromPoints(Offset(0.0, 0.0), Offset(width, height)));
+    final Paint paint = Paint();
+
+    // Scale the image on the canvas
+    canvas.drawImageRect(image, Rect.fromLTRB(0, 0, image.width.toDouble(), image.height.toDouble()), Rect.fromLTRB(0, 0, width, height), paint);
+
+    // Convert to an image
+    final ui.Image resizedImage = await pictureRecorder.endRecording().toImage(width.toInt(), height.toInt());
+
+    // Convert to byte data
+    final ByteData? byteData = await resizedImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List resizedBytes = byteData!.buffer.asUint8List();
+
+    // Return the resized BitmapDescriptor
+    return BitmapDescriptor.bytes(resizedBytes);
+  }
+
+  /// Returns set of markers with only location pin marker
+  static Set<Marker> resetMarkers(LatLng? markerPosition) {
+
+    Set<Marker> newMarkers = {};
+
+    if (markerPosition != null) {
+      MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
+
+      newMarkers.add(Marker(
+        markerId: id,
+        position: markerPosition,
+        consumeTapEvents: true,
+      ));
+    }
+
+    return newMarkers;
+  }
 }
 
 class GeoPathUtils {
@@ -391,189 +435,5 @@ class GeoPathUtils {
     LatLng lastStopLocation = stopPositions[stopPositions.length - 1];
     return calculateDistance(lastStopLocation, firstGeoPathPoint)
         < calculateDistance(lastStopLocation, lastGeoPathPoint);
-  }
-}
-
-
-class TransportPathUtils {
-  /// Returns set of markers with only location pin marker
-  static Set<Marker> resetMarkers(LatLng? markerPosition) {
-
-    Set<Marker> newMarkers = {};
-
-    if (markerPosition != null) {
-      MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
-
-      newMarkers.add(Marker(
-        markerId: id,
-        position: markerPosition,
-        consumeTapEvents: true,
-      ));
-    }
-
-    return newMarkers;
-  }
-
-  Future<PolyLines> loadRoutePolyline(String routeColour, List<LatLng> geoPath, bool isDirectionSpecified, bool isReverseDirection, {LatLng? stopPositionAlongGeoPath}) async {
-
-    geoPath = isReverseDirection ? geoPath.reversed.toList() : geoPath;
-    List<LatLng> previousRoute = [];
-    List<LatLng> futureRoute = List.from(geoPath);
-    int? closestIndex;
-
-    Polyline? previousPolyLine;
-    Polyline futurePolyLine;
-
-    if (stopPositionAlongGeoPath != null) {
-      closestIndex = geoPath.indexOf(stopPositionAlongGeoPath);
-
-      // Separate the coordinates into previous and future journey
-      previousRoute = geoPath.sublist(0, closestIndex + 1);
-      futureRoute = isDirectionSpecified ? geoPath.sublist(closestIndex) : geoPath;
-    }
-
-    if (isDirectionSpecified) {
-      // Add polyline for previous journey
-      previousPolyLine = Polyline(
-        polylineId: PolylineId('previous_route_polyline'),
-        color: Color(0xFFB6B6B6),
-        width: 6,
-        points: previousRoute,
-      );
-    }
-
-    // Add polyline for future journey
-    futurePolyLine = Polyline(
-      polylineId: PolylineId('future_route_polyline'),
-      color: ColourUtils.hexToColour(routeColour),
-      width: 9,
-      points: futureRoute,
-    );
-
-    return PolyLines(futurePolyLine, previousPolyLine);
-
-  }
-
-  Future<PolyLineMarkers> setMarkers(Set<Marker> markers, List<LatLng> stopPositions, bool isDirectionSpecified, {LatLng? stopPosition}) async {
-
-    Set<Marker> largeMarkers = {};
-    Set<Marker> smallMarkers = {};
-    Marker? stopMarker;
-    Marker firstMarker;
-    Marker lastMarker;
-
-
-    BitmapDescriptor? customMarkerIconFuture = await getResizedImage("assets/icons/Marker Filled.png", 9, 9);
-    BitmapDescriptor? customMarkerIconPrevious = await getResizedImage("assets/icons/Marker Filled.png", 7, 7);
-
-    BitmapDescriptor? customMarkerIcon = isDirectionSpecified
-        ? customMarkerIconPrevious
-        : customMarkerIconFuture;
-    BitmapDescriptor? customStopMarkerIcon = await getResizedImage("assets/icons/Marker Filled.png", 20, 20);
-
-    bool isLargeMarker = isDirectionSpecified ? false : true;
-
-    for (var stop in stopPositions) {
-      if (stop != stopPosition && (stop == stopPositions.first || stop == stopPositions.last)) {
-        continue;
-      }
-      if (stop == stopPosition) {
-        customMarkerIcon = customMarkerIconFuture;
-        isLargeMarker = true;
-        continue;
-      }
-
-      Marker currentMarker = Marker(
-        markerId: MarkerId('$stop'),
-        position: stop,
-        icon: customMarkerIcon!,
-        anchor: const Offset(0.5, 0.5),
-        consumeTapEvents: true,
-      );
-
-      if (isLargeMarker) {
-        largeMarkers.add(currentMarker);
-      } else {
-        smallMarkers.add(currentMarker);
-      }
-    }
-
-    if (stopPosition != null) {
-      stopMarker = Marker(
-        markerId: MarkerId('$stopPosition'),
-        position: stopPosition,
-        icon: customStopMarkerIcon,
-        anchor: const Offset(0.5, 0.5),
-        consumeTapEvents: true,
-      );
-    }
-
-    firstMarker = Marker(
-      markerId: MarkerId('${stopPositions.first}'),
-      position: stopPositions.first,
-      icon: customMarkerIconFuture,
-      anchor: const Offset(0.5, 0.5),
-      consumeTapEvents: true,
-    );
-
-    lastMarker = Marker(
-      markerId: MarkerId('${stopPositions.last}'),
-      position: stopPositions.last,
-      icon: customMarkerIconFuture,
-      anchor: const Offset(0.5, 0.5),
-      consumeTapEvents: true,
-    );
-
-
-    return PolyLineMarkers(largeMarkers, smallMarkers, stopMarker, firstMarker, lastMarker);
-  }
-
-  Future<GeoPathAndStops> addStopToGeoPath(List<LatLng> geoPath, LatLng chosenStopPosition) async {
-    LatLng? stopPositionAlongGeoPath = GeoPathUtils.generatePointOnGeoPath(chosenStopPosition, geoPath);
-    List<LatLng> newGeoPath = [...geoPath];
-
-    int insertionIndex = 0;
-    for (int i = 0; i < newGeoPath.length - 1; i++) {
-      LatLng pointA = newGeoPath[i];
-      LatLng pointB = newGeoPath[i + 1];
-
-      // If closestPoint is between pointA and pointB
-      if (GeoPathUtils.isBetween(stopPositionAlongGeoPath, pointA, pointB)) {
-        insertionIndex = i + 1;
-        break;
-      }
-    }
-
-    // Insert the closest point at the correct position
-    newGeoPath.insert(insertionIndex, stopPositionAlongGeoPath);
-
-    return GeoPathAndStops(newGeoPath, stopPositionAlongGeoPath);
-  }
-
-  Future<BitmapDescriptor> getResizedImage(String assetPath, double width, double height) async {
-    // Load the image from assets
-    final ByteData data = await rootBundle.load(assetPath);
-    final List<int> bytes = data.buffer.asUint8List();
-
-    // Decode the image
-    final ui.Image image = await decodeImageFromList(Uint8List.fromList(bytes));
-
-    // Resize the image using a canvas
-    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder, Rect.fromPoints(Offset(0.0, 0.0), Offset(width, height)));
-    final Paint paint = Paint();
-
-    // Scale the image on the canvas
-    canvas.drawImageRect(image, Rect.fromLTRB(0, 0, image.width.toDouble(), image.height.toDouble()), Rect.fromLTRB(0, 0, width, height), paint);
-
-    // Convert to an image
-    final ui.Image resizedImage = await pictureRecorder.endRecording().toImage(width.toInt(), height.toInt());
-
-    // Convert to byte data
-    final ByteData? byteData = await resizedImage.toByteData(format: ui.ImageByteFormat.png);
-    final Uint8List resizedBytes = byteData!.buffer.asUint8List();
-
-    // Return the resized BitmapDescriptor
-    return BitmapDescriptor.bytes(resizedBytes);
   }
 }
