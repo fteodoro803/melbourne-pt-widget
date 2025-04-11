@@ -12,7 +12,6 @@ import '../../ptv_info_classes/stop_info.dart';
 
 class GeoPathAndStops {
   final List<LatLng> geoPathWithStop;
-  // final List<LatLng> stopsAlongGeoPath;
   final LatLng? stopPositionAlongGeoPath;
 
   GeoPathAndStops(this.geoPathWithStop, this.stopPositionAlongGeoPath);
@@ -29,14 +28,32 @@ class PolyLineMarkers {
   PolyLineMarkers(this.largeMarkers, this.smallMarkers, this.stopMarker, this.firstMarker, this.lastMarker);
 }
 
+class PolyLines {
+  final Polyline futurePolyLine;
+  final Polyline? previousPolyLine;
+
+  PolyLines(this.futurePolyLine, this.previousPolyLine);
+}
+
 class MapUtils {
 
   double zoomThresholdLarge = 12.8; // Zoom level threshold to hide the marker
   double zoomThresholdSmall = 13.4;
 
+  // Calculate polyline extent to adjust padding based on polyline size
+  static double calculatePolylineExtent(List<LatLng> points) {
+    LatLngBounds bounds = calculatePolylineBounds(points);
+
+    // Calculate diagonal distance of the bounds as a rough measure of polyline size
+    double latDiff = bounds.northeast.latitude - bounds.southwest.latitude;
+    double lngDiff = bounds.northeast.longitude - bounds.southwest.longitude;
+
+    // Use the Pythagorean theorem as a rough approximation
+    return sqrt(latDiff * latDiff + lngDiff * lngDiff);
+  }
+
   /// Helper method to calculate a position that will place our marker at the specified height ratio
-  Future<LatLng> calculateOffsetPosition(
-      LatLng center, double verticalFraction, GoogleMapController controller) async {
+  Future<LatLng> calculateOffsetPosition(LatLng center, double verticalFraction, GoogleMapController controller) async {
     // Get the current visible region
     LatLngBounds visibleRegion = await controller.getVisibleRegion();
 
@@ -144,36 +161,6 @@ class MapUtils {
     return !(wasSmallHidden == hideSmall && wasLargeHidden == hideLarge);
   }
 
-  /// Changes polyline marker visibility on zoom change
-  Set<Marker> onZoomChange(Set<Marker> markers, double zoom, PolyLineMarkers polyLineMarkers, LatLng? markerPosition) {
-
-    Set<Marker> newMarkers = {};
-
-    if (zoom < zoomThresholdLarge) {
-
-      newMarkers = TransportPathUtils.resetMarkers(markerPosition);
-      if (polyLineMarkers.stopMarker != null) {
-        newMarkers.add(polyLineMarkers.stopMarker!);
-      }
-      newMarkers.add(polyLineMarkers.firstMarker);
-      newMarkers.add(polyLineMarkers.lastMarker);
-
-    } else if (zoom < zoomThresholdSmall && zoom >= zoomThresholdLarge) {
-      newMarkers = TransportPathUtils.resetMarkers(markerPosition);
-      if (polyLineMarkers.stopMarker != null) {
-        newMarkers.add(polyLineMarkers.stopMarker!);
-      }
-      newMarkers.add(polyLineMarkers.firstMarker);
-      newMarkers.add(polyLineMarkers.lastMarker);
-      newMarkers = {...newMarkers, ...polyLineMarkers.largeMarkers};
-    }
-    else {
-      // Re-add the marker when zoom is above the threshold
-      newMarkers = {...markers, ...polyLineMarkers.smallMarkers, ...polyLineMarkers.largeMarkers};
-    }
-    return newMarkers;
-  }
-
   // map_utils.dart
   Future<Marker> createNearbyStopMarker({
     required Stop stop,
@@ -273,6 +260,58 @@ class MapUtils {
     return LatLng(
       sumLat / points.length,
       sumLng / points.length,
+    );
+  }
+
+  Future<void> centerMapOnPolyLine(List<LatLng> polyLine, GoogleMapController mapController, BuildContext context) async {
+    LatLngBounds bounds = MapUtils.calculatePolylineBounds(polyLine);
+
+    // Calculate padding based on screen size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Calculate padding as percentage of screen dimensions
+    // You can adjust these percentages based on your needs
+    final horizontalPadding = screenWidth * 0.35; // 15% of screen width
+    final verticalPadding = screenHeight * 0.35;  // 15% of screen height
+
+    // Use the smaller value to ensure consistent padding
+    final padding = horizontalPadding < verticalPadding ?
+    horizontalPadding : verticalPadding;
+
+    // Apply a minimum padding to ensure there's always some space
+    final adaptivePadding = padding < 20 ? 20 : padding;
+
+    // First animate to bounds to make sure all points are visible
+    await mapController.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, adaptivePadding.toDouble()),
+    );
+
+    // Wait for first animation to complete
+    await Future.delayed(Duration(milliseconds: 300));
+
+    // Get the current zoom level after fitting to bounds
+    final zoom = await mapController.getZoomLevel();
+
+    // Calculate the center point of the polyline
+    LatLng center = MapUtils.calculatePolylineCenter(polyLine);
+
+    // Calculate offset to position the center point at about 45% of screen height
+    // (between your 0.3 and 0.6 target window)
+    LatLng adjustedCenter = await calculateOffsetPosition(
+        center,
+        0.5, // Position in the middle of your 0.3-0.6 window
+        mapController
+    );
+
+    // Animate to the new adjusted position
+    await mapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: adjustedCenter,
+          zoom: zoom,
+        ),
+      ),
     );
   }
 }
@@ -375,13 +414,15 @@ class TransportPathUtils {
     return newMarkers;
   }
 
-  Future<Set<Polyline>> loadRoutePolyline(String routeColour, List<LatLng> geoPath, bool isDirectionSpecified, bool isReverseDirection, {LatLng? stopPositionAlongGeoPath}) async {
+  Future<PolyLines> loadRoutePolyline(String routeColour, List<LatLng> geoPath, bool isDirectionSpecified, bool isReverseDirection, {LatLng? stopPositionAlongGeoPath}) async {
 
-    Set<Polyline> polyLines = {};
     geoPath = isReverseDirection ? geoPath.reversed.toList() : geoPath;
     List<LatLng> previousRoute = [];
     List<LatLng> futureRoute = List.from(geoPath);
     int? closestIndex;
+
+    Polyline? previousPolyLine;
+    Polyline futurePolyLine;
 
     if (stopPositionAlongGeoPath != null) {
       closestIndex = geoPath.indexOf(stopPositionAlongGeoPath);
@@ -393,33 +434,27 @@ class TransportPathUtils {
 
     if (isDirectionSpecified) {
       // Add polyline for previous journey
-      polyLines.add(Polyline(
+      previousPolyLine = Polyline(
         polylineId: PolylineId('previous_route_polyline'),
         color: Color(0xFFB6B6B6),
         width: 6,
         points: previousRoute,
-      ));
+      );
     }
 
     // Add polyline for future journey
-    polyLines.add(Polyline(
+    futurePolyLine = Polyline(
       polylineId: PolylineId('future_route_polyline'),
       color: ColourUtils.hexToColour(routeColour),
       width: 9,
       points: futureRoute,
-    ));
+    );
 
-    return polyLines;
+    return PolyLines(futurePolyLine, previousPolyLine);
 
   }
 
-  Future<PolyLineMarkers> setMarkers(
-      Set<Marker> markers,
-      List<LatLng> stopPositions,
-      bool isDirectionSpecified,
-      {
-        LatLng? stopPosition,
-      }) async {
+  Future<PolyLineMarkers> setMarkers(Set<Marker> markers, List<LatLng> stopPositions, bool isDirectionSpecified, {LatLng? stopPosition}) async {
 
     Set<Marker> largeMarkers = {};
     Set<Marker> smallMarkers = {};

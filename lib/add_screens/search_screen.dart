@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/search_details.dart';
 import 'package:flutter_project/add_screens/sheets/route_details_sheet.dart';
+import 'package:flutter_project/add_screens/transport_path.dart';
 import 'package:flutter_project/add_screens/widgets/sheet_navigator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:custom_info_window/custom_info_window.dart';
@@ -47,7 +48,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late SearchDetails _searchDetails;
 
   bool _showSheet = false;
-  bool _showStops = false;
+  bool _showNearbyStopMarkers = false;
   bool _shouldResetFilters = false;
 
   final GlobalKey<SheetNavigatorState> _sheetNavigatorKey = GlobalKey<SheetNavigatorState>();
@@ -64,13 +65,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Google Map
   late GoogleMapController mapController;
-  Set<Marker> _markers = {};
-  Set<Polyline> _polyLines = {};
   Set<Circle> _circles = {};
   List<LatLng> _geoPath = [];
   Set<Marker> _nearbyStopMarkers = {};
-
-  late PolyLineMarkers _polyLineMarkers;
+  Set<Marker> _markers = {};
+  TransportPath? transportPath;
 
   double _currentZoom = 15.0; // Default zoom level
 
@@ -134,9 +133,15 @@ class _SearchScreenState extends State<SearchScreen> {
     }
     if (newRoute) {
       _geoPath = await ptvService.fetchGeoPath(_searchDetails.route!);
+      transportPath = TransportPath(
+          _geoPath,
+          _searchDetails.route!.stopsAlongRoute,
+          _searchDetails.stop,
+          _searchDetails.route!.colour!,
+          _searchDetails.markerPosition
+      );
     }
   }
-
 
   void _handleSheetExpansion(bool isExpanded) {
     setState(() {
@@ -147,102 +152,15 @@ class _SearchScreenState extends State<SearchScreen> {
   /// Loads route geo path and stops on map
   Future<void> _loadTransportPath(bool isDirectionSpecified) async {
 
-    // Early exit if GeoPath is empty
-    if (_geoPath.isEmpty || _searchDetails.route!.stopsAlongRoute == null
-        || _searchDetails.route!.stopsAlongRoute!.isEmpty) {
-      return;
-    }
+    transportPath?.setDirection(isDirectionSpecified);
+    await transportPath?.loadTransportPath();
+    _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+    _markers = {..._markers, ...transportPath?.markers ?? {}};
 
-    LatLng? stopPosition;
-
-    if (_searchDetails.stop != null) {
-      stopPosition = LatLng(
-          _searchDetails.stop!.latitude!, _searchDetails.stop!.longitude!);
-    }
-
-    List<LatLng> stopPositions = [];
-    LatLng? chosenStopPositionAlongGeoPath = stopPosition;
-    List<LatLng> newGeoPath = [..._geoPath];
-
-    for (var stop in _searchDetails.route!.stopsAlongRoute!) {
-      var pos = LatLng(stop.latitude!, stop.longitude!);
-      stopPositions.add(pos);
-    }
-
-    if (stopPosition != null) {
-      GeoPathAndStops geoPathAndStop
-      = await transportPathUtils.addStopToGeoPath(_geoPath, stopPosition);
-
-      newGeoPath = geoPathAndStop.geoPathWithStop;
-      chosenStopPositionAlongGeoPath = geoPathAndStop.stopPositionAlongGeoPath!;
-    }
-
-    bool isReverseDirection = isDirectionSpecified
-        ? GeoPathUtils.reverseDirection(newGeoPath, stopPositions)
-        : false;
-
-    _polyLineMarkers = await transportPathUtils.setMarkers(
-      _markers,
-      stopPositions,
-      stopPosition: stopPosition,
-      isDirectionSpecified,
-    );
-
-    _markers = {
-      ..._markers,
-      ..._polyLineMarkers.largeMarkers,
-      ..._polyLineMarkers.smallMarkers
-    };
-    if (_polyLineMarkers.stopMarker != null) {
-      _markers.add(_polyLineMarkers.stopMarker!);
-
-    }
-    _markers.add(_polyLineMarkers.firstMarker);
-    _markers.add(_polyLineMarkers.lastMarker);
-
-    _polyLines = await transportPathUtils.loadRoutePolyline(
-        _searchDetails.route!.colour!,
-        newGeoPath,
-        stopPositionAlongGeoPath: chosenStopPositionAlongGeoPath,
-        isDirectionSpecified,
-        isReverseDirection
-    );
-
-    if (_polyLines.isNotEmpty && _geoPath.isNotEmpty) {
+    if (transportPath!.polyLines.isNotEmpty && _geoPath.isNotEmpty) {
+      List<LatLng> polyLineToShow = isDirectionSpecified ? transportPath!.futurePolyLine.points : _geoPath;
       // Calculate bounds that encompass all points in the polyline
-      LatLngBounds bounds = MapUtils.calculatePolylineBounds(_geoPath);
-
-      // First animate to bounds to make sure all points are visible
-      await mapController.animateCamera(
-        CameraUpdate.newLatLngBounds(bounds, 50), // 50px padding
-      );
-
-      // Wait for first animation to complete
-      await Future.delayed(Duration(milliseconds: 300));
-
-      // Get the current zoom level after fitting to bounds
-      final zoom = await mapController.getZoomLevel();
-
-      // Calculate the center point of the polyline
-      LatLng center = MapUtils.calculatePolylineCenter(_geoPath);
-
-      // Calculate offset to position the center point at about 45% of screen height
-      // (between your 0.3 and 0.6 target window)
-      LatLng adjustedCenter = await mapUtils.calculateOffsetPosition(
-          center,
-          0.45, // Position in the middle of your 0.3-0.6 window
-          mapController
-      );
-
-      // Animate to the new adjusted position
-      await mapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: adjustedCenter,
-            zoom: zoom,
-          ),
-        ),
-      );
+      await mapUtils.centerMapOnPolyLine(polyLineToShow, mapController, context);
     }
 
     setState(() {
@@ -258,11 +176,9 @@ class _SearchScreenState extends State<SearchScreen> {
         && _currentZoom != position.zoom) {
       if (mapUtils.didZoomChange(_currentZoom, position.zoom)) {
         setState(() {
-          _markers = mapUtils.onZoomChange(
-              _markers, position.zoom,
-              _polyLineMarkers,
-              _searchDetails.markerPosition
-          );
+          transportPath?.onZoomChange(position.zoom);
+          _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
+          _markers = {..._markers, ...transportPath?.markers ?? {}};
           _currentZoom = position.zoom;
         });
       }
@@ -274,7 +190,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Shows nearby stops on map when button is toggled by user
   Future<void> _showStopMarkers(bool refresh) async {
-    if (_showStops) {
+    if (_showNearbyStopMarkers) {
       _tappedStopId = null;
 
       if (refresh) {
@@ -360,9 +276,9 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     _searchDetails = SearchDetails();
+    transportPath = null;
 
     _circles.clear();
-    _polyLines.clear();
     _nearbyStopMarkers.clear();
     _markers.clear();
 
@@ -550,13 +466,15 @@ class _SearchScreenState extends State<SearchScreen> {
         // Handle sheet-specific logic
         if (prevSheet == 'Stop Details' &&
             (currentSheet == 'Transport Details' || currentSheet == 'Departure Details')) {
-          _loadTransportPath(false); // reload without direction
+          setState(() {
+            _loadTransportPath(false); // reload without direction
+          });
         }
         if (prevSheet == 'Nearby Stops' && currentSheet == 'Stop Details') {
           setState(() {
             _searchDetails.stop = null;
             _searchDetails.route = null;
-            _polyLines.clear();
+            transportPath = null;
             _markers = TransportPathUtils.resetMarkers(_searchDetails.markerPosition);
           });
         }
@@ -590,7 +508,7 @@ class _SearchScreenState extends State<SearchScreen> {
               onCameraMove: _onCameraMove,
               initialCameraPosition: CameraPosition(target: _initialPosition, zoom: _currentZoom),
               markers: _markers,
-              polylines: _polyLines,
+              polylines: transportPath?.polyLines ?? {},
               circles: _circles,
             ),
           ),
@@ -624,12 +542,12 @@ class _SearchScreenState extends State<SearchScreen> {
               if (_showSheet && widget.enableSearch == true)
                 ElevatedButton(
                   onPressed: () async {
-                    setState(() => _showStops = !_showStops);
+                    setState(() => _showNearbyStopMarkers = !_showNearbyStopMarkers);
                     await _showStopMarkers(_nearbyStopMarkers.isEmpty);
                   },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 14),
-                    backgroundColor: !_showStops
+                    backgroundColor: !_showNearbyStopMarkers
                         ? Theme.of(context).colorScheme.surfaceContainerHighest
                         : Theme.of(context).colorScheme.primaryContainer,
                     minimumSize: Size(40, 40),
