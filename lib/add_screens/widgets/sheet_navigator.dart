@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/widgets/screen_widgets.dart';
 
 class SheetNavigator extends StatefulWidget {
   final Map<String, Widget Function(BuildContext, ScrollController)> sheets;
@@ -119,33 +120,38 @@ class SheetNavigatorState extends State<SheetNavigator> {
             ],
           ),
           child: _isSheetFullyExpanded
-              ? Column(
-            children: [
-              const SizedBox(height: 50),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                    onPressed: () => popSheet(),
-                  ),
-                  Expanded(
-                    child: Text(
-                      _currentSheet,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 18),
+            ? Column(
+              children: [
+                const SizedBox(height: 50),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      onPressed: () => popSheet(),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.location_pin),
-                    onPressed: () => _controller.jumpTo(0.6),
-                  ),
-                ],
-              ),
-              const Divider(),
-              Expanded(child: widget.sheets[_currentSheet]!(context, scrollController)),
-            ],
-          )
-              : widget.sheets[_currentSheet]!(context, scrollController),
+                    Expanded(
+                      child: Text(
+                        _currentSheet,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.location_pin),
+                      onPressed: () => _controller.jumpTo(0.6),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Expanded(child: widget.sheets[_currentSheet]!(context, scrollController)),
+              ],
+            )
+            : Column(
+              children: [
+                HandleWidget(),
+                Expanded(child: widget.sheets[_currentSheet]!(context, scrollController))
+              ]
+          ),
         );
       },
     );

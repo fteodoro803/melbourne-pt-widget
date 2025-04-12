@@ -231,157 +231,147 @@ class NearbyStopsSheetState extends State<NearbyStopsSheet> {
       }
     });
 
-    return Column(
-      children: [
-        // Draggable Scrollable Sheet Handle
-        if (!widget.searchDetails.isSheetExpanded!)
-          ScreenWidgets.HandleWidget(),
-        // Address and toggleable transport type buttons
-        Expanded(
-          child: CustomScrollView(
-            controller: widget.scrollController,
-            physics: ClampingScrollPhysics(),
+    return CustomScrollView(
+      controller: widget.scrollController,
+      physics: ClampingScrollPhysics(),
 
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LocationWidget(textField: address, textSize: 18, scrollable: true),
+                SizedBox(height: 8),
+                Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: _transportTypeFilters.keys.map((transportType) {
+                    final isSelected = _transportTypeFilters[transportType] ?? false;
+                    return ScreenWidgets.TransportToggleButton(
+                      isSelected: isSelected,
+                      transportType: transportType,
+                      handleTransportToggle: _handleTransportToggle,
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 4),
+                Divider(),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
-                      LocationWidget(textField: address, textSize: 18, scrollable: true),
-                      SizedBox(height: 8),
-                      Row(
-                        spacing: 8,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: _transportTypeFilters.keys.map((transportType) {
-                          final isSelected = _transportTypeFilters[transportType] ?? false;
-                          return ScreenWidgets.TransportToggleButton(
-                            isSelected: isSelected,
-                            transportType: transportType,
-                            handleTransportToggle: _handleTransportToggle,
+                      ActionChip(
+                        avatar: Icon(Icons.keyboard_arrow_down_sharp),
+                        label: Text('Within $_selectedDistance$_selectedUnit'),
+                        onPressed: () async {
+                          await showModalBottomSheet(
+                            constraints: BoxConstraints(maxHeight: 500),
+                            context: context,
+                            builder: (BuildContext context) {
+                              return DistanceFilterSheet(
+                                selectedDistance: _selectedDistance,
+                                selectedUnit: _selectedUnit,
+                                onConfirmPressed: onConfirmPressed,
+                              );
+                          });
+                        },
+
+                      ),
+                      SizedBox(width: 5.0),
+                      Wrap(
+                        spacing: 5.0,
+                        children:
+                        ToggleableFilter.values.map((ToggleableFilter result) {
+                          return FilterChip(
+                              label: Text(result.name),
+                              selected: _filters.contains(result),
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _filters.add(result);
+                                  } else {
+                                    _filters.remove(result);
+                                  }
+                                });
+                              }
                           );
                         }).toList(),
-                      ),
-                      SizedBox(height: 4),
-                      Divider(),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            ActionChip(
-                              avatar: Icon(Icons.keyboard_arrow_down_sharp),
-                              label: Text('Within $_selectedDistance$_selectedUnit'),
-                              onPressed: () async {
-                                await showModalBottomSheet(
-                                  constraints: BoxConstraints(maxHeight: 500),
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return DistanceFilterSheet(
-                                      selectedDistance: _selectedDistance,
-                                      selectedUnit: _selectedUnit,
-                                      onConfirmPressed: onConfirmPressed,
-                                    );
-                                });
-                              },
-
-                            ),
-                            SizedBox(width: 5.0),
-                            Wrap(
-                              spacing: 5.0,
-                              children:
-                              ToggleableFilter.values.map((ToggleableFilter result) {
-                                return FilterChip(
-                                    label: Text(result.name),
-                                    selected: _filters.contains(result),
-                                    onSelected: (bool selected) {
-                                      setState(() {
-                                        if (selected) {
-                                          _filters.add(result);
-                                        } else {
-                                          _filters.remove(result);
-                                        }
-                                      });
-                                    }
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              // Header item
+              ],
+            ),
+          ),
+        ),
+        // Header item
 
-              SliverFillRemaining(
-                hasScrollBody: true,
-                fillOverscroll: true,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ScrollablePositionedList.builder(
-                    itemScrollController: _itemScrollController,
-                    itemPositionsListener: _itemPositionsListener,
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(0.0),
-                    itemCount: widget.searchDetails.stops!.length,
-                    itemBuilder: (context, index) {
-                      // Stop items
-                      final stopIndex = index;
-                      final stop = widget.searchDetails.stops![stopIndex];
-                      final bool? isExpanded = stop.isExpanded;
-                      final routes = stop.routes ?? [];
-                      final stopName = stop.name;
-                      final distance = stop.distance;
-                      final routeType = stop.routeType?.name ?? 'unknown';
+        SliverFillRemaining(
+          hasScrollBody: true,
+          fillOverscroll: true,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ScrollablePositionedList.builder(
+              itemScrollController: _itemScrollController,
+              itemPositionsListener: _itemPositionsListener,
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(0.0),
+              itemCount: widget.searchDetails.stops!.length,
+              itemBuilder: (context, index) {
+                // Stop items
+                final stopIndex = index;
+                final stop = widget.searchDetails.stops![stopIndex];
+                final bool? isExpanded = stop.isExpanded;
+                final routes = stop.routes ?? [];
+                final stopName = stop.name;
+                final distance = stop.distance;
+                final routeType = stop.routeType?.name ?? 'unknown';
 
-                      return Card(
-                        color: isExpanded! ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
-                        margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),
-                        child: ListTile(
-                          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                return Card(
+                  color: isExpanded! ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
+                  margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4, top: 8, left: 0, right: 0),
+                  child: ListTile(
+                    visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                    dense: true,
+                    contentPadding: EdgeInsets.all(0),
+                    // Stop and route details
+                    title: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
                           dense: true,
-                          contentPadding: EdgeInsets.all(0),
-                          // Stop and route details
-                          title: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                dense: true,
-                                visualDensity: VisualDensity(horizontal: -3, vertical: 0),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
-                                title: !isExpanded
-                                    ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
-                                    : ExpandedStopWidget(stopName: stopName, distance: distance),
-                                leading: Image.asset(
-                                  "assets/icons/PTV $routeType Logo.png",
-                                  width: 40,
-                                  height: 40,
-                                ),
-                                trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-                                onTap: () {
-                                  setState(() {
-                                    _savedScrollIndex = stopIndex;
-                                    widget.searchDetails.stops![stopIndex].isExpanded = !widget.searchDetails.stops![stopIndex].isExpanded!;
-                                  });
-                                  _notifyStateChanged();
-                                }
-                              ),
-
-                              if (isExpanded)...[
-                                Divider(height: 0,),
-                                ExpandedStopRoutesWidget(routes: routes, routeType: routeType, onStopTapped: widget.onStopTapped, stop: stop),
-                              ],
-                            ],
+                          visualDensity: VisualDensity(horizontal: -3, vertical: 0),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                          title: !isExpanded
+                              ? UnexpandedStopWidget(stopName: stopName, routes: routes, routeType: routeType)
+                              : ExpandedStopWidget(stopName: stopName, distance: distance),
+                          leading: Image.asset(
+                            "assets/icons/PTV $routeType Logo.png",
+                            width: 40,
+                            height: 40,
                           ),
+                          trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                          onTap: () {
+                            setState(() {
+                              _savedScrollIndex = stopIndex;
+                              widget.searchDetails.stops![stopIndex].isExpanded = !widget.searchDetails.stops![stopIndex].isExpanded!;
+                            });
+                            _notifyStateChanged();
+                          }
                         ),
-                      );
-                    },
+
+                        if (isExpanded)...[
+                          Divider(height: 0,),
+                          ExpandedStopRoutesWidget(routes: routes, routeType: routeType, onStopTapped: widget.onStopTapped, stop: stop),
+                        ],
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
         ),
       ],

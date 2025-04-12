@@ -6,7 +6,6 @@ import '../../transport.dart';
 import '../search_details.dart';
 import '../widgets/departure_card.dart';
 import '../widgets/save_transport_sheet.dart';
-import '../widgets/screen_widgets.dart';
 import '../widgets/transport_widgets.dart';
 
 class StopDetailsSheet extends StatefulWidget {
@@ -89,138 +88,127 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
       return CircularProgressIndicator();
     }
 
-    return Column(
+    return ListView(
+      padding: EdgeInsets.zero,
+      controller: widget.scrollController,
+      physics: ClampingScrollPhysics(),
       children: [
-        // Draggable Scrollable Sheet Handle
-        if (!widget.searchDetails.isSheetExpanded!)
-          HandleWidget(),
-
-        // Stop and route details
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            controller: widget.scrollController,
-            physics: ClampingScrollPhysics(),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              LocationWidget(textField: widget.searchDetails.stop!.name, textSize: 18, scrollable: true),
+
+              // Stop location
+              ListTile(
+                contentPadding: EdgeInsets.all(0),
+                visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                dense: true,
+                title: Row(
                   children: [
-                    LocationWidget(textField: widget.searchDetails.stop!.name, textSize: 18, scrollable: true),
+                    SizedBox(width: 8),
+                    Container(
+                      width: 4,
 
-                    // Stop location
-                    ListTile(
-                      contentPadding: EdgeInsets.all(0),
-                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                      dense: true,
-                      title: Row(
-                        children: [
-                          SizedBox(width: 8),
-                          Container(
-                            width: 4,
-
-                            height: 42,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(2),
-                              color: Color(0xFF717171),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          RouteWidget(route: widget.searchDetails.route!, scrollable: false,),
-                        ],
-                      ),
-                      trailing: GestureDetector(
-                        child: FavoriteButton(isSaved: _savedList.contains(true)),
-                        onTap: () async {
-                          await showModalBottomSheet(
-                            constraints: BoxConstraints(maxHeight: 320),
-                            context: context,
-                            builder: (BuildContext context) {
-                              return SaveTransportSheet(
-                                searchDetails: widget.searchDetails,
-                                savedList: _savedList,
-                                onConfirmPressed: _onConfirmPressed,
-                              );
-                            }
-                          );
-                        },
+                      height: 42,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        color: Color(0xFF717171),
                       ),
                     ),
-                    Divider(),
-
-                    // Departures for each direction
-                    Column(
-                      children: transportsList.map((transport) {
-                        var departures = transport.departures;
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                                dense: true,
-                                contentPadding: EdgeInsets.all(0),
-                                title: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Text(
-                                    "Towards ${transport.direction?.name}",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                                trailing: SizedBox(
-                                  width: 100,
-                                  child: GestureDetector(
-                                    child: Row(
-                                      children: [
-                                        SizedBox(width: 18),
-                                        Text("See all", style: TextStyle(fontSize: 16,)),
-                                        Icon(Icons.keyboard_arrow_right),
-                                      ],
-                                    ),
-                                    onTap: () {
-                                      setState(() {
-                                        widget.onTransportTapped(transport);
-                                      });
-                                    }
-                                  ),
-                                ),
-                              ),
-
-                              // Display departures if they exist
-                              if (departures != null && departures.isNotEmpty)
-
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.all(0.0),
-                                  itemCount: departures.length > 2 ? 2 : departures.length,
-                                  itemBuilder: (context, index) {
-                                    final departure = departures[index];
-                                    return DepartureCard(transport: transport, departure: departure, onDepartureTapped: widget.onDepartureTapped);
-                                  },
-                                ),
-
-                              // Display a message if no departures
-                              if (departures == null || departures.isEmpty)
-                                Card(
-                                  margin: const EdgeInsets.symmetric(vertical: 2),
-                                  elevation: 1,
-                                  child: Text("No departures to show."),
-                                ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                    SizedBox(width: 10),
+                    RouteWidget(route: widget.searchDetails.route!, scrollable: false,),
                   ],
                 ),
+                trailing: GestureDetector(
+                  child: FavoriteButton(isSaved: _savedList.contains(true)),
+                  onTap: () async {
+                    await showModalBottomSheet(
+                      constraints: BoxConstraints(maxHeight: 320),
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SaveTransportSheet(
+                          searchDetails: widget.searchDetails,
+                          savedList: _savedList,
+                          onConfirmPressed: _onConfirmPressed,
+                        );
+                      }
+                    );
+                  },
+                ),
+              ),
+              Divider(),
+
+              // Departures for each direction
+              Column(
+                children: transportsList.map((transport) {
+                  var departures = transport.departures;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                          dense: true,
+                          contentPadding: EdgeInsets.all(0),
+                          title: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Text(
+                              "Towards ${transport.direction?.name}",
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          trailing: SizedBox(
+                            width: 100,
+                            child: GestureDetector(
+                              child: Row(
+                                children: [
+                                  SizedBox(width: 18),
+                                  Text("See all", style: TextStyle(fontSize: 16,)),
+                                  Icon(Icons.keyboard_arrow_right),
+                                ],
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  widget.onTransportTapped(transport);
+                                });
+                              }
+                            ),
+                          ),
+                        ),
+
+                        // Display departures if they exist
+                        if (departures != null && departures.isNotEmpty)
+
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(0.0),
+                            itemCount: departures.length > 2 ? 2 : departures.length,
+                            itemBuilder: (context, index) {
+                              final departure = departures[index];
+                              return DepartureCard(transport: transport, departure: departure, onDepartureTapped: widget.onDepartureTapped);
+                            },
+                          ),
+
+                        // Display a message if no departures
+                        if (departures == null || departures.isEmpty)
+                          Card(
+                            margin: const EdgeInsets.symmetric(vertical: 2),
+                            elevation: 1,
+                            child: Text("No departures to show."),
+                          ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
             ],
           ),

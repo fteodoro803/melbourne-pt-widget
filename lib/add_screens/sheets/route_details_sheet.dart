@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/widgets/screen_widgets.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 
 import '../../ptv_info_classes/route_direction_info.dart';
@@ -72,82 +71,75 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Column(
-      children: [
-        HandleWidget(),
-        Expanded(
-            child: ListView(
-                padding: EdgeInsets.all(16),
-                controller: widget.scrollController,
-                physics: ClampingScrollPhysics(),
-                children: [
-                  RouteWidget(route: route!, scrollable: false,),
-                  SizedBox(height: 4),
-                  ListTile(
-                      title: Text("To: $_direction", style: TextStyle(fontSize: 18)),
-                      trailing: GestureDetector(
-                          child: Icon(Icons.compare_arrows),
-                          onTap: () {
-                            _changeDirection();
-                          }
-                      )
-                  ),
-                  // Text(_route.name, style: TextStyle(fontSize: 18)),
-                  Divider(),
+    return ListView(
+        padding: EdgeInsets.all(16),
+        controller: widget.scrollController,
+        physics: ClampingScrollPhysics(),
+        children: [
+          RouteWidget(route: route!, scrollable: false,),
+          SizedBox(height: 4),
+          ListTile(
+              title: Text("To: $_direction", style: TextStyle(fontSize: 18)),
+              trailing: GestureDetector(
+                  child: Icon(Icons.compare_arrows),
+                  onTap: () {
+                    _changeDirection();
+                  }
+              )
+          ),
+          // Text(_route.name, style: TextStyle(fontSize: 18)),
+          Divider(),
 
-                  Card(
-                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                    margin: EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
-                      children: _suburbStops!.map((suburb) {
-                        return Column(
-                            children: [
-                              Container(
-                                color: Theme.of(context).colorScheme.secondaryContainer, // You can use any color here
-                                child: ListTile(
-                                    dense: true,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                                    title: Text(
-                                      suburb.suburb,
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500
-                                      ),
-                                    ),
-                                    trailing: GestureDetector(
-                                      child: !suburb.isExpanded
-                                          ? Icon(Icons.keyboard_arrow_down_sharp, size: 30)
-                                          : Icon(Icons.keyboard_arrow_up_sharp, size: 30),
-                                      onTap: () {
-                                        setState(() {
-                                          suburb.isExpanded = !suburb.isExpanded;
-                                        });
-                                      },
-                                    )
-                                ),
+          Card(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            margin: EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: _suburbStops!.map((suburb) {
+                return Column(
+                    children: [
+                      Container(
+                        color: Theme.of(context).colorScheme.secondaryContainer, // You can use any color here
+                        child: ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                            title: Text(
+                              suburb.suburb,
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500
                               ),
-                              if (suburb.isExpanded)
-                                ...suburb.stops.map((stop) {
-                                  return ListTile(
-                                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                                      dense: true,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),
-                                      title: Text(stop.name, style: TextStyle(fontSize: 15)),
-                                      trailing: Icon(Icons.keyboard_arrow_right),
-                                      onTap: () async {
-                                        await widget.onStopTapped(stop, widget.searchDetails.route!, false);
-                                      }
-                                  );
-                                }),
-                            ]
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ]
-            )
-        ),
-      ],
+                            ),
+                            trailing: GestureDetector(
+                              child: !suburb.isExpanded
+                                  ? Icon(Icons.keyboard_arrow_down_sharp, size: 30)
+                                  : Icon(Icons.keyboard_arrow_up_sharp, size: 30),
+                              onTap: () {
+                                setState(() {
+                                  suburb.isExpanded = !suburb.isExpanded;
+                                });
+                              },
+                            )
+                        ),
+                      ),
+                      if (suburb.isExpanded)
+                        ...suburb.stops.map((stop) {
+                          return ListTile(
+                              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                              dense: true,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),
+                              title: Text(stop.name, style: TextStyle(fontSize: 15)),
+                              trailing: Icon(Icons.keyboard_arrow_right),
+                              onTap: () async {
+                                await widget.onStopTapped(stop, widget.searchDetails.route!, false);
+                              }
+                          );
+                        }),
+                    ]
+                );
+              }).toList(),
+            ),
+          ),
+        ]
     );
   }
 }
