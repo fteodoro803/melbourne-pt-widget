@@ -110,12 +110,14 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                                     title: Text(
                                       suburb.suburb,
                                       style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.w500
                                       ),
                                     ),
                                     trailing: GestureDetector(
-                                      child: Icon(Icons.keyboard_arrow_down_sharp, size: 30),
+                                      child: !suburb.isExpanded
+                                          ? Icon(Icons.keyboard_arrow_down_sharp, size: 30)
+                                          : Icon(Icons.keyboard_arrow_up_sharp, size: 30),
                                       onTap: () {
                                         setState(() {
                                           suburb.isExpanded = !suburb.isExpanded;

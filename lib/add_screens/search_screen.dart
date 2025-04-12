@@ -93,8 +93,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(Duration(milliseconds: 100)); // wait for mapController to be initialized
+      if (_sheetNavigatorKey.currentState?.currentSheet == 'Nearby Stops' &&
+          widget.enableSearch && !_showSheet) {
+        setState(() {
+          _showSheet = true;
+        });
+      }
 
-      if (_searchDetails.route != null
+      else if (_searchDetails.route != null
           && widget.enableSearch == false) {
 
         await _initialiseGeoPathForRoute(true);
@@ -164,7 +170,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (transportPath!.polyLines.isNotEmpty && _geoPath.isNotEmpty) {
       List<LatLng> polyLineToShow = isDirectionSpecified ? transportPath!.futurePolyLine.points : _geoPath;
       // Calculate bounds that encompass all points in the polyline
-      await mapUtils.centerMapOnPolyLine(polyLineToShow, mapController, context);
+      await mapUtils.centerMapOnPolyLine(polyLineToShow, mapController, context, widget.enableSearch);
     }
 
     setState(() {
@@ -315,6 +321,9 @@ class _SearchScreenState extends State<SearchScreen> {
     _sheetNavigatorKey.currentState?.pushSheet('Nearby Stops');
 
     _showStopMarkers(true);
+    print("Debug: _showSheet=$_showSheet, enableSearch=${widget.enableSearch}, currentSheet=${_sheetNavigatorKey.currentState?.currentSheet}");
+    print("Debug: currentState=${_sheetNavigatorKey.currentState}");
+
   }
 
   /// Handles changes in transport type and distance filters on NearbyStopsSheet
@@ -438,7 +447,11 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       },
       onSheetChanged: (sheet) {
-        if (sheet == 'Nearby Stops') _showStopMarkers(true);
+
+        if (sheet == 'Nearby Stops') {
+
+          _showStopMarkers(true);
+        }
       },
       handleSheetExpansion: _handleSheetExpansion,
     );
@@ -543,7 +556,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                 ],
               ),
-              if (_showSheet && widget.enableSearch == true)
+              if (_searchDetails.stops!.isNotEmpty && _searchDetails.stop == null)
                 ElevatedButton(
                   onPressed: () async {
                     setState(() => _showNearbyStopMarkers = !_showNearbyStopMarkers);

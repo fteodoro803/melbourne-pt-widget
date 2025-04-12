@@ -262,7 +262,7 @@ class MapUtils {
     );
   }
 
-  Future<void> centerMapOnPolyLine(List<LatLng> polyLine, GoogleMapController mapController, BuildContext context) async {
+  Future<void> centerMapOnPolyLine(List<LatLng> polyLine, GoogleMapController mapController, BuildContext context, bool enableSearch) async {
     LatLngBounds bounds = MapUtils.calculatePolylineBounds(polyLine);
 
     // Calculate padding based on screen size
@@ -271,8 +271,8 @@ class MapUtils {
 
     // Calculate padding as percentage of screen dimensions
     // You can adjust these percentages based on your needs
-    final horizontalPadding = screenWidth * 0.35; // 15% of screen width
-    final verticalPadding = screenHeight * 0.35;  // 15% of screen height
+    final horizontalPadding = enableSearch ? screenWidth * 0.35 : screenWidth * 0.25; // 15% of screen width
+    final verticalPadding = enableSearch ? screenHeight * 0.35 : screenHeight * 0.25;  // 15% of screen height
 
     // Use the smaller value to ensure consistent padding
     final padding = horizontalPadding < verticalPadding ?
