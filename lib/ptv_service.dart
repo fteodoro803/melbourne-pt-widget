@@ -1,6 +1,7 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/database/helpers/directionHelpers.dart';
 import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
@@ -113,6 +114,9 @@ class PtvService {
     for (var direction in jsonResponse!["directions"]) {
       RouteDirection newDirection = RouteDirection.fromApi(direction);
       directionList.add(newDirection);
+
+      // Adding to database
+      await Get.find<db.AppDatabase>().addDirection(newDirection.id, newDirection.name, newDirection.description);
     }
 
     return directionList;
