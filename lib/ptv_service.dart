@@ -324,7 +324,8 @@ class PtvService {
   }
 
 // Stop Functions
-  /// Fetch Stops, and links it to its Route, and saves to database
+  /// Fetch Stops near a Location and saves them to the database.
+  /// This function also creates a link between the stop and route it's on.
   Future<List<Stop>> fetchStopsLocation(String location, {int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
     List<Future> futures = [];    // holds all Futures for database async operations
@@ -356,7 +357,6 @@ class PtvService {
 
       // Adds route-stop relationship to database
       for (var route in stop["routes"]) {
-        // todo: add stop-routeType relationship to database
         int currRouteTypeId = route["route_type"];
         futures.add(Get.find<db.AppDatabase>().addStopRouteType(stopId, currRouteTypeId));
 
@@ -375,7 +375,8 @@ class PtvService {
     return stopList;
   }
 
-  // Fetch Stops along a Route
+  /// Fetch Stops along a Route and saves them to the database.
+  /// Also saves the link between the route and its stops.
   Future<List<Stop>> fetchStopsRoute(Route route, {RouteDirection? direction}) async {
     List<Stop> stopList = [];
 
@@ -388,12 +389,19 @@ class PtvService {
           geoPath: true);
     }
     else {
-      data = await PtvApiService().stopsAlongRoute(
-          route.id.toString(), route.type.id.toString(), geoPath: true);
-    }
-    Map<String, dynamic>? jsonResponse = data.response;
+      // Auto-select a direction to get stop sequence data
+      // Stop sequence is only available from the api if a direction is given, but the direction doesn't seem to make a difference
+      List<RouteDirection> directions = await fetchDirections(route.id);
 
-    // print(" (ptv_service.dart -> fetchStopsAlongDirection) -- fetched stops along direction:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
+      if (directions.isNotEmpty) {
+        data = await PtvApiService().stopsAlongRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString(), geoPath: true);
+      }
+      else {
+        data = await PtvApiService().stopsAlongRoute(route.id.toString(), route.type.id.toString(), geoPath: true);
+      }
+    }
+
+    Map<String, dynamic>? jsonResponse = data.response;
 
     // Empty JSON Response
     if (jsonResponse == null) {
@@ -408,11 +416,30 @@ class PtvService {
       String name = stop["stop_name"];
       double latitude = stop["stop_latitude"];
       double longitude = stop["stop_longitude"];
+      int sequence = stop["stop_sequence"];
 
-      Stop newStop = Stop(
-          id: id, name: name, latitude: latitude, longitude: longitude);
+      // Stop newStop = Stop(
+      //     id: id, name: name, latitude: latitude, longitude: longitude);
+      Stop newStop = Stop.withSequence(id: id, name: name, latitude: latitude, longitude: longitude, sequence: sequence);
       stopList.add(newStop);
+
+      // Add to database
+      Get.find<db.AppDatabase>().addStop(id, name, latitude, longitude, sequence: sequence);
+      Get.find<db.AppDatabase>().addRouteStop(route.id, id);
+
     }
+
+    // todo: convert this entire function into the following:
+    // 1. make api call, if data doesn't exist in database
+    // 2. convert api response to domain models, via factory constructor
+    // 3. convert domain model to companions
+    // 4. use helper for single/batch inserts
+
+    // // Convert domain models to companion
+    // final stopCompanions = stopList.map((stop) => stop.toCompanion()).toList();
+
+    // // Use helper to batch insert
+    // await Get.find<db.AppDatabase>().batchInsertStops(stopCompanions: stopCompanions, routeId: route.id);
 
     return stopList;
   }
