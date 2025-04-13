@@ -104,20 +104,12 @@ class PtvService {
     // Early Exit
     if (data.response == null) {
       print("( ptv_service.dart -> fetchDirections ) -- Null response");
-      return directionList;
+      return [];
     }
 
     // Populating Stops List
     for (var direction in jsonResponse!["directions"]) {
-      // if (direction["route_id"] != widget.userSelections.stop?.route.id) {continue;}
-
-      int id = direction["direction_id"];
-      String name = direction["direction_name"];
-      String description = direction["route_direction_description"];
-
-      RouteDirection newDirection =
-      RouteDirection(id: id, name: name, description: description);
-
+      RouteDirection newDirection = RouteDirection.fromApi(direction);
       directionList.add(newDirection);
     }
 
