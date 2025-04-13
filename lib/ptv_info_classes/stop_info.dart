@@ -52,7 +52,7 @@ class Stop {
   }
 
   /// Converts Stop to StopsTableCompanion
-  db.StopsTableCompanion toStopsTableCompanion() {
+  db.StopsTableCompanion toCompanion() {
     return db.StopsTableCompanion(
       id: drift.Value(id),
       name: drift.Value(name),
