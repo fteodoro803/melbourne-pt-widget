@@ -38,24 +38,24 @@ extension RouteHelpers on AppDatabase {
   }
 
   /// Gets routes according to name.
-  Future<List<Route>> getRoutes({String? search, int? routeType}) async {
+  Future<List<RoutesTableData>> getRoutes({String? search, int? routeType}) async {
     AppDatabase db = Get.find<AppDatabase>();
 
-    drift.SimpleSelectStatement<$RoutesTable, Route> query;
+    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
     if (search != null && search.isNotEmpty && routeType != null) {
-      query = db.select(db.routes)
+      query = db.select(db.routesTable)
       ..where((tbl) => tbl.name.contains(search) & tbl.routeTypeId.equals(routeType));
     }
     else if (routeType != null) {
-      query = db.select(db.routes)
+      query = db.select(db.routesTable)
         ..where((tbl) => tbl.routeTypeId.equals(routeType));
     }
     else if (search != null && search.isNotEmpty) {
-      query = db.select(db.routes)
+      query = db.select(db.routesTable)
         ..where((tbl) => tbl.name.contains(search));
     }
     else {
-      query = db.select(db.routes);
+      query = db.select(db.routesTable);
     }
 
     final result = await query.get();

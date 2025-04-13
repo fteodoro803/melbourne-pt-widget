@@ -430,7 +430,7 @@ class PtvService {
       stopList.add(newStop);
 
       // Add to database
-      Get.find<db.AppDatabase>().addStop(id, name, latitude, longitude, sequence: sequence);
+      Get.find<db.AppDatabase>().addStop(id, name, latitude, longitude, sequence: stopSequence);
       Get.find<db.AppDatabase>().addRouteStop(route.id, id);
 
     }

@@ -15,7 +15,7 @@ class Stop {
   RouteType? routeType;      // todo, turn this to a list
   int? number;
   bool? isExpanded = false;
-  int? stopSequence;
+  int? stopSequence;        // todo: rename this to sequence
 
   // todo: maybe use the Location class; im not sure if these should be here
   double? latitude;     // todo: make these not nullable
@@ -24,7 +24,7 @@ class Stop {
   String? suburb;
 
   Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence});   // todo: probably make these constructors more distinct
-  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.sequence});
+  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.stopSequence});
 
   @override
   String toString() {
@@ -48,7 +48,7 @@ class Stop {
         name: dbStop.name,
         latitude: dbStop.latitude,
         longitude: dbStop.longitude,
-        sequence: dbStop.sequence,
+        stopSequence: dbStop.sequence,
     );
   }
 
@@ -59,7 +59,7 @@ class Stop {
       name: drift.Value(name),
       latitude: latitude != null ? drift.Value(latitude!) : drift.Value(0),
       longitude: longitude != null ? drift.Value(longitude!) : drift.Value(0),
-      sequence: drift.Value(sequence),
+      sequence: drift.Value(stopSequence),
       lastUpdated: drift.Value(DateTime.now()),
     );
   }

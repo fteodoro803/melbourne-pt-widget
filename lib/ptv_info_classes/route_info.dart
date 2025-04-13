@@ -121,7 +121,7 @@ class Route {
   Map<String, dynamic> toJson() => _$RouteToJson(this);
 
   /// Factory constructor to create a Route from a database RoutesData object.
-  factory Route.fromDb(db.Route dbRoute) {
+  factory Route.fromDb(db.RoutesTableData dbRoute) {
     return Route(
       id: dbRoute.id,
       name: dbRoute.name,

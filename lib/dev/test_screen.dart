@@ -16,11 +16,20 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
+  final TextEditingController routeQuery = TextEditingController();
+  final TextEditingController routeTypeIdController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _initialisePTVData();
+  }
+
+  @override
+  void dispose() {
+    routeQuery.dispose();
+    routeTypeIdController.dispose();
+    super.dispose();
   }
 
   Future<void> _initialisePTVData() async {
@@ -46,6 +55,12 @@ class _TestScreenState extends State<TestScreen> {
     print(dataStopsRoute.toString());
   }
 
+  Future<void> searchRoutes(String? query, int? routeType) async {
+    var database = Get.find<db.AppDatabase>();
+    var routeList = await ptvService.searchRoutes(query: query, routeType: routeType != null ? RouteType.fromId(routeType) : null);
+    print(routeList);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +73,20 @@ class _TestScreenState extends State<TestScreen> {
           ElevatedButton(onPressed: () {
             getStopsRoute();
           }, child: Text("getStopsRoute")),
+          Divider(),
+          TextField(
+            controller: routeQuery,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: "Route Query"),
+          ),
+          TextField(
+            controller: routeTypeIdController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: "Route Type ID"),
+          ),
+          ElevatedButton(onPressed: () {
+            searchRoutes(routeQuery.text, int.tryParse(routeTypeIdController.text));
+          }, child: Text("Search Route")),
         ],
       ),
     );
