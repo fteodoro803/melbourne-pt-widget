@@ -31,6 +31,7 @@ class StopRouteLists {
 class PtvService {
 
 // Departure Functions
+  // todo: use fromApi constructor
   Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
     List<Departure> departures = [];
 
@@ -94,6 +95,7 @@ class PtvService {
   }
 
 // Direction Functions
+  // todo: add to database
   Future<List<RouteDirection>> fetchDirections(int routeId) async {
     List<RouteDirection> directionList = [];
 
@@ -147,6 +149,7 @@ class PtvService {
   }
 
 // Pattern Functions
+  // todo: use fromApi constructor
   Future<List<Departure>> fetchPattern(Transport transport, Departure departure) async {
     List<Departure> departures = [];
 
@@ -236,23 +239,11 @@ class PtvService {
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
     for (var route in jsonResponse["routes"]) {
-      int id = route["route_id"];
-      String name = route["route_name"];
-      String number = route["route_number"];
-      RouteType type = RouteType.fromId(route["route_type"]);
-      String gtfsId = route["route_gtfs_id"];
-      String status = route["route_service_status"]["description"];
-
-      Route newRoute = Route(id: id,
-          name: name,
-          number: number,
-          type: type,
-          gtfsId: gtfsId,
-          status: status);
+      Route newRoute = Route.fromApi(route);
       routeList.add(newRoute);
 
       // Add to Database
-      await Get.find<db.AppDatabase>().addRoute(id, name, number, type.id, gtfsId, status);
+      await Get.find<db.AppDatabase>().addRoute(newRoute.id, newRoute.name, newRoute.number, newRoute.type.id, newRoute.gtfsId, newRoute.status);
     }
 
     return routeList;
