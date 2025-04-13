@@ -13,10 +13,10 @@ enum RouteType {
   bus(2, "bus"),
 
   @JsonValue(3)
-  vLine(3, "vLine");
+  vLine(3, "vLine"),
 
-  // @JsonValue(4)
-  // nightBus(4, "night bus");      // reenable nightbus later, or merge with bus
+  @JsonValue(4)
+  nightBus(4, "nightBus");      // todo: re-enable night bus later, or merge with bus
 
   final int id;
   final String name;

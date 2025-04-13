@@ -123,6 +123,7 @@ class PtvService {
   }
 
 // GeoPath Functions
+  // todo: add to database
   Future<List<LatLng>> fetchGeoPath(Route route) async {
     List<LatLng> pathList = [];
 
@@ -154,6 +155,7 @@ class PtvService {
 
 // Pattern Functions
   // todo: use fromApi constructor
+  // todo: add to database
   Future<List<Departure>> fetchPattern(Transport transport, Departure departure) async {
     List<Departure> departures = [];
 
@@ -236,12 +238,11 @@ class PtvService {
 
     // Empty JSON Response
     if (jsonResponse == null) {
-      print(
-          "(ptv_service.dart -> fetchRoutes) -- Null data response");
-      return routeList;
+      print("(ptv_service.dart -> fetchRoutes) -- Null data response");
+      return [];
     }
 
-    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
+    // Creates new routes, and adds them to return list and database
     for (var route in jsonResponse["routes"]) {
       Route newRoute = Route.fromApi(route);
       routeList.add(newRoute);
@@ -279,20 +280,20 @@ class PtvService {
     ApiData data = await PtvApiService().routeTypes();
     Map<String, dynamic>? jsonResponse = data.response;
 
-    // Early Exit
+    // Early exit: Empty response
     if (data.response == null) {
-      print("( ptv_service.dart -> fetchRouteTypes ) -- null data response");
-      return routeTypes;
+      print("( ptv_service.dart -> fetchRouteTypes ) -- Null response");
+      return [];
     }
 
-    // Populating RouteTypes List
+    // Populating RouteTypes list
     for (var entry in jsonResponse!["route_types"]) {
       int id = entry["route_type"];
-      String name = entry["route_type_name"];
-      routeTypes.add(name);
+      RouteType newRouteType = RouteType.fromId(id);
+      routeTypes.add(newRouteType.name);
 
       // Add to database
-      Get.find<db.AppDatabase>().addRouteType(id, name);
+      Get.find<db.AppDatabase>().addRouteType(newRouteType.id, newRouteType.name);
     }
 
     return routeTypes;
