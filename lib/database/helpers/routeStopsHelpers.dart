@@ -60,8 +60,6 @@ extension RouteStopHelpers on AppDatabase {
       return row.readTable(stopsTable);
     }).toList();
 
-    print(results);
-
     return results;
   }
 
