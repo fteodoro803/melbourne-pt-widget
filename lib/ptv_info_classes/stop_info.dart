@@ -1,6 +1,8 @@
 import 'package:flutter_project/ptv_info_classes/route_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter_project/database/database.dart' as db;
+import 'package:drift/drift.dart' as drift;
 
 part 'stop_info.g.dart';
 
@@ -16,12 +18,13 @@ class Stop {
   int? stopSequence;
 
   // todo: maybe use the Location class; im not sure if these should be here
-  double? latitude;
+  double? latitude;     // todo: make these not nullable
   double? longitude;
-  double? distance;
+  double? distance;     // todo: change this to a getDistance function
   String? suburb;
 
-  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence});
+  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence});   // todo: probably make these constructors more distinct
+  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.sequence});
 
   @override
   String toString() {
@@ -35,6 +38,30 @@ class Stop {
         "\tRouteType: $routeType\n"
         "\tStopSequence: $stopSequence\n"
         "\tSuburb: $suburb\n";
+  }
+
+  // Methods for Database
+  /// Factory constructor from database
+  factory Stop.fromDb(db.StopsTableData dbStop) {
+    return Stop.withSequence(
+        id: dbStop.id,
+        name: dbStop.name,
+        latitude: dbStop.latitude,
+        longitude: dbStop.longitude,
+        sequence: dbStop.sequence,
+    );
+  }
+
+  /// Converts Stop to StopsTableCompanion
+  db.StopsTableCompanion toCompanion() {
+    return db.StopsTableCompanion(
+      id: drift.Value(id),
+      name: drift.Value(name),
+      latitude: latitude != null ? drift.Value(latitude!) : drift.Value(0),
+      longitude: longitude != null ? drift.Value(longitude!) : drift.Value(0),
+      sequence: drift.Value(sequence),
+      lastUpdated: drift.Value(DateTime.now()),
+    );
   }
 
   // Methods for JSON Serialization
