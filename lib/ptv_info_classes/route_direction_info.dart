@@ -20,7 +20,7 @@ class RouteDirection {
         "\tName: $name\n";
   }
 
-  /// Factory constructor from PTV API
+  /// Factory constructor to create a Direction from the PTV API response
   factory RouteDirection.fromApi(Map<String, dynamic> json) {
     return RouteDirection(
         id: json["direction_id"],
