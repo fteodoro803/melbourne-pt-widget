@@ -263,6 +263,7 @@ class PtvService {
 
   /// Fetches routes according to a stop, from the database.
   /// Maps the databases' routes to domain's route
+  // todo: change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
     final dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
 
@@ -325,35 +326,28 @@ class PtvService {
 
     // Early Exit
     if (data.response == null) {
-      print("( ptv_service.dart -> fetchStopsLocation ) -- null data response");
-      return stopList;
+      print("( ptv_service.dart -> fetchStopsLocation ) -- null response");
+      return [];
     }
 
     // Populating stops list and adding them to Database
     for (var stop in jsonResponse!["stops"]) {
-      int stopId = stop["stop_id"];
-      String stopName = stop["stop_name"];
-      int selectedRouteType = stop["route_type"];
-      double latitude = stop["stop_latitude"];
-      double longitude = stop["stop_longitude"];
-      double? distance = stop["stop_distance"];
-      Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude,
-          longitude: longitude, distance: distance);
-
+      Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude, longitude));
+      futures.add(Get.find<db.AppDatabase>().addStop(newStop.id, newStop.name, newStop.latitude!, newStop.longitude!));
 
       // Adds route-stop relationship to database
+      int selectedRouteType = stop["route_type"];
       for (var route in stop["routes"]) {
+        int routeId = route["route_id"];
         int currRouteTypeId = route["route_type"];
-        futures.add(Get.find<db.AppDatabase>().addStopRouteType(stopId, currRouteTypeId));
+        futures.add(Get.find<db.AppDatabase>().addStopRouteType(newStop.id, currRouteTypeId));
 
         if (route["route_type"] != selectedRouteType) {
           continue;
         }
 
-        int routeId = route["route_id"];
-        futures.add(Get.find<db.AppDatabase>().addRouteStop(routeId, stopId));
+        futures.add(Get.find<db.AppDatabase>().addRouteStop(routeId, newStop.id));
       }
     }
 
@@ -426,7 +420,7 @@ class PtvService {
     // todo: convert this entire function into the following:
     // 1. make api call, if data doesn't exist in database
     // 2. convert api response to domain models, via factory constructor
-    // 3. convert domain model to companions
+    // 3. convert domain model to companions? - think about making a toCompanion first
     // 4. use helper for single/batch inserts
 
     // // Convert domain models to companion
