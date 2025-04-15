@@ -11,15 +11,15 @@ extension StopHelpers on AppDatabase {
       // routeTypeId: drift.Value(routeTypeId),
       latitude: drift.Value(latitude),
       longitude: drift.Value(longitude),
-      sequence: drift.Value(sequence),
+      sequence: sequence != null ? drift.Value(sequence) : drift.Value.absent(),
       lastUpdated: drift.Value(DateTime.now()),
     );
   }
 
+  /// Adds a stop to the database.
   Future<void> addStop(int id, String name, double latitude, double longitude, {int? sequence}) async {
     StopsTableCompanion stop = await createStopCompanion(id: id, name: name, latitude: latitude, longitude: longitude, sequence: sequence);
-    AppDatabase db = Get.find<AppDatabase>();
-    db.insertStop(stop);
+    insertStop(stop);
   }
 
   // todo: function for distance from Stop
