@@ -300,28 +300,38 @@ class PtvService {
   }
 
 // RouteType Functions
-  /// Fetches route types offered by PTV, and saves them to the database
-  // todo: get from database first, preferring database
+  /// Fetches all route types offered by PTV from the database.
+  /// If no route type data is in database, it fetches from the PTV API and stores it to database.  // todo: get from database first, preferring database
   Future<List<String>> fetchRouteTypes() async {
     List<String> routeTypes = [];
 
-    ApiData data = await PtvApiService().routeTypes();
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Early exit: Empty response
-    if (data.response == null) {
-      print("( ptv_service.dart -> fetchRouteTypes ) -- Null response");
-      return [];
+    // If data exists in database, adds that data to routeTypes list
+    final dbRouteTypesList = await Get.find<db.AppDatabase>().getRouteTypes();
+    if (dbRouteTypesList.isNotEmpty) {
+      routeTypes = dbRouteTypesList.map((rt) => rt.name).toList();
     }
 
-    // Populating RouteTypes list
-    for (var entry in jsonResponse!["route_types"]) {
-      int id = entry["route_type"];
-      RouteType newRouteType = RouteType.fromId(id);
-      routeTypes.add(newRouteType.name);
+    // If data doesn't exist in database, fetches from API and adds it to database
+    else {
+      ApiData data = await PtvApiService().routeTypes();
+      Map<String, dynamic>? jsonResponse = data.response;
 
-      // Add to database
-      Get.find<db.AppDatabase>().addRouteType(newRouteType.id, newRouteType.name);
+      // Early exit: Empty response
+      if (data.response == null) {
+        print("( ptv_service.dart -> fetchRouteTypes ) -- Null response");
+        return [];
+      }
+
+      // Populating RouteTypes list
+      for (var entry in jsonResponse!["route_types"]) {
+        int id = entry["route_type"];
+        RouteType newRouteType = RouteType.fromId(id);
+        routeTypes.add(newRouteType.name);
+
+        // Add to database
+        Get.find<db.AppDatabase>().addRouteType(
+            newRouteType.id, newRouteType.name);
+      }
     }
 
     return routeTypes;
