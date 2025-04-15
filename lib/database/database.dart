@@ -39,6 +39,7 @@ class DirectionsTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get description => text()();
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 

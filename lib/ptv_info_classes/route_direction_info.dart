@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter_project/database/database.dart' as db;
 
 part 'route_direction_info.g.dart';
 
@@ -26,6 +27,15 @@ class RouteDirection {
         id: json["direction_id"],
         name: json["direction_name"],
         description: json["route_direction_description"],
+    );
+  }
+
+  /// Factory constructor to create a Direction from a database DirectionData object
+  factory RouteDirection.fromDb(db.DirectionsTableData dbDirection) {
+    return RouteDirection(
+        id: dbDirection.id,
+        name: dbDirection.name,
+        description: dbDirection.description
     );
   }
 

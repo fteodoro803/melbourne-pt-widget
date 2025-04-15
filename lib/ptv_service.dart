@@ -96,27 +96,39 @@ class PtvService {
   }
 
 // Direction Functions
-  // todo: add to database
+  /// Fetches directions for a given route.
+  /// Uses data from either the database or PTV API, preferring the database.
   Future<List<RouteDirection>> fetchDirections(int routeId) async {
     List<RouteDirection> directionList = [];
 
-    // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().routeDirections(routeId.toString());
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Early Exit
-    if (data.response == null) {
-      print("( ptv_service.dart -> fetchDirections ) -- Null response");
-      return [];
+    // Check if directions data exists in database
+    // If it does, set directionList to the retrieved data. If not, fetch data from the API
+    final dbDirectionsList = await Get.find<db.AppDatabase>().getDirectionsByRoute(routeId);
+    if (dbDirectionsList.isNotEmpty) {
+      directionList = dbDirectionsList.map(RouteDirection.fromDb).toList();
     }
 
-    // Populating Stops List
-    for (var direction in jsonResponse!["directions"]) {
-      RouteDirection newDirection = RouteDirection.fromApi(direction);
-      directionList.add(newDirection);
+    else {
+      ApiData data = await PtvApiService().routeDirections(routeId.toString());
+      Map<String, dynamic>? jsonResponse = data.response;
 
-      // Adding to database
-      await Get.find<db.AppDatabase>().addDirection(newDirection.id, newDirection.name, newDirection.description);
+      // Early Exit
+      if (data.response == null) {
+        print("( ptv_service.dart -> fetchDirections ) -- Null response");
+        return [];
+      }
+
+      // Populating Stops List
+      for (var direction in jsonResponse!["directions"]) {
+        int routeId = direction["route_id"];
+        RouteDirection newDirection = RouteDirection.fromApi(direction);
+        directionList.add(newDirection);
+
+        // Adding to database
+        await Get.find<db.AppDatabase>().addDirection(
+            newDirection.id, newDirection.name, newDirection.description,
+            routeId);
+      }
     }
 
     return directionList;
