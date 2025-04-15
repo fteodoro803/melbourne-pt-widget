@@ -3,7 +3,7 @@ import 'package:flutter_project/ptv_info_classes/stop_info.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../ptv_info_classes/route_info.dart' as pt_route;
-import '../search_details.dart';
+import '../.deprecated/search_details.dart';
 import '../widgets/distance_filter.dart';
 import '../widgets/screen_widgets.dart' as ScreenWidgets;
 import '../widgets/transport_widgets.dart';

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/search_details.dart';
-import 'package:flutter_project/add_screens/search_screen.dart';
+import 'package:flutter_project/add_screens/sheet_ui/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../ptv_service.dart';
-import 'widgets/screen_widgets.dart' as ScreenWidgets;
+import '../../ptv_info_classes/route_info.dart' as pt_route;
+import '../../ptv_service.dart';
+import '../controllers/search_controller.dart';
+import '../widgets/screen_widgets.dart' as ScreenWidgets;
 
 enum BusFilter {
   metro(name: "Metro", id: "4"),
@@ -337,7 +337,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SearchScreen(arguments: widget.arguments, searchDetails: SearchDetails.withRoute(route), enableSearch: false,)
+                              builder: (context) => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false,)
                           ),
                         );
                       },

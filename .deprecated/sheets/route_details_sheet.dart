@@ -6,7 +6,7 @@ import '../../ptv_info_classes/route_direction_info.dart';
 import '../../ptv_info_classes/route_info.dart' as pt_route;
 import '../../ptv_info_classes/stop_info.dart';
 import '../../ptv_service.dart';
-import '../search_details.dart';
+import '../.deprecated/search_details.dart';
 import '../utility/search_utils.dart';
 
 class RouteDetailsSheet extends StatefulWidget {

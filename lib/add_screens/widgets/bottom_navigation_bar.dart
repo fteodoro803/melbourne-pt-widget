@@ -43,8 +43,9 @@ class BottomNavigation extends StatelessWidget {
           // No need to update data when going to search
             Navigator.pushNamed(
               context,
-              '/searchScreen',
-              arguments: ScreenArguments(updateMainPage!),
+              '/searchScreenUI',
+              // arguments: ScreenArguments(updateMainPage!),
+              // searchDetails: SearchDetails(),
             );
             break;
 

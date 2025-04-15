@@ -13,19 +13,19 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/ptv_service.dart';
 
-import '../ptv_info_classes/departure_info.dart';
-import '../ptv_info_classes/stop_info.dart';
-import '../ptv_info_classes/route_info.dart' as pt_route;
+import '../../ptv_info_classes/departure_info.dart';
+import '../../ptv_info_classes/stop_info.dart';
+import '../../ptv_info_classes/route_info.dart' as pt_route;
 
-import 'utility/map_utils.dart';
-import 'utility/search_utils.dart';
+import '../utility/map_utils.dart';
+import '../utility/search_utils.dart';
 
-import 'widgets/bottom_navigation_bar.dart';
-import 'widgets/screen_widgets.dart';
+import '../widgets/bottom_navigation_bar.dart';
+import '../widgets/screen_widgets.dart';
 
-import 'sheets/departure_details_sheet.dart';
-import 'sheets/nearby_stops_sheet.dart';
-import 'widgets/suggestions_search.dart';
+import '../sheets/departure_details_sheet.dart';
+import '../sheets/nearby_stops_sheet.dart';
+import '../widgets/suggestions_search.dart';
 
 class SearchScreen extends StatefulWidget {
   final ScreenArguments arguments;
@@ -375,7 +375,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// Handles tap on a direction in StopDetailsSheet
   Future<void> _onTransportSelected(Transport transport) async {
-    _markers = MapUtils.resetMarkers(_searchDetails.markerPosition!);
+    _markers = MapUtils.resetMarkers(_searchDetails.markerPosition);
     _searchDetails.transport = transport;
 
     _sheetNavigatorKey.currentState?.pushSheet('Transport Details');

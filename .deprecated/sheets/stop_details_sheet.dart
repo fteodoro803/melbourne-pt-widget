@@ -3,9 +3,9 @@ import 'package:flutter_project/screen_arguments.dart';
 import '../../file_service.dart';
 import '../../ptv_info_classes/departure_info.dart';
 import '../../transport.dart';
-import '../search_details.dart';
-import '../widgets/departure_card.dart';
-import '../widgets/save_transport_sheet.dart';
+import '../.deprecated/search_details.dart';
+import '../.deprecated/departure_card.dart';
+import '../.deprecated/save_transport_sheet.dart';
 import '../widgets/transport_widgets.dart';
 
 class StopDetailsSheet extends StatefulWidget {

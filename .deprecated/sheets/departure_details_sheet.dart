@@ -5,7 +5,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../ptv_info_classes/departure_info.dart';
 import '../../ptv_service.dart';
-import '../search_details.dart';
+import '../.deprecated/search_details.dart';
 import '../utility/time_utils.dart';
 import '../../transport.dart';
 import '../widgets/transport_widgets.dart';

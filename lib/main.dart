@@ -18,10 +18,10 @@ import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
+import "add_screens/controllers/search_controller.dart";
+import "add_screens/sheet_ui/find_routes_screen.dart";
 
-import "add_screens/find_routes_screen.dart";
-import "add_screens/search_details.dart";
-import "add_screens/search_screen.dart";
+import "add_screens/sheet_ui/search_screen.dart";
 import "home_widget_service.dart";
 
 import 'package:get/get.dart';
@@ -78,11 +78,17 @@ class _MyAppState extends State<MyApp> {
           '/selectLocationScreen': (context) => SelectLocationScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
                   as ScreenArguments),
-          '/searchScreen': (context) => SearchScreen(
-              arguments: ModalRoute.of(context)!.settings.arguments
-              as ScreenArguments,
-              searchDetails: SearchDetails(),
-              enableSearch: true,
+          // '/searchScreen': (context) => SearchScreen(
+          //     arguments: ModalRoute.of(context)!.settings.arguments
+          //     as ScreenArguments,
+          //     searchDetails: SearchDetails(),
+          //     enableSearch: true,
+          // ),
+          '/searchScreenUI': (context) => SearchScreen(
+            // arguments: ModalRoute.of(context)!.settings.arguments
+            // as ScreenArguments,
+            searchDetails: SearchDetails(),
+            enableSearch: true,
           ),
           '/selectStopScreen': (context) => SelectStopScreen(
               arguments: ModalRoute.of(context)!.settings.arguments
@@ -263,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SearchScreen(arguments: ScreenArguments(_updateMainPage), searchDetails: SearchDetails.withTransport(_transportList[index]), enableSearch: false)
+                                builder: (context) => SearchScreen(searchDetails: SearchDetails.withTransport(_transportList[index]), enableSearch: false)
                             ),
                           )
                         ),

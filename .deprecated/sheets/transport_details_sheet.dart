@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import '../../file_service.dart';
 import '../../ptv_info_classes/departure_info.dart';
 import '../../screen_arguments.dart';
-import '../search_details.dart';
-import '../widgets/departure_card.dart';
+import '../.deprecated/search_details.dart';
+import '../.deprecated/departure_card.dart';
 import '../../transport.dart';
 import '../widgets/transport_widgets.dart';
 
