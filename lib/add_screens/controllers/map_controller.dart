@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import '../../ptv_info_classes/stop_info.dart';
 import '../utility/map_utils.dart';
 import '../utility/transport_path.dart';
-import '../widgets/screen_widgets.dart';
 import 'nearby_stops_controller.dart';
 import '../controllers/search_controller.dart' as search_controller;
 
@@ -78,27 +77,27 @@ class MapController extends GetxController {
     markerPos = location;
     resetMarkers();
 
-
     String address = await mapUtils.getAddressFromCoordinates(
-        location.latitude,
-        location.longitude
+      location.latitude,
+      location.longitude
     );
 
     await searchController.pushLocation(location, address);
-    mapUtils.moveCameraToFitRadiusWithVerticalOffset(
+    Future.delayed(Duration(milliseconds: 100), () async {
+      await initialiseNearbyStopMarkers();
+      await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
         controller: mapController,
         center: location,
         radiusInMeters: double.parse(
-            Get.find<NearbyStopsController>().selectedUnit.value == "m"
-                ? Get.find<NearbyStopsController>().selectedDistance.value
-                : Get.find<NearbyStopsController>().selectedDistance.value * 1000
+          Get.find<NearbyStopsController>().selectedUnit.value == "m"
+            ? Get.find<NearbyStopsController>().selectedDistance.value
+            : Get.find<NearbyStopsController>().selectedDistance.value * 1000
         ));
-
-    // await initialiseNearbyStopMarkers();
+    });
   }
 
   Future<void> initialiseNearbyStopMarkers() async {
-    customInfoWindowController.hideInfoWindow!();
+    // customInfoWindowController.hideInfoWindow!();
     tappedStopId = null;
     tappedStopMarker = null;
     List<Stop> stops = Get.find<NearbyStopsController>().filteredStops;
@@ -111,8 +110,8 @@ class MapController extends GetxController {
       strokeWidth: 0,
       radius: double.parse(
         Get.find<NearbyStopsController>().selectedUnit.value == "m"
-            ? Get.find<NearbyStopsController>().selectedDistance.value
-            : Get.find<NearbyStopsController>().selectedDistance.value * 1000
+          ? Get.find<NearbyStopsController>().selectedDistance.value
+          : Get.find<NearbyStopsController>().selectedDistance.value * 1000
       ),
     );
 

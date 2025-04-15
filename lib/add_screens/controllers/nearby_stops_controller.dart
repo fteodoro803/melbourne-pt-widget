@@ -39,13 +39,6 @@ class NearbyStopsController extends GetxController {
     "vLine": false,
   }.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-
-    Get.find<MapController>().initialiseNearbyStopMarkers();
-  }
-
   List<Stop> get filteredStops {
     final activeTypes = transportTypeFilters.entries
         .where((e) => e.value && e.key != "all")

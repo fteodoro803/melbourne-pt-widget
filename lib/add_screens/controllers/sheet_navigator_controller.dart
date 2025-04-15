@@ -11,10 +11,10 @@ class SheetNavigationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    scrollableController.addListener(_handleScrollChange);
+    scrollableController.addListener(handleScrollChange);
   }
 
-  void _handleScrollChange() {
+  void handleScrollChange() {
     if (scrollableController.size >= 0.75 && !isSheetExpanded.value) {
       isSheetExpanded.value = true;
       scrollableController.jumpTo(1.0);

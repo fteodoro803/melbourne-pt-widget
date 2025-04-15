@@ -89,7 +89,7 @@ class _SearchScreenState extends State<SearchScreen> {
               onMapCreated: (controller) {
                 mapController.setController(controller);
               },
-              onLongPress: mapController.onLocationSelected,
+              onLongPress: widget.enableSearch ? mapController.onLocationSelected : null,
               onCameraMove: mapController.onCameraMove,
               initialCameraPosition: CameraPosition(
                   target: mapController.currentPosition.value,
@@ -126,35 +126,40 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                 ],
               ),
-              if (searchController.details.value.stops!.isNotEmpty && searchController.details.value.stop == null)
-                ElevatedButton(
-                  onPressed: () async {
-                    if (mapController.isNearbyStopsButtonToggled.value) {
-                      mapController.hideNearbyStopMarkers();
-                    } else {
-                      mapController.initialiseNearbyStopMarkers();
-                      mapController.showNearbyStopMarkers();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 14),
-                    backgroundColor: !mapController.isNearbyStopsButtonToggled.value
-                        ? Theme.of(context).colorScheme.surfaceContainerHighest
-                        : Theme.of(context).colorScheme.primaryContainer,
-                    minimumSize: Size(40, 40),
-                  ),
-                  child: SizedBox(
-                    height: 40,
-                    width: 40,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.location_pin),
-                        Icon(Icons.tram),
-                      ],
+              Obx(() {
+                if (sheetNavigationController.currentSheet.value == 'Nearby Stops') {
+                  return ElevatedButton(
+                    onPressed: () async {
+                      if (mapController.isNearbyStopsButtonToggled.value) {
+                        mapController.hideNearbyStopMarkers();
+                      } else {
+                        mapController.initialiseNearbyStopMarkers();
+                        mapController.showNearbyStopMarkers();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 14),
+                      backgroundColor: !mapController.isNearbyStopsButtonToggled.value
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest
+                          : Theme.of(context).colorScheme.primaryContainer,
+                      minimumSize: Size(40, 40),
                     ),
-                  ),
-                ),
+                    child: SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.location_pin),
+                          Icon(Icons.tram),
+                        ],
+                      ),
+                    ),
+                  );
+                } else {
+                  return SizedBox.shrink(); // Hide the button
+                }
+              }),
             ],
           ),
           if (searchController.showSheet.value) _buildSheets(),

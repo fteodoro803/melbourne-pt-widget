@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/sheet_ui/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import 'package:flutter_project/screen_arguments.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import '../../ptv_info_classes/route_info.dart' as pt_route;
 import '../../ptv_service.dart';
 import '../controllers/search_controller.dart';
@@ -334,12 +336,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                       subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId) : null,
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false,)
-                          ),
-                        );
+                        Get.to(() => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false));
                       },
                     )
                   );

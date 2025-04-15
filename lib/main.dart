@@ -58,7 +58,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
         title: 'PTV Widget App Demo',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey, brightness: Brightness.dark),
@@ -265,13 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           transport: _transportList[index],
                           dismissible: true,
                           onDismiss: () => {removeTransport(_transportList[index]), _updateMainPage()},
-                          onTap: () =>
-                            Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchScreen(searchDetails: SearchDetails.withTransport(_transportList[index]), enableSearch: false)
-                            ),
-                          )
+                          onTap: () => Get.to(() => SearchScreen(searchDetails: SearchDetails.withTransport(_transportList[index]), enableSearch: false))
                         ),
                       ),
                     ],

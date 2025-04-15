@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:get/get_state_manager/src/simple/get_view.dart';
+import 'package:get/get.dart';
 
 import '../controllers/sheet_navigator_controller.dart';
 import '../widgets/screen_widgets.dart';
@@ -11,10 +9,10 @@ class SheetNavigatorWidget extends GetView<SheetNavigationController> {
   final String initialSheet;
 
   const SheetNavigatorWidget({
-    Key? key,
+    super.key,
     required this.sheets,
     required this.initialSheet,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +48,13 @@ class SheetNavigatorWidget extends GetView<SheetNavigationController> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new),
-                    onPressed: () => controller.popSheet(),
+                    onPressed: () {
+                      if (controller.sheetHistory.last == "") {
+                        controller.animateSheetTo(0.6);
+                      } else {
+                        controller.popSheet();
+                      }
+                    }
                   ),
                   Expanded(
                     child: Text(

@@ -46,18 +46,31 @@ class SearchController extends GetxController {
 
   void handleBackButton() {
     final currentSheet = sheetController.currentSheet.value;
-    final sheetHistory = sheetController.sheetHistory;
+    final sheetHistory = sheetController.sheetHistory.toList();
 
     // If we're viewing Nearby Stops
     if (currentSheet == 'Nearby Stops') {
       resetDetails();
+      Get.find<MapController>().clearMap();
       showSheet.value = false;
+      sheetController.popSheet();
       return;
     }
 
     // If we're in a nested sheet
     if (sheetHistory.isNotEmpty) {
       final prevSheet = sheetHistory.last;
+
+      if (prevSheet == "") {
+        if (sheetController.isSheetExpanded()) {
+          sheetController.animateSheetTo(0.6);
+          return;
+        }
+        else {
+          Get.back();
+          return;
+        }
+      }
 
       // If we are navigating back to Stop Details
       if (prevSheet == 'Stop Details' &&

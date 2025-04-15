@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
-
 class BackButtonWidget extends StatelessWidget {
   const BackButtonWidget({
     super.key,
@@ -31,7 +29,6 @@ class BackButtonWidget extends StatelessWidget {
     );
   }
 }
-
 
 class TransportToggleButton extends StatelessWidget {
   const TransportToggleButton({
@@ -72,50 +69,6 @@ class TransportToggleButton extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-    );
-  }
-}
-
-class StopInfoWindow extends StatelessWidget {
-  const StopInfoWindow({
-    super.key,
-    required this.stop,
-  });
-
-  final Stop stop;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(width: 205),
-        SizedBox(
-          width: 360-205,
-          height: 36,
-          // padding: const EdgeInsets.only(left: 150.0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(stop.name,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-                height: 1.2,
-                shadows: <Shadow>[
-                  Shadow(
-                    offset: Offset(1, 1),
-                    blurRadius: 5.0,
-                    color: Color.fromARGB(255, 255, 255, 255),
-                  ),
-                ],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.left,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
