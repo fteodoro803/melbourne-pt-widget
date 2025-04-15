@@ -52,8 +52,6 @@ class RoutesTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get number => text()();                    // todo: convert this to int?
-  TextColumn get colour => text()();
-  TextColumn get textColour => text()();
   IntColumn get routeTypeId => integer().references(RouteTypesTable, #id)();
   TextColumn get gtfsId => text()();
   TextColumn get status => text()();

@@ -102,12 +102,15 @@ class Route {
   @override
   String toString() {
     String str = "Route:\n"
-        "\tID: $id\t"
-        "\tName: $name\t"
-        "\tNumber: $number\n"
-        "\tType: ${type.name}\t"
-        "\tColour: $colour\t"
-        "\tTextColour: $textColour\n";
+        "\t         ID: $id\t"
+        "\t     Number: $number\t"
+        "\t       Name: $name\n"
+        "\t       Type: ${type.name}\t"
+        "\t     Colour: $colour\t"
+        "\t TextColour: $textColour\n"
+        "\t     GtfsId: $gtfsId\t"
+        "\t     Status: $status\n"
+    ;
 
     if (direction != null) {
       str += direction.toString();

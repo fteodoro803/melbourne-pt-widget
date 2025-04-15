@@ -256,7 +256,7 @@ class PtvService {
 
   /// Fetches routes from database, by search name.
   Future<List<Route>> searchRoutes({String? query, RouteType? routeType}) async {
-    final dbRouteList = await Get.find<db.AppDatabase>().getRoutes(search: query, routeType: routeType?.id);
+    final dbRouteList = await Get.find<db.AppDatabase>().getRoutesByName(search: query, routeType: routeType?.id);
     List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
     return domainRouteList;
   }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptv_info_classes/location_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as ptv;
+import 'package:flutter_project/database/database.dart' as db;
+import 'package:get/get.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -14,7 +15,6 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   final TextEditingController locationField = TextEditingController();
-  final TextEditingController routeField = TextEditingController();
 
   @override
   void initState() {
@@ -25,7 +25,6 @@ class _TestScreenState extends State<TestScreen> {
   @override
   void dispose() {
     locationField.dispose();
-    routeField.dispose();
     super.dispose();
   }
 
@@ -36,16 +35,16 @@ class _TestScreenState extends State<TestScreen> {
     await Future.delayed(Duration(milliseconds: 100));
   }
 
-  Future<void> directions(String location) async {
-    Location newLocation = Location(coordinates: location);
-    var stops = await ptvService.fetchStopsLocation("${newLocation.latitude},${newLocation.longitude}");
-    print(stops);
-  }
+  Future<void> fromDbTest() async {
+    int routeId = 725;
 
-  Future<void> stops(int routeId) async {
-    ptv.Route route = ptv.Route(id: routeId, name: "name", number: "number", type: RouteType.fromId(1), gtfsId: "gtfsId", status: "status");
-    var stops = await ptvService.fetchStopsRoute(route);
-    print(stops);
+    var database = Get.find<db.AppDatabase>();
+    var dbRoute = await database.getRouteById(routeId);
+
+    print("Db Route: ${dbRoute.toString()}");
+
+    ptv.Route? domainRoute = dbRoute != null ? ptv.Route.fromDb(dbRoute) : null;
+    print("Domain Route: $domainRoute");
   }
 
   @override
@@ -54,23 +53,14 @@ class _TestScreenState extends State<TestScreen> {
       appBar: AppBar(title: const Text("Test Screen")),
       body: Column(
         children: [
-          TextField(
-            controller: locationField,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Location"),
-          ),
+          // TextField(
+          //   controller: locationField,
+          //   keyboardType: TextInputType.number,
+          //   decoration: InputDecoration(labelText: "Location"),
+          // ),
           ElevatedButton(onPressed: () {
-            directions(locationField.text);
-          }, child: Text("Stops from a Location")),
-          Divider(),
-          TextField(
-            controller: routeField,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Route ID"),
-          ),
-          ElevatedButton(onPressed: () {
-            stops(int.parse(routeField.text));
-          }, child: Text("Stops on a Route")),
+            fromDbTest();
+          }, child: Text("FromDb - Route")),
         ],
       ),
     );
