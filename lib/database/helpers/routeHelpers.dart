@@ -33,6 +33,22 @@ extension RouteHelpers on AppDatabase {
     await db.insertRoute(route);
   }
 
+  /// Gets all routes in database.
+  Future<List<RoutesTableData>> getRoutes(int? routeType) async {
+    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
+
+    if (routeType != null) {
+      query = select(routesTable)
+        ..where((tbl) => tbl.routeTypeId.equals(routeType));
+    }
+    else {
+      query = select(routesTable);
+    }
+
+    final result = await query.get();
+    return result;
+  }
+
   /// Gets route according to id.
   Future<RoutesTableData?> getRouteById(int id) async {
     drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;

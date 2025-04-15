@@ -240,27 +240,40 @@ class PtvService {
   }
 
 // Route Functions
-  /// Fetches all routes offered by PTV, and saves them to the database
+  /// Fetches all routes offered by PTV from the database.
+  /// If no route data is in database, it fetches from the PTV API and stores it to database.
   Future<List<Route>> fetchRoutes({String? routeTypes}) async {
     List<Route> routeList = [];
 
-    // Fetches stop data via PTV API
-    ApiData data = await PtvApiService().routes(routeTypes: routeTypes);
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Empty JSON Response
-    if (jsonResponse == null) {
-      print("(ptv_service.dart -> fetchRoutes) -- Null data response");
-      return [];
+    // Checks if data exists in database, and sets routeList if it exists
+    int? routeType = routeTypes != null ? int.tryParse(routeTypes) : null;
+    final dbRouteList = await Get.find<db.AppDatabase>().getRoutes(routeType);
+    if (dbRouteList.isNotEmpty) {
+      routeList = dbRouteList.map(Route.fromDb).toList();
     }
 
-    // Creates new routes, and adds them to return list and database
-    for (var route in jsonResponse["routes"]) {
-      Route newRoute = Route.fromApi(route);
-      routeList.add(newRoute);
+    // Fetches data from API and adds to database, if route data doesn't exist in database
+    else {
+      // Fetches stop data via PTV API
+      ApiData data = await PtvApiService().routes(routeTypes: routeTypes);
+      Map<String, dynamic>? jsonResponse = data.response;
 
-      // Add to Database
-      await Get.find<db.AppDatabase>().addRoute(newRoute.id, newRoute.name, newRoute.number, newRoute.type.id, newRoute.gtfsId, newRoute.status);
+      // Empty JSON Response
+      if (jsonResponse == null) {
+        print("(ptv_service.dart -> fetchRoutes) -- Null data response");
+        return [];
+      }
+
+      // Creates new routes, and adds them to return list and database
+      for (var route in jsonResponse["routes"]) {
+        Route newRoute = Route.fromApi(route);
+        routeList.add(newRoute);
+
+        // Add to Database
+        await Get.find<db.AppDatabase>().addRoute(
+            newRoute.id, newRoute.name, newRoute.number, newRoute.type.id,
+            newRoute.gtfsId, newRoute.status);
+      }
     }
 
     return routeList;
@@ -275,7 +288,8 @@ class PtvService {
 
   /// Fetches routes according to a stop, from the database.
   /// Maps the databases' routes to domain's route
-  // todo: change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
+  // todo: consider change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
+  // todo: but also, in our functions, we use fetch, but most of them also check the database first. So maybe for consistency, keep it?
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
     final dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
 
@@ -287,6 +301,7 @@ class PtvService {
 
 // RouteType Functions
   /// Fetches route types offered by PTV, and saves them to the database
+  // todo: get from database first, preferring database
   Future<List<String>> fetchRouteTypes() async {
     List<String> routeTypes = [];
 
@@ -327,6 +342,7 @@ class PtvService {
 // Stop Functions
   /// Fetch Stops near a Location and saves them to the database.
   /// This function also creates a link between the stop and route it's on.
+  // todo: think about if getting from the database is even needed here. Since it's impossible to save every stop around a location. And if you were to retrieve it from database, it would be incomplete, so you'd have to call the api anyway. Might as well just keep it to doing the api call
   Future<List<Stop>> fetchStopsLocation(String location, {int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
     List<Future> futures = [];    // holds all Futures for database async operations
@@ -371,6 +387,7 @@ class PtvService {
 
   /// Fetch Stops along a Route and saves them to the database.
   /// Also saves the link between the route and its stops.
+  // todo: fetch data from database first, preferring database
   Future<List<Stop>> fetchStopsRoute(Route route, {RouteDirection? direction}) async {
     List<Stop> stopList = [];
 
