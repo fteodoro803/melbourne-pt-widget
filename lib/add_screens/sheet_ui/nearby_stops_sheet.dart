@@ -11,7 +11,7 @@ import '../widgets/get_widgets.dart';
 
 class NearbyStopsSheet extends StatelessWidget {
   final search_controller.SearchController searchController = Get.find<search_controller.SearchController>();
-  final NearbyStopsController nearbyController = Get.put(NearbyStopsController());
+  final NearbyStopsController nearbyController = Get.find<NearbyStopsController>();
   final ScrollController scrollController;
 
   NearbyStopsSheet({super.key, required this.scrollController});

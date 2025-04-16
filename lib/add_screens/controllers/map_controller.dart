@@ -15,9 +15,11 @@ import '../controllers/search_controller.dart' as search_controller;
 class MapController extends GetxController {
   final CustomInfoWindowController customInfoWindowController
     = CustomInfoWindowController();
-  search_controller.SearchController get searchController =>
-      Get.find<search_controller.SearchController>();
   late GoogleMapController mapController;
+
+  search_controller.SearchController get searchController {
+    return Get.find<search_controller.SearchController>();
+  }
 
   final MapUtils mapUtils = MapUtils();
 
@@ -81,19 +83,19 @@ class MapController extends GetxController {
       location.latitude,
       location.longitude
     );
-
+    final searchController = Get.find<search_controller.SearchController>();
     await searchController.pushLocation(location, address);
-    Future.delayed(Duration(milliseconds: 100), () async {
-      await initialiseNearbyStopMarkers();
-      await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
-        controller: mapController,
-        center: location,
-        radiusInMeters: double.parse(
-          Get.find<NearbyStopsController>().selectedUnit.value == "m"
-            ? Get.find<NearbyStopsController>().selectedDistance.value
-            : Get.find<NearbyStopsController>().selectedDistance.value * 1000
-        ));
-    });
+
+    Get.find<SheetNavigationController>().animateSheetTo(0.5);
+
+    await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
+      controller: mapController,
+      center: location,
+      radiusInMeters: double.parse(
+        Get.find<NearbyStopsController>().selectedUnit.value == "m"
+          ? Get.find<NearbyStopsController>().selectedDistance.value
+          : Get.find<NearbyStopsController>().selectedDistance.value * 1000
+      ));
   }
 
   Future<void> initialiseNearbyStopMarkers() async {
@@ -193,7 +195,7 @@ class MapController extends GetxController {
 
     int stopIndex = Get.find<NearbyStopsController>().filteredStops.indexOf(stop);
 
-    Get.find<SheetNavigationController>().animateSheetTo(0.6);
+    Get.find<SheetNavigationController>().animateSheetTo(0.5);
 
     Future.delayed(Duration(milliseconds: 100), () {
       Get.find<NearbyStopsController>().scrollToStopItem(stopIndex);

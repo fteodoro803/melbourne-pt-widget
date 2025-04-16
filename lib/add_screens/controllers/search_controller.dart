@@ -9,6 +9,7 @@ import '../../ptv_info_classes/stop_info.dart';
 import '../../ptv_service.dart';
 import '../../transport.dart';
 import '../utility/search_utils.dart';
+import 'departure_details_controller.dart';
 import 'map_controller.dart';
 
 class SearchDetails {
@@ -30,7 +31,7 @@ class SearchDetails {
 }
 
 class SearchController extends GetxController {
-  late Rx<SearchDetails> details;
+  late Rx<SearchDetails> details = SearchDetails().obs;
 
   SheetNavigationController get sheetController => Get.find<SheetNavigationController>();
 
@@ -40,9 +41,9 @@ class SearchController extends GetxController {
 
   RxMap<int, RxBool> stopExpansionState = <int, RxBool>{}.obs;
 
-  SearchController({
-    required this.details,
-  });
+  void setDetails(SearchDetails searchDetails) {
+    details = searchDetails.obs;
+  }
 
   void handleBackButton() {
     final currentSheet = sheetController.currentSheet.value;
@@ -109,6 +110,7 @@ class SearchController extends GetxController {
 
       sheetController.pushSheet('Route Details');
       showSheet.value = true;
+      Get.find<SheetNavigationController>().animateSheetTo(0.4);
 
       Get.find<MapController>().setTransportPath();
       Get.find<MapController>().renderTransportPath(false);
@@ -120,6 +122,7 @@ class SearchController extends GetxController {
 
       sheetController.pushSheet('Transport Details');
       showSheet.value = true;
+      Get.find<SheetNavigationController>().animateSheetTo(0.4);
 
       Get.find<MapController>().setTransportPath();
       Get.find<MapController>().renderTransportPath(true);
@@ -140,6 +143,8 @@ class SearchController extends GetxController {
     await setStops("all", 300);
     sheetController.pushSheet('Nearby Stops');
     showSheet.value = true;
+    Get.find<SheetNavigationController>().animateSheetTo(0.4);
+    await Get.find<MapController>().initialiseNearbyStopMarkers();
   }
 
   /// Triggers loading Stop Details Sheet from Route Details/Nearby Stops
@@ -148,6 +153,7 @@ class SearchController extends GetxController {
     await setTransportList();
     sheetController.pushSheet('Stop Details');
 
+    Get.find<SheetNavigationController>().animateSheetTo(0.3);
     Get.find<MapController>().setTransportPath();
     Get.find<MapController>().renderTransportPath(false);
   }
@@ -157,13 +163,15 @@ class SearchController extends GetxController {
     setTransport(transport);
 
     sheetController.pushSheet('Transport Details');
+    Get.find<SheetNavigationController>().animateSheetTo(0.5);
     Get.find<MapController>().renderTransportPath(true);
   }
 
   /// Triggers loading Departure Details sheet from Stop Details/Transport Details)
-  void pushDeparture(Departure departure) {
+  Future<void> pushDeparture(Departure departure) async {
     setDeparture(departure);
     sheetController.pushSheet('Departure Details');
+    await Get.find<DepartureDetailsController>().fetchPattern();
     Get.find<MapController>().renderTransportPath(true);
   }
 

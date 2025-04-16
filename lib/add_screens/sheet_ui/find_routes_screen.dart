@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/sheet_ui/search_screen.dart';
+import 'package:flutter_project/add_screens/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
-import 'package:flutter_project/screen_arguments.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import '../../ptv_info_classes/route_info.dart' as pt_route;
 import '../../ptv_service.dart';
 import '../controllers/search_controller.dart';
+import '../search_binding.dart';
+import '../widgets/bottom_navigation_bar.dart';
 import '../widgets/screen_widgets.dart' as ScreenWidgets;
 
 enum BusFilter {
@@ -37,11 +37,9 @@ enum VLineFilter {
 }
 
 class FindRoutesScreen extends StatefulWidget {
-  final ScreenArguments arguments;
 
   FindRoutesScreen({
     super.key,
-    required this.arguments
   });
 
   @override
@@ -335,9 +333,13 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                         : null,
                       subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId) : null,
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
-                      onTap: () {
-                        Get.to(() => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false));
-                      },
+                      onTap: () =>
+                        Get.to(
+                              () => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false),
+                          binding: SearchBinding(
+                            searchDetails: SearchDetails.withRoute(route), // Pass actual data
+                          ),
+                        )
                     )
                   );
                 }
@@ -357,10 +359,10 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
             ),
         ]
       ),
-      // bottomNavigationBar: BottomNavigation(
-      // currentIndex: 2,
-      // updateMainPage: null,
-      // ),
+      bottomNavigationBar: BottomNavigation(
+        currentIndex: 0,
+        updateMainPage: null,
+        ),
     );
   }
 }

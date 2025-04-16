@@ -7,19 +7,15 @@ import 'package:flutter_project/add_screens/sheet_ui/transport_details_sheet.dar
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../controllers/departure_details_controller.dart';
-import '../controllers/map_controller.dart';
-import '../controllers/nearby_stops_controller.dart';
-import '../controllers/route_details_controller.dart';
-import '../controllers/search_controller.dart' as search_controller;
-import '../controllers/sheet_navigator_controller.dart';
-import '../controllers/stop_details_controller.dart';
-import '../controllers/transport_details_controller.dart';
-import '../widgets/bottom_navigation_bar.dart';
-import '../widgets/screen_widgets.dart';
-import '../widgets/suggestions_search.dart';
-import 'departure_details_sheet.dart';
-import 'nearby_stops_sheet.dart';
+import 'controllers/map_controller.dart';
+import 'controllers/nearby_stops_controller.dart';
+import 'controllers/search_controller.dart' as search_controller;
+import 'controllers/sheet_navigator_controller.dart';
+import 'widgets/bottom_navigation_bar.dart';
+import 'widgets/screen_widgets.dart';
+import 'widgets/suggestions_search.dart';
+import 'sheet_ui/departure_details_sheet.dart';
+import 'sheet_ui/nearby_stops_sheet.dart';
 
 // todo: fix forward/backward navigation between pages; fix camera view when first rendering marker/transport path
 
@@ -39,44 +35,72 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
 
-  final SheetNavigationController sheetNavigationController = Get.put(SheetNavigationController());
-  late final search_controller.SearchController searchController;
-  final MapController mapController = Get.put(MapController());
+  final sheetNavigationController = Get.put(SheetNavigationController());
+  final searchController = Get.put(search_controller.SearchController());
+  final mapController = Get.put(MapController());
+  final nearbyStopsController = Get.put(NearbyStopsController());
 
   @override
   void initState() {
     super.initState();
+    print("search_screen.dart --> INITIALIZING STATE");
+    searchController.setDetails(widget.searchDetails);
 
-    // Only put controller if it hasn’t been created yet
-    if (!Get.isRegistered<search_controller.SearchController>()) {
-      searchController = Get.put(
-        search_controller.SearchController(
-          details: widget.searchDetails.obs,
-        ),
-      );
-
-      if (!widget.enableSearch) {
-        searchController.autoOpenSheet();
-      }
-    } else {
-      searchController = Get.find<search_controller.SearchController>();
+    if (!widget.enableSearch) {
+      searchController.autoOpenSheet();
     }
   }
 
   @override
   void dispose() {
-    // Delete all related controllers when leaving the screen
-    Get.delete<search_controller.SearchController>();
-    Get.delete<NearbyStopsController>();
-    Get.delete<RouteDetailsController>();
-    Get.delete<DepartureDetailsController>();
-    Get.delete<StopDetailsController>();
-    Get.delete<TransportDetailsController>();
-    Get.delete<MapController>();
-    Get.delete<SheetNavigationController>();
+    print("search_screen.dart --> RUNNING DISPOSE");
+
+    try {
+      // Use direct controller references instead of Get.find
+      if (Get.isRegistered<SheetNavigationController>()) {
+        final controller = Get.find<SheetNavigationController>();
+        Get.delete<SheetNavigationController>(force: true);
+        print("SheetNavigationController deleted in SearchScreen dispose");
+      }
+
+      if (Get.isRegistered<search_controller.SearchController>()) {
+        Get.delete<search_controller.SearchController>(force: true);
+        print("SearchController deleted in SearchScreen dispose");
+      }
+
+      if (Get.isRegistered<NearbyStopsController>()) {
+        Get.delete<NearbyStopsController>(force: true);
+        print("NearbyStopsController deleted in SearchScreen dispose");
+      }
+
+      if (Get.isRegistered<MapController>()) {
+        Get.delete<MapController>(force: true);
+        print("MapController deleted in SearchScreen dispose");
+      }
+    } catch (e) {
+      print("Error during controller disposal: $e");
+    }
 
     super.dispose();
   }
+
+  // @override
+  // void dispose() {
+  //   print("search_screen.dart --> RUNNING DISPOSE");
+  //   // Delete all related controllers when leaving the screen
+  //   // Get.delete<search_controller.SearchController>();
+  //   // Get.delete<NearbyStopsController>(force: true);
+  //   // Get.delete<RouteDetailsController>(force: true);
+  //   // Get.delete<DepartureDetailsController>(force: true);
+  //   // Get.delete<StopDetailsController>(force: true);
+  //   // Get.delete<TransportDetailsController>(force: true);
+  //   // Get.delete<MapController>();
+  //   Get.delete<SheetNavigationController>(force: true);
+  //
+  //   print("search_screen.dart --> FINISHED DISPOSE");
+  //
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +190,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ],
       )),
       bottomNavigationBar: BottomNavigation(
-        currentIndex: 1,
+        currentIndex: widget.enableSearch ? 1 : 0,
         updateMainPage: null,
       ),
     );
@@ -174,10 +198,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildSheets() {
     // Get sheet navigation controller
-    final sheetController = Get.find<SheetNavigationController>();
-
     return SheetNavigatorWidget(
-      initialSheet: sheetController.currentSheet.value,
+      controller: sheetNavigationController,
       sheets: {
         'Nearby Stops': (ctx, scroll) => NearbyStopsSheet(
           scrollController: scroll,

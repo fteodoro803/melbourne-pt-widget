@@ -14,7 +14,7 @@ class HomeWidgetService {
 
   // Initialise home widgets
   Future<void> initialiseHomeWidget() async {
-    print(" (home_widget_service.dart -> initialiseHomeWidget() ) -- platform: ${Platform.operatingSystem}");
+    // print(" (home_widget_service.dart -> initialiseHomeWidget() ) -- platform: ${Platform.operatingSystem}");
     if (Platform.isIOS || Platform.isAndroid) {
       isMobile = true;
       await HomeWidget.setAppGroupId(appGroupId);
@@ -32,8 +32,8 @@ class HomeWidgetService {
         final optimisedData = getOptimisedData(transportList);
         final data = JsonEncoder.withIndent('  ').convert(optimisedData);
 
-        print("( home_widget_service.dart -> sendWidgetData() ) -- Data Size: ${getDataSize(data)}KB");
-        print("( home_widget_service.dart -> sendWidgetData() ) -- Sending JSON Data:\n $data");
+        // print("( home_widget_service.dart -> sendWidgetData() ) -- Data Size: ${getDataSize(data)}KB");
+        // print("( home_widget_service.dart -> sendWidgetData() ) -- Sending JSON Data:\n $data");
 
         await HomeWidget.saveWidgetData(dataKey, data);
 

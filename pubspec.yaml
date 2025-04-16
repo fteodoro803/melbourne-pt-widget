@@ -51,6 +51,7 @@ dependencies:
   drift: ^2.26.0
   drift_flutter: ^0.2.4
   custom_info_window: ^1.0.1
+  flutter_speed_dial: ^7.0.0
 
 dev_dependencies:
   flutter_test:

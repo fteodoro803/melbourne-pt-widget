@@ -16,22 +16,48 @@ class GeoPathAndStops {
   GeoPathAndStops(this.geoPathWithStop, this.stopPositionAlongGeoPath);
 }
 
-class PolyLineMarkers {
-  final Set<Marker> largeMarkers;
-  final Set<Marker> smallMarkers;
+class StopInfoWindow extends StatelessWidget {
+  const StopInfoWindow({
+    super.key,
+    required this.stop,
+  });
 
-  final Marker? stopMarker;
-  final Marker firstMarker;
-  final Marker lastMarker;
+  final Stop stop;
 
-  PolyLineMarkers(this.largeMarkers, this.smallMarkers, this.stopMarker, this.firstMarker, this.lastMarker);
-}
-
-class PolyLines {
-  final Polyline futurePolyLine;
-  final Polyline? previousPolyLine;
-
-  PolyLines(this.futurePolyLine, this.previousPolyLine);
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(width: 205),
+        SizedBox(
+          width: 360-205,
+          height: 36,
+          // padding: const EdgeInsets.only(left: 150.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(stop.name,
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                height: 1.2,
+                shadows: <Shadow>[
+                  Shadow(
+                    offset: Offset(1, 1),
+                    blurRadius: 5.0,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+                ],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class MapUtils {

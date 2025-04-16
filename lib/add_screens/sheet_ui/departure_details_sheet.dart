@@ -180,7 +180,7 @@ class DepartureDetailsSheet extends StatelessWidget {
                 final timeDifference = TimeUtils.timeDifference(departureTime);
 
                 return Card(
-                  color: index == departureDetailsController.currentStopIndex ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
+                  color: index == departureDetailsController.currentStopIndex.value ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
                   margin: const EdgeInsets.symmetric(vertical: 2.0),
                   elevation: 1,
                   child: ListTile(

@@ -4,20 +4,18 @@ import 'package:get/get.dart';
 import '../controllers/sheet_navigator_controller.dart';
 import '../widgets/screen_widgets.dart';
 
-class SheetNavigatorWidget extends GetView<SheetNavigationController> {
+class SheetNavigatorWidget extends StatelessWidget {
   final Map<String, Widget Function(BuildContext, ScrollController)> sheets;
-  final String initialSheet;
+  final SheetNavigationController controller;
 
   const SheetNavigatorWidget({
     super.key,
     required this.sheets,
-    required this.initialSheet,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller with initial sheet
-    controller.currentSheet.value = initialSheet;
 
     return DraggableScrollableSheet(
       controller: controller.scrollableController,
