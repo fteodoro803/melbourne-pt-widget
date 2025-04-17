@@ -4,6 +4,8 @@ import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
+// todo: add transport
+
 // todo: add disruptions (it comes with Departures i think)
 
 // todo: think about whether columns here should be nullable, because all the swagger api shows is that they are
@@ -32,7 +34,7 @@ class DeparturesTable extends Table {
 
   // todo: maybe its primary foreign key should be the runref? what if it's null?
   @override
-  Set<Column> get primaryKey => {scheduledDeparture, runRef, directionId};
+  Set<Column> get primaryKey => {runRef, stopId, routeId, directionId};
 }
 
 class DirectionsTable extends Table {
