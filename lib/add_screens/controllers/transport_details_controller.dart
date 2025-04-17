@@ -6,7 +6,7 @@ import '../../ptv_info_classes/departure_info.dart';
 
 class TransportDetailsController extends GetxController {
   final searchDetails = Get.find<search_controller.SearchController>().details.value;
-  final RxBool isSaved = false.obs;
+  late RxBool isSaved = false.obs;
   final RxMap<String, bool> filters = <String, bool>{}.obs;
   final Rx<ScrollController> listController = ScrollController().obs;
   RxList<Departure> filteredDepartures = <Departure>[].obs;
@@ -14,6 +14,7 @@ class TransportDetailsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    checkSaved();
     filteredDepartures.assignAll(List.from(searchDetails.transport!.departures!));
   }
 
@@ -29,6 +30,7 @@ class TransportDetailsController extends GetxController {
   // Function to check if transport is saved
   Future<void> checkSaved() async {
     isSaved.value = await isTransportSaved(searchDetails.transport!);
+    print(isSaved.value);
   }
 
   // Function to save or delete transport

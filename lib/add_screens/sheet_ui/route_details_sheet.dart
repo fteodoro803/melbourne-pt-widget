@@ -35,16 +35,16 @@ class RouteDetailsSheet extends StatelessWidget {
           RouteWidget(route: route!, scrollable: false,),
           SizedBox(height: 4),
           ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.symmetric(
+                horizontal: 8, vertical: 0),
             title: Text("To: ${routeDetailsController.direction}",
               style: TextStyle(fontSize: 18)),
-            trailing: GestureDetector(
-              child: Icon(Icons.compare_arrows),
-              onTap: () {
-                routeDetailsController.changeDirection();
-              }
-            )
+            trailing: Icon(Icons.compare_arrows),
+            onTap: () {
+              routeDetailsController.changeDirection();
+            }
           ),
-          // Text(_route.name, style: TextStyle(fontSize: 18)),
           Divider(),
 
           Card(

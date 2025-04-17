@@ -22,6 +22,7 @@ class Departure {
   String? runRef;
   bool? hasLowFloor;
   bool? hasAirConditioning;
+  String? platformNumber;
 
   // Stop Description     // todo: i feel like there's a smarter way to do this. Stop name being here seems redundant. It's only used in fetchPattern.
   String? stopName;
@@ -36,6 +37,7 @@ class Departure {
       required this.runRef,
       required this.hasLowFloor,
       required this.hasAirConditioning,
+      this.platformNumber,
       this.stopId}) {
     // Adds and converts Departure to local Melbourne Time
     if (scheduledDepartureUTC != null) {

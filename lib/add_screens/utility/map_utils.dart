@@ -455,10 +455,11 @@ class GeoPathUtils {
   }
 
   /// Helper function to determine whether a the transport path and markers should be reversed
-  static bool reverseDirection(List<LatLng> geopath, List<LatLng> stopPositions) {
+  static bool reverseDirection(List<LatLng> geopath, List<Stop> stops) {
     LatLng firstGeoPathPoint = geopath[0];
     LatLng lastGeoPathPoint = geopath[geopath.length - 1];
-    LatLng lastStopLocation = stopPositions[stopPositions.length - 1];
+    Stop lastStop = stops[stops.length - 1];
+    LatLng lastStopLocation = LatLng(lastStop.latitude!, lastStop.longitude!);
     return calculateDistance(lastStopLocation, firstGeoPathPoint)
         < calculateDistance(lastStopLocation, lastGeoPathPoint);
   }

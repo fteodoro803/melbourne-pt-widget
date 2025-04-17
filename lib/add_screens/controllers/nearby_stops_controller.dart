@@ -56,6 +56,14 @@ class NearbyStopsController extends GetxController {
     }).toList();
   }
 
+  double get distanceInMeters {
+    if (selectedUnit.value == "m") {
+      return double.parse(selectedDistance.value);
+    } else {
+      return double.parse(selectedDistance.value * 1000);
+    }
+  }
+
   void scrollToStopItem(int stopIndex) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (itemScrollController.isAttached) {
@@ -90,7 +98,7 @@ class NearbyStopsController extends GetxController {
   Future<void> toggleTransport(String type) async {
     final isSelected = transportTypeFilters[type]!;
     String toggleTo = isSelected ? "all" : type;
-
+    searchController.resetStopExpanded();
     transportTypeFilters.updateAll((key, value) => key == toggleTo);
     await Get.find<MapController>().initialiseNearbyStopMarkers();
   }
