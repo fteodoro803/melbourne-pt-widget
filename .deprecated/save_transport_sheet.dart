@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../controllers/search_controller.dart';
-import 'transport_widgets.dart';
+import 'search_details.dart';
+import '../widgets/transport_widgets.dart';
 
-class SaveTransportSheet extends StatelessWidget {
+import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
+import 'package:flutter_project/transport.dart';
+
+class SaveTransportSheet extends StatefulWidget {
   final SearchDetails searchDetails;
   final List<bool> savedList;
   final Function(List<bool>) onConfirmPressed;
@@ -16,52 +19,66 @@ class SaveTransportSheet extends StatelessWidget {
   });
 
   @override
+  _SaveTransportSheetState createState() => _SaveTransportSheetState();
+}
+
+class _SaveTransportSheetState extends State<SaveTransportSheet> {
+  List<bool> tempSavedList = [];
+  bool hasListChanged = false;
+  late pt_route.Route route;
+  late String stopName;
+  late List<Transport> transportList;
+
+  @override
+  void initState() {
+    super.initState();
+    route = widget.searchDetails.route!;
+    stopName = widget.searchDetails.stop!.name;
+    transportList = widget.searchDetails.transportList!;
+    tempSavedList = List.from(widget.savedList);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final route = searchDetails.route!;
-    final stopName = searchDetails.stop!.name;
-    final transportList = searchDetails.transportList!;
-
-    List<bool> tempSavedList = List.from(savedList);
-    bool hasListChanged = false;
-
     return StatefulBuilder(builder: (context, setModalState) {
+
       return Column(
         children: [
           ListTile(
             leading: Padding(
               padding: const EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
               child: GestureDetector(
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(
-                    fontSize: 16,
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                }
+                  onTap: () {
+                    Navigator.pop(context);
+                  }
               ),
             ),
             trailing: GestureDetector(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8.0, top: 10.0, bottom: 10.0),
-                child: Text(
-                  "Confirm",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: hasListChanged ? null : Color(
-                        0xFF555555),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0, top: 10.0, bottom: 10.0),
+                  child: Text(
+                    "Confirm",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: hasListChanged ? null : Color(
+                          0xFF555555),
+                    ),
+                    textAlign: TextAlign.right,
                   ),
-                  textAlign: TextAlign.right,
                 ),
-              ),
-              onTap: () async {
-                if (hasListChanged) {
-                  await onConfirmPressed(tempSavedList);
-                  Navigator.pop(context);
+                onTap: () async {
+                  if (hasListChanged) {
+                    await widget.onConfirmPressed(tempSavedList);
+                    Navigator.pop(context);
+                  }
                 }
-              }
             ),
             title: Text(
               "Save Transport",
@@ -78,7 +95,7 @@ class SaveTransportSheet extends StatelessWidget {
             elevation: 1,
             child: ListTile(
               title: LocationWidget(textField: stopName, textSize: 18, scrollable: false),
-              subtitle: RouteWidget(route: route, scrollable: false),
+              subtitle: RouteWidget(route: route, scrollable: false,),
             ),
           ),
           SizedBox(height: 12),
@@ -105,7 +122,7 @@ class SaveTransportSheet extends StatelessWidget {
                   onTap: () {
                     setModalState(() {
                       tempSavedList[index] = !tempSavedList[index];
-                      hasListChanged = !(listEquals(savedList, tempSavedList));
+                      hasListChanged = !(listEquals(widget.savedList, tempSavedList));
                     });
                   },
                 ),

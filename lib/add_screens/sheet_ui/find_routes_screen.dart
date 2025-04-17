@@ -1,10 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/route_details_screen.dart';
+import 'package:flutter_project/add_screens/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
-import '../ptv_info_classes/route_info.dart' as pt_route;
-import '../ptv_service.dart';
-import 'widgets/screen_widgets.dart' as ScreenWidgets;
+import 'package:get/get.dart';
+import '../../ptv_info_classes/route_info.dart' as pt_route;
+import '../../ptv_service.dart';
+import '../controllers/search_controller.dart';
+import '../search_binding.dart';
+import '../widgets/bottom_navigation_bar.dart';
+import '../widgets/screen_widgets.dart' as ScreenWidgets;
 
 enum BusFilter {
   metro(name: "Metro", id: "4"),
@@ -44,6 +47,7 @@ class FindRoutesScreen extends StatefulWidget {
 }
 
 class _FindRoutesScreenState extends State<FindRoutesScreen> {
+  SearchDetails searchDetails = SearchDetails();
   TextEditingController _searchController = TextEditingController();
 
   Map<String, bool> _transportTypeFilters = {};
@@ -330,11 +334,10 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                       subtitle: routeType != "tram" && routeType != "train" ? Text(route.gtfsId) : null,
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
                       onTap: () =>
-                        // Navigate to TransportDetailsScreen with transport data
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RouteDetailsScreen(route: route)
+                        Get.to(
+                              () => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false),
+                          binding: SearchBinding(
+                            searchDetails: SearchDetails.withRoute(route), // Pass actual data
                           ),
                         )
                     )
@@ -356,10 +359,10 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
             ),
         ]
       ),
-      // bottomNavigationBar: BottomNavigation(
-      // currentIndex: 2,
-      // updateMainPage: null,
-      // ),
+      bottomNavigationBar: BottomNavigation(
+        currentIndex: 0,
+        updateMainPage: null,
+        ),
     );
   }
 }

@@ -7,7 +7,7 @@ import '../../ptv_info_classes/departure_info.dart';
 class DepartureCard extends StatefulWidget {
   final Transport transport;
   final Departure departure;
-  final Function(Departure)? onDepartureTapped;
+  final Function(Departure, Transport)? onDepartureTapped;
 
   const DepartureCard({
     super.key,
@@ -106,7 +106,7 @@ class _DepartureCardState extends State<DepartureCard> {
         onTap: () {
           if (widget.onDepartureTapped != null) {
             setState(() {
-              widget.onDepartureTapped!(departure);
+              widget.onDepartureTapped!(departure, widget.transport);
             });
           }
         },
