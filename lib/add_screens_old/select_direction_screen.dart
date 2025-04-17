@@ -48,7 +48,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       int id = _directions[index].id;
       String name = _directions[index].name;
       String description = _directions[index].description;
-      int? routeId = widget.arguments.transport.route?.id;
+      int? routeId = widget.arguments.transport?.route?.id;
 
       Get.find<db.AppDatabase>().addDirection(id, name, description, routeId!);
     }

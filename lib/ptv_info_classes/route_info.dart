@@ -113,8 +113,12 @@ class Route {
         "\t     Status: $status\n"
     ;
 
-    if (direction != null) {
-      str += direction.toString();
+    // if (direction != null) {
+    //   str += direction.toString();
+    // }
+
+    if (directions != null) {
+      str += directions.toString();
     }
 
     return str;
