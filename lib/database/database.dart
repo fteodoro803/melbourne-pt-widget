@@ -29,6 +29,8 @@ class DeparturesTable extends Table {
   IntColumn get routeId => integer().references(RoutesTable, #id).nullable()();
   IntColumn get directionId => integer().references(DirectionsTable, #id).nullable()();
 
+  // todo: Column for Transport mapping? Because each Departure is mapped to a Transport
+
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 
@@ -92,6 +94,17 @@ class StopsTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+class TransportsTable extends Table {
+  TextColumn get uniqueId => text()();
+  IntColumn get routeTypeId => integer()();
+  IntColumn get routeId => integer()();
+  IntColumn get stopId => integer()();
+  IntColumn get directionId => integer()();
+
+  @override
+  Set<Column> get primaryKey => {uniqueId};
+}
+
 // Linking Tables
 /// Represents the many-to-many relationship between Stops and Routes.
 /// One stop can serve multiple routes, and one route can have multiple stops.
@@ -121,7 +134,7 @@ class StopRouteTypesTable extends Table {
 //   IntColumn get routeId =>
 // }
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, RouteTypesTable, RoutesTable, StopsTable, RouteStopsTable, StopRouteTypesTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, RouteTypesTable, RoutesTable, StopsTable, TransportsTable, RouteStopsTable, StopRouteTypesTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -208,6 +221,11 @@ class AppDatabase extends _$AppDatabase {
   /// If it does, update the old stop by merging it with the new one.
   Future<void> insertStop(StopsTableCompanion stop) async {
     await mergeUpdate(stopsTable, stop, (t) => t.id.equals(stop.id.value));
+  }
+
+  // Transport Functions
+  Future<void> insertTransport(TransportsTableCompanion transport) async {
+    await mergeUpdate(transportsTable, transport, (t) => t.uniqueId.equals(transport.uniqueId.value));
   }
 
   // RouteStops Functions

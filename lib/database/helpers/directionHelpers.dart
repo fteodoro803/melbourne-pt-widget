@@ -29,4 +29,12 @@ extension DirectionHelpers on AppDatabase {
     final result = await query.get();
     return result;
   }
+
+  Future<DirectionsTableData?> getDirectionById(int id) async {
+    drift.SimpleSelectStatement<$DirectionsTableTable, DirectionsTableData> query;
+    query = select(directionsTable)
+      ..where((d) => d.id.equals(id));
+    final result = await query.getSingleOrNull();
+    return result;
+  }
 }
