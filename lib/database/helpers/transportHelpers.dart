@@ -31,4 +31,12 @@ extension TransportHelpers on AppDatabase {
     var result = await query.get();
     return result;
   }
+
+  Future<bool> isTransportInDatabase(String id) async {
+    drift.SimpleSelectStatement<$TransportsTableTable, TransportsTableData> query;
+    query = select(transportsTable)..where((t) => t.uniqueId.equals(id));
+    var result = await query.getSingleOrNull();
+
+    return result != null ? true : false;
+  }
 }

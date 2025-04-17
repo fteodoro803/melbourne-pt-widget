@@ -530,6 +530,16 @@ class PtvService {
     }
   }
 
+  /// Checks if Transport is in Database
+  Future<bool> isTransportSaved(Transport transport) async {
+    if (transport.uniqueID != null) {
+      return await Get.find<db.AppDatabase>().isTransportInDatabase(transport.uniqueID!);
+    }
+    else {
+      return false;
+    }
+  }
+
   Future<List<Transport>> loadTransports() async {
     List<Transport> transportList = [];
     db.AppDatabase database = Get.find<db.AppDatabase>();
