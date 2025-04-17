@@ -7,6 +7,7 @@ import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
 import 'package:flutter_project/database/helpers/stopHelpers.dart';
 import 'package:flutter_project/database/helpers/stopRouteTypesHelpers.dart';
+import 'package:flutter_project/database/helpers/transportHelpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -512,6 +513,56 @@ class PtvService {
     }
 
     return StopRouteLists(stops, routes);
+  }
+
+  Future<void> saveTransport(Transport transport) async {
+    String? uniqueId = transport.uniqueID;
+    int? routeTypeId = transport.routeType?.id;
+    int? routeId = transport.route?.id;
+    int? stopId = transport.stop?.id;
+    int? directionId = transport.direction?.id;
+
+    if (uniqueId != null && routeTypeId != null && routeId != null && stopId != null && directionId != null) {
+      Get.find<db.AppDatabase>().addTransport(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId);
+    }
+    else {
+      print(" ( ptv_service.dart -> saveTransportToDb ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
+    }
+  }
+
+  Future<List<Transport>> loadTransports() async {
+    List<Transport> transportList = [];
+    db.AppDatabase database = Get.find<db.AppDatabase>();
+
+    var dbTransports = await Get.find<db.AppDatabase>().getTransports();
+    RouteType? routeType;
+    Route? route;
+    Stop? stop;
+    RouteDirection? direction;
+
+
+    // Convert database transport to domain transport
+    for (var dbTransport in dbTransports) {
+      routeType = RouteType.fromId(dbTransport.routeTypeId);
+
+      var dbRoute = await database.getRouteById(dbTransport.routeId);
+      route = dbRoute != null ? Route.fromDb(dbRoute) : null;
+
+      var dbStop = await database.getStopById(dbTransport.stopId);
+      stop = dbStop != null ? Stop.fromDb(dbStop) : null;
+
+      var dbDirection = await database.getDirectionById(dbTransport.directionId);
+      direction = dbDirection != null ? RouteDirection.fromDb(dbDirection) : null;
+
+      Transport newTransport = Transport.withAttributes(routeType, stop, route, direction);
+      transportList.add(newTransport);
+    }
+
+    return transportList;
+  }
+
+  Future<void> deleteTransport(String transportId) async {
+    await Get.find<db.AppDatabase>().removeTransport(transportId);
   }
 
 }

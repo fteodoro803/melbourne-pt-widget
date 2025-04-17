@@ -3,7 +3,10 @@ import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as ptv;
 import 'package:flutter_project/database/database.dart' as db;
+import 'package:flutter_project/transport.dart';
 import 'package:get/get.dart';
+
+import '../add_screens/widgets/custom_list_tile.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -15,11 +18,13 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   final TextEditingController locationField = TextEditingController();
+  List<Transport> transportList = [];
 
   @override
   void initState() {
     super.initState();
     _initialisePTVData();
+    _loadTransports();
   }
 
   @override
@@ -33,6 +38,12 @@ class _TestScreenState extends State<TestScreen> {
     await ptvService.fetchRouteTypes();
     await ptvService.fetchRoutes();
     await Future.delayed(Duration(milliseconds: 100));
+  }
+
+  Future<void> _loadTransports() async {
+    transportList = await ptvService.loadTransports();
+
+    setState(() {});
   }
 
   Future<void> fromDbTest() async {
@@ -51,17 +62,29 @@ class _TestScreenState extends State<TestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Test Screen")),
-      body: Column(
-        children: [
-          // TextField(
-          //   controller: locationField,
-          //   keyboardType: TextInputType.number,
-          //   decoration: InputDecoration(labelText: "Location"),
-          // ),
-          ElevatedButton(onPressed: () {
-            fromDbTest();
-          }, child: Text("FromDb - Route")),
-        ],
+      // body: Column(
+      //   children: [
+      //     // TextField(
+      //     //   controller: locationField,
+      //     //   keyboardType: TextInputType.number,
+      //     //   decoration: InputDecoration(labelText: "Location"),
+      //     // ),
+      //     // ElevatedButton(onPressed: () {
+      //     //   fromDbTest();
+      //     // }, child: Text("FromDb - Route")),
+      //   ],
+      // ),
+
+      body: ListView.builder(
+        itemCount: transportList.length,
+        itemBuilder: (context, index) {
+          final transport = transportList[index];
+          return CustomListTile(
+              transport: transport,
+              onTap: () {
+                print("DB Transport Info:\n$transport");
+              });
+        },
       ),
     );
   }

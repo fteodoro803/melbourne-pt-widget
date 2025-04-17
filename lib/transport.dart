@@ -27,7 +27,7 @@ class Transport {
   // todo: add GeoPath as an attribute
 
   // Constructor
-  Transport();    // Empty Transport
+  Transport();    // Empty Transport    // todo: delete this
 
   Transport.withStopRoute(Stop stop, Route route, RouteDirection direction) {
     this.stop = stop;
@@ -41,6 +41,8 @@ class Transport {
     this.stop = stop;
     this.route = route;
     this.direction = direction;
+
+    generateUniqueID();
   }
 
   // isEqualTo method to compare all properties
@@ -92,6 +94,7 @@ class Transport {
     generateUniqueID();
   }
 
+  // todo: this should probably be made in the constructor, rather than in the updating departures
   void generateUniqueID() {
     if (routeType != null && stop != null && route != null && direction != null) {
       uniqueID = "${routeType?.id}-${stop?.id}-${route?.id}-${direction?.id}";
@@ -164,6 +167,8 @@ class Transport {
 
     return str;
   }
+
+  // todo: factory constructor fromDB
 
   // Methods for JSON Serialization
   factory Transport.fromJson(Map<String, dynamic> json) => _$TransportFromJson(json);

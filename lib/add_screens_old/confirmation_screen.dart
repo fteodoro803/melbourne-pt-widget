@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
+import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/add_screens/widgets/custom_list_tile.dart';
 import 'package:flutter_project/file_service.dart';
@@ -21,6 +22,7 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
   String _screenName = "ConfirmationScreen";
+  PtvService ptvService = PtvService();
   DevTools tools = DevTools();
   List<Transport> transportList = [];
   bool _isLoading = true;
@@ -69,6 +71,10 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     // setState(() {});
   }
 
+  Future<void> _saveTransportToDb(Transport transport) async {
+    await ptvService.saveTransport(transport);
+  }
+
   // Generate
 
   @override
@@ -94,6 +100,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                 transport: transport,
                 onTap: () async {
                   await append(transportList[index]);
+                  await _saveTransportToDb(transport);
                   widget.arguments
                       .callback(); // calls the screen arguments callback function
                   Navigator.popUntil(context, ModalRoute.withName("/"));
