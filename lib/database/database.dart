@@ -4,6 +4,8 @@ import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
+// todo: add transport
+
 // todo: add disruptions (it comes with Departures i think)
 
 // todo: think about whether columns here should be nullable, because all the swagger api shows is that they are
@@ -32,13 +34,14 @@ class DeparturesTable extends Table {
 
   // todo: maybe its primary foreign key should be the runref? what if it's null?
   @override
-  Set<Column> get primaryKey => {scheduledDeparture, runRef, directionId};
+  Set<Column> get primaryKey => {runRef, stopId, routeId, directionId};
 }
 
 class DirectionsTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get description => text()();
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 
@@ -52,8 +55,6 @@ class RoutesTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get number => text()();                    // todo: convert this to int?
-  TextColumn get colour => text()();
-  TextColumn get textColour => text()();
   IntColumn get routeTypeId => integer().references(RouteTypesTable, #id)();
   TextColumn get gtfsId => text()();
   TextColumn get status => text()();
@@ -143,6 +144,11 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // todo: move these functions to their respective helpers maybe?
+  // todo: rethink about how insertOnConflictUpdate works, because it completely overwrites previous data with new ones
+      // if the previous data was Stop(1, tram, null), and the new one is Stop(1, null, something), the result will be (1, null something) rather than Stop(1, tram, something)
+      // Maybe think of where merging data could be useful? Departures? Stops? etc
+      // Maybe if the data is past a long expiry, it can completely overwrite (bc maybe stops would have changed its location, but not id)
+      // But within a short expiry, that's unlikely, so just update the incomplete fields?
 
   // Departure Functions
   /// Adds a departure to the database, if it doesn't already exist,
@@ -151,10 +157,10 @@ class AppDatabase extends _$AppDatabase {
     // final exists = await (select(departures)
     //   ..where((d) => d.id.equals(departure.id.value))).getSingleOrNull();
     // if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-    //   into(departures).insertOnConflictUpdate(departure);
+    //   await into(departures).insertOnConflictUpdate(departure);
     // }
-    into(departuresTable).insertOnConflictUpdate(departure);
-    // into(departures).insert(departure);
+    await into(departuresTable).insertOnConflictUpdate(departure);
+    // await into(departures).insert(departure);
   }
 
   // Direction Functions
@@ -164,7 +170,7 @@ class AppDatabase extends _$AppDatabase {
     final exists = await (select(directionsTable)
       ..where((d) => d.id.equals(direction.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      into(directionsTable).insertOnConflictUpdate(direction);
+      await into(directionsTable).insertOnConflictUpdate(direction);
     }
   }
 
@@ -175,7 +181,7 @@ class AppDatabase extends _$AppDatabase {
     final exists = await (select(routeTypesTable)
       ..where((d) => d.id.equals(routeType.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      into(routeTypesTable).insertOnConflictUpdate(routeType);
+      await into(routeTypesTable).insertOnConflictUpdate(routeType);
     }
   }
 
@@ -193,18 +199,15 @@ class AppDatabase extends _$AppDatabase {
   Future<void> insertRoute(RoutesTableCompanion route) async {
     final exists = await (select(routesTable)..where((d) => d.id.equals(route.id.value))).getSingleOrNull();
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      into(routesTable).insertOnConflictUpdate(route);
+      await into(routesTable).insertOnConflictUpdate(route);
     }
   }
 
   // Stop Functions
-  /// Adds a stop to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
+  /// Adds a stop to the database, if it doesn't already exist.
+  /// If it does, update the old stop by merging it with the new one.
   Future<void> insertStop(StopsTableCompanion stop) async {
-    final exists = await (select(stopsTable)..where((d) => (d.id.equals(stop.id.value)))).getSingleOrNull();
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      into(stopsTable).insertOnConflictUpdate(stop);
-    }
+    await mergeUpdate(stopsTable, stop, (t) => t.id.equals(stop.id.value));
   }
 
   // RouteStops Functions
@@ -234,7 +237,25 @@ class AppDatabase extends _$AppDatabase {
   }
 
 // Table Functions
-  // Future<void> clearData() async {
-  //   await delete(departures).go();
-  // }
+//   Future<void> clearData() async {
+//     await delete(departures).go();
+//   }
+
+  /// Generic method to merge and update records.
+  /// Only updates fields that are present in the new data.
+  Future<void> mergeUpdate<T extends Table, D>(
+      TableInfo<T, D> table,
+      Insertable<D> newData,
+      Expression<bool> Function(T) whereClause,
+      ) async {
+    final query = select(table)..where(whereClause);
+    final existing = await query.getSingleOrNull();
+
+    if (existing == null) {
+      await into(table).insertOnConflictUpdate(newData);
+    }
+    else {
+      await (update(table)..where(whereClause)).write(newData);
+    }
+  }
 }

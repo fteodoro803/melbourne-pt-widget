@@ -11,7 +11,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'ptv_service.dart';
 
 import 'database/helpers/departureHelpers.dart';
-import 'package:drift/drift.dart';
 import 'database/database.dart' as db;
 import 'package:get/get.dart';
 
@@ -49,8 +48,7 @@ class Transport {
     return uniqueID == other.uniqueID;
   }
 
-
-  // Next 3 Departures, make a function to update this on selected intervals later
+  // Next 3 Departures
   List<Departure>? departures;
 
   // Update Departures
@@ -59,8 +57,6 @@ class Transport {
     String? stopId = stop?.id.toString();
     String? directionId = direction?.id.toString();
     String? routeId = route?.id.toString();
-
-    // print("( transport.dart -> updateDepartures() ) -- transport file: \n${toString()} ");
 
     // Early exit if any of the prerequisites are null
     // if (routeType == null || stopId == null || directionId == null || routeId == null) {
@@ -116,6 +112,7 @@ class Transport {
     return newTransportList;
   }
 
+  // todo: use the ptv service version of this
   Future<List<RouteDirection>> fetchRouteDirections() async {
     String? routeId = route?.id.toString();
     List<RouteDirection> directions = [];

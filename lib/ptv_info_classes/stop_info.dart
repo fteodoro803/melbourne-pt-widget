@@ -2,7 +2,6 @@ import 'package:flutter_project/ptv_info_classes/route_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:drift/drift.dart' as drift;
 
 part 'stop_info.g.dart';
 
@@ -40,6 +39,19 @@ class Stop {
         "\tSuburb: $suburb\n";
   }
 
+  /// Factory constructor to create a Route from the PTV API response
+  factory Stop.fromApi(Map<String, dynamic> json) {
+    return Stop(
+      id: json["stop_id"],
+      name: json["stop_name"],
+      latitude: json["stop_latitude"],
+      longitude: json["stop_longitude"],
+      distance: json["stop_distance"],
+      suburb: json["stop_suburb"],
+      stopSequence: json["stop_sequence"],
+    );
+  }
+
   // Methods for Database
   /// Factory constructor from database
   factory Stop.fromDb(db.StopsTableData dbStop) {
@@ -49,18 +61,6 @@ class Stop {
         latitude: dbStop.latitude,
         longitude: dbStop.longitude,
         stopSequence: dbStop.sequence,
-    );
-  }
-
-  /// Converts Stop to StopsTableCompanion
-  db.StopsTableCompanion toCompanion() {
-    return db.StopsTableCompanion(
-      id: drift.Value(id),
-      name: drift.Value(name),
-      latitude: latitude != null ? drift.Value(latitude!) : drift.Value(0),
-      longitude: longitude != null ? drift.Value(longitude!) : drift.Value(0),
-      sequence: drift.Value(stopSequence),
-      lastUpdated: drift.Value(DateTime.now()),
     );
   }
 

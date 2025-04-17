@@ -12,9 +12,17 @@ extension RouteTypeHelpers on AppDatabase {
     );
   }
 
+  /// Adds a route type to the database
   Future<void> addRouteType(int id, String name) async {
     RouteTypesTableCompanion routeType = await createRouteTypeCompanion(id: id, name: name);
     AppDatabase db = Get.find<AppDatabase>();
     db.insertRouteType(routeType);
+  }
+
+  /// Gets all route types offered by PTV from the database.
+  Future<List<RouteTypesTableData>> getRouteTypes() async {
+    var query = select(routeTypesTable);
+    final result = await query.get();
+    return result;
   }
 }

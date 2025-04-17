@@ -1,6 +1,7 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
+import 'package:flutter_project/database/helpers/directionHelpers.dart';
 import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
@@ -31,6 +32,7 @@ class StopRouteLists {
 class PtvService {
 
 // Departure Functions
+  // todo: use fromApi constructor
   Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
     List<Departure> departures = [];
 
@@ -53,40 +55,9 @@ class PtvService {
     }
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
+    Map<String, dynamic>? runData = jsonResponse["runs"];
     for (var departure in jsonResponse["departures"]) {
-      DateTime? scheduledDepartureUTC = departure["scheduled_departure_utc"] !=
-          null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
-      DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
-          null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
-      String? runRef = departure["run_ref"]?.toString();
-      int? stopId = departure["stop_id"];
-
-      // Get Vehicle descriptors per Departure
-      var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
-      bool? hasLowFloor;
-      bool? hasAirConditioning;
-      if (vehicleDescriptors != null && vehicleDescriptors
-          .toString()
-          .isNotEmpty) {
-        // print("( ptv_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
-
-        hasLowFloor = vehicleDescriptors["low_floor"];
-        hasAirConditioning = vehicleDescriptors["air_conditioned"];
-      }
-      else {
-        print(
-            "( ptv_service.dart -> fetchDepartures() ) -- runs for runRef $runRef is empty )");
-      }
-
-      Departure newDeparture = Departure(
-        scheduledDepartureUTC: scheduledDepartureUTC,
-        estimatedDepartureUTC: estimatedDepartureUTC,
-        runRef: runRef,
-        stopId: stopId,
-        hasAirConditioning: hasAirConditioning,
-        hasLowFloor: hasLowFloor,
-      );
-
+      Departure newDeparture = Departure.fromAPI(departure, runData);
       departures.add(newDeparture);
     }
 
@@ -94,37 +65,46 @@ class PtvService {
   }
 
 // Direction Functions
+  /// Fetches directions for a given route.
+  /// Uses data from either the database or PTV API, preferring the database.
   Future<List<RouteDirection>> fetchDirections(int routeId) async {
     List<RouteDirection> directionList = [];
 
-    // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().routeDirections(routeId.toString());
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Early Exit
-    if (data.response == null) {
-      print("( ptv_service.dart -> fetchDirections ) -- Null response");
-      return directionList;
+    // Check if directions data exists in database
+    // If it does, set directionList to the retrieved data. If not, fetch data from the API
+    final dbDirectionsList = await Get.find<db.AppDatabase>().getDirectionsByRoute(routeId);
+    if (dbDirectionsList.isNotEmpty) {
+      directionList = dbDirectionsList.map(RouteDirection.fromDb).toList();
     }
 
-    // Populating Stops List
-    for (var direction in jsonResponse!["directions"]) {
-      // if (direction["route_id"] != widget.userSelections.stop?.route.id) {continue;}
+    else {
+      ApiData data = await PtvApiService().routeDirections(routeId.toString());
+      Map<String, dynamic>? jsonResponse = data.response;
 
-      int id = direction["direction_id"];
-      String name = direction["direction_name"];
-      String description = direction["route_direction_description"];
+      // Early Exit
+      if (data.response == null) {
+        print("( ptv_service.dart -> fetchDirections ) -- Null response");
+        return [];
+      }
 
-      RouteDirection newDirection =
-      RouteDirection(id: id, name: name, description: description);
+      // Populating Stops List
+      for (var direction in jsonResponse!["directions"]) {
+        int routeId = direction["route_id"];
+        RouteDirection newDirection = RouteDirection.fromApi(direction);
+        directionList.add(newDirection);
 
-      directionList.add(newDirection);
+        // Adding to database
+        await Get.find<db.AppDatabase>().addDirection(
+            newDirection.id, newDirection.name, newDirection.description,
+            routeId);
+      }
     }
 
     return directionList;
   }
 
 // GeoPath Functions
+  // todo: add to database
   Future<List<LatLng>> fetchGeoPath(Route route) async {
     List<LatLng> pathList = [];
 
@@ -155,6 +135,8 @@ class PtvService {
   }
 
 // Pattern Functions
+  // todo: use fromApi constructor
+  // todo: add to database
   Future<List<Departure>> fetchPattern(Transport transport, Departure departure) async {
     List<Departure> departures = [];
 
@@ -227,40 +209,40 @@ class PtvService {
   }
 
 // Route Functions
-  /// Fetches all routes offered by PTV, and saves them to the database
+  /// Fetches all routes offered by PTV from the database.
+  /// If no route data is in database, it fetches from the PTV API and stores it to database.
   Future<List<Route>> fetchRoutes({String? routeTypes}) async {
     List<Route> routeList = [];
 
-    // Fetches stop data via PTV API
-    ApiData data = await PtvApiService().routes(routeTypes: routeTypes);
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Empty JSON Response
-    if (jsonResponse == null) {
-      print(
-          "(ptv_service.dart -> fetchRoutes) -- Null data response");
-      return routeList;
+    // Checks if data exists in database, and sets routeList if it exists
+    int? routeType = routeTypes != null ? int.tryParse(routeTypes) : null;
+    final dbRouteList = await Get.find<db.AppDatabase>().getRoutes(routeType);
+    if (dbRouteList.isNotEmpty) {
+      routeList = dbRouteList.map(Route.fromDb).toList();
     }
 
-    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
-    for (var route in jsonResponse["routes"]) {
-      int id = route["route_id"];
-      String name = route["route_name"];
-      String number = route["route_number"];
-      RouteType type = RouteType.fromId(route["route_type"]);
-      String gtfsId = route["route_gtfs_id"];
-      String status = route["route_service_status"]["description"];
+    // Fetches data from API and adds to database, if route data doesn't exist in database
+    else {
+      // Fetches stop data via PTV API
+      ApiData data = await PtvApiService().routes(routeTypes: routeTypes);
+      Map<String, dynamic>? jsonResponse = data.response;
 
-      Route newRoute = Route(id: id,
-          name: name,
-          number: number,
-          type: type,
-          gtfsId: gtfsId,
-          status: status);
-      routeList.add(newRoute);
+      // Empty JSON Response
+      if (jsonResponse == null) {
+        print("(ptv_service.dart -> fetchRoutes) -- Null data response");
+        return [];
+      }
 
-      // Add to Database
-      await Get.find<db.AppDatabase>().addRoute(id, name, number, type.id, gtfsId, status);
+      // Creates new routes, and adds them to return list and database
+      for (var route in jsonResponse["routes"]) {
+        Route newRoute = Route.fromApi(route);
+        routeList.add(newRoute);
+
+        // Add to Database
+        await Get.find<db.AppDatabase>().addRoute(
+            newRoute.id, newRoute.name, newRoute.number, newRoute.type.id,
+            newRoute.gtfsId, newRoute.status);
+      }
     }
 
     return routeList;
@@ -268,13 +250,15 @@ class PtvService {
 
   /// Fetches routes from database, by search name.
   Future<List<Route>> searchRoutes({String? query, RouteType? routeType}) async {
-    final dbRouteList = await Get.find<db.AppDatabase>().getRoutes(search: query, routeType: routeType?.id);
+    final dbRouteList = await Get.find<db.AppDatabase>().getRoutesByName(search: query, routeType: routeType?.id);
     List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
     return domainRouteList;
   }
 
   /// Fetches routes according to a stop, from the database.
   /// Maps the databases' routes to domain's route
+  // todo: consider change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
+  // todo: but also, in our functions, we use fetch, but most of them also check the database first. So maybe for consistency, keep it?
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
     final dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
 
@@ -285,27 +269,38 @@ class PtvService {
   }
 
 // RouteType Functions
-  /// Fetches route types offered by PTV, and saves them to the database
+  /// Fetches all route types offered by PTV from the database.
+  /// If no route type data is in database, it fetches from the PTV API and stores it to database.  // todo: get from database first, preferring database
   Future<List<String>> fetchRouteTypes() async {
     List<String> routeTypes = [];
 
-    ApiData data = await PtvApiService().routeTypes();
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // Early Exit
-    if (data.response == null) {
-      print("( ptv_service.dart -> fetchRouteTypes ) -- null data response");
-      return routeTypes;
+    // If data exists in database, adds that data to routeTypes list
+    final dbRouteTypesList = await Get.find<db.AppDatabase>().getRouteTypes();
+    if (dbRouteTypesList.isNotEmpty) {
+      routeTypes = dbRouteTypesList.map((rt) => rt.name).toList();
     }
 
-    // Populating RouteTypes List
-    for (var entry in jsonResponse!["route_types"]) {
-      int id = entry["route_type"];
-      String name = entry["route_type_name"];
-      routeTypes.add(name);
+    // If data doesn't exist in database, fetches from API and adds it to database
+    else {
+      ApiData data = await PtvApiService().routeTypes();
+      Map<String, dynamic>? jsonResponse = data.response;
 
-      // Add to database
-      Get.find<db.AppDatabase>().addRouteType(id, name);
+      // Early exit: Empty response
+      if (data.response == null) {
+        print("( ptv_service.dart -> fetchRouteTypes ) -- Null response");
+        return [];
+      }
+
+      // Populating RouteTypes list
+      for (var entry in jsonResponse!["route_types"]) {
+        int id = entry["route_type"];
+        RouteType newRouteType = RouteType.fromId(id);
+        routeTypes.add(newRouteType.name);
+
+        // Add to database
+        Get.find<db.AppDatabase>().addRouteType(
+            newRouteType.id, newRouteType.name);
+      }
     }
 
     return routeTypes;
@@ -326,6 +321,7 @@ class PtvService {
 // Stop Functions
   /// Fetch Stops near a Location and saves them to the database.
   /// This function also creates a link between the stop and route it's on.
+  // todo: think about if getting from the database is even needed here. Since it's impossible to save every stop around a location. And if you were to retrieve it from database, it would be incomplete, so you'd have to call the api anyway. Might as well just keep it to doing the api call
   Future<List<Stop>> fetchStopsLocation(String location, {int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
     List<Future> futures = [];    // holds all Futures for database async operations
@@ -337,35 +333,28 @@ class PtvService {
 
     // Early Exit
     if (data.response == null) {
-      print("( ptv_service.dart -> fetchStopsLocation ) -- null data response");
-      return stopList;
+      print("( ptv_service.dart -> fetchStopsLocation ) -- null response");
+      return [];
     }
 
     // Populating stops list and adding them to Database
     for (var stop in jsonResponse!["stops"]) {
-      int stopId = stop["stop_id"];
-      String stopName = stop["stop_name"];
-      int selectedRouteType = stop["route_type"];
-      double latitude = stop["stop_latitude"];
-      double longitude = stop["stop_longitude"];
-      double? distance = stop["stop_distance"];
-      Stop newStop = Stop(id: stopId, name: stopName, latitude: latitude,
-          longitude: longitude, distance: distance);
-
+      Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude, longitude));
+      futures.add(Get.find<db.AppDatabase>().addStop(newStop.id, newStop.name, newStop.latitude!, newStop.longitude!));
 
       // Adds route-stop relationship to database
+      int selectedRouteType = stop["route_type"];
       for (var route in stop["routes"]) {
+        int routeId = route["route_id"];
         int currRouteTypeId = route["route_type"];
-        futures.add(Get.find<db.AppDatabase>().addStopRouteType(stopId, currRouteTypeId));
+        futures.add(Get.find<db.AppDatabase>().addStopRouteType(newStop.id, currRouteTypeId));
 
         if (route["route_type"] != selectedRouteType) {
           continue;
         }
 
-        int routeId = route["route_id"];
-        futures.add(Get.find<db.AppDatabase>().addRouteStop(routeId, stopId));
+        futures.add(Get.find<db.AppDatabase>().addRouteStop(routeId, newStop.id));
       }
     }
 
@@ -377,6 +366,7 @@ class PtvService {
 
   /// Fetch Stops along a Route and saves them to the database.
   /// Also saves the link between the route and its stops.
+  // todo: fetch data from database first, preferring database
   Future<List<Stop>> fetchStopsRoute(Route route, {RouteDirection? direction}) async {
     List<Stop> stopList = [];
 
@@ -438,7 +428,7 @@ class PtvService {
     // todo: convert this entire function into the following:
     // 1. make api call, if data doesn't exist in database
     // 2. convert api response to domain models, via factory constructor
-    // 3. convert domain model to companions
+    // 3. convert domain model to companions? - think about making a toCompanion first
     // 4. use helper for single/batch inserts
 
     // // Convert domain models to companion

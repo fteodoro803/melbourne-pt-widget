@@ -102,12 +102,15 @@ class Route {
   @override
   String toString() {
     String str = "Route:\n"
-        "\tID: $id\t"
-        "\tName: $name\t"
-        "\tNumber: $number\n"
-        "\tType: ${type.name}\t"
-        "\tColour: $colour\t"
-        "\tTextColour: $textColour\n";
+        "\t         ID: $id\t"
+        "\t     Number: $number\t"
+        "\t       Name: $name\n"
+        "\t       Type: ${type.name}\t"
+        "\t     Colour: $colour\t"
+        "\t TextColour: $textColour\n"
+        "\t     GtfsId: $gtfsId\t"
+        "\t     Status: $status\n"
+    ;
 
     if (direction != null) {
       str += direction.toString();
@@ -119,6 +122,18 @@ class Route {
   /// Methods for JSON Serialization.
   factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
   Map<String, dynamic> toJson() => _$RouteToJson(this);
+
+  /// Factory constructor to create a Route from the PTV API response
+  factory Route.fromApi(Map<String, dynamic> json) {
+    return Route(
+        id: json["route_id"],
+        name: json["route_name"],
+        number: json["route_number"],
+        type: RouteType.fromId(json["route_type"]),
+        gtfsId: json["route_gtfs_id"],
+        status: json["route_service_status"]["description"],
+    );
+  }
 
   /// Factory constructor to create a Route from a database RoutesData object.
   factory Route.fromDb(db.RoutesTableData dbRoute) {

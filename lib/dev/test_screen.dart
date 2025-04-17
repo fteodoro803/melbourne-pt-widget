@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as ptv;
+import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
-import '../database/database.dart' as db;
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -16,8 +14,7 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
-  final TextEditingController routeQuery = TextEditingController();
-  final TextEditingController routeTypeIdController = TextEditingController();
+  final TextEditingController locationField = TextEditingController();
 
   @override
   void initState() {
@@ -27,8 +24,7 @@ class _TestScreenState extends State<TestScreen> {
 
   @override
   void dispose() {
-    routeQuery.dispose();
-    routeTypeIdController.dispose();
+    locationField.dispose();
     super.dispose();
   }
 
@@ -39,26 +35,16 @@ class _TestScreenState extends State<TestScreen> {
     await Future.delayed(Duration(milliseconds: 100));
   }
 
-  ptv.Route route = ptv.Route(id: 725, name: "name", number: "1", type: RouteType.tram, gtfsId: "gtfsId", status: "status");
-  RouteDirection direction = RouteDirection(id: 10, name: "name", description: "description");
-  Future<void> fetchStopsRoute() async {
-    // also do a fetch route stops here
-    var stops = await ptvService.fetchStopsRoute(route);
-    await Future.delayed(Duration(milliseconds: 100));
-    print(stops);
-  }
-  Future<void> getStopsRoute() async {
-    // also do a fetch route stops here
-    var database = Get.find<db.AppDatabase>();
-    var dataStopsRoute = await database.getStopsOnRoute(route.id);
-    await Future.delayed(Duration(milliseconds: 100));
-    print(dataStopsRoute.toString());
-  }
+  Future<void> fromDbTest() async {
+    int routeId = 725;
 
-  Future<void> searchRoutes(String? query, int? routeType) async {
     var database = Get.find<db.AppDatabase>();
-    var routeList = await ptvService.searchRoutes(query: query, routeType: routeType != null ? RouteType.fromId(routeType) : null);
-    print(routeList);
+    var dbRoute = await database.getRouteById(routeId);
+
+    print("Db Route: ${dbRoute.toString()}");
+
+    ptv.Route? domainRoute = dbRoute != null ? ptv.Route.fromDb(dbRoute) : null;
+    print("Domain Route: $domainRoute");
   }
 
   @override
@@ -67,26 +53,14 @@ class _TestScreenState extends State<TestScreen> {
       appBar: AppBar(title: const Text("Test Screen")),
       body: Column(
         children: [
+          // TextField(
+          //   controller: locationField,
+          //   keyboardType: TextInputType.number,
+          //   decoration: InputDecoration(labelText: "Location"),
+          // ),
           ElevatedButton(onPressed: () {
-            getStopsRoute();
-          }, child: Text("fetchStopsRoute")),
-          ElevatedButton(onPressed: () {
-            getStopsRoute();
-          }, child: Text("getStopsRoute")),
-          Divider(),
-          TextField(
-            controller: routeQuery,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Route Query"),
-          ),
-          TextField(
-            controller: routeTypeIdController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Route Type ID"),
-          ),
-          ElevatedButton(onPressed: () {
-            searchRoutes(routeQuery.text, int.tryParse(routeTypeIdController.text));
-          }, child: Text("Search Route")),
+            fromDbTest();
+          }, child: Text("FromDb - Route")),
         ],
       ),
     );

@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
-import 'package:flutter_project/palettes.dart';
 
 /// Represents the colours a route can have.
 class Colours {
@@ -16,15 +15,12 @@ extension RouteHelpers on AppDatabase {
   async {
     AppDatabase db = Get.find<AppDatabase>();
     String? routeType = await db.getRouteTypeNameFromRouteTypeId(routeTypeId);
-    Colours routeColours = setRouteColour(routeType!, number: number, name: name);
 
     return RoutesTableCompanion(
       id: drift.Value(id),
       name: drift.Value(name),
       number: drift.Value(number),
       routeTypeId: drift.Value(routeTypeId),
-      colour: drift.Value(routeColours.colour),
-      textColour: drift.Value(routeColours.textColour),
       gtfsId: drift.Value(gtfsId),
       status: drift.Value(status),
       lastUpdated: drift.Value(DateTime.now()),
@@ -37,8 +33,34 @@ extension RouteHelpers on AppDatabase {
     await db.insertRoute(route);
   }
 
+  /// Gets all routes in database.
+  Future<List<RoutesTableData>> getRoutes(int? routeType) async {
+    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
+
+    if (routeType != null) {
+      query = select(routesTable)
+        ..where((tbl) => tbl.routeTypeId.equals(routeType));
+    }
+    else {
+      query = select(routesTable);
+    }
+
+    final result = await query.get();
+    return result;
+  }
+
+  /// Gets route according to id.
+  Future<RoutesTableData?> getRouteById(int id) async {
+    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
+    query = select(routesTable)
+      ..where((tbl) => tbl.id.equals(id));
+
+    final result = await query.getSingleOrNull();
+    return result;
+  }
+
   /// Gets routes according to name.
-  Future<List<RoutesTableData>> getRoutes({String? search, int? routeType}) async {
+  Future<List<RoutesTableData>> getRoutesByName({String? search, int? routeType}) async {
     AppDatabase db = Get.find<AppDatabase>();
 
     drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
@@ -60,66 +82,5 @@ extension RouteHelpers on AppDatabase {
 
     final result = await query.get();
     return result;
-  }
-
-  /// Sets a route's colours based on its type.
-  /// Uses predefined colour palette with fallbacks for routes.
-  // todo: move this to domain model
-  Colours setRouteColour(String routeType, {String? name, String? number}) {
-    String colour;
-    String textColour;
-    routeType = routeType.toLowerCase(); // Normalise case for matching
-
-    // Tram routes: match by route number
-    if (routeType == "tram") {
-      String routeId = "route$number";
-
-      colour = TramPalette.values
-          .firstWhere((route) => route.name == routeId,
-          orElse: () => TramPalette.routeDefault)
-          .colour;
-      textColour = TramPalette.values
-          .firstWhere((route) => route.name == routeId,
-          orElse: () => TramPalette.routeDefault)
-          .textColour
-          .colour;
-    }
-
-    // Train routes: match by route name
-    else if (routeType == "train") {
-      String? routeName = name?.replaceAll(" ", "").toLowerCase();
-
-      // Matches Transport route name to Palette route Name
-      colour = TrainPalette.values
-          .firstWhere((route) => route.name == routeName,
-          orElse: () => TrainPalette.routeDefault)
-          .colour;
-      textColour = TrainPalette.values
-          .firstWhere((route) => route.name == routeName,
-          orElse: () => TrainPalette.routeDefault)
-          .textColour
-          .colour;
-    }
-
-    // Bus and Night Bus routes: use standard colours
-    // todo: add route-specific colours
-    else if (routeType == "bus" || routeType == "night bus") {
-      colour = BusPalette.routeDefault.colour;
-      textColour = BusPalette.routeDefault.textColour.colour;
-    }
-
-    // VLine routes: use standard colours
-    // todo: add route-specific colours
-    else if (routeType == "vline") {
-      colour = VLine.routeDefault.colour;
-      textColour = VLine.routeDefault.textColour.colour;
-
-      // Unknown route type: use fallback colours
-    } else {
-      colour = FallbackColour.routeDefault.colour;
-      textColour = FallbackColour.routeDefault.textColour.colour;
-    }
-
-    return Colours(colour, textColour);
   }
 }
