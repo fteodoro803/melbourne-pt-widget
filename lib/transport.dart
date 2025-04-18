@@ -69,7 +69,7 @@ class Transport {
 
     // Gets Departures and saves to instance
     PtvService ptvService = PtvService();
-    int departureCount = 3;
+    int departureCount = 20;
     departures = await ptvService.fetchDepartures(
         routeType, stopId, routeId, directionId: directionId, maxResults: departureCount.toString());
 

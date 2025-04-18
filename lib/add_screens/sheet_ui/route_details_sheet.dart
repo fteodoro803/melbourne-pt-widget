@@ -5,6 +5,8 @@ import '../controllers/route_details_controller.dart';
 import '../controllers/search_controller.dart' as search_controller;
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
+import '../widgets/sticky_header_delegate.dart';
+
 class RouteDetailsSheet extends StatelessWidget {
   final ScrollController scrollController;
   final searchController = Get.find<search_controller.SearchController>();
@@ -32,7 +34,7 @@ class RouteDetailsSheet extends StatelessWidget {
           // Pinned route + direction header
           SliverPersistentHeader(
             pinned: true,
-            delegate: _StickyHeaderDelegate(
+            delegate: StickyHeaderDelegate(
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 padding: EdgeInsets.fromLTRB(12, 12, 16, 4),
@@ -131,36 +133,5 @@ class RouteDetailsSheet extends StatelessWidget {
         ],
       );
     });
-  }
-}
-
-
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  final double height;
-
-  _StickyHeaderDelegate({
-    required this.child,
-    required this.height,
-  });
-
-  @override
-  double get minExtent => height;
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  Widget build(
-      BuildContext context,
-      double shrinkOffset,
-      bool overlapsContent,
-      ) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return true;
   }
 }
