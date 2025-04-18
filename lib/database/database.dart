@@ -31,7 +31,7 @@ class DeparturesTable extends Table {
 
   // todo: Column for Transport mapping? Because each Departure is mapped to a Transport
   // todo: Add Column for Platform Number
-  IntColumn get platform =>
+  // IntColumn get platform =>
 
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();

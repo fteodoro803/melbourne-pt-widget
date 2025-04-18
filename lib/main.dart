@@ -224,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // Function to handle the reorder action
-  void onReorder(int oldIndex, int newIndex) {
+  void onReorder(int oldIndex, int newIndex) async {
     setState(() {
       if (newIndex > oldIndex) {
         newIndex -= 1;
@@ -235,6 +235,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Save the updated list after reordering
     save(_transportList);
+
+    // Save indices to database
+    for (int i=0; i<_transportList.length; i++) {
+      _transportList[i].setIndex(i);
+      await ptvService.saveTransport(_transportList[i]);
+    }
   }
 
   @override

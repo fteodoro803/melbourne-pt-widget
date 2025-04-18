@@ -154,6 +154,10 @@ class Transport {
     }
   }
 
+  void setIndex(int index) {
+    this.index = index;
+  }
+
   // Make the toString for list representation???~
   @override
   String toString() {
