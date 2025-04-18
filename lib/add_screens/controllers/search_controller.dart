@@ -188,10 +188,6 @@ class SearchController extends GetxController {
 
   /// Triggers loading Departure Details sheet from Stop Details/Transport Details)
   Future<void> pushDeparture(Departure departure) async {
-    if (details.value.departure != null) {
-      Get.find<DepartureDetailsController>().fetchPattern();
-    }
-
     setDeparture(departure);
 
     if (sheetController.currentSheet.value != 'Transport Details') {
@@ -199,6 +195,10 @@ class SearchController extends GetxController {
       await Get.find<MapController>().renderTransportPath();
     }
     sheetController.pushSheet('Departure Details');
+
+    if (Get.isRegistered<DepartureDetailsController>()) {
+      Get.find<DepartureDetailsController>().fetchPattern();
+    }
   }
 
   /// Sets new stops list & initializes expansion states

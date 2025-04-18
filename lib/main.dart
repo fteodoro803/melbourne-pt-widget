@@ -28,7 +28,6 @@ import "home_widget_service.dart";
 
 import 'package:get/get.dart';
 
-// void main() {
 void main() async {
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,11 +36,6 @@ void main() async {
 
   // todo: maybe call fetchRoutes here?
 
-  // // Loads Config
-  // await GlobalConfiguration().loadFromAsset("config");
-  //
-  // // Runs app
-  // runApp(MyApp());
   try {
     await GlobalConfiguration().loadFromAsset("config");
     runApp(MyApp());
@@ -126,7 +120,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final requestController = TextEditingController();
   final locationController = TextEditingController();
-  String? _file;
   List<Transport> _transportList = [];
 
   HomeWidgetService homeWidgetService = HomeWidgetService();
@@ -136,8 +129,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    print("initState called");
-    // _updateMainPage();
 
     // Get all Routes and RouteTypes, and add to Database
     _initialisePTVData();
@@ -150,7 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Set up a timer to update the transport list every 30 seconds
     _timer = Timer.periodic(Duration(seconds: 30), (timer) {
-      print("Timer triggered");
       _updateMainPage();
     });
   }
@@ -166,53 +156,25 @@ class _MyHomePageState extends State<MyHomePage> {
     await ptvService.fetchRoutes();
   }
 
-  // Reads the saved transport data from a file and converts it into a list of Transport objects.
-  // If the file is empty or doesn't exist, initializes an empty transport list.
+  // Reads the saved transport data from database and updates departures
   Future<void> _updateMainPage() async {
-    print("updating main page");
-    String? stringContent = await read(formatted: true);
+    print("Updating main page");
 
-    // Case: Populated transport File
-    // Updates the Displayed Transport
-    if (stringContent != null) {
-      List<Transport> transportList = await parseTransportJSON(stringContent);
+    List<Transport> transportList = await ptvService.loadTransports();
 
-      // Updates all Departures
-      for (var transport in transportList) {
-        await transport.updateDepartures();
-      }
-
-      // Saves updated Departures to File
-      save(transportList);
-
-      setState(() {
-        _file = stringContent;
-        _transportList = transportList;
-      });
-
-      print("( main.dart ) -- preparing to send Widget Data");
-      // Send Transport Data to Widget
-      await homeWidgetService.sendWidgetData(_transportList);
-      print("( main.dart ) -- Widget Data finishing sending");
+    // Updates all Departures
+    for (var transport in transportList) {
+      await transport.updateDepartures();
     }
 
-    // Case: No transport File
-    else {
-      setState(() {
-        _file = stringContent;
-        _transportList = [];
-      });
-    }
-  }
-
-  // Dismiss a Transport item from List
-  void removeTransport(Transport transport) async {
     setState(() {
-      _transportList.remove(transport);
+      _transportList = transportList;
     });
 
-    await save(_transportList);   // Updates the save file
-    print("( main.dart -> removeTransport() ) : TransportListCount=${_transportList.length}");
+    // print("( main.dart ) -- preparing to send Widget Data");
+    // Send Transport Data to Widget
+    await homeWidgetService.sendWidgetData(_transportList);
+    print("( main.dart ) -- Widget Data finishing sending");
   }
 
   @override
@@ -264,7 +226,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: CustomListTile(
                           transport: _transportList[index],
                           dismissible: true,
-                          onDismiss: () => {removeTransport(_transportList[index]), _updateMainPage()},
+                          onDismiss: () {
+                            ptvService.deleteTransport(_transportList[index]);
+                            _updateMainPage();
+                          },
                           onTap: () =>
                             Get.to(
                               () => SearchScreen(searchDetails: SearchDetails.withTransport(_transportList[index]), enableSearch: false),
@@ -279,12 +244,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      // Add the refresh button as a floating action button
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => Get.to(() => FindRoutesScreen()),
-      //   tooltip: 'Refresh',
-      //   child: Icon(Icons.add),
-      // ),
       floatingActionButton: SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
