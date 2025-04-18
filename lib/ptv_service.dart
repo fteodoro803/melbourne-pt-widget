@@ -523,9 +523,10 @@ class PtvService {
     int? routeId = transport.route?.id;
     int? stopId = transport.stop?.id;
     int? directionId = transport.direction?.id;
+    int? index = transport.index;
 
     if (uniqueId != null && routeTypeId != null && routeId != null && stopId != null && directionId != null) {
-      Get.find<db.AppDatabase>().addTransport(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId);
+      Get.find<db.AppDatabase>().addTransport(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
     }
     else {
       print(" ( ptv_service.dart -> saveTransportToDb ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");

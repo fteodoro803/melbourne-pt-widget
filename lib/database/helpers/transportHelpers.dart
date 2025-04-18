@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
 extension TransportHelpers on AppDatabase {
-  Future<TransportsTableCompanion> createTransportCompanion({required String uniqueId, required int routeTypeId, required int routeId, required int stopId, required int directionId})
+  Future<TransportsTableCompanion> createTransportCompanion({required String uniqueId, required int routeTypeId, required int routeId, required int stopId, required int directionId, int? index})
   async {
     return TransportsTableCompanion(
       uniqueId: drift.Value(uniqueId),
@@ -10,13 +10,14 @@ extension TransportHelpers on AppDatabase {
       routeId: drift.Value(routeId),
       stopId: drift.Value(stopId),
       directionId: drift.Value(directionId),
+      index: index != null ? drift.Value(index) : drift.Value.absent(),
     );
   }
 
   Future<void> addTransport(
       {required String uniqueId, required int routeTypeId, required int routeId,
-        required int stopId, required int directionId}) async {
-    TransportsTableCompanion transport = await createTransportCompanion(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId);
+        required int stopId, required int directionId, int? index}) async {
+    TransportsTableCompanion transport = await createTransportCompanion(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
     await insertTransport(transport);
   }
 

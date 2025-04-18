@@ -30,6 +30,8 @@ class DeparturesTable extends Table {
   IntColumn get directionId => integer().references(DirectionsTable, #id).nullable()();
 
   // todo: Column for Transport mapping? Because each Departure is mapped to a Transport
+  // todo: Add Column for Platform Number
+  // IntColumn get platform =>
 
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
@@ -100,6 +102,7 @@ class TransportsTable extends Table {
   IntColumn get routeId => integer()();
   IntColumn get stopId => integer()();
   IntColumn get directionId => integer()();
+  IntColumn get index => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {uniqueId};

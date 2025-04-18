@@ -24,6 +24,7 @@ class Transport {
   Stop? stop;
   Route? route;
   RouteDirection? direction;
+  int? index;
   // todo: add GeoPath as an attribute
 
   // Constructor
@@ -151,6 +152,10 @@ class Transport {
     } catch (e) {
       print(e); // Logs unknown route type errors
     }
+  }
+
+  void setIndex(int index) {
+    this.index = index;
   }
 
   // Make the toString for list representation???~
