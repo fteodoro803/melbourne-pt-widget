@@ -28,6 +28,8 @@ class Departure {
   int? stopId;
   // todo: add attribute for if a stop has a high platform
 
+  // todo: URGENT: add platform number
+
   /// Creates a Departure object from a scheduled and estimated departure time in UTC.
   /// Also converts the UTC departure times to Melbourne time.
   Departure(

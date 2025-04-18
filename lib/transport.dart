@@ -24,6 +24,7 @@ class Transport {
   Stop? stop;
   Route? route;
   RouteDirection? direction;
+  int? index;
   // todo: add GeoPath as an attribute
 
   // Constructor
