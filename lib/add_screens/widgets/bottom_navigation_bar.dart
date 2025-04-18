@@ -36,18 +36,20 @@ class BottomNavigation extends StatelessWidget {
         switch (index) {
           case 0: // Home
           // If returning to home from another screen, maybe we need to update
-            if (currentIndex != 0 && updateMainPage != null) {
-              // Only refresh data when returning to home
-              updateMainPage!();
+            if (Get.currentRoute != '/') {
+              if (updateMainPage != null) {
+                // Only refresh data when returning to home
+                updateMainPage!();
+              }
+              Get.offAllNamed('/');
             }
-
-            Get.offAllNamed('/');
             break;
-
 
         // In bottom_navigation_bar.dart, modify the onTap handler for the Search tab:
           case 1: // Search
-            print("Bottom navigation: Search tab pressed - reinitializing search screen");
+            // print("Bottom navigation: Search tab pressed - reinitializing search screen");
+
+            if (currentIndex != 1) {} // todo: save state of search screen when navigating to home
 
             // Force delete all existing controllers to ensure fresh state
             if (Get.isRegistered<SheetNavigationController>()) {
@@ -72,7 +74,7 @@ class BottomNavigation extends StatelessWidget {
 
             // Then create new search screen instance
             Future.delayed(Duration(milliseconds: 50), () {
-              print("Creating new search screen instance");
+              // print("Creating new search screen instance");
               Get.to(
                     () => SearchScreen(
                     searchDetails: SearchDetails(),

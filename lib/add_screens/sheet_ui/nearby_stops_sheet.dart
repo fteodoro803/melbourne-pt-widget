@@ -115,7 +115,7 @@ class NearbyStopsSheet extends StatelessWidget {
         ),
         // Header item
 
-        if (searchController.details.value.stops != null && searchController.details.value.stops!.isNotEmpty)
+        if (nearbyController.filteredStops.isNotEmpty)
           SliverFillRemaining(
             hasScrollBody: true,
             fillOverscroll: true,

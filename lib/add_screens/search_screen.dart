@@ -43,42 +43,46 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    print("search_screen.dart --> INITIALIZING STATE");
+    // print("search_screen.dart --> INITIALIZING STATE");
     searchController.setDetails(widget.searchDetails);
 
     if (!widget.enableSearch) {
-      searchController.autoOpenSheet();
+      if (widget.searchDetails.transport != null) {
+        searchController.pushTransport(widget.searchDetails.transport!);
+      } else {
+        searchController.pushRoute();
+      }
     }
   }
 
   @override
   void dispose() {
-    print("search_screen.dart --> RUNNING DISPOSE");
+    // print("search_screen.dart --> RUNNING DISPOSE");
 
     try {
       // Use direct controller references instead of Get.find
       if (Get.isRegistered<SheetNavigationController>()) {
         final controller = Get.find<SheetNavigationController>();
         Get.delete<SheetNavigationController>(force: true);
-        print("SheetNavigationController deleted in SearchScreen dispose");
+        // print("SheetNavigationController deleted in SearchScreen dispose");
       }
 
       if (Get.isRegistered<search_controller.SearchController>()) {
         Get.delete<search_controller.SearchController>(force: true);
-        print("SearchController deleted in SearchScreen dispose");
+        // print("SearchController deleted in SearchScreen dispose");
       }
 
       if (Get.isRegistered<NearbyStopsController>()) {
         Get.delete<NearbyStopsController>(force: true);
-        print("NearbyStopsController deleted in SearchScreen dispose");
+        // print("NearbyStopsController deleted in SearchScreen dispose");
       }
 
       if (Get.isRegistered<MapController>()) {
         Get.delete<MapController>(force: true);
-        print("MapController deleted in SearchScreen dispose");
+        // print("MapController deleted in SearchScreen dispose");
       }
     } catch (e) {
-      print("Error during controller disposal: $e");
+      // print("Error during controller disposal: $e");
     }
 
     super.dispose();
