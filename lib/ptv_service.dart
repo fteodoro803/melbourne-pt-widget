@@ -568,10 +568,10 @@ class PtvService {
       var dbDirection = await database.getDirectionById(dbTransport.directionId);
       direction = dbDirection != null ? RouteDirection.fromDb(dbDirection) : null;
 
-      var dbIndex = dbTransport.index ?? 999;
+      index = dbTransport.index ?? 999;
 
       Transport newTransport = Transport.withAttributes(routeType, stop, route, direction);
-      newTransport.setIndex(dbIndex);
+      newTransport.setIndex(index);
       transportList.add(newTransport);
     }
 
