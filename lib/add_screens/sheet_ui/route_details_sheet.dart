@@ -3,7 +3,7 @@ import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import 'package:get/get.dart';
 import '../controllers/route_details_controller.dart';
 import '../controllers/search_controller.dart' as search_controller;
-
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 class RouteDetailsSheet extends StatelessWidget {
   final ScrollController scrollController;
@@ -17,7 +17,6 @@ class RouteDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Obx(() {
       final searchDetails = searchController.details.value;
       final route = searchDetails.route;
@@ -27,88 +26,141 @@ class RouteDetailsSheet extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
       }
 
-      return ListView(
-        padding: EdgeInsets.all(16),
+      return CustomScrollView(
         controller: scrollController,
-        physics: ClampingScrollPhysics(),
-        children: [
-          RouteWidget(route: route!, scrollable: false,),
-          SizedBox(height: 4),
-          ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.symmetric(
-                horizontal: 8, vertical: 0),
-            title: Text("To: ${routeDetailsController.direction}",
-              style: TextStyle(fontSize: 18)),
-            trailing: Icon(Icons.compare_arrows),
-            onTap: () {
-              routeDetailsController.changeDirection();
-            }
-          ),
-          Divider(),
-
-          Card(
-            color: Theme
-              .of(context)
-              .colorScheme
-              .surfaceContainerHigh,
-            margin: EdgeInsets.symmetric(vertical: 4),
-            child: Column(
-              children: suburbStops.map((suburb) {
-                return Column(
+        slivers: [
+          // Pinned route + direction header
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _StickyHeaderDelegate(
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                padding: EdgeInsets.fromLTRB(12, 12, 16, 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      color: Theme
-                        .of(context)
-                        .colorScheme
-                        .secondaryContainer, // You can use any color here
-                      child: ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 0),
-                        title: Text(
-                          suburb.suburb,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500
+                    RouteWidget(route: route!, scrollable: false),
+                    ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                      title: AnimatedSwitcher(
+                        duration: Duration(milliseconds: 250),
+                        transitionBuilder: (child, animation) => SlideTransition(
+                          position: Tween<Offset>(
+                            begin: Offset(0.2, 0), end: Offset(0, 0),
+                          ).animate(animation),
+                          child: FadeTransition(opacity: animation, child: child),
+                        ),
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            "To: ${routeDetailsController.direction}",
+                            key: ValueKey(routeDetailsController.direction), // important!
+                            style: TextStyle(fontSize: 18),
                           ),
                         ),
-                        trailing: GestureDetector(
-                          child: !suburb.isExpanded
-                            ? Icon(
-                              Icons.keyboard_arrow_down_sharp, size: 30)
-                            : Icon(
-                              Icons.keyboard_arrow_up_sharp, size: 30),
-                          onTap: () {
-                            routeDetailsController.setExpanded(suburb);
-                          },
-                        )
                       ),
+                      trailing: Obx(() {
+                        final isReversed = routeDetailsController.directionReversed.value;
+                        return AnimatedRotation(
+                          turns: isReversed ? 0.5 : 0.0,
+                          duration: Duration(milliseconds: 300),
+                          child: Icon(Icons.compare_arrows),
+                        );
+                      }),
+                      onTap: () {
+                        routeDetailsController.changeDirection();
+                      },
                     ),
-                    if (suburb.isExpanded)
-                      ...suburb.stops.map((stop) {
-                        return ListTile(
-                          visualDensity: VisualDensity(
-                            horizontal: -4, vertical: -4),
+
+                  ],
+                ),
+              ),
+              height: 95, // Adjust depending on actual header height
+            ),
+          ),
+
+          // Suburb sticky headers + stops
+          ...suburbStops.map((suburb) {
+            return SliverStickyHeader(
+              header: Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  suburb.suburb,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                    final stop = suburb.stops[index];
+                    return Column(
+                      children: [
+                        ListTile(
+                          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                           dense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 5),
-                          title: Text(
-                            stop.name, style: TextStyle(fontSize: 15)),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),
+                          title: Text(stop.name, style: TextStyle(fontSize: 15)),
                           trailing: Icon(Icons.keyboard_arrow_right),
                           onTap: () async {
                             searchController.setRoute(route);
                             searchController.pushStop(stop);
-                          }
-                        );
-                      }),
-                  ]
-                );
-              }).toList(),
-            ),
-          ),
-        ]
+                          },
+                        ),
+                        if (index < suburb.stops.length - 1)
+                          Divider(
+                            height: 1,
+                            thickness: 0.7,
+                            indent: 16,
+                            endIndent: 16,
+                            color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                          ),
+                      ],
+                    );
+                  },
+                  childCount: suburb.stops.length,
+                ),
+              ),
+
+            );
+          }).toList(),
+        ],
       );
     });
+  }
+}
+
+
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double height;
+
+  _StickyHeaderDelegate({
+    required this.child,
+    required this.height,
+  });
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+      BuildContext context,
+      double shrinkOffset,
+      bool overlapsContent,
+      ) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return true;
   }
 }

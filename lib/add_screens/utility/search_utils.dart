@@ -1,3 +1,4 @@
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:flutter_project/api_data.dart';
@@ -32,7 +33,7 @@ class UniqueStop {
 class SuburbStops {
   final String suburb;
   List<Stop> stops;
-  bool isExpanded = true;
+  RxBool isExpanded = true.obs;
 
   SuburbStops({
     required this.suburb,
@@ -74,7 +75,9 @@ class SearchUtils {
       Transport newTransport = Transport.withStopRoute(stop, route, direction);
       newTransport.routeType = RouteType.fromId(route.type.id);
       await newTransport.updateDepartures();
-      transportList.add(newTransport);
+      if (newTransport.departures != null && newTransport.departures!.isNotEmpty) {
+        transportList.add(newTransport);
+      }
     }
 
     return transportList;
@@ -190,5 +193,14 @@ class SearchUtils {
     suburbStopsList.add(SuburbStops(suburb: previousSuburb!, stops: stopsInSuburb));
 
     return suburbStopsList;
+  }
+
+  Future<void> handleSave(Transport transport) async {
+    bool isSaved = await ptvService.isTransportSaved(transport);
+    if (!isSaved) {
+      await ptvService.saveTransport(transport);  // Add transport to saved list
+    } else {
+      await ptvService.deleteTransport(transport.uniqueID!);  // Remove transport from saved list
+    }
   }
 }

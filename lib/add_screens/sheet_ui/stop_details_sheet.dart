@@ -67,7 +67,8 @@ class StopDetailsSheet extends StatelessWidget {
                   trailing: GestureDetector(
                     child: FavoriteButton(isSaved: savedList.contains(true)),
                     onTap: () async {
-                      await showModalBottomSheet(
+                      if (transportsList.length > 1) {
+                        await showModalBottomSheet(
                           constraints: BoxConstraints(maxHeight: 320),
                           context: context,
                           builder: (BuildContext context) {
@@ -78,7 +79,13 @@ class StopDetailsSheet extends StatelessWidget {
                                   .onConfirmPressed,
                             );
                           }
-                      );
+                        );
+                      } else {
+                        List<bool> tempSavedList = [...savedList];
+                        tempSavedList[0] = !tempSavedList[0];
+                        await stopDetailsController.onConfirmPressed(tempSavedList);
+                        SaveTransportService.renderSnackBar(context, tempSavedList[0]);
+                      }
                     },
                   ),
                 ),
@@ -88,7 +95,6 @@ class StopDetailsSheet extends StatelessWidget {
                 Column(
                   children: transportsList.map((transport) {
                     var departures = transport.departures;
-
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Column(
@@ -127,29 +133,26 @@ class StopDetailsSheet extends StatelessWidget {
                             ),
                           ),
 
-                          // Display departures if they exist
-                          if (departures != null && departures.isNotEmpty)
-
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              padding: const EdgeInsets.all(0.0),
-                              itemCount: departures.length > 2 ? 2 : departures
-                                  .length,
-                              itemBuilder: (context, index) {
-                                final departure = departures[index];
-                                return DepartureCard(
-                                    transport: transport,
-                                    departure: departure,
-                                    onDepartureTapped: (departure) {
-                                      searchController.setTransport(transport);
-                                      searchController.pushDeparture(departure);
-                                    });
-                              },
-                            ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(0.0),
+                            itemCount: departures!.length > 2 ? 2 : departures
+                                .length,
+                            itemBuilder: (context, index) {
+                              final departure = departures[index];
+                              return DepartureCard(
+                                  transport: transport,
+                                  departure: departure,
+                                  onDepartureTapped: (departure) {
+                                    searchController.setTransport(transport);
+                                    searchController.pushDeparture(departure);
+                                  });
+                            },
+                          ),
 
                           // Display a message if no departures
-                          if (departures == null || departures.isEmpty)
+                          if (departures.isEmpty)
                             Card(
                               margin: const EdgeInsets.symmetric(vertical: 2),
                               elevation: 1,

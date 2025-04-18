@@ -3,6 +3,7 @@ import 'package:flutter_project/add_screens/controllers/search_controller.dart' 
 import 'package:get/get.dart';
 import '../../ptv_info_classes/departure_info.dart';
 import '../../ptv_service.dart';
+import '../utility/search_utils.dart';
 
 class TransportDetailsController extends GetxController {
   final searchDetails = Get.find<search_controller.SearchController>().details.value;
@@ -11,6 +12,8 @@ class TransportDetailsController extends GetxController {
   final Rx<ScrollController> listController = ScrollController().obs;
   RxList<Departure> filteredDepartures = <Departure>[].obs;
   PtvService ptvService = PtvService();
+  final SearchUtils searchUtils = SearchUtils();
+
 
   @override
   void onInit() {
@@ -31,18 +34,11 @@ class TransportDetailsController extends GetxController {
   // Function to check if transport is saved
   Future<void> checkSaved() async {
     isSaved.value = await ptvService.isTransportSaved(searchDetails.transport!);
-    print(isSaved.value);
   }
 
   // Function to save or delete transport
   Future<void> handleSave() async {
     isSaved.value = !isSaved.value;
-    if (isSaved.value) {
-      await ptvService.saveTransport(searchDetails.transport!);  // Add transport to saved list
-      // widget.arguments.callback();
-    } else {
-      await ptvService.deleteTransport(searchDetails.transport!.uniqueID!);  // Remove transport from saved list
-      // widget.arguments.callback();
-    }
+    searchUtils.handleSave(searchDetails.transport!);
   }
 }

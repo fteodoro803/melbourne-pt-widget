@@ -88,7 +88,7 @@ class TransportDetailsSheet extends StatelessWidget {
                                             ),
                                             SizedBox(width: 4),
                                             GestureDetector(
-                                              onTap: () {
+                                              onTap: () async {
                                                 transportDetailsController.handleSave();
                                                 SaveTransportService.renderSnackBar(context, transportDetailsController.isSaved.value);
                                               },

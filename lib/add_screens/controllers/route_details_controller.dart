@@ -11,6 +11,7 @@ class RouteDetailsController extends GetxController {
   RxList<SuburbStops> suburbStops = <SuburbStops>[].obs;
   late pt_route.Route route;
   late String direction;
+  final directionReversed = false.obs;
 
   Future<void> getSuburbStops() async {
     pt_route.Route route = searchController.details.value.route!;
@@ -21,6 +22,7 @@ class RouteDetailsController extends GetxController {
   }
 
   void changeDirection() {
+    directionReversed.value = !directionReversed.value;
       for (var suburb in suburbStops) {
         suburb.stops = suburb.stops.reversed.toList();
       }
@@ -29,7 +31,7 @@ class RouteDetailsController extends GetxController {
   }
 
   void setExpanded(SuburbStops suburb) {
-    suburb.isExpanded = !suburb.isExpanded;
+    suburb.isExpanded.value = !suburb.isExpanded.value;
   }
 
   @override

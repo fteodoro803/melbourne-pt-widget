@@ -1,8 +1,7 @@
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-
 import '../../ptv_service.dart';
+import '../utility/search_utils.dart';
 
 class StopDetailsController extends GetxController {
   final search_controller.SearchController searchController = Get.find<search_controller.SearchController>();
@@ -10,6 +9,7 @@ class StopDetailsController extends GetxController {
   RxList<bool> savedList = <bool>[].obs;
   final isSavedListInitialized = false.obs;
   PtvService ptvService = PtvService();
+  SearchUtils searchUtils = SearchUtils();
 
   // Function to initialize the savedList
   Future<void> initializeSavedList() async {
@@ -38,14 +38,7 @@ class StopDetailsController extends GetxController {
       bool wasSaved = savedList[index];
       bool isNowSaved = tempSavedList[index];
       if (wasSaved != isNowSaved) {
-        if (!wasSaved) {
-          await ptvService.saveTransport(transport);
-          // widget.arguments.callback();
-        }
-        else {
-          await ptvService.deleteTransport(transport.uniqueID!);
-          // widget.arguments.callback();
-        }
+        await searchUtils.handleSave(transport);
       }
     }
     savedList.assignAll(tempSavedList);
