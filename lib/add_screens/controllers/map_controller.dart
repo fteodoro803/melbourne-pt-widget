@@ -91,11 +91,8 @@ class MapController extends GetxController {
     await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
       controller: mapController,
       center: location,
-      radiusInMeters: double.parse(
-        Get.find<NearbyStopsController>().selectedUnit.value == "m"
-          ? Get.find<NearbyStopsController>().selectedDistance.value
-          : Get.find<NearbyStopsController>().selectedDistance.value * 1000
-      ));
+      radiusInMeters: Get.find<NearbyStopsController>().distanceInMeters
+    );
   }
 
   Future<void> initialiseNearbyStopMarkers() async {
@@ -110,11 +107,7 @@ class MapController extends GetxController {
       center: markerPos!,
       fillColor: Colors.blue.withValues(alpha: 0.2),
       strokeWidth: 0,
-      radius: double.parse(
-        Get.find<NearbyStopsController>().selectedUnit.value == "m"
-          ? Get.find<NearbyStopsController>().selectedDistance.value
-          : Get.find<NearbyStopsController>().selectedDistance.value * 1000
-      ),
+      radius: Get.find<NearbyStopsController>().distanceInMeters
     );
 
     // Handle nearby stop markers
@@ -194,15 +187,11 @@ class MapController extends GetxController {
     );
 
     int stopIndex = Get.find<NearbyStopsController>().filteredStops.indexOf(stop);
-
-    Get.find<SheetNavigationController>().animateSheetTo(0.5);
-
-    Future.delayed(Duration(milliseconds: 100), () {
-      Get.find<NearbyStopsController>().scrollToStopItem(stopIndex);
-    });
+    Get.find<SheetNavigationController>().animateSheetTo(0.7);
+    Get.find<NearbyStopsController>().scrollToStopItem(stopIndex);
   }
 
-  void setTransportPath() {
+  Future<void> setTransportPath() async {
     transportPath = TransportPath(
         searchController.details.value.geoPath!,
         searchController.details.value.route!.stopsAlongRoute,
@@ -210,13 +199,11 @@ class MapController extends GetxController {
         searchController.details.value.route!.colour!,
         markerPos
     );
+    await transportPath!.initializeFullPath();
   }
 
-  Future<void> renderTransportPath(bool showDirection) async {
+  Future<void> renderTransportPath() async {
     hideNearbyStopMarkers();
-
-    transportPath?.setDirection(showDirection);
-    await transportPath?.loadTransportPath();
 
     polylines.assignAll(transportPath!.polyLines);
 
@@ -224,7 +211,7 @@ class MapController extends GetxController {
     if (transportPath!.polyLines.isNotEmpty &&
         searchController.details.value.geoPath!.isNotEmpty) {
       await mapUtils.centerMapOnPolyLine(
-        showDirection ? transportPath!.futurePolyLine.points : searchController
+        transportPath!.showDirection ? transportPath!.futurePolyLine!.points : searchController
             .details.value.geoPath!,
         mapController,
         Get.context!,

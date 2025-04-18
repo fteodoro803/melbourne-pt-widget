@@ -167,6 +167,7 @@ class PtvService {
           null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
       String? runRef = departure["run_ref"]?.toString();
       int? stopId = departure["stop_id"];
+      String? platformNumber = departure["platform_number"];
       var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
       bool? hasLowFloor;
       bool? hasAirConditioning;
@@ -183,7 +184,8 @@ class PtvService {
           runRef: runRef,
           stopId: stopId,
           hasLowFloor: hasLowFloor,
-          hasAirConditioning: hasAirConditioning
+          hasAirConditioning: hasAirConditioning,
+          platformNumber: platformNumber
       );
 
       // Get Stop Name per Departure

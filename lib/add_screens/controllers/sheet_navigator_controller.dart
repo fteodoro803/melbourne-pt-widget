@@ -98,11 +98,11 @@ class SheetNavigationController extends GetxController {
         scrollPositions.value[currentSheet.value] = scrollableController.size;
       }
       currentSheet.value = previous;
-      _animateToSavedPosition(previous);
+      animateToSavedPosition(previous);
     }
   }
 
-  void _animateToSavedPosition(String sheet) {
+  void animateToSavedPosition(String sheet) {
     final targetSize = scrollPositions.value[sheet] ?? 0.6;
     if (scrollableController.isAttached) {
       scrollableController.animateTo(

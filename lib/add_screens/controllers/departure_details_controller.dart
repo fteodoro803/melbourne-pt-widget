@@ -18,6 +18,12 @@ class DepartureDetailsController extends GetxController {
   RxList<Departure> pattern = <Departure>[].obs;
   RxInt currentStopIndex = 0.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    fetchPattern();
+  }
+
   Future<void> fetchPattern() async {
     List<Departure> newPattern = await ptvService.fetchPattern(searchController.details.value.transport!, searchController.details.value.departure!);
     pattern.assignAll(newPattern);
