@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
-import '../../file_service.dart';
 import '../../ptv_info_classes/departure_info.dart';
 import '../../ptv_service.dart';
 
@@ -42,7 +41,7 @@ class TransportDetailsController extends GetxController {
       await ptvService.saveTransport(searchDetails.transport!);  // Add transport to saved list
       // widget.arguments.callback();
     } else {
-      await ptvService.deleteTransport(searchDetails.transport!);  // Remove transport from saved list
+      await ptvService.deleteTransport(searchDetails.transport!.uniqueID!);  // Remove transport from saved list
       // widget.arguments.callback();
     }
   }

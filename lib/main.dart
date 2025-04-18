@@ -227,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           transport: _transportList[index],
                           dismissible: true,
                           onDismiss: () {
-                            ptvService.deleteTransport(_transportList[index]);
+                            ptvService.deleteTransport(_transportList[index].uniqueID!);
                             _updateMainPage();
                           },
                           onTap: () =>

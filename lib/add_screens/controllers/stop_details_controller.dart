@@ -2,7 +2,6 @@ import 'package:flutter_project/add_screens/controllers/search_controller.dart' 
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
-import '../../file_service.dart';
 import '../../ptv_service.dart';
 
 class StopDetailsController extends GetxController {
@@ -44,7 +43,7 @@ class StopDetailsController extends GetxController {
           // widget.arguments.callback();
         }
         else {
-          await ptvService.deleteTransport(transport);
+          await ptvService.deleteTransport(transport.uniqueID!);
           // widget.arguments.callback();
         }
       }

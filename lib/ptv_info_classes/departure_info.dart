@@ -102,6 +102,7 @@ class Departure {
         null ? DateTime.parse(departureData["estimated_departure_utc"]) : null;
     String? runRef = departureData["run_ref"]?.toString();
     int? stopId = departureData["stop_id"];
+    String? platformNumber = departureData["platform_number"];
 
     // Get Vehicle descriptors per Departure
     var vehicleDescriptors = runData?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
@@ -123,6 +124,7 @@ class Departure {
       stopId: stopId,
       hasAirConditioning: hasAirConditioning,
       hasLowFloor: hasLowFloor,
+      platformNumber: platformNumber,
     );
   }
 
