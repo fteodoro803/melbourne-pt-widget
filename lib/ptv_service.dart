@@ -552,6 +552,7 @@ class PtvService {
     Route? route;
     Stop? stop;
     RouteDirection? direction;
+    int? index;
 
 
     // Convert database transport to domain transport
@@ -567,7 +568,10 @@ class PtvService {
       var dbDirection = await database.getDirectionById(dbTransport.directionId);
       direction = dbDirection != null ? RouteDirection.fromDb(dbDirection) : null;
 
+      index = dbTransport.index ?? 999;
+
       Transport newTransport = Transport.withAttributes(routeType, stop, route, direction);
+      newTransport.setIndex(index);
       transportList.add(newTransport);
     }
 

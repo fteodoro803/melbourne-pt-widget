@@ -26,9 +26,10 @@ extension TransportHelpers on AppDatabase {
       ..where((t) => t.uniqueId.equals(uniqueId))).go();
   }
 
+  /// Returns the Transport list in ascending index order
   Future<List<TransportsTableData>> getTransports() async {
     drift.SimpleSelectStatement<$TransportsTableTable, TransportsTableData> query;
-    query = select(transportsTable);
+    query = select(transportsTable) ..orderBy([(t) => drift.OrderingTerm(expression: t.index)]);
     var result = await query.get();
     return result;
   }
