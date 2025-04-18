@@ -27,7 +27,7 @@ class TransportDetailsSheet extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0, top: 16.0),
+            padding: const EdgeInsets.only(left: 12.0, right: 22.0, bottom: 12.0, top: 16.0),
             child: Column(
               children: [
                 LocationWidget(textField: transport.stop!.name, textSize: 18, scrollable: true),
@@ -108,6 +108,8 @@ class TransportDetailsSheet extends StatelessWidget {
                     );
                   }).toList(),
                 ),
+                SizedBox(height: 12),
+                Divider(height: 0),
               ],
             ),
           ),
@@ -118,8 +120,9 @@ class TransportDetailsSheet extends StatelessWidget {
           header: Column(
             children: [
               Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                padding: EdgeInsets.only(left: 18, right: 18, top: 14, bottom: 14),
+                color: Theme.of(context).colorScheme.surface,
+                // color: Theme.of(context).colorScheme.surfaceContainerLow,
+                padding: EdgeInsets.only(left: 18, right: 18, top: 4, bottom: 12),
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Upcoming Departures",
