@@ -57,6 +57,11 @@ class TransportUtils {
     }
     else {
       routeLabel = route.number;
+      String tempRouteLabel = routeLabel.toLowerCase();
+      if (tempRouteLabel.contains("combined")) {
+        routeLabel = routeLabel.toLowerCase();
+        routeLabel = routeLabel.replaceAll(" combined", "");
+      }
       if (routeLabel == "") {
         List<String> nameComponents = route.name.split(' ');
         routeLabel = nameComponents[0];
@@ -205,7 +210,6 @@ class TimeUtils {
 
   static bool showDepartureTime(DateTime isoTime) {
     Map<String, int>? timeDifference = TimeUtils.timeDifference(isoTime);
-    print(timeDifference);
     if (timeDifference != null
         && (timeDifference['hours']!.abs() == 0
         || timeDifference['days']! > 0)) {

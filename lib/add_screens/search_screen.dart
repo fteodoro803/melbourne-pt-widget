@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/sheet_ui/route_details_sheet.dart';
-import 'package:flutter_project/add_screens/sheet_ui/draggable_sheet.dart';
+import 'package:flutter_project/add_screens/sheet_ui/sheet_navigator_widget.dart';
 import 'package:flutter_project/add_screens/sheet_ui/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/sheet_ui/transport_details_sheet.dart';
 import 'package:get/get.dart';
@@ -39,20 +41,28 @@ class _SearchScreenState extends State<SearchScreen> {
   final searchController = Get.put(search_controller.SearchController());
   final mapController = Get.put(MapController());
   final nearbyStopsController = Get.put(NearbyStopsController());
+  late Timer _timer;
 
   @override
   void initState() {
     super.initState();
     // print("search_screen.dart --> INITIALIZING STATE");
-    searchController.setDetails(widget.searchDetails);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      searchController.setDetails(widget.searchDetails);
 
-    if (!widget.enableSearch) {
-      if (widget.searchDetails.transport != null) {
-        searchController.pushTransport(widget.searchDetails.transport!);
-      } else {
-        searchController.pushRoute();
+      if (!widget.enableSearch) {
+        if (widget.searchDetails.transport != null) {
+          searchController.pushTransport(widget.searchDetails.transport!);
+        } else {
+          searchController.pushRoute();
+        }
       }
-    }
+    });
+
+    // Set up a timer to update the transport list every 30 seconds
+    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+      searchController.updateDepartures();
+    });
   }
 
   @override
@@ -84,27 +94,10 @@ class _SearchScreenState extends State<SearchScreen> {
     } catch (e) {
       // print("Error during controller disposal: $e");
     }
+    _timer.cancel();
 
     super.dispose();
   }
-
-  // @override
-  // void dispose() {
-  //   print("search_screen.dart --> RUNNING DISPOSE");
-  //   // Delete all related controllers when leaving the screen
-  //   // Get.delete<search_controller.SearchController>();
-  //   // Get.delete<NearbyStopsController>(force: true);
-  //   // Get.delete<RouteDetailsController>(force: true);
-  //   // Get.delete<DepartureDetailsController>(force: true);
-  //   // Get.delete<StopDetailsController>(force: true);
-  //   // Get.delete<TransportDetailsController>(force: true);
-  //   // Get.delete<MapController>();
-  //   Get.delete<SheetNavigationController>(force: true);
-  //
-  //   print("search_screen.dart --> FINISHED DISPOSE");
-  //
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {

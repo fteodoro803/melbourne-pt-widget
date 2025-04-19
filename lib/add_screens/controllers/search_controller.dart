@@ -183,6 +183,25 @@ class SearchController extends GetxController {
     }
   }
 
+  Future<void> updateDepartures() async {
+    if (sheetController.currentSheet.value == 'Stop Details'
+        && details.value.transportList != null
+        && details.value.transportList!.isNotEmpty) {
+      for (var transport in details.value.transportList!) {
+        await transport.updateDepartures();
+        details.refresh();
+      }
+    } else if (sheetController.currentSheet.value == 'Transport Details'
+        && details.value.transport != null) {
+      await details.value.transport!.updateDepartures();
+      details.refresh();
+    } else if (sheetController.currentSheet.value == 'Departure Details'
+        && Get.isRegistered<DepartureDetailsController>()) {
+      Get.find<DepartureDetailsController>().fetchPattern();
+      details.refresh();
+    }
+  }
+
   /// Sets new stops list & initializes expansion states
   Future<void> setStops(String routeType, int distance) async {
     List<Stop> uniqueStops = await searchUtils.getStops(details.value.markerPos!, routeType, distance);
