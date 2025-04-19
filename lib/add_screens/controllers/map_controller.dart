@@ -39,6 +39,7 @@ class MapController extends GetxController {
       144.96358311072478).obs;
 
   RxBool isNearbyStopsButtonToggled = false.obs;
+  bool shouldRenderMarkers = false;
 
   /// On map initialization
   void setController(GoogleMapController controller) {
@@ -206,6 +207,8 @@ class MapController extends GetxController {
     hideNearbyStopMarkers();
 
     polylines.assignAll(transportPath!.polyLines);
+    resetMarkers();
+    shouldRenderMarkers = false;
 
     /// Move camera to show marker
     if (transportPath!.polyLines.isNotEmpty &&
@@ -219,7 +222,10 @@ class MapController extends GetxController {
       );
     }
 
-    resetMarkers();
+    await Future.delayed(Duration(milliseconds: 300));
+    shouldRenderMarkers = true;
+    transportPath?.onZoomChange(currentZoom.value);
+
     markers.assignAll({
       ...markers,
       ...transportPath!.markers,
@@ -228,8 +234,8 @@ class MapController extends GetxController {
 
   /// Handles zoom and camera move events
   void onCameraMove(CameraPosition position) {
-    if (searchController.details.value.stop != null
-        && currentZoom.value != position.zoom) {
+    if (searchController.details.value.route != null
+        && currentZoom.value != position.zoom && shouldRenderMarkers) {
       if (mapUtils.didZoomChange(currentZoom.value, position.zoom)) {
         transportPath?.onZoomChange(position.zoom);
         resetMarkers();

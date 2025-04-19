@@ -21,7 +21,7 @@ class SearchDetails {
   Stop? stop;
   pt_route.Route? route;
   List<LatLng>? geoPath = [];
-  List<Transport>? transportList = [];
+  List<Transport> transportList = [];
   Transport? transport;
   Departure? departure;
 
@@ -164,7 +164,12 @@ class SearchController extends GetxController {
     showSheet.value = true;
     Get.find<SheetNavigationController>().animateSheetTo(0.5);
     await Get.find<MapController>().transportPath?.setStop(details.value.transport!.stop!);
-    await Get.find<MapController>().transportPath?.setDirection();
+    if (details.value.transportList.isNotEmpty && transport.direction != details.value.transportList[0].direction) {
+      await Get.find<MapController>().transportPath?.setDirection(true);
+    } else {
+      await Get.find<MapController>().transportPath?.setDirection(false);
+    }
+
     await Get.find<MapController>().renderTransportPath();
   }
 
@@ -173,7 +178,7 @@ class SearchController extends GetxController {
     setDeparture(departure);
 
     if (sheetController.currentSheet.value != 'Transport Details') {
-      await Get.find<MapController>().transportPath?.setDirection();
+      await Get.find<MapController>().transportPath?.setDirection(false);
       await Get.find<MapController>().renderTransportPath();
     }
     sheetController.pushSheet('Departure Details');
@@ -185,9 +190,8 @@ class SearchController extends GetxController {
 
   Future<void> updateDepartures() async {
     if (sheetController.currentSheet.value == 'Stop Details'
-        && details.value.transportList != null
-        && details.value.transportList!.isNotEmpty) {
-      for (var transport in details.value.transportList!) {
+        && details.value.transportList.isNotEmpty) {
+      for (var transport in details.value.transportList) {
         await transport.updateDepartures();
         details.refresh();
       }
@@ -240,8 +244,8 @@ class SearchController extends GetxController {
 
   /// Sets new transport list based on stop and route pair
   Future<void> setTransportList() async {
-    List<Transport> newTransportList =
-    await searchUtils.splitDirection(details.value.stop!, details.value.route!);
+    List<Transport> newTransportList = await searchUtils.splitDirection(
+        details.value.stop!, details.value.route!);
 
     details.update((d) => d?.transportList = newTransportList);
   }

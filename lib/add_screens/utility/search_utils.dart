@@ -75,6 +75,7 @@ class SearchUtils {
       Transport newTransport = Transport.withStopRoute(stop, route, direction);
       newTransport.routeType = RouteType.fromId(route.type.id);
       await newTransport.updateDepartures();
+      await Future.delayed(Duration(milliseconds: 200));
       if (newTransport.departures != null && newTransport.departures!.isNotEmpty) {
         transportList.add(newTransport);
       }

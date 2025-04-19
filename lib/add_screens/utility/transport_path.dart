@@ -8,7 +8,7 @@ import '../../ptv_info_classes/stop_info.dart';
 
 class TransportPath {
   final List<LatLng> geoPath;
-  final List<Stop>? stopsAlongRoute;
+  List<Stop>? stopsAlongRoute;
   Stop? selectedStop;
   final String? routeColour;
   final LatLng? markerPosition;
@@ -140,7 +140,7 @@ class TransportPath {
     selectedStopMarker = null;
   }
 
-  Future<void> setDirection() async {
+  Future<void> setDirection(bool reverseDirection) async {
     showDirection = true;
     LatLng stopPosition = LatLng(selectedStop!.latitude!, selectedStop!.longitude!);
 
@@ -149,17 +149,21 @@ class TransportPath {
     List<LatLng> newGeoPath = geoPathAndStop.geoPathWithStop;
     LatLng stopPositionOnGeoPath = geoPathAndStop.stopPositionAlongGeoPath!;
 
-    bool isReverseDirection = GeoPathUtils.reverseDirection(newGeoPath, stopsAlongRoute!);
+    if (reverseDirection) {
+      stopsAlongRoute = stopsAlongRoute!.reversed.toList();
+    }
 
     await splitMarkers(stopsAlongRoute!, stopPosition);
-    splitPolyLine(newGeoPath, isReverseDirection, stopPositionOnGeoPath);
+    splitPolyLine(newGeoPath, stopPositionOnGeoPath);
   }
 
   void hideDirection() {
     showDirection = false;
   }
 
-  void splitPolyLine(List<LatLng> geoPath, bool isReverseDirection, LatLng stopPositionAlongGeoPath) {
+  void splitPolyLine(List<LatLng> geoPath, LatLng stopPositionAlongGeoPath) {
+
+    bool isReverseDirection = GeoPathUtils.reverseDirection(geoPath, stopsAlongRoute!);
 
     List<LatLng> newGeoPath = isReverseDirection ? geoPath.reversed.toList() : geoPath;
     List<LatLng> previousRoute = [];
