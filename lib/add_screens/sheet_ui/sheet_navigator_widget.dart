@@ -19,7 +19,7 @@ class SheetNavigatorWidget extends StatelessWidget {
 
     return DraggableScrollableSheet(
       controller: controller.scrollableController,
-      initialChildSize: 0.6,
+      initialChildSize: controller.initialSheetSize,
       minChildSize: 0.15,
       maxChildSize: 1.0,
       expand: true,

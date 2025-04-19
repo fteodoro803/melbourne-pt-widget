@@ -52,10 +52,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
       if (!widget.enableSearch) {
         if (widget.searchDetails.transport != null) {
+          sheetNavigationController.initialSheetSize = 0.5;
           searchController.pushTransport(widget.searchDetails.transport!);
         } else {
+          sheetNavigationController.initialSheetSize = 0.4;
           searchController.pushRoute();
         }
+      } else {
+        sheetNavigationController.initialSheetSize = 0.4;
       }
     });
 

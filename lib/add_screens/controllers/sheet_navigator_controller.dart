@@ -6,6 +6,7 @@ class SheetNavigationController extends GetxController {
   final RxList<String> sheetHistory = <String>[].obs;
   final Rx<Map<String, double>> scrollPositions = Rx<Map<String, double>>({});
   Rx<bool> isSheetExpanded = false.obs;
+  double initialSheetSize = 0.4;
 
   // Don't use late - initialize immediately
   final DraggableScrollableController scrollableController = DraggableScrollableController();
@@ -26,6 +27,10 @@ class SheetNavigationController extends GetxController {
     }
   }
 
+  void setInitialSheetSize(double size) {
+    initialSheetSize = size;
+  }
+
   void handleScrollChange() {
     try {
       if (scrollableController.size >= 0.75 && !isSheetExpanded.value) {
@@ -42,21 +47,23 @@ class SheetNavigationController extends GetxController {
 
   // Safer version of animateTo
   void animateSheetTo(double size, {int delayMs = 100}) {
-    Future.delayed(Duration(milliseconds: delayMs), () {
-      try {
-        if (scrollableController.isAttached) {
-          scrollableController.animateTo(
-              size,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeInOut
-          );
-        } else {
-          print("SheetNavigationController: Controller not attached when trying to animate");
+    if (scrollableController.isAttached && size != scrollableController.size) {
+      Future.delayed(Duration(milliseconds: delayMs), () {
+        try {
+          if (scrollableController.isAttached) {
+            scrollableController.animateTo(
+                size,
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut
+            );
+          } else {
+            print("SheetNavigationController: Controller not attached when trying to animate");
+          }
+        } catch (e) {
+          print("SheetNavigationController: Error animating sheet - $e");
         }
-      } catch (e) {
-        print("SheetNavigationController: Error animating sheet - $e");
-      }
-    });
+      });
+    }
   }
 
   @override
