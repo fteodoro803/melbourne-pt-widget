@@ -25,16 +25,14 @@ class _DepartureCardState extends State<DepartureCard> {
   @override
   Widget build(BuildContext context) {
     final departure = widget.departure;
-    final String estimatedDepartureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime ?? "No Data";
-    final String scheduledDepartureTime = departure.scheduledDepartureTime ?? "No Data";
-    final DepartureStatus status = TransportUtils.getDepartureStatus(
-      departure.scheduledDepartureTime,
-      departure.estimatedDepartureTime,
-    );
+    final DateTime scheduled = departure.scheduledDepartureUTC!;
+    final DateTime estimated = departure.estimatedDepartureUTC ?? scheduled;
+
+    final status = TransportUtils.getDepartureStatus(scheduled, estimated);
     final bool hasLowFloor = departure.hasLowFloor ?? false;
-    Map<String,int>? timeDifference = TimeUtils.timeDifference(estimatedDepartureTime);
-    String? minutesUntilNextDepartureString = TimeUtils.minutesToString(timeDifference);
-    final bool alreadyDeparted = timeDifference!['days']! < 0 || timeDifference['hours']! < 0 || timeDifference['minutes']! < 0;
+    final String minutesString = TimeUtils.minutesString(estimated, scheduled);
+    final String statusString = TimeUtils.statusString(status);
+    final String timeStringScheduled = TimeUtils.trimTime(scheduled, false);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 2.0),
@@ -53,28 +51,25 @@ class _DepartureCardState extends State<DepartureCard> {
               ),
             Row(
               children: [
+                // Status string, e.g. "Departed late" or "4 min early"
                 Text(
-                  status.status,
+                  statusString,
                   style: TextStyle(
                     color: ColourUtils.getColorForStatus(status.status),
                   ),
                 ),
-                if (status.timeDifference != null)
-                  Text(
-                    " ${status.timeDifference} min",
-                    style: TextStyle(
-                      color: ColourUtils.getColorForStatus(status.status),
-                    ),
-                  ),
+
                 Text(
                   " • ",
                   style: TextStyle(
                     color: ColourUtils.getColorForStatus(status.status),
                   ),
                 ),
-                if (minutesUntilNextDepartureString != null)...[
+
+                // Scheduled time string, e.g. "5:45 pm"
+                if (TimeUtils.showDepartureTime(scheduled))...[
                   Text(
-                    TimeUtils.trimTime(scheduledDepartureTime),
+                    timeStringScheduled,
                     style: TextStyle(
                       color: ColourUtils.getColorForStatus(status.status),
                       decoration: status.timeDifference != null ? TextDecoration.lineThrough : null,
@@ -92,13 +87,6 @@ class _DepartureCardState extends State<DepartureCard> {
                 if (hasLowFloor) ...[
                   Icon(Icons.accessible, size: 18),
                   SizedBox(width: 2)
-
-                  // SizedBox(width: 4),
-                  // Image.asset(
-                  //   "assets/icons/Low Floor Icon.png",
-                  //   width: 14,
-                  //   height: 14,
-                  // ),
                 ],
                 // Icon(Icons.people_outline, size: 20),
                 Icon(Icons.people_outline_outlined, size: 20),
@@ -107,21 +95,15 @@ class _DepartureCardState extends State<DepartureCard> {
             ),
           ],
         ),
-        trailing: minutesUntilNextDepartureString != null
-          ? Text(
-            minutesUntilNextDepartureString,
-            style: TextStyle(
-              fontSize: 15,
-              color: ColourUtils.getColorForStatus(status.status),
-            ),
-          )
-          : Text(
-            TimeUtils.trimTime(scheduledDepartureTime),
-            style: TextStyle(
-              fontSize: 15,
-              color: ColourUtils.getColorForStatus(status.status),
-            ),
+
+        // Minutes string, e.g. "5 min ago", "8:45 pm", "Fri, 5 Apr"
+        trailing: Text(
+          minutesString,
+          style: TextStyle(
+            fontSize: 15,
+            color: ColourUtils.getColorForStatus(status.status),
           ),
+        ),
         onTap: () {
           if (widget.onDepartureTapped != null) {
             setState(() {

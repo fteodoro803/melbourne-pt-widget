@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
+import '../../ptv_info_classes/departure_info.dart';
 import 'transport_widgets.dart';
 
 import '../utility/time_utils.dart';
@@ -17,7 +18,9 @@ class CustomListTile extends StatelessWidget {
     this.onTap = _emptyFunction,
     this.dismissible,
     this.onDismiss,
-  }) : assert(dismissible == false || dismissible == null || (dismissible == true && onDismiss != null), "onDismiss must be provided if dismissible is true");
+  }) : assert(dismissible == false || dismissible == null
+      || (dismissible == true && onDismiss != null),
+      "onDismiss must be provided if dismissible is true");
 
   // Empty function for default OnTap
   static void _emptyFunction() {}
@@ -28,29 +31,30 @@ class CustomListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Transport transport = this.transport;
 
-    final departure = transport.departures != null && transport.departures!.isNotEmpty ? transport.departures![0] : null;
-    final String estimatedDepartureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
-    final DepartureStatus status = TransportUtils.getDepartureStatus(
-      departure?.scheduledDepartureTime,
-      departure?.estimatedDepartureTime,
-    );
-    Map<String, int>? timeToDeparture = TimeUtils.timeDifference(estimatedDepartureTime);
+    Departure? departure = transport.departures != null
+        && transport.departures!.isNotEmpty
+        ? transport.departures![0] : null;
+    DateTime? estimated;
+    DepartureStatus? status;
+    String? minutesString;
+    if (departure != null) {
+      estimated = departure.estimatedDepartureUTC
+        ?? departure.scheduledDepartureUTC;
+      status = TransportUtils.getDepartureStatus(
+        departure.scheduledDepartureUTC,
+        departure.estimatedDepartureUTC,
+      );
 
-    String? timeString;
-
-    if (timeToDeparture?['days'] == 0 && timeToDeparture?['hours'] == 0) {
-      if (timeToDeparture?['minutes'] == 0) {
-        timeString = "Now";
-      }
-      else if (timeToDeparture!['minutes']! > 0){
-        timeString = "${timeToDeparture['minutes']!} min";
-      }
+      minutesString =
+          TimeUtils.minutesString(estimated, departure.estimatedDepartureUTC!);
     }
 
   // Enables the Widget to be Deleted/Dismissed by Swiping
   return Dismissible(
     key: Key(transport.toString()),
-    direction: dismissible == true? DismissDirection.endToStart : DismissDirection.none,    // Dismissible if true
+    direction: dismissible == true
+        ? DismissDirection.endToStart
+        : DismissDirection.none,    // Dismissible if true
     background: Container(
       color: Colors.red,
       alignment: Alignment.centerRight,
@@ -68,9 +72,15 @@ class CustomListTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // LocationWidget above the vertical line
-          LocationWidget(textField: transport.stop!.name, textSize: 16, scrollable: false),
+          LocationWidget(
+              textField: transport.stop!.name,
+              textSize: 16,
+              scrollable: false),
           SizedBox(height: 2),
-          RouteWidget(route: transport.route!, direction: transport.direction, scrollable: false,),
+          RouteWidget(
+            route: transport.route!,
+            direction: transport.direction,
+            scrollable: false,),
 
           // Row for the vertical line and the rest of the widgets
           if (transport.departures != null)
@@ -80,7 +90,9 @@ class CustomListTile extends StatelessWidget {
               contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
               leading: Icon(Icons.access_time_filled),
               title: DeparturesStringWidget(departures: transport.departures),
-              trailing: timeString != null
+              trailing: departure != null
+                  && status!.hasDeparted == false
+                  && status.isWithinAnHour == true
                 ? Container(
                   padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                   decoration: BoxDecoration(
@@ -88,14 +100,13 @@ class CustomListTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)
                   ),
                   child: Text(
-                    timeString,
+                    minutesString!,
                     style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
                         fontSize: 15
                     ),
-                  ),
-                )
+                  ))
                 : null,
             ),
         ],

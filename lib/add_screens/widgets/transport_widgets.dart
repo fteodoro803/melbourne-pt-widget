@@ -212,69 +212,26 @@ class MinutesUntilDepartureWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    DepartureStatus departureStatus;
+    final DateTime scheduled = departure.scheduledDepartureUTC!;
+    final DateTime estimated = departure.estimatedDepartureUTC ?? scheduled;
 
-    String? minutesUntilNextDepartureText;
-
-    // Gets the first departure information
-    departureStatus = TransportUtils.getDepartureStatus(
-      departure.estimatedDepartureTime,
-      departure.scheduledDepartureTime,
-    );
-    String? departureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime;
-
-    minutesUntilNextDepartureText = TimeUtils.minutesToString(TimeUtils.timeDifference(departureTime!));
+    final status = TransportUtils.getDepartureStatus(estimated, scheduled);
+    final String minutesString = TimeUtils.minutesString(estimated, scheduled);
 
     // Check if minutesUntilNextDepartureText is null after calculation
-    if (minutesUntilNextDepartureText == null) {
+    if (status.hasDeparted == true || status.isWithinAnHour == false) {
       return SizedBox.shrink(); // Return an empty widget if minutesUntilNextDepartureText is null
     }
 
     return Text(
-        minutesUntilNextDepartureText,
+      minutesString,
         style: TextStyle(
         fontSize: 16, // Smaller font size for "Now"
         fontWeight: FontWeight.w600,
-        color: ColourUtils.getColorForStatus(departureStatus.status),
+        color: ColourUtils.getColorForStatus(status.status),
       height: 1.1,
       ),
     );
-
-    //   Column(
-    //   mainAxisAlignment: MainAxisAlignment.center,
-    //   children: [
-    //     if (minutesUntilNextDepartureText == "Now")
-    //       Text(
-    //         minutesUntilNextDepartureText!,
-    //         style: TextStyle(
-    //           fontSize: 16, // Smaller font size for "Now"
-    //           fontWeight: FontWeight.w600,
-    //           color: TransportUtils.getColorForStatus(departureStatus.status),
-    //           height: 1.1,
-    //         ),
-    //       )
-    //     else ...[
-    //       Text(
-    //         minutesUntilNextDepartureText!.split(' ').first,
-    //         style: TextStyle(
-    //           fontSize: 20, // Larger font size for the first word
-    //           fontWeight: FontWeight.w600,
-    //           color: TransportUtils.getColorForStatus(departureStatus.status),
-    //           height: 1.1,
-    //         ),
-    //       ),
-    //       Text(
-    //         minutesUntilNextDepartureText.split(' ').skip(1).join(' '),
-    //         style: TextStyle(
-    //           fontSize: 14, // Smaller font size for the remaining text
-    //           fontWeight: FontWeight.w600,
-    //           color: TransportUtils.getColorForStatus(departureStatus.status),
-    //           height: 1.1,
-    //         ),
-    //       ),
-    //     ],
-    //   ],
-    // );
   }
 }
 
@@ -300,10 +257,11 @@ class DeparturesStringWidget extends StatelessWidget {
           ...List.generate(
               departures!.length > 2 ? 2 : departures!.length,
                   (index) {
-                bool hasLowFloor = departures![index].hasLowFloor ?? false;
-                String departureTime = departures![index].estimatedDepartureTime ??
-                    departures![index].scheduledDepartureTime ??
-                    "No Data";
+                final departure = departures![index];
+                final bool hasLowFloor = departure.hasLowFloor ?? false;
+                final DateTime? estimatedTime = departure.estimatedDepartureUTC ??
+                    departure.scheduledDepartureUTC;
+                final String timeString = TimeUtils.trimTime(estimatedTime!, false); // todo: if more than a day away, show month!
 
                 return Row(
                   children: [
@@ -315,7 +273,7 @@ class DeparturesStringWidget extends StatelessWidget {
                         ),
                       ),
                     Text(
-                      TimeUtils.trimTime(departureTime),
+                      timeString,
                       style: TextStyle(
                         fontSize: 16,
                         // fontWeight: FontWeight.w600,
@@ -323,11 +281,7 @@ class DeparturesStringWidget extends StatelessWidget {
                     ),
                     if (hasLowFloor) ...[
                       SizedBox(width: 3),
-                      Image.asset(
-                        "assets/icons/Low Floor Icon.png",
-                        width: 14,
-                        height: 14,
-                      ),
+                      Icon(Icons.accessible, size: 18)
                     ],
                     SizedBox(width: 4),
                     if (index < ((departures!.length > 2 ? 2 : departures!.length) - 1)) ...[

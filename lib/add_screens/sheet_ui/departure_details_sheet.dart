@@ -23,29 +23,12 @@ class DepartureDetailsSheet extends StatelessWidget {
     return Obx(() {
       final searchDetails = searchController.details.value;
       final departure = searchDetails.departure!;
-      final String estimatedDepartureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime ?? "No Data";
       final DepartureStatus status = TransportUtils.getDepartureStatus(
-        departure.scheduledDepartureTime,
-        departure.estimatedDepartureTime,
+        departure.scheduledDepartureUTC,
+        departure.estimatedDepartureUTC,
       );
-      Map<String, int>? timeToDeparture = TimeUtils.timeDifference(estimatedDepartureTime);
 
-
-      String timeString = "At ${TimeUtils.trimTime(estimatedDepartureTime)}";
-      if (timeToDeparture!['days']! < 0 || timeToDeparture['hours']! < 0) {
-        timeString = "Departed ${TimeUtils.trimTime(estimatedDepartureTime)}";
-      }
-      else if (timeToDeparture['days'] == 0 && timeToDeparture['hours'] == 0) {
-        if (timeToDeparture['minutes'] == 0) {
-          timeString = "Departing now";
-        }
-        else if (timeToDeparture['minutes']! < 0) {
-          timeString = "${timeToDeparture['minutes']!.abs()} min ago";
-        }
-        else {
-          timeString = "In ${timeToDeparture['minutes']!} min";
-        }
-      }
+      final String minutesString = TimeUtils.minutesString(departure.estimatedDepartureUTC, departure.scheduledDepartureUTC!);
 
       // Add listener to the ItemPositionsListener
       departureDetailsController.itemPositionsListener.itemPositions.addListener(() {
@@ -122,7 +105,7 @@ class DepartureDetailsSheet extends StatelessWidget {
                                                 borderRadius: BorderRadius.circular(8)
                                             ),
                                             child: Text(
-                                              timeString,
+                                              minutesString,
                                               style: TextStyle(
                                                   color: Colors.black,
                                                   fontWeight: FontWeight.w500,
@@ -176,8 +159,8 @@ class DepartureDetailsSheet extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final stopDeparture = departureDetailsController.pattern[index];
                   final stopName = stopDeparture.stopName;
-                  final departureTime = stopDeparture.scheduledDepartureTime!;
-
+                  final departureTime = stopDeparture.scheduledDepartureUTC!;
+                  final timeString = TimeUtils.trimTime(departureTime, false);
                   final timeDifference = TimeUtils.timeDifference(departureTime);
 
                   return Card(
@@ -187,13 +170,13 @@ class DepartureDetailsSheet extends StatelessWidget {
                     child: ListTile(
                       leading: SizedBox(
                         width: 55,
-                        child: Text(TimeUtils.trimTime(departureTime), style: TextStyle(fontSize: 12),),
+                        child: Text(timeString, style: TextStyle(fontSize: 12),),
                       ),
                       title: Row(
                         children: [
                           Container(
                             width: 5, // Width of the vertical line
-                            color: timeDifference!['minutes']! >= 0 && timeDifference['hours']! >= 0 ? Colors.green : Colors.grey, // Color of the vertical line
+                            color:  TimeUtils.hasDeparted(timeDifference) ? Colors.grey : Colors.green, // Color of the vertical line
                             height: 60, // Adjust the height of the vertical line
                           ),
                           SizedBox(width: 12),

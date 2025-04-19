@@ -27,8 +27,10 @@ import "add_screens/search_screen.dart";
 import "home_widget_service.dart";
 
 import 'package:get/get.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
 
 void main() async {
+  tzdata.initializeTimeZones();
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
 

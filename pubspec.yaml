@@ -53,6 +53,7 @@ dependencies:
   custom_info_window: ^1.0.1
   flutter_speed_dial: ^7.0.0
   flutter_sticky_header: ^0.7.0
+  timezone: ^0.9.2
 
 dev_dependencies:
   flutter_test:
