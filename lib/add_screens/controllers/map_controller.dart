@@ -246,6 +246,7 @@ class MapController extends GetxController {
       }
     }
     else {
+      currentZoom.value = position.zoom;
       customInfoWindowController.onCameraMove!();
     }
   }
