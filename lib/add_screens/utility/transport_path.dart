@@ -13,12 +13,10 @@ class TransportPath {
   final String? routeColour;
   final LatLng? markerPosition;
 
-  Set<Polyline> polyLines = {};
   late Polyline fullPolyLine;
   late Polyline? futurePolyLine;
   late Polyline? previousPolyLine;
 
-  Set<Marker> markers = {};
   Set<Marker> allRouteMarkers = {};
   Set<Marker> futureRouteMarkers = {};
   Set<Marker> previousRouteMarkers = {};
@@ -27,6 +25,9 @@ class TransportPath {
   late Marker lastStopMarker;
 
   bool showDirection = false;
+  bool showStop = false;
+  bool showFutureMarkers = false;
+  bool showPreviousMarkers = false;
   MapUtils mapUtils = MapUtils();
 
   TransportPath(this.geoPath, this.stopsAlongRoute, this.selectedStop, this.routeColour, this.markerPosition);
@@ -46,9 +47,6 @@ class TransportPath {
       width: 9,
       points: geoPath,
     );
-
-    polyLines.add(fullPolyLine);
-
   }
 
   Future<void> initializeRouteMarkers(List<Stop> stopsAlongRoute) async {
@@ -74,13 +72,54 @@ class TransportPath {
         allRouteMarkers.add(currentMarker);
       }
     }
+  }
 
-    markers = {...allRouteMarkers};
-    markers.add(firstStopMarker);
-    markers.add(lastStopMarker);
+  Set<Marker> get markers {
+    Set<Marker> markers = {};
+
+    if (showDirection) {
+      if (showFutureMarkers) {
+        markers = {...futureRouteMarkers};
+      }
+      if (showPreviousMarkers) {
+        markers = {...markers, ...previousRouteMarkers};
+      }
+    } else if (showFutureMarkers) {
+      markers = {...markers, ...allRouteMarkers};
+    }
+
+    if (showStop) {
+      if (selectedStop!.id == stopsAlongRoute!.first.id) {
+        markers.add(lastStopMarker);
+      } else if (selectedStop!.id == stopsAlongRoute!.last.id) {
+        markers.add(firstStopMarker);
+      } else {
+        markers.removeWhere((m) => m.markerId == MarkerId(selectedStop!.id.toString()));
+        markers.add(firstStopMarker);
+        markers.add(lastStopMarker);
+      }
+      markers.add(selectedStopMarker!);
+    } else {
+      markers.add(firstStopMarker);
+      markers.add(lastStopMarker);
+    }
+
+    return markers;
+  }
+
+  Set<Polyline> get polyLines {
+    Set<Polyline> polyLines = {};
+    if (showDirection) {
+      polyLines.add(previousPolyLine!);
+      polyLines.add(futurePolyLine!);
+    } else {
+      polyLines.add(fullPolyLine);
+    }
+    return polyLines;
   }
 
   Future<void> setStop(Stop stop) async {
+    showStop = true;
     selectedStop = stop;
 
     BitmapDescriptor? customStopMarkerIcon = await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 20, 20);
@@ -93,13 +132,10 @@ class TransportPath {
       anchor: const Offset(0.5, 0.5),
       consumeTapEvents: true,
     );
-
-    markers.removeWhere((m) => m.markerId == MarkerId(stop.id.toString()));
-    markers.add(selectedStopMarker!);
   }
 
   void hideStopMarker() {
-    markers = {...allRouteMarkers};
+    showStop = false;
     selectedStop = null;
     selectedStopMarker = null;
   }
@@ -111,28 +147,16 @@ class TransportPath {
     GeoPathAndStops geoPathAndStop = await addStopToGeoPath(geoPath, stopPosition);
 
     List<LatLng> newGeoPath = geoPathAndStop.geoPathWithStop;
-    LatLng chosenStopPositionAlongGeoPath = geoPathAndStop.stopPositionAlongGeoPath!;
+    LatLng stopPositionOnGeoPath = geoPathAndStop.stopPositionAlongGeoPath!;
 
     bool isReverseDirection = GeoPathUtils.reverseDirection(newGeoPath, stopsAlongRoute!);
 
-    await splitMarkers(
-      stopsAlongRoute!,
-      stopPosition,
-    );
-
-    splitPolyLine(
-      newGeoPath,
-      isReverseDirection,
-      chosenStopPositionAlongGeoPath
-    );
+    await splitMarkers(stopsAlongRoute!, stopPosition);
+    splitPolyLine(newGeoPath, isReverseDirection, stopPositionOnGeoPath);
   }
 
   void hideDirection() {
-    polyLines.clear();
-    polyLines.add(fullPolyLine);
-    markers = {...allRouteMarkers};
-    markers.removeWhere((m) => m.markerId == MarkerId(selectedStop!.id.toString()));
-    markers.add(selectedStopMarker!);
+    showDirection = false;
   }
 
   void splitPolyLine(List<LatLng> geoPath, bool isReverseDirection, LatLng stopPositionAlongGeoPath) {
@@ -162,10 +186,6 @@ class TransportPath {
       width: 9,
       points: futureRoute,
     );
-
-    polyLines.clear();
-    polyLines.add(previousPolyLine!);
-    polyLines.add(futurePolyLine!);
   }
 
   /// Sets markers 
@@ -202,11 +222,6 @@ class TransportPath {
         previousRouteMarkers.add(currentMarker);
       }
     }
-    markers.clear();
-    markers.add(firstStopMarker);
-    markers.add(lastStopMarker);
-    markers.add(selectedStopMarker!);
-    markers = {...markers, ...futureRouteMarkers, ...previousRouteMarkers};
   }
 
   /// Adds current stop to geoPath in order to split polyline by direction
@@ -237,28 +252,17 @@ class TransportPath {
     double zoomThresholdLarge = 12.8; // Zoom level threshold to hide the marker
     double zoomThresholdSmall = 13.4;
 
-    Set<Marker> newMarkers = {};
-
     if (zoom < zoomThresholdLarge) {
-
-      if (selectedStopMarker != null) {
-        newMarkers.add(selectedStopMarker!);
-      }
-      newMarkers.add(firstStopMarker);
-      newMarkers.add(lastStopMarker);
+      showFutureMarkers = false;
+      showPreviousMarkers = false;
 
     } else if (zoom < zoomThresholdSmall && zoom >= zoomThresholdLarge) {
-      if (selectedStopMarker != null) {
-        newMarkers.add(selectedStopMarker!);
-      }
-      newMarkers.add(firstStopMarker);
-      newMarkers.add(lastStopMarker);
-      newMarkers = {...newMarkers, ...futureRouteMarkers};
+      showFutureMarkers = true;
+      showPreviousMarkers = false;
     }
     else {
-      // Re-add the marker when zoom is above the threshold
-      newMarkers = {...markers, ...previousRouteMarkers, ...futureRouteMarkers};
+      showFutureMarkers = true;
+      showPreviousMarkers = true;
     }
-    markers = newMarkers;
   }
 }
