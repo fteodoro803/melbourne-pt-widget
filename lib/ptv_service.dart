@@ -7,7 +7,7 @@ import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
 import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
 import 'package:flutter_project/database/helpers/stopHelpers.dart';
 import 'package:flutter_project/database/helpers/stopRouteTypesHelpers.dart';
-import 'package:flutter_project/database/helpers/transportHelpers.dart';
+import 'package:flutter_project/database/helpers/tripHelpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/domain/departure_info.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -526,7 +526,7 @@ class PtvService {
     int? index = trip.index;
 
     if (uniqueId != null && routeTypeId != null && routeId != null && stopId != null && directionId != null) {
-      Get.find<db.AppDatabase>().addTransport(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
+      Get.find<db.AppDatabase>().addTrip(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
     }
     else {
       print(" ( ptv_service.dart -> saveTrip ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
@@ -536,7 +536,7 @@ class PtvService {
   /// Checks if Trip is in Database
   Future<bool> isTripSaved(Trip trip) async {
     if (trip.uniqueID != null) {
-      return await Get.find<db.AppDatabase>().isTransportInDatabase(trip.uniqueID!);
+      return await Get.find<db.AppDatabase>().isTripInDatabase(trip.uniqueID!);
     }
     else {
       return false;
@@ -547,7 +547,7 @@ class PtvService {
     List<Trip> tripList = [];
     db.AppDatabase database = Get.find<db.AppDatabase>();
 
-    var dbTrips = await Get.find<db.AppDatabase>().getTransports();
+    var dbTrips = await Get.find<db.AppDatabase>().getTrips();
     RouteType? routeType;
     Route? route;
     Stop? stop;
