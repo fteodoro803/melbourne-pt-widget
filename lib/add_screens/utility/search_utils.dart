@@ -7,7 +7,7 @@ import 'package:flutter_project/domain/route_info.dart' as pt_route;
 import 'package:flutter_project/domain/route_type_info.dart';
 import 'package:flutter_project/domain/stop_info.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/transport.dart';
 
 class UniqueStop {
   final String id;

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/transport.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<String> getLocalPath() async {

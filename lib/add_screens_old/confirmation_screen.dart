@@ -8,7 +8,7 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/add_screens/widgets/custom_list_tile.dart';
 import 'package:flutter_project/file_service.dart';
 
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/transport.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key, required this.arguments});

@@ -1,7 +1,7 @@
 // Home Widget
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/transport.dart';
 import 'package:home_widget/home_widget.dart';
 
 class HomeWidgetService {

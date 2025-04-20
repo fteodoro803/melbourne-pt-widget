@@ -8,13 +8,13 @@ import 'package:flutter_project/domain/route_type_info.dart';
 import 'package:flutter_project/domain/stop_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'ptv_service.dart';
+import '../ptv_service.dart';
 
-import 'database/helpers/departureHelpers.dart';
-import 'database/database.dart' as db;
+import '../database/helpers/departureHelpers.dart';
+import '../database/database.dart' as db;
 import 'package:get/get.dart';
 
-part 'transport.g.dart';
+part '../transport.g.dart';
 
 @JsonSerializable()
 class Transport {
