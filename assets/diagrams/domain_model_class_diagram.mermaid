@@ -1,0 +1,71 @@
+classDiagram
+    class Departure {
+        +String? runRef
+        +DateTime? scheduledDeparture
+        +DateTime? estimatedDeparture
+        +bool hasLowFloor
+        +bool hasAirConditioning
+        +fromApi(Map departureData, Map runData)
+    }
+
+    class Direction {
+        +int id
+        +String name
+        +String description
+        +fromApi(Map json)
+        +fromDb(Map db)
+    }
+
+    class Route{
+        +int id
+        +String name
+        +String number
+        +String colour
+        +String textColour
+        +String gtfsId
+        +String status
+        +setRouteColour(String routeType)
+        +fromApi(Map json)
+        +fromDb(Map db)
+    }
+
+    class RouteType {
+        <<enumeration>>
+        +int id
+        +String name
+        train = 0
+        tram = 1
+        bus = 2
+        vLine = 3
+        nightBus = 4
+        +fromId(int id) RouteType
+        +fromName(String name) RouteType
+%%        -normaliseName(String name) String
+    }
+
+    class Stop {
+        +int id
+        +String name
+        +int? number
+        +int? sequence
+        +fromApi(Map json)
+        +fromDb(Map db)
+    }
+
+    class Trip {
+        +String uniqueID
+        +Route? route
+        +Stop? stop
+        +Direction? direction
+        +int? index
+        +updateDepartures() void
+    }
+
+    Trip "0..1" --> "1" Stop : has
+    Trip "0..1" --> "1" Direction : has
+    Trip "0..1" --> "1" Route : has
+    Trip "0..1" --> "0..*" Departure : has
+    Route "1" --> "1" RouteType : has
+
+
+

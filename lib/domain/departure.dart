@@ -10,7 +10,7 @@ class Departure {
   DateTime? scheduledDepartureUTC;
   DateTime? estimatedDepartureUTC;
 
-  // Departures in Melbourne Time
+  // Departures in Melbourne Time     // todo: is there a need for this? Since the departure times are already in the database. Maybe only formatted is necessary
   DateTime? scheduledDeparture;
   DateTime? estimatedDeparture;
 
@@ -19,7 +19,7 @@ class Departure {
   String? estimatedDepartureTime;
 
   // Vehicle Descriptions
-  String? runRef;
+  String? runRef;     // id
   bool? hasLowFloor;
   bool? hasAirConditioning;
   String? platformNumber;
