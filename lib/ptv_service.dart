@@ -138,7 +138,7 @@ class PtvService {
 // Pattern Functions
   // todo: use fromApi constructor
   // todo: add to database
-  Future<List<Departure>> fetchPattern(Trip transport, Departure departure) async {
+  Future<List<Departure>> fetchPattern(Trip trip, Departure departure) async {
     List<Departure> departures = [];
 
     // if (departure == null) {
@@ -147,7 +147,7 @@ class PtvService {
 
     String expands = "Stop";
     String? runRef = departure.runRef;
-    RouteType? routeType = transport.routeType;
+    RouteType? routeType = trip.routeType;
     ApiData data = await PtvApiService().patterns(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -310,10 +310,10 @@ class PtvService {
   }
 
 // Runs Functions
-  Future<void> fetchRuns(Trip transport) async {
+  Future<void> fetchRuns(Trip trip) async {
     String expands = "All";
-    String? runRef = transport.departures?[0].runRef;
-    RouteType? routeType = transport.routeType;
+    String? runRef = trip.departures?[0].runRef;
+    RouteType? routeType = trip.routeType;
     ApiData data = await PtvApiService().runs(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -517,37 +517,37 @@ class PtvService {
     return StopRouteLists(stops, routes);
   }
 
-  Future<void> saveTransport(Trip transport) async {
-    String? uniqueId = transport.uniqueID;
-    int? routeTypeId = transport.routeType?.id;
-    int? routeId = transport.route?.id;
-    int? stopId = transport.stop?.id;
-    int? directionId = transport.direction?.id;
-    int? index = transport.index;
+  Future<void> saveTrip(Trip trip) async {
+    String? uniqueId = trip.uniqueID;
+    int? routeTypeId = trip.routeType?.id;
+    int? routeId = trip.route?.id;
+    int? stopId = trip.stop?.id;
+    int? directionId = trip.direction?.id;
+    int? index = trip.index;
 
     if (uniqueId != null && routeTypeId != null && routeId != null && stopId != null && directionId != null) {
       Get.find<db.AppDatabase>().addTransport(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
     }
     else {
-      print(" ( ptv_service.dart -> saveTransportToDb ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
+      print(" ( ptv_service.dart -> saveTrip ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
     }
   }
 
-  /// Checks if Transport is in Database
-  Future<bool> isTransportSaved(Trip transport) async {
-    if (transport.uniqueID != null) {
-      return await Get.find<db.AppDatabase>().isTransportInDatabase(transport.uniqueID!);
+  /// Checks if Trip is in Database
+  Future<bool> isTripSaved(Trip trip) async {
+    if (trip.uniqueID != null) {
+      return await Get.find<db.AppDatabase>().isTransportInDatabase(trip.uniqueID!);
     }
     else {
       return false;
     }
   }
 
-  Future<List<Trip>> loadTransports() async {
-    List<Trip> transportList = [];
+  Future<List<Trip>> loadTrips() async {
+    List<Trip> tripList = [];
     db.AppDatabase database = Get.find<db.AppDatabase>();
 
-    var dbTransports = await Get.find<db.AppDatabase>().getTransports();
+    var dbTrips = await Get.find<db.AppDatabase>().getTransports();
     RouteType? routeType;
     Route? route;
     Stop? stop;
@@ -555,31 +555,31 @@ class PtvService {
     int? index;
 
 
-    // Convert database transport to domain transport
-    for (var dbTransport in dbTransports) {
-      routeType = RouteType.fromId(dbTransport.routeTypeId);
+    // Convert database trip to domain trip
+    for (var dbTrip in dbTrips) {
+      routeType = RouteType.fromId(dbTrip.routeTypeId);
 
-      var dbRoute = await database.getRouteById(dbTransport.routeId);
+      var dbRoute = await database.getRouteById(dbTrip.routeId);
       route = dbRoute != null ? Route.fromDb(dbRoute) : null;
 
-      var dbStop = await database.getStopById(dbTransport.stopId);
+      var dbStop = await database.getStopById(dbTrip.stopId);
       stop = dbStop != null ? Stop.fromDb(dbStop) : null;
 
-      var dbDirection = await database.getDirectionById(dbTransport.directionId);
+      var dbDirection = await database.getDirectionById(dbTrip.directionId);
       direction = dbDirection != null ? RouteDirection.fromDb(dbDirection) : null;
 
-      index = dbTransport.index ?? 999;
+      index = dbTrip.index ?? 999;
 
-      Trip newTransport = Trip.withAttributes(routeType, stop, route, direction);
-      newTransport.setIndex(index);
-      transportList.add(newTransport);
+      Trip newTrip = Trip.withAttributes(routeType, stop, route, direction);
+      newTrip.setIndex(index);
+      tripList.add(newTrip);
     }
 
-    return transportList;
+    return tripList;
   }
 
-  Future<void> deleteTransport(String transportId) async {
-    await Get.find<db.AppDatabase>().removeTransport(transportId);
+  Future<void> deleteTrip(String tripId) async {
+    await Get.find<db.AppDatabase>().removeTransport(tripId);
   }
 
 }

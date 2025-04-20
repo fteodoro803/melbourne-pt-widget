@@ -41,7 +41,7 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadTransports() async {
-    transportList = await ptvService.loadTransports();
+    transportList = await ptvService.loadTrips();
 
     setState(() {});
   }

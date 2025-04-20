@@ -120,7 +120,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final requestController = TextEditingController();
   final locationController = TextEditingController();
-  List<Trip> _transportList = [];
+  List<Trip> _tripList = [];
 
   HomeWidgetService homeWidgetService = HomeWidgetService();
   PtvService ptvService = PtvService();
@@ -139,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _updateMainPage();
 
-    // Set up a timer to update the transport list every 30 seconds
+    // Set up a timer to update the main page every 30 seconds
     _timer = Timer.periodic(Duration(seconds: 30), (timer) {
       _updateMainPage();
     });
@@ -156,24 +156,24 @@ class _MyHomePageState extends State<MyHomePage> {
     await ptvService.fetchRoutes();
   }
 
-  // Reads the saved transport data from database and updates departures
+  // Reads the saved trip data from database and updates departures
   Future<void> _updateMainPage() async {
     print("Updating main page");
 
-    List<Trip> transportList = await ptvService.loadTransports();
+    List<Trip> tripList = await ptvService.loadTrips();
 
     // Updates all Departures
-    for (var transport in transportList) {
-      await transport.updateDepartures();
+    for (var trip in tripList) {
+      await trip.updateDepartures();
     }
 
     setState(() {
-      _transportList = transportList;
+      _tripList = tripList;
     });
 
     // print("( main.dart ) -- preparing to send Widget Data");
-    // Send Transport Data to Widget
-    await homeWidgetService.sendWidgetData(_transportList);
+    // Send Trips Data to Widget
+    await homeWidgetService.sendWidgetData(_tripList);
     print("( main.dart ) -- Widget Data finishing sending");
   }
 
@@ -191,17 +191,17 @@ class _MyHomePageState extends State<MyHomePage> {
       if (newIndex > oldIndex) {
         newIndex -= 1;
       }
-      final Trip item = _transportList.removeAt(oldIndex);
-      _transportList.insert(newIndex, item);
+      final Trip item = _tripList.removeAt(oldIndex);
+      _tripList.insert(newIndex, item);
     });
 
     // Save the updated list after reordering
-    save(_transportList);
+    save(_tripList);
 
     // Save indices to database
-    for (int i=0; i<_transportList.length; i++) {
-      _transportList[i].setIndex(i);
-      await ptvService.saveTransport(_transportList[i]);
+    for (int i=0; i<_tripList.length; i++) {
+      _tripList[i].setIndex(i);
+      await ptvService.saveTrip(_tripList[i]);
     }
   }
 
@@ -224,21 +224,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ReorderableListView(
                   onReorder: onReorder,
                   children: [
-                    for (int index = 0; index < _transportList.length; index++)
+                    for (int index = 0; index < _tripList.length; index++)
                       Card(
-                        key: ValueKey(_transportList[index].hashCode),
+                        key: ValueKey(_tripList[index].hashCode),
                         margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 6.0),
                         elevation: 4,
                         child: CustomListTile(
-                          transport: _transportList[index],
+                          transport: _tripList[index],
                           dismissible: true,
                           onDismiss: () {
-                            ptvService.deleteTransport(_transportList[index].uniqueID!);
+                            ptvService.deleteTrip(_tripList[index].uniqueID!);
                             _updateMainPage();
                           },
                           onTap: () =>
                             Get.to(
-                              () => SearchScreen(searchDetails: SearchDetails.withTransport(_transportList[index]), enableSearch: false),
+                              () => SearchScreen(searchDetails: SearchDetails.withTransport(_tripList[index]), enableSearch: false),
                               binding: SearchBinding(searchDetails: SearchDetails()),
                             )
                         ),

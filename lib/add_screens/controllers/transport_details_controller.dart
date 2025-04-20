@@ -30,7 +30,7 @@ class TransportDetailsController extends GetxController {
 
   // Function to check if transport is saved
   Future<void> checkSaved() async {
-    isSaved.value = await ptvService.isTransportSaved(searchDetails.transport!);
+    isSaved.value = await ptvService.isTripSaved(searchDetails.transport!);
     print(isSaved.value);
   }
 
@@ -38,10 +38,10 @@ class TransportDetailsController extends GetxController {
   Future<void> handleSave() async {
     isSaved.value = !isSaved.value;
     if (isSaved.value) {
-      await ptvService.saveTransport(searchDetails.transport!);  // Add transport to saved list
+      await ptvService.saveTrip(searchDetails.transport!);  // Add transport to saved list
       // widget.arguments.callback();
     } else {
-      await ptvService.deleteTransport(searchDetails.transport!.uniqueID!);  // Remove transport from saved list
+      await ptvService.deleteTrip(searchDetails.transport!.uniqueID!);  // Remove transport from saved list
       // widget.arguments.callback();
     }
   }
