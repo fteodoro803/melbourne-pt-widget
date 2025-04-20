@@ -43,10 +43,10 @@ class SuburbStops {
 class SearchUtils {
   PtvService ptvService = PtvService();
 
-  Future<List<Transport>> splitDirection(Stop stop, pt_route.Route route) async {
+  Future<List<Trip>> splitDirection(Stop stop, pt_route.Route route) async {
     String? routeId = route.id.toString();
     List<RouteDirection> directions = [];
-    List<Transport> transportList = [];
+    List<Trip> transportList = [];
 
     // Fetching Data and converting to JSON
     ApiData data = await PtvApiService().routeDirections(routeId);
@@ -71,7 +71,7 @@ class SearchUtils {
     }
 
     for (var direction in directions) {
-      Transport newTransport = Transport.withStopRoute(stop, route, direction);
+      Trip newTransport = Trip.withStopRoute(stop, route, direction);
       newTransport.routeType = RouteType.fromId(route.type.id);
       await newTransport.updateDepartures();
       transportList.add(newTransport);

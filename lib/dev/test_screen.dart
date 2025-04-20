@@ -18,7 +18,7 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   final TextEditingController locationField = TextEditingController();
-  List<Transport> transportList = [];
+  List<Trip> transportList = [];
 
   @override
   void initState() {

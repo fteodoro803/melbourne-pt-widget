@@ -21,8 +21,8 @@ class SearchDetails {
   Stop? stop;
   pt_route.Route? route;
   List<LatLng>? geoPath = [];
-  List<Transport>? transportList = [];
-  Transport? transport;
+  List<Trip>? transportList = [];
+  Trip? transport;
   Departure? departure;
 
   SearchDetails();
@@ -171,7 +171,7 @@ class SearchController extends GetxController {
   }
 
   /// Triggers loading Transport Details Sheet
-  Future<void> pushTransport(Transport transport) async {
+  Future<void> pushTransport(Trip transport) async {
     if (details.value.transport == null) {
       setTransport(transport);
     } else {
@@ -243,13 +243,13 @@ class SearchController extends GetxController {
 
   /// Sets new transport list based on stop and route pair
   Future<void> setTransportList() async {
-    List<Transport> newTransportList =
+    List<Trip> newTransportList =
     await searchUtils.splitDirection(details.value.stop!, details.value.route!);
 
     details.update((d) => d?.transportList = newTransportList);
   }
 
-  void setTransport(Transport transport) {
+  void setTransport(Trip transport) {
     details.update((d) => d?.transport = transport);
   }
 

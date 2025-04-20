@@ -22,7 +22,7 @@ class DevTools {
     }
   }
 
-  void printTransport(Transport transport) {
+  void printTransport(Trip transport) {
     if (kDebugMode) {
       String transportDetails = transport
           .toString(); // Get the transport details as a string
@@ -39,7 +39,7 @@ class DevTools {
     }
   }
 
-  void printTransportList(List<Transport> transportList) {
+  void printTransportList(List<Trip> transportList) {
     if (transportList.isEmpty) {
       if (kDebugMode) {
         print("TransportList is empty");

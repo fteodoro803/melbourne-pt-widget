@@ -25,7 +25,7 @@ class HomeWidgetService {
   }
 
 // Send necessary JSON Data to Widget
-  Future<void> sendWidgetData(List<Transport> transportList) async {
+  Future<void> sendWidgetData(List<Trip> transportList) async {
     print("( home_widget_service.dart -> sendWidgetData() ) -- isMobile=$isMobile");
     if (isMobile == true) {
       try {
@@ -53,7 +53,7 @@ class HomeWidgetService {
   }
 
   // Reduces the fields in the Transport class to what's needed in the Widget Design
-  List<Map<String, dynamic>> getOptimisedData(List<Transport> transportList) {
+  List<Map<String, dynamic>> getOptimisedData(List<Trip> transportList) {
     return transportList.map((transport) {
       return {
         'uniqueID': transport.uniqueID ?? "No uniqueID",

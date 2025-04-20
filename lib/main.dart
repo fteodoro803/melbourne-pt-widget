@@ -120,7 +120,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final requestController = TextEditingController();
   final locationController = TextEditingController();
-  List<Transport> _transportList = [];
+  List<Trip> _transportList = [];
 
   HomeWidgetService homeWidgetService = HomeWidgetService();
   PtvService ptvService = PtvService();
@@ -160,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _updateMainPage() async {
     print("Updating main page");
 
-    List<Transport> transportList = await ptvService.loadTransports();
+    List<Trip> transportList = await ptvService.loadTransports();
 
     // Updates all Departures
     for (var transport in transportList) {
@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (newIndex > oldIndex) {
         newIndex -= 1;
       }
-      final Transport item = _transportList.removeAt(oldIndex);
+      final Trip item = _transportList.removeAt(oldIndex);
       _transportList.insert(newIndex, item);
     });
 

@@ -5,7 +5,7 @@ import '../../domain/departure_info.dart';
 
 // Widget for the Address input section with transport type toggle
 class DepartureCard extends StatefulWidget {
-  final Transport transport;
+  final Trip transport;
   final Departure departure;
   final Function(Departure)? onDepartureTapped;
 

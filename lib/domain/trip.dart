@@ -14,10 +14,10 @@ import '../database/helpers/departureHelpers.dart';
 import '../database/database.dart' as db;
 import 'package:get/get.dart';
 
-part '../transport.g.dart';
+part 'trip.g.dart';
 
 @JsonSerializable()
-class Transport {
+class Trip {
   String? uniqueID; // unique ID for the widget timeline
   RouteType? routeType;
   Location? location;
@@ -28,15 +28,15 @@ class Transport {
   // todo: add GeoPath as an attribute
 
   // Constructor
-  Transport();    // Empty Transport    // todo: delete this
+  Trip();    // Empty Transport    // todo: delete this
 
-  Transport.withStopRoute(Stop stop, Route route, RouteDirection direction) {
+  Trip.withStopRoute(Stop stop, Route route, RouteDirection direction) {
     this.stop = stop;
     this.route = route;
     this.direction = direction;
   }
 
-  Transport.withAttributes(RouteType? routeType, Stop? stop, Route? route, RouteDirection? direction) {
+  Trip.withAttributes(RouteType? routeType, Stop? stop, Route? route, RouteDirection? direction) {
     this.routeType = routeType;
     // this.location = location;
     this.stop = stop;
@@ -47,7 +47,7 @@ class Transport {
   }
 
   // isEqualTo method to compare all properties
-  bool isEqualTo(Transport other) {
+  bool isEqualTo(Trip other) {
     return uniqueID == other.uniqueID;
   }
 
@@ -103,14 +103,14 @@ class Transport {
   }
 
   // DELETE LATER ITS BEING USED IN OLD SCREENS
-  Future<List<Transport>> splitByDirection() async {
+  Future<List<Trip>> splitByDirection() async {
 
     // Get the two directions a route can go, and set each new transport to one of them
     List<RouteDirection> directions = await fetchRouteDirections();
-    Transport newTransport1 = Transport.withAttributes(routeType, stop, route, directions[0]);
-    Transport newTransport2 = Transport.withAttributes(routeType, stop, route, directions[1]);
+    Trip newTransport1 = Trip.withAttributes(routeType, stop, route, directions[0]);
+    Trip newTransport2 = Trip.withAttributes(routeType, stop, route, directions[1]);
 
-    List<Transport> newTransportList = [newTransport1, newTransport2];
+    List<Trip> newTransportList = [newTransport1, newTransport2];
 
     // print("( trip.dart -> getRouteDirections() ) -- newTransportList: \n$newTransportList");
     return newTransportList;
@@ -176,6 +176,6 @@ class Transport {
   // todo: factory constructor fromDB
 
   // Methods for JSON Serialization
-  factory Transport.fromJson(Map<String, dynamic> json) => _$TransportFromJson(json);
-  Map<String, dynamic> toJson() => _$TransportToJson(this);
+  factory Trip.fromJson(Map<String, dynamic> json) => _$TripFromJson(json);
+  Map<String, dynamic> toJson() => _$TripToJson(this);
 }

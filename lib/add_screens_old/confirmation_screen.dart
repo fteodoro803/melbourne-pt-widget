@@ -24,7 +24,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   String _screenName = "ConfirmationScreen";
   PtvService ptvService = PtvService();
   DevTools tools = DevTools();
-  List<Transport> transportList = [];
+  List<Trip> transportList = [];
   bool _isLoading = true;
 
   @override
@@ -71,7 +71,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     // setState(() {});
   }
 
-  Future<void> _saveTransportToDb(Transport transport) async {
+  Future<void> _saveTransportToDb(Trip transport) async {
     await ptvService.saveTransport(transport);
   }
 

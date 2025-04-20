@@ -138,7 +138,7 @@ class PtvService {
 // Pattern Functions
   // todo: use fromApi constructor
   // todo: add to database
-  Future<List<Departure>> fetchPattern(Transport transport, Departure departure) async {
+  Future<List<Departure>> fetchPattern(Trip transport, Departure departure) async {
     List<Departure> departures = [];
 
     // if (departure == null) {
@@ -310,7 +310,7 @@ class PtvService {
   }
 
 // Runs Functions
-  Future<void> fetchRuns(Transport transport) async {
+  Future<void> fetchRuns(Trip transport) async {
     String expands = "All";
     String? runRef = transport.departures?[0].runRef;
     RouteType? routeType = transport.routeType;
@@ -517,7 +517,7 @@ class PtvService {
     return StopRouteLists(stops, routes);
   }
 
-  Future<void> saveTransport(Transport transport) async {
+  Future<void> saveTransport(Trip transport) async {
     String? uniqueId = transport.uniqueID;
     int? routeTypeId = transport.routeType?.id;
     int? routeId = transport.route?.id;
@@ -534,7 +534,7 @@ class PtvService {
   }
 
   /// Checks if Transport is in Database
-  Future<bool> isTransportSaved(Transport transport) async {
+  Future<bool> isTransportSaved(Trip transport) async {
     if (transport.uniqueID != null) {
       return await Get.find<db.AppDatabase>().isTransportInDatabase(transport.uniqueID!);
     }
@@ -543,8 +543,8 @@ class PtvService {
     }
   }
 
-  Future<List<Transport>> loadTransports() async {
-    List<Transport> transportList = [];
+  Future<List<Trip>> loadTransports() async {
+    List<Trip> transportList = [];
     db.AppDatabase database = Get.find<db.AppDatabase>();
 
     var dbTransports = await Get.find<db.AppDatabase>().getTransports();
@@ -570,7 +570,7 @@ class PtvService {
 
       index = dbTransport.index ?? 999;
 
-      Transport newTransport = Transport.withAttributes(routeType, stop, route, direction);
+      Trip newTransport = Trip.withAttributes(routeType, stop, route, direction);
       newTransport.setIndex(index);
       transportList.add(newTransport);
     }
