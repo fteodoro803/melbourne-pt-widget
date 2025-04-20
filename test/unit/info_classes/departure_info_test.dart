@@ -1,4 +1,4 @@
-// import 'package:flutter_project/domain/departure_info.dart';
+// import 'package:flutter_project/domain/departure.dart';
 // import 'package:flutter_test/flutter_test.dart';
 //
 // void main() {

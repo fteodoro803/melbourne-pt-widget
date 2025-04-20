@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
-import '../../domain/departure_info.dart';
+import '../../domain/departure.dart';
 import '../../ptv_service.dart';
 
 class TransportDetailsController extends GetxController {

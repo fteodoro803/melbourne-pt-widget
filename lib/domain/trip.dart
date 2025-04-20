@@ -1,6 +1,6 @@
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
-import 'package:flutter_project/domain/departure_info.dart';
+import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/domain/location_info.dart';
 import 'package:flutter_project/domain/route_direction_info.dart';
 import 'package:flutter_project/domain/route_info.dart';

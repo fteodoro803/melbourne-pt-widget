@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/domain/trip.dart';
 import '../utility/time_utils.dart';
-import '../../domain/departure_info.dart';
+import '../../domain/departure.dart';
 
 // Widget for the Address input section with transport type toggle
 class DepartureCard extends StatefulWidget {
