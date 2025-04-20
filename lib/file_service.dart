@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<String> getLocalPath() async {
@@ -9,7 +9,7 @@ Future<String> getLocalPath() async {
   return directory.path;
 }
 
-Future<void> save(List<Transport> transportList) async {
+Future<void> save(List<Trip> transportList) async {
   try {
     final path = await getLocalPath();
     final file = File('$path/transport_data.json');
@@ -71,7 +71,7 @@ Future<void> save(List<Transport> transportList) async {
 //   }
 // }
 
-Future<void> append(Transport newTransport) async { // I think you can compare it to the transport list in the context rather than save file
+Future<void> append(Trip newTransport) async { // I think you can compare it to the transport list in the context rather than save file
   try {
     // Get the path to the application documents directory
     final path = await getLocalPath();
@@ -90,7 +90,7 @@ Future<void> append(Transport newTransport) async { // I think you can compare i
     }
 
     // Convert transports to list of Transport objects
-    List<Transport> transportList = transports.map((transportJson) => Transport.fromJson(transportJson)).toList();
+    List<Trip> transportList = transports.map((transportJson) => Trip.fromJson(transportJson)).toList();
 
     // Check if the newTransport is already in the list
     bool isTransportAlreadySaved = transportList.any((existingTransport) => existingTransport.isEqualTo(newTransport));
@@ -119,7 +119,7 @@ Future<void> append(Transport newTransport) async { // I think you can compare i
   }
 }
 
-Future<bool> isTransportSaved(Transport transport) async {
+Future<bool> isTransportSaved(Trip transport) async {
   try {
     // Get the path to the application documents directory
     final path = await getLocalPath();
@@ -133,7 +133,7 @@ Future<bool> isTransportSaved(Transport transport) async {
       if (content.isNotEmpty) {
         // Decode JSON into a list of Transport objects
         List<Map<String, dynamic>> transports = List<Map<String, dynamic>>.from(jsonDecode(content));
-        List<Transport> transportList = transports.map((json) => Transport.fromJson(json)).toList();
+        List<Trip> transportList = transports.map((json) => Trip.fromJson(json)).toList();
 
         // Check if the transport is already in the list
         bool isAlreadySaved = transportList.any((existingTransport) => existingTransport.isEqualTo(transport));
@@ -151,7 +151,7 @@ Future<bool> isTransportSaved(Transport transport) async {
   }
 }
 
-Future<void> deleteMatchingTransport(Transport newTransport) async {
+Future<void> deleteMatchingTransport(Trip newTransport) async {
   try {
     // Get the path to the application documents directory
     final path = await getLocalPath();
@@ -172,7 +172,7 @@ Future<void> deleteMatchingTransport(Transport newTransport) async {
     // Find the transport that matches all details of newTransport
     transports.removeWhere((existingTransport) {
       // Check if all relevant fields match
-      return Transport.fromJson(existingTransport).isEqualTo(newTransport); // Assuming `isEqualTo` is a method that compares Transport
+      return Trip.fromJson(existingTransport).isEqualTo(newTransport); // Assuming `isEqualTo` is a method that compares Transport
     });
 
     // Convert the updated list back to a prettified JSON string
@@ -227,9 +227,9 @@ Future<String?> read({bool formatted = false}) async {
 }
 
 // Convert JSON String to Transport objects
-Future<List<Transport>> parseTransportJSON(String jsonString) async {
+Future<List<Trip>> parseTransportJSON(String jsonString) async {
   // Convert each JSON map to a Transport instance
-  List<Transport> transports = [];
+  List<Trip> transports = [];
 
   // Checks if jsonString is empty, and returns empty List if it is
   if (jsonString.isEmpty) {
@@ -240,7 +240,7 @@ Future<List<Transport>> parseTransportJSON(String jsonString) async {
   List<dynamic> jsonList = jsonDecode(jsonString);
 
   for (var json in jsonList) {
-    Transport transport = Transport.fromJson(json);
+    Trip transport = Trip.fromJson(json);
     // print("testParseJSON: ${transport.toString()}\n");
     transports.add(transport);
   }

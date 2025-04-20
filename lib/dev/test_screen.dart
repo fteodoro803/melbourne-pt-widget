@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/database/helpers/routeHelpers.dart';
+import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart' as ptv;
+import 'package:flutter_project/domain/route.dart' as ptv;
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'package:get/get.dart';
 
 import '../add_screens/widgets/custom_list_tile.dart';
@@ -18,7 +18,7 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   final TextEditingController locationField = TextEditingController();
-  List<Transport> transportList = [];
+  List<Trip> transportList = [];
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadTransports() async {
-    transportList = await ptvService.loadTransports();
+    transportList = await ptvService.loadTrips();
 
     setState(() {});
   }

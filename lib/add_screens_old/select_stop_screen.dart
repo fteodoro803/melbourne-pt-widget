@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/database/helpers/stopHelpers.dart';
+import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart' as PTRoute;
+import 'package:flutter_project/domain/stop.dart';
+import 'package:flutter_project/domain/route.dart' as PTRoute;
 import 'package:get/get.dart';
-import 'package:flutter_project/database/helpers/routeHelpers.dart';
+import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
 class SelectStopScreen extends StatefulWidget {
@@ -39,8 +39,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
 
   // Fetch each Route that each Stop is on
   Future<void> getStopsAndRoutes() async {
-    String? location = widget.arguments.transport!.location?.coordinates;
-    int? routeType = widget.arguments.transport!.routeType?.id;
+    String? location = widget.arguments.trip!.location?.coordinates;
+    int? routeType = widget.arguments.trip!.routeType?.id;
     int maxDistance = 300;
 
     // Create temporary lists to hold the new data
@@ -75,8 +75,8 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   }
 
   void setStopAndRoute(index) {
-    widget.arguments.transport!.stop = _stops[index];
-    widget.arguments.transport!.route = _routes[index];
+    widget.arguments.trip!.stop = _stops[index];
+    widget.arguments.trip!.route = _routes[index];
 
     int routeId = _routes[index].id;
     String routeName = _routes[index].name;

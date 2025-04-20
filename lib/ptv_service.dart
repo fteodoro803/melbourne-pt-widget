@@ -1,21 +1,21 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
-import 'package:flutter_project/database/helpers/directionHelpers.dart';
-import 'package:flutter_project/database/helpers/routeHelpers.dart';
-import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
-import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
-import 'package:flutter_project/database/helpers/stopHelpers.dart';
-import 'package:flutter_project/database/helpers/stopRouteTypesHelpers.dart';
-import 'package:flutter_project/database/helpers/transportHelpers.dart';
+import 'package:flutter_project/database/helpers/direction_helpers.dart';
+import 'package:flutter_project/database/helpers/route_helpers.dart';
+import 'package:flutter_project/database/helpers/route_stops_helpers.dart';
+import 'package:flutter_project/database/helpers/route_type_helpers.dart';
+import 'package:flutter_project/database/helpers/stop_helpers.dart';
+import 'package:flutter_project/database/helpers/stop_route_types_helpers.dart';
+import 'package:flutter_project/database/helpers/trip_helpers.dart';
 import 'package:flutter_project/geopath.dart';
-import 'package:flutter_project/ptv_info_classes/departure_info.dart';
+import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/direction.dart';
+import 'package:flutter_project/domain/route.dart';
+import 'package:flutter_project/domain/route_type.dart';
+import 'package:flutter_project/domain/stop.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'database/database.dart' as db;
@@ -68,14 +68,14 @@ class PtvService {
 // Direction Functions
   /// Fetches directions for a given route.
   /// Uses data from either the database or PTV API, preferring the database.
-  Future<List<RouteDirection>> fetchDirections(int routeId) async {
-    List<RouteDirection> directionList = [];
+  Future<List<Direction>> fetchDirections(int routeId) async {
+    List<Direction> directionList = [];
 
     // Check if directions data exists in database
     // If it does, set directionList to the retrieved data. If not, fetch data from the API
     final dbDirectionsList = await Get.find<db.AppDatabase>().getDirectionsByRoute(routeId);
     if (dbDirectionsList.isNotEmpty) {
-      directionList = dbDirectionsList.map(RouteDirection.fromDb).toList();
+      directionList = dbDirectionsList.map(Direction.fromDb).toList();
     }
 
     else {
@@ -91,7 +91,7 @@ class PtvService {
       // Populating Stops List
       for (var direction in jsonResponse!["directions"]) {
         int routeId = direction["route_id"];
-        RouteDirection newDirection = RouteDirection.fromApi(direction);
+        Direction newDirection = Direction.fromApi(direction);
         directionList.add(newDirection);
 
         // Adding to database
@@ -138,7 +138,7 @@ class PtvService {
 // Pattern Functions
   // todo: use fromApi constructor
   // todo: add to database
-  Future<List<Departure>> fetchPattern(Transport transport, Departure departure) async {
+  Future<List<Departure>> fetchPattern(Trip trip, Departure departure) async {
     List<Departure> departures = [];
 
     // if (departure == null) {
@@ -147,7 +147,7 @@ class PtvService {
 
     String expands = "Stop";
     String? runRef = departure.runRef;
-    RouteType? routeType = transport.routeType;
+    RouteType? routeType = trip.routeType;
     ApiData data = await PtvApiService().patterns(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -310,10 +310,10 @@ class PtvService {
   }
 
 // Runs Functions
-  Future<void> fetchRuns(Transport transport) async {
+  Future<void> fetchRuns(Trip trip) async {
     String expands = "All";
-    String? runRef = transport.departures?[0].runRef;
-    RouteType? routeType = transport.routeType;
+    String? runRef = trip.departures?[0].runRef;
+    RouteType? routeType = trip.routeType;
     ApiData data = await PtvApiService().runs(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -370,7 +370,7 @@ class PtvService {
   /// Fetch Stops along a Route and saves them to the database.
   /// Also saves the link between the route and its stops.
   // todo: fetch data from database first, preferring database
-  Future<List<Stop>> fetchStopsRoute(Route route, {RouteDirection? direction}) async {
+  Future<List<Stop>> fetchStopsRoute(Route route, {Direction? direction}) async {
     List<Stop> stopList = [];
 
     // Fetches stops data via PTV API
@@ -384,7 +384,7 @@ class PtvService {
     else {
       // Auto-select a direction to get stop sequence data
       // Stop sequence is only available from the api if a direction is given, but the direction doesn't seem to make a difference
-      List<RouteDirection> directions = await fetchDirections(route.id);
+      List<Direction> directions = await fetchDirections(route.id);
 
       if (directions.isNotEmpty) {
         data = await PtvApiService().stopsAlongRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString(), geoPath: true);
@@ -517,69 +517,69 @@ class PtvService {
     return StopRouteLists(stops, routes);
   }
 
-  Future<void> saveTransport(Transport transport) async {
-    String? uniqueId = transport.uniqueID;
-    int? routeTypeId = transport.routeType?.id;
-    int? routeId = transport.route?.id;
-    int? stopId = transport.stop?.id;
-    int? directionId = transport.direction?.id;
-    int? index = transport.index;
+  Future<void> saveTrip(Trip trip) async {
+    String? uniqueId = trip.uniqueID;
+    int? routeTypeId = trip.routeType?.id;
+    int? routeId = trip.route?.id;
+    int? stopId = trip.stop?.id;
+    int? directionId = trip.direction?.id;
+    int? index = trip.index;
 
     if (uniqueId != null && routeTypeId != null && routeId != null && stopId != null && directionId != null) {
-      Get.find<db.AppDatabase>().addTransport(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
+      Get.find<db.AppDatabase>().addTrip(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
     }
     else {
-      print(" ( ptv_service.dart -> saveTransportToDb ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
+      print(" ( ptv_service.dart -> saveTrip ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
     }
   }
 
-  /// Checks if Transport is in Database
-  Future<bool> isTransportSaved(Transport transport) async {
-    if (transport.uniqueID != null) {
-      return await Get.find<db.AppDatabase>().isTransportInDatabase(transport.uniqueID!);
+  /// Checks if Trip is in Database
+  Future<bool> isTripSaved(Trip trip) async {
+    if (trip.uniqueID != null) {
+      return await Get.find<db.AppDatabase>().isTripInDatabase(trip.uniqueID!);
     }
     else {
       return false;
     }
   }
 
-  Future<List<Transport>> loadTransports() async {
-    List<Transport> transportList = [];
+  Future<List<Trip>> loadTrips() async {
+    List<Trip> tripList = [];
     db.AppDatabase database = Get.find<db.AppDatabase>();
 
-    var dbTransports = await Get.find<db.AppDatabase>().getTransports();
+    var dbTrips = await Get.find<db.AppDatabase>().getTrips();
     RouteType? routeType;
     Route? route;
     Stop? stop;
-    RouteDirection? direction;
+    Direction? direction;
     int? index;
 
 
-    // Convert database transport to domain transport
-    for (var dbTransport in dbTransports) {
-      routeType = RouteType.fromId(dbTransport.routeTypeId);
+    // Convert database trip to domain trip
+    for (var dbTrip in dbTrips) {
+      routeType = RouteType.fromId(dbTrip.routeTypeId);
 
-      var dbRoute = await database.getRouteById(dbTransport.routeId);
+      var dbRoute = await database.getRouteById(dbTrip.routeId);
       route = dbRoute != null ? Route.fromDb(dbRoute) : null;
 
-      var dbStop = await database.getStopById(dbTransport.stopId);
+      var dbStop = await database.getStopById(dbTrip.stopId);
       stop = dbStop != null ? Stop.fromDb(dbStop) : null;
 
-      var dbDirection = await database.getDirectionById(dbTransport.directionId);
-      direction = dbDirection != null ? RouteDirection.fromDb(dbDirection) : null;
+      var dbDirection = await database.getDirectionById(dbTrip.directionId);
+      direction = dbDirection != null ? Direction.fromDb(dbDirection) : null;
 
-      index = dbTransport.index ?? 999;
+      index = dbTrip.index ?? 999;
 
-      Transport newTransport = Transport.withAttributes(routeType, stop, route, direction);
-      newTransport.setIndex(index);
-      transportList.add(newTransport);
+      Trip newTrip = Trip.withAttributes(routeType, stop, route, direction);
+      newTrip.setIndex(index);
+      tripList.add(newTrip);
     }
 
-    return transportList;
+    return tripList;
   }
 
-  Future<void> deleteTransport(String transportId) async {
-    await Get.find<db.AppDatabase>().removeTransport(transportId);
+  Future<void> deleteTrip(String tripId) async {
+    await Get.find<db.AppDatabase>().removeTransport(tripId);
   }
 
 }

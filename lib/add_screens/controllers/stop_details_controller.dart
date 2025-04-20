@@ -18,7 +18,7 @@ class StopDetailsController extends GetxController {
 
     for (var transport in searchController.details.value.transportList!) {
       // Check if the transport is already saved
-      bool isSaved = await ptvService.isTransportSaved(transport);
+      bool isSaved = await ptvService.isTripSaved(transport);
       tempSavedList.add(isSaved);
     }
 
@@ -39,11 +39,11 @@ class StopDetailsController extends GetxController {
       bool isNowSaved = tempSavedList[index];
       if (wasSaved != isNowSaved) {
         if (!wasSaved) {
-          await ptvService.saveTransport(transport);
+          await ptvService.saveTrip(transport);
           // widget.arguments.callback();
         }
         else {
-          await ptvService.deleteTransport(transport.uniqueID!);
+          await ptvService.deleteTrip(transport.uniqueID!);
           // widget.arguments.callback();
         }
       }

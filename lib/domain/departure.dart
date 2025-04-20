@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'departure_info.g.dart';
+part 'departure.g.dart';
 
 /// Represents a transport's departure, with information on its respective vehicle.
 /// Handles conversion from UTC time to Melbourne's local time
@@ -116,7 +116,7 @@ class Departure {
     }
     else {
       print(
-          "( departure_info.dart -> Departure.fromAPI ) -- runs for runRef $runRef is empty )");
+          "( departure.dart -> Departure.fromAPI ) -- runs for runRef $runRef is empty )");
     }
 
     return Departure(

@@ -1,9 +1,9 @@
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptv_info_classes/departure_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/domain/departure.dart';
+import 'package:flutter_project/domain/direction.dart';
+import 'package:flutter_project/domain/route.dart' as pt_route;
+import 'package:flutter_project/domain/stop.dart';
 import '../utility/time_utils.dart';
 
 class LocationWidget extends StatelessWidget {
@@ -95,7 +95,7 @@ class RouteWidget extends StatelessWidget {
   });
 
   final pt_route.Route route;
-  final RouteDirection? direction;
+  final Direction? direction;
   final bool scrollable;
 
   @override

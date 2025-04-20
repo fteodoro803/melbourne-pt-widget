@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'transport_widgets.dart';
 
 import '../utility/time_utils.dart';
 
 class CustomListTile extends StatelessWidget {
-  final Transport transport;
+  final Trip transport;
   final VoidCallback onTap;
   final bool? dismissible;
   final VoidCallback? onDismiss;
@@ -26,7 +26,7 @@ class CustomListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Transport transport = this.transport;
+    final Trip transport = this.transport;
 
     final departure = transport.departures != null && transport.departures!.isNotEmpty ? transport.departures![0] : null;
     final String estimatedDepartureTime = departure?.estimatedDepartureTime ?? departure?.scheduledDepartureTime ?? "No Data";
