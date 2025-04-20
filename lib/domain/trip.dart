@@ -19,7 +19,7 @@ part 'trip.g.dart';
 @JsonSerializable()
 class Trip {
   String? uniqueID; // unique ID for the widget timeline
-  RouteType? routeType;
+  RouteType? routeType;     // todo: is this even used? since it's in route, maybe we can delete this
   Location? location;
   Stop? stop;
   Route? route;
