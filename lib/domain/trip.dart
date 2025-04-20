@@ -10,7 +10,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../ptv_service.dart';
 
-import '../database/helpers/departureHelpers.dart';
+import '../database/helpers/departure_helpers.dart';
 import '../database/database.dart' as db;
 import 'package:get/get.dart';
 

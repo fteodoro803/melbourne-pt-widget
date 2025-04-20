@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/database/helpers/stopHelpers.dart';
+import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/domain/route.dart' as PTRoute;
 import 'package:get/get.dart';
-import 'package:flutter_project/database/helpers/routeHelpers.dart';
+import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
 class SelectStopScreen extends StatefulWidget {

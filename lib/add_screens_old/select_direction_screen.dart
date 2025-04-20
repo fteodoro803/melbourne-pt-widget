@@ -6,7 +6,7 @@ import 'package:flutter_project/screen_arguments.dart';
 
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
-import 'package:flutter_project/database/helpers/directionHelpers.dart';
+import 'package:flutter_project/database/helpers/direction_helpers.dart';
 
 class SelectDirectionScreen extends StatefulWidget {
   const SelectDirectionScreen({super.key, required this.arguments});

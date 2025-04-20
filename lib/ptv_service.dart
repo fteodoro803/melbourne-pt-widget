@@ -1,13 +1,13 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
 import 'package:flutter_project/api_data.dart';
-import 'package:flutter_project/database/helpers/directionHelpers.dart';
-import 'package:flutter_project/database/helpers/routeHelpers.dart';
-import 'package:flutter_project/database/helpers/routeStopsHelpers.dart';
-import 'package:flutter_project/database/helpers/routeTypeHelpers.dart';
-import 'package:flutter_project/database/helpers/stopHelpers.dart';
-import 'package:flutter_project/database/helpers/stopRouteTypesHelpers.dart';
-import 'package:flutter_project/database/helpers/tripHelpers.dart';
+import 'package:flutter_project/database/helpers/direction_helpers.dart';
+import 'package:flutter_project/database/helpers/route_helpers.dart';
+import 'package:flutter_project/database/helpers/route_stops_helpers.dart';
+import 'package:flutter_project/database/helpers/route_type_helpers.dart';
+import 'package:flutter_project/database/helpers/stop_helpers.dart';
+import 'package:flutter_project/database/helpers/stop_route_types_helpers.dart';
+import 'package:flutter_project/database/helpers/trip_helpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
