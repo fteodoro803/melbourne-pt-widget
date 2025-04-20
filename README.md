@@ -1,7 +1,7 @@
 # PTV Widget
 This application gives users easy access to information on their selected routes from PTV, via their mobile device's home widget.
 
-# Demo Video (as of 20 April 2025)
+# [Demo Video](https://www.youtube.com/watch?v=KVPCm8o5nXM) (as of 20 April 2025)
 [![Demo Video](assets/thumbnail.png)](https://www.youtube.com/watch?v=KVPCm8o5nXM)
 
 ### Setup
