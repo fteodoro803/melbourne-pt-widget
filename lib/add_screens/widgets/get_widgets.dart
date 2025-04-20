@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../ptv_info_classes/route_info.dart' as pt_route;
-import '../../ptv_info_classes/stop_info.dart';
+import '../../domain/route_info.dart' as pt_route;
+import '../../domain/stop_info.dart';
 import '../utility/time_utils.dart';
 
 class LocationWidget extends StatelessWidget {

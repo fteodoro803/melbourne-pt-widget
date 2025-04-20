@@ -1,11 +1,11 @@
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
-import 'package:flutter_project/ptv_info_classes/departure_info.dart';
-import 'package:flutter_project/ptv_info_classes/location_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/domain/departure_info.dart';
+import 'package:flutter_project/domain/location_info.dart';
+import 'package:flutter_project/domain/route_direction_info.dart';
+import 'package:flutter_project/domain/route_info.dart';
+import 'package:flutter_project/domain/route_type_info.dart';
+import 'package:flutter_project/domain/stop_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'ptv_service.dart';

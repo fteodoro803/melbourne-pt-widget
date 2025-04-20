@@ -1,5 +1,5 @@
-import 'package:flutter_project/ptv_info_classes/route_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/domain/route_info.dart';
+import 'package:flutter_project/domain/route_type_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/database/database.dart' as db;
 

@@ -9,12 +9,12 @@ import 'package:flutter_project/database/helpers/stopHelpers.dart';
 import 'package:flutter_project/database/helpers/stopRouteTypesHelpers.dart';
 import 'package:flutter_project/database/helpers/transportHelpers.dart';
 import 'package:flutter_project/geopath.dart';
-import 'package:flutter_project/ptv_info_classes/departure_info.dart';
+import 'package:flutter_project/domain/departure_info.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/domain/route_direction_info.dart';
+import 'package:flutter_project/domain/route_info.dart';
+import 'package:flutter_project/domain/route_type_info.dart';
+import 'package:flutter_project/domain/stop_info.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

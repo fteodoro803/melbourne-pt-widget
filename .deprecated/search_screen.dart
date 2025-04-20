@@ -13,9 +13,9 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/transport.dart';
 import 'package:flutter_project/ptv_service.dart';
 
-import '../../ptv_info_classes/departure_info.dart';
-import '../../ptv_info_classes/stop_info.dart';
-import '../../ptv_info_classes/route_info.dart' as pt_route;
+import '../../domain/departure_info.dart';
+import '../../domain/stop_info.dart';
+import '../../domain/route_info.dart' as pt_route;
 
 import '../utility/map_utils.dart';
 import '../utility/search_utils.dart';

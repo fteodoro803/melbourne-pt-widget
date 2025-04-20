@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/ptv_info_classes/location_info.dart';
+import 'package:flutter_project/domain/location_info.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
-import '../../ptv_info_classes/stop_info.dart';
+import '../../domain/stop_info.dart';
 import '../utility/map_utils.dart';
 import '../utility/transport_path.dart';
 import 'nearby_stops_controller.dart';

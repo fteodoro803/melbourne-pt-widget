@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'search_details.dart';
 import '../widgets/transport_widgets.dart';
 
-import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
+import 'package:flutter_project/domain/route_info.dart' as pt_route;
 import 'package:flutter_project/transport.dart';
 
 class SaveTransportSheet extends StatefulWidget {

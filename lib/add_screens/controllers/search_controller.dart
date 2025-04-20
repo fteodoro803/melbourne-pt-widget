@@ -3,9 +3,9 @@
 import 'package:flutter_project/add_screens/controllers/sheet_navigator_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../ptv_info_classes/departure_info.dart';
-import '../../ptv_info_classes/route_info.dart' as pt_route;
-import '../../ptv_info_classes/stop_info.dart';
+import '../../domain/departure_info.dart';
+import '../../domain/route_info.dart' as pt_route;
+import '../../domain/stop_info.dart';
 import '../../ptv_service.dart';
 import '../../transport.dart';
 import '../utility/search_utils.dart';
