@@ -57,7 +57,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   }
 
   void setRouteType(int index) {
-    widget.arguments.transport!.routeType = _routeTypes[index];
+    widget.arguments.trip!.routeType = _routeTypes[index];
   }
 
   // Rendering

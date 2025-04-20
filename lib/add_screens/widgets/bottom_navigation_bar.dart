@@ -90,7 +90,7 @@ class BottomNavigation extends StatelessWidget {
             Navigator.pushNamed(
               context,
               '/selectRouteTypeScreen',
-              arguments: ScreenArguments.withTransport(Trip(), updateMainPage!),
+              arguments: ScreenArguments.withTrip(Trip(), updateMainPage!),
             );
             break;
         }

@@ -9,7 +9,7 @@ class DevTools {
   void printScreenState(String screenName, ScreenArguments arguments) {
 
     if (kDebugMode && isEnabled) {
-      String transportDetails = arguments.transport.toString(); // Get the transport details as a string
+      String transportDetails = arguments.trip.toString(); // Get the transport details as a string
 
       // Format transport details to indent each line
       String indentedTransportDetails = transportDetails.split('\n').map((line) => '\t\t$line').join('\n');

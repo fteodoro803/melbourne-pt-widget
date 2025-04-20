@@ -35,7 +35,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   }
 
   void getDirections() async {
-    int? routeId = widget.arguments.transport!.route?.id;
+    int? routeId = widget.arguments.trip!.route?.id;
     List<RouteDirection> directions = await ptvService.fetchDirections(routeId!);
     _directions = directions;
     setState(() {});
@@ -43,17 +43,17 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
 
   void setDirection(int? index) {
     if (index != null) {
-      widget.arguments.transport!.direction = _directions[index];
+      widget.arguments.trip!.direction = _directions[index];
 
       int id = _directions[index].id;
       String name = _directions[index].name;
       String description = _directions[index].description;
-      int? routeId = widget.arguments.transport?.route?.id;
+      int? routeId = widget.arguments.trip?.route?.id;
 
       Get.find<db.AppDatabase>().addDirection(id, name, description, routeId!);
     }
     else {
-      widget.arguments.transport!.direction = null;
+      widget.arguments.trip!.direction = null;
     }
   }
 
