@@ -7,7 +7,7 @@ import '../../domain/departure_info.dart';
 import '../../ptv_service.dart';
 import '../.deprecated/search_details.dart';
 import '../utility/time_utils.dart';
-import '../../transport.dart';
+import '../../trip.dart';
 import '../widgets/transport_widgets.dart';
 
 class DepartureDetailsSheet extends StatefulWidget {

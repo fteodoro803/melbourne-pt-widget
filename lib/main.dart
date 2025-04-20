@@ -15,7 +15,7 @@ import "package:flutter_speed_dial/flutter_speed_dial.dart";
 // add cupertino for apple version
 
 import 'package:global_configuration/global_configuration.dart';
-import 'package:flutter_project/domain/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';

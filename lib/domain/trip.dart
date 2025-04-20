@@ -64,7 +64,7 @@ class Transport {
     // Early exit if any of the prerequisites are null
     // if (routeType == null || stopId == null || directionId == null || routeId == null) {
     if (routeType == null || stopId == null || routeId == null) {
-      print("( transport.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
+      print("( trip.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
       return;
     }
 
@@ -90,7 +90,7 @@ class Transport {
       }
     }
 
-    // print("( transport.dart -> updatedDepartures() ) -- Updated Departures: \n $departures");
+    // print("( trip.dart -> updatedDepartures() ) -- Updated Departures: \n $departures");
 
     generateUniqueID();
   }
@@ -112,7 +112,7 @@ class Transport {
 
     List<Transport> newTransportList = [newTransport1, newTransport2];
 
-    // print("( transport.dart -> getRouteDirections() ) -- newTransportList: \n$newTransportList");
+    // print("( trip.dart -> getRouteDirections() ) -- newTransportList: \n$newTransportList");
     return newTransportList;
   }
 
@@ -127,7 +127,7 @@ class Transport {
 
     // Early Exit
     if (data.response == null) {
-      print("( transport.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
+      print("( trip.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
       return [];
     }
 
@@ -142,7 +142,7 @@ class Transport {
       directions.add(newDirection);
     }
 
-    // print("( transport.dart -> fetchRouteDirections ) -- Directions: $directions");
+    // print("( trip.dart -> fetchRouteDirections ) -- Directions: $directions");
     return directions;
   }
 

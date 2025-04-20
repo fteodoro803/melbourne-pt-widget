@@ -7,7 +7,7 @@ import '../../domain/departure_info.dart';
 import '../../domain/route_info.dart' as pt_route;
 import '../../domain/stop_info.dart';
 import '../../ptv_service.dart';
-import '../../domain/transport.dart';
+import '../../domain/trip.dart';
 import '../utility/search_utils.dart';
 import 'departure_details_controller.dart';
 import 'map_controller.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/domain/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 
 class DevTools {
   bool isEnabled = false;

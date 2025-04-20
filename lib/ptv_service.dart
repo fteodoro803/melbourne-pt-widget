@@ -15,7 +15,7 @@ import 'package:flutter_project/domain/route_direction_info.dart';
 import 'package:flutter_project/domain/route_info.dart';
 import 'package:flutter_project/domain/route_type_info.dart';
 import 'package:flutter_project/domain/stop_info.dart';
-import 'package:flutter_project/domain/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'database/database.dart' as db;

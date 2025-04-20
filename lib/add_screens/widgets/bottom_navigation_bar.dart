@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/domain/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'package:get/get.dart';
 
 import '../../main.dart';

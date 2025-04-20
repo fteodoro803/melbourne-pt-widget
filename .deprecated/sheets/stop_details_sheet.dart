@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import '../../file_service.dart';
 import '../../domain/departure_info.dart';
-import '../../transport.dart';
+import '../../trip.dart';
 import '../.deprecated/search_details.dart';
 import '../.deprecated/departure_card.dart';
 import '../.deprecated/save_transport_sheet.dart';

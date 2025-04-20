@@ -10,7 +10,7 @@ import 'package:flutter_project/add_screens/sheets/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/sheets/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/trip.dart';
 import 'package:flutter_project/ptv_service.dart';
 
 import '../../domain/departure_info.dart';

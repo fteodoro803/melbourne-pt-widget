@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/domain/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import '../utility/time_utils.dart';
 import '../../domain/departure_info.dart';
 
