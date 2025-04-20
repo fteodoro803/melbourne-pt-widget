@@ -1,6 +1,9 @@
 # PTV Widget
 This application gives users easy access to information on their selected routes from PTV, via their mobile device's home widget.
 
+# Demo Video (as of 20 April 2025)
+[![Demo Video](https://img.youtube.com/vi/KVPCm8o5nXM/0.jpg)](https://www.youtube.com/watch?v=KVPCm8o5nXM)
+
 ### Setup
 For the program to work, paste your User ID and/or API Key in the config file:
   - Base app: PTV and Google Maps credentials: assets/cfg/config.json
