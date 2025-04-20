@@ -4,7 +4,7 @@ import 'package:flutter_project/add_screens/utility/map_utils.dart';
 import 'package:flutter_project/add_screens/utility/time_utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../domain/stop_info.dart';
+import '../../domain/stop.dart';
 
 class TransportPath {
   final List<LatLng> geoPath;

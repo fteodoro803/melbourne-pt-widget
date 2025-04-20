@@ -1,11 +1,11 @@
-import 'package:flutter_project/domain/route_direction_info.dart';
-import 'package:flutter_project/domain/route_type_info.dart';
-import 'package:flutter_project/domain/stop_info.dart';
+import 'package:flutter_project/domain/direction.dart';
+import 'package:flutter_project/domain/route_type.dart';
+import 'package:flutter_project/domain/stop.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
-part 'route_info.g.dart';
+part 'route.g.dart';
 
 /// Represents PTV's route, with identification and styling information.
 /// Handles colour mapping based on route type.
@@ -20,7 +20,7 @@ class Route {
   String gtfsId;
   String status;
 
-  List<RouteDirection>? directions;
+  List<Direction>? directions;
   List<Stop>? stopsAlongRoute;
 
   /// Creates a route object, and matches its details to its respective colour.

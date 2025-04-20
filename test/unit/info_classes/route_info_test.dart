@@ -1,6 +1,6 @@
 // import 'package:flutter_project/palettes.dart';
-// import 'package:flutter_project/domain/route_info.dart';
-// import 'package:flutter_project/domain/route_type_info.dart';
+// import 'package:flutter_project/domain/route.dart';
+// import 'package:flutter_project/domain/route_type.dart';
 // import 'package:flutter_test/flutter_test.dart';
 //
 // void main() {

@@ -36,7 +36,7 @@ enum RouteType {
   static RouteType fromName(String name) {
     return RouteType.values.firstWhere(
             (routeType) => RouteType._normaliseName(routeType.name) == RouteType._normaliseName(name),
-        orElse: () => throw ArgumentError('( route_type_info.dart -> RouteType.withName() ) -- No RouteTypeEnum found for name: $name')
+        orElse: () => throw ArgumentError('( route_type.dart -> RouteType.withName() ) -- No RouteTypeEnum found for name: $name')
     );
   }
 

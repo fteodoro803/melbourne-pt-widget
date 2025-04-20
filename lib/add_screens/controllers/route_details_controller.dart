@@ -1,8 +1,8 @@
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
 
-import '../../domain/route_info.dart' as pt_route;
-import '../../domain/stop_info.dart';
+import '../../domain/route.dart' as pt_route;
+import '../../domain/stop.dart';
 import '../utility/search_utils.dart';
 
 class RouteDetailsController extends GetxController {

@@ -11,10 +11,10 @@ import 'package:flutter_project/database/helpers/tripHelpers.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
-import 'package:flutter_project/domain/route_direction_info.dart';
-import 'package:flutter_project/domain/route_info.dart';
-import 'package:flutter_project/domain/route_type_info.dart';
-import 'package:flutter_project/domain/stop_info.dart';
+import 'package:flutter_project/domain/direction.dart';
+import 'package:flutter_project/domain/route.dart';
+import 'package:flutter_project/domain/route_type.dart';
+import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -68,14 +68,14 @@ class PtvService {
 // Direction Functions
   /// Fetches directions for a given route.
   /// Uses data from either the database or PTV API, preferring the database.
-  Future<List<RouteDirection>> fetchDirections(int routeId) async {
-    List<RouteDirection> directionList = [];
+  Future<List<Direction>> fetchDirections(int routeId) async {
+    List<Direction> directionList = [];
 
     // Check if directions data exists in database
     // If it does, set directionList to the retrieved data. If not, fetch data from the API
     final dbDirectionsList = await Get.find<db.AppDatabase>().getDirectionsByRoute(routeId);
     if (dbDirectionsList.isNotEmpty) {
-      directionList = dbDirectionsList.map(RouteDirection.fromDb).toList();
+      directionList = dbDirectionsList.map(Direction.fromDb).toList();
     }
 
     else {
@@ -91,7 +91,7 @@ class PtvService {
       // Populating Stops List
       for (var direction in jsonResponse!["directions"]) {
         int routeId = direction["route_id"];
-        RouteDirection newDirection = RouteDirection.fromApi(direction);
+        Direction newDirection = Direction.fromApi(direction);
         directionList.add(newDirection);
 
         // Adding to database
@@ -370,7 +370,7 @@ class PtvService {
   /// Fetch Stops along a Route and saves them to the database.
   /// Also saves the link between the route and its stops.
   // todo: fetch data from database first, preferring database
-  Future<List<Stop>> fetchStopsRoute(Route route, {RouteDirection? direction}) async {
+  Future<List<Stop>> fetchStopsRoute(Route route, {Direction? direction}) async {
     List<Stop> stopList = [];
 
     // Fetches stops data via PTV API
@@ -384,7 +384,7 @@ class PtvService {
     else {
       // Auto-select a direction to get stop sequence data
       // Stop sequence is only available from the api if a direction is given, but the direction doesn't seem to make a difference
-      List<RouteDirection> directions = await fetchDirections(route.id);
+      List<Direction> directions = await fetchDirections(route.id);
 
       if (directions.isNotEmpty) {
         data = await PtvApiService().stopsAlongRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString(), geoPath: true);
@@ -551,7 +551,7 @@ class PtvService {
     RouteType? routeType;
     Route? route;
     Stop? stop;
-    RouteDirection? direction;
+    Direction? direction;
     int? index;
 
 
@@ -566,7 +566,7 @@ class PtvService {
       stop = dbStop != null ? Stop.fromDb(dbStop) : null;
 
       var dbDirection = await database.getDirectionById(dbTrip.directionId);
-      direction = dbDirection != null ? RouteDirection.fromDb(dbDirection) : null;
+      direction = dbDirection != null ? Direction.fromDb(dbDirection) : null;
 
       index = dbTrip.index ?? 999;
 

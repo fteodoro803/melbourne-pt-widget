@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/domain/stop_info.dart';
+import 'package:flutter_project/domain/stop.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../../domain/route_info.dart' as pt_route;
+import '../../domain/route.dart' as pt_route;
 import '../.deprecated/search_details.dart';
 import '../widgets/distance_filter.dart';
 import '../widgets/screen_widgets.dart' as ScreenWidgets;

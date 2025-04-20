@@ -1,6 +1,6 @@
 import 'package:flutter_project/domain/departure.dart';
-import 'package:flutter_project/domain/route_info.dart' as pt_route;
-import 'package:flutter_project/domain/stop_info.dart';
+import 'package:flutter_project/domain/route.dart' as pt_route;
+import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/trip.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

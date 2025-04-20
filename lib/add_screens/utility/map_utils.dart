@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
-import '../../domain/stop_info.dart';
+import '../../domain/stop.dart';
 
 
 class GeoPathAndStops {

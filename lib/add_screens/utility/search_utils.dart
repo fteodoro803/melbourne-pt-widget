@@ -2,10 +2,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
-import 'package:flutter_project/domain/route_direction_info.dart';
-import 'package:flutter_project/domain/route_info.dart' as pt_route;
-import 'package:flutter_project/domain/route_type_info.dart';
-import 'package:flutter_project/domain/stop_info.dart';
+import 'package:flutter_project/domain/direction.dart';
+import 'package:flutter_project/domain/route.dart' as pt_route;
+import 'package:flutter_project/domain/route_type.dart';
+import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 
@@ -45,7 +45,7 @@ class SearchUtils {
 
   Future<List<Trip>> splitDirection(Stop stop, pt_route.Route route) async {
     String? routeId = route.id.toString();
-    List<RouteDirection> directions = [];
+    List<Direction> directions = [];
     List<Trip> transportList = [];
 
     // Fetching Data and converting to JSON
@@ -64,8 +64,8 @@ class SearchUtils {
       int id = direction["direction_id"];
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
-      RouteDirection newDirection =
-      RouteDirection(id: id, name: name, description: description);
+      Direction newDirection =
+      Direction(id: id, name: name, description: description);
 
       directions.add(newDirection);
     }
@@ -140,11 +140,11 @@ class SearchUtils {
     return uniqueStops;
   }
 
-  Future<List<RouteDirection>> getRouteDirections(int routeId) async {
+  Future<List<Direction>> getRouteDirections(int routeId) async {
     return await ptvService.fetchDirections(routeId);
   }
 
-  Future<List<Stop>> getStopsAlongRoute(List<RouteDirection> directions, pt_route.Route route) async {
+  Future<List<Stop>> getStopsAlongRoute(List<Direction> directions, pt_route.Route route) async {
     List<Stop> stops = [];
     if (directions.isNotEmpty) {
       stops = await ptvService.fetchStopsRoute(route, direction: directions[0]);

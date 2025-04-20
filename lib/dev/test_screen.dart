@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/database/helpers/routeHelpers.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/domain/route_info.dart' as ptv;
+import 'package:flutter_project/domain/route.dart' as ptv;
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/domain/trip.dart';
 import 'package:get/get.dart';

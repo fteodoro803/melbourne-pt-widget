@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:flutter_project/domain/route_info.dart' as pt_route;
+import 'package:flutter_project/domain/route.dart' as pt_route;
 
 class DepartureStatus {
   final String status;

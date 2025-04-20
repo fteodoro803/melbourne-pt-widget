@@ -1,11 +1,11 @@
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/domain/departure.dart';
-import 'package:flutter_project/domain/location_info.dart';
-import 'package:flutter_project/domain/route_direction_info.dart';
-import 'package:flutter_project/domain/route_info.dart';
-import 'package:flutter_project/domain/route_type_info.dart';
-import 'package:flutter_project/domain/stop_info.dart';
+import 'package:flutter_project/domain/location.dart';
+import 'package:flutter_project/domain/direction.dart';
+import 'package:flutter_project/domain/route.dart';
+import 'package:flutter_project/domain/route_type.dart';
+import 'package:flutter_project/domain/stop.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../ptv_service.dart';
@@ -23,20 +23,20 @@ class Trip {
   Location? location;
   Stop? stop;
   Route? route;
-  RouteDirection? direction;
+  Direction? direction;
   int? index;
   // todo: add GeoPath as an attribute
 
   // Constructor
   Trip();    // Empty Transport    // todo: delete this
 
-  Trip.withStopRoute(Stop stop, Route route, RouteDirection direction) {
+  Trip.withStopRoute(Stop stop, Route route, Direction direction) {
     this.stop = stop;
     this.route = route;
     this.direction = direction;
   }
 
-  Trip.withAttributes(RouteType? routeType, Stop? stop, Route? route, RouteDirection? direction) {
+  Trip.withAttributes(RouteType? routeType, Stop? stop, Route? route, Direction? direction) {
     this.routeType = routeType;
     // this.location = location;
     this.stop = stop;
@@ -106,7 +106,7 @@ class Trip {
   Future<List<Trip>> splitByDirection() async {
 
     // Get the two directions a route can go, and set each new transport to one of them
-    List<RouteDirection> directions = await fetchRouteDirections();
+    List<Direction> directions = await fetchRouteDirections();
     Trip newTransport1 = Trip.withAttributes(routeType, stop, route, directions[0]);
     Trip newTransport2 = Trip.withAttributes(routeType, stop, route, directions[1]);
 
@@ -117,9 +117,9 @@ class Trip {
   }
 
   // todo: use the ptv service version of this
-  Future<List<RouteDirection>> fetchRouteDirections() async {
+  Future<List<Direction>> fetchRouteDirections() async {
     String? routeId = route?.id.toString();
-    List<RouteDirection> directions = [];
+    List<Direction> directions = [];
 
     // Fetching Data and converting to JSON
     ApiData data = await PtvApiService().routeDirections(routeId!);
@@ -136,8 +136,8 @@ class Trip {
       int id = direction["direction_id"];
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
-      RouteDirection newDirection =
-      RouteDirection(id: id, name: name, description: description);
+      Direction newDirection =
+      Direction(id: id, name: name, description: description);
 
       directions.add(newDirection);
     }

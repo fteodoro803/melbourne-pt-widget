@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 import 'package:get/get.dart';
-import '../../domain/route_info.dart' as pt_route;
+import '../../domain/route.dart' as pt_route;
 import '../../ptv_service.dart';
 import '../controllers/search_controller.dart';
 import '../search_binding.dart';

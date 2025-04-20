@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
 
-import '../../domain/route_direction_info.dart';
-import '../../domain/route_info.dart' as pt_route;
-import '../../domain/stop_info.dart';
+import '../../domain/direction.dart';
+import '../../domain/route.dart' as pt_route;
+import '../../domain/stop.dart';
 import '../../ptv_service.dart';
 import '../.deprecated/search_details.dart';
 import '../utility/search_utils.dart';

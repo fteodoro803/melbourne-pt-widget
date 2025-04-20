@@ -14,8 +14,8 @@ import 'package:flutter_project/trip.dart';
 import 'package:flutter_project/ptv_service.dart';
 
 import '../../domain/departure.dart';
-import '../../domain/stop_info.dart';
-import '../../domain/route_info.dart' as pt_route;
+import '../../domain/stop.dart';
+import '../../domain/route.dart' as pt_route;
 
 import '../utility/map_utils.dart';
 import '../utility/search_utils.dart';

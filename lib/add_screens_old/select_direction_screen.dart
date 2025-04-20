@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/domain/route_direction_info.dart';
+import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
@@ -20,7 +20,7 @@ class SelectDirectionScreen extends StatefulWidget {
 
 class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   final String _screenName = "selectDirection";
-  List<RouteDirection> _directions = [];
+  List<Direction> _directions = [];
   PtvService ptvService = PtvService();
   DevTools tools = DevTools();
 
@@ -36,7 +36,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
 
   void getDirections() async {
     int? routeId = widget.arguments.trip!.route?.id;
-    List<RouteDirection> directions = await ptvService.fetchDirections(routeId!);
+    List<Direction> directions = await ptvService.fetchDirections(routeId!);
     _directions = directions;
     setState(() {});
   }

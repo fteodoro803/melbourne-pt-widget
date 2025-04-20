@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import '../../domain/stop_info.dart';
+import '../../domain/stop.dart';
 import '../utility/search_utils.dart';
 import 'map_controller.dart';
 
