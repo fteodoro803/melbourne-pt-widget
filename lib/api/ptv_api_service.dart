@@ -87,7 +87,7 @@ class PtvApiService {
   }
 
   // Get Route Directions
-  Future<ApiData> routeDirections(String routeId) async {
+  Future<ApiData> directions(String routeId) async {
     String request = "/v3/directions/route/$routeId";
     Uri url = getURL(request);
     Map<String, dynamic>? response = await getResponse(url);
@@ -109,7 +109,8 @@ class PtvApiService {
     return ApiData(url, response);
   }
 
-  Future<ApiData> stopsAlongRoute(String routeId, String routeType, {String? directionId, bool? geoPath}) async {
+  /// Get Stops along a Route
+  Future<ApiData> stopsRoute(String routeId, String routeType, {String? directionId, bool? geoPath}) async {
     String request = "/v3/stops/route/$routeId/route_type/$routeType";
 
     // Parameter handling

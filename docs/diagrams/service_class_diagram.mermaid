@@ -1,0 +1,61 @@
+classDiagram
+    class PtvApiService {
+        -String userId
+        -String apiKey
+        +getUrl(String request, Map parameters) Uri
+        +departures(String routeType, String stopId) Response
+        +directions(String route) Response
+        +routes(String routeTypes) Response
+        +routeTypes() Response
+        +stopsLocation(String location) Response
+        +stopsRoute(String route) Response
+        +runs(String runRef, String routeType) Response
+        +patterns(String runRef, String routeType) Response
+        -handleParameters() Map
+
+    }
+
+    class PtvService {
+        +fetchDepartures(String routeType, String stopId, String routeId) List<Departure>
+        +fetchDirections(int routeId) List<Direction>
+        +fetchGeoPath(Route route) List<LatLng>
+        +fetchRoutes() List<Route>
+        +fetchRoutesFromStop(int stopId) List<Route>
+        +searchRoutes(String? query) List<Route>
+        +fetchRouteTypes() List<String>
+        +fetchStopsLocation(String location) List<Stop>
+        +fetchStopsRoute(Route route) List<Stop>
+        +saveTrip(Trip trip) void
+        +isTripSaved(Trip trip) bool
+        +loadTrips() List<Trip>
+        +deleteTrip(String tripId) void
+    }
+
+    class AppDatabase {
+        +Duration expiry
+        +int schemaVersion
+        +insertDeparture(DeparturesTableCompanion)
+        +insertDirection(DirectionsTableCompanion)
+        +insertRouteType(RouteTypesTableCompanion)
+        +insertRoute(RoutesTableCompanion)
+        +insertStop(StopsTableCompanion)
+        +insertTransport(TripsTableCompanion)
+        +insertRouteStopLink(RouteStopsTableCompanion)
+        +insertStopRouteTypeLink(StopRouteTypesTableCompanion)
+        +mergeUpdate(TableInfo, Insertable, Function)
+    }
+
+    class HomeWidgetService {
+        +bool isMobile
+        +String appGroupId
+        +String iosWidgetName
+        +String androidWidgetName
+        +String dataKey
+        +initialiseHomeWidget() Future<void>
+        +sendWidgetData(List<Trip> transportList) Future<void>
+        +getOptimisedData(List<Trip> transportList) List<Map>
+    }
+
+    PtvService --> AppDatabase : uses
+    PtvService --> PtvApiService : uses
+    PtvService --> HomeWidgetService : uses
