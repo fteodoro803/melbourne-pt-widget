@@ -1,7 +1,7 @@
 // Home Widget
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/domain/trip.dart';
 import 'package:home_widget/home_widget.dart';
 
 import 'add_screens/utility/trip_utils.dart';
@@ -27,7 +27,7 @@ class HomeWidgetService {
   }
 
 // Send necessary JSON Data to Widget
-  Future<void> sendWidgetData(List<Transport> transportList) async {
+  Future<void> sendWidgetData(List<Trip> transportList) async {
     print("( home_widget_service.dart -> sendWidgetData() ) -- isMobile=$isMobile");
     if (isMobile == true) {
       try {
@@ -55,7 +55,7 @@ class HomeWidgetService {
   }
 
   // Reduces the fields in the Transport class to what's needed in the Widget Design
-  List<Map<String, dynamic>> getOptimisedData(List<Transport> transportList) {
+  List<Map<String, dynamic>> getOptimisedData(List<Trip> transportList) {
     return transportList.map((transport) {
       return {
         'uniqueID': transport.uniqueID ?? "No uniqueID",

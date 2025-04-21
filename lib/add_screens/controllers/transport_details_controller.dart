@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
-import '../../ptv_info_classes/departure_info.dart';
+import '../../domain/departure.dart';
 import '../../ptv_service.dart';
 import '../utility/search_utils.dart';
 
@@ -33,7 +33,7 @@ class TransportDetailsController extends GetxController {
 
   // Function to check if transport is saved
   Future<void> checkSaved() async {
-    isSaved.value = await ptvService.isTransportSaved(searchDetails.transport!);
+    isSaved.value = await ptvService.isTripSaved(searchDetails.transport!);
   }
 
   // Function to save or delete transport

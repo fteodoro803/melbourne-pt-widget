@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
@@ -57,7 +57,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   }
 
   void setRouteType(int index) {
-    widget.arguments.transport!.routeType = _routeTypes[index];
+    widget.arguments.trip!.routeType = _routeTypes[index];
   }
 
   // Rendering

@@ -1,41 +1,42 @@
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
-import 'package:flutter_project/ptv_info_classes/departure_info.dart';
-import 'package:flutter_project/ptv_info_classes/location_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_info.dart';
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
-import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import 'package:flutter_project/domain/departure.dart';
+import 'package:flutter_project/domain/location.dart';
+import 'package:flutter_project/domain/direction.dart';
+import 'package:flutter_project/domain/route.dart';
+import 'package:flutter_project/domain/route_type.dart';
+import 'package:flutter_project/domain/stop.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'ptv_service.dart';
+import '../ptv_service.dart';
 
-import 'database/helpers/departureHelpers.dart';
-import 'database/database.dart' as db;
+import '../database/helpers/departure_helpers.dart';
+import '../database/database.dart' as db;
 import 'package:get/get.dart';
 
-part 'transport.g.dart';
+part 'trip.g.dart';
 
 @JsonSerializable()
-class Transport {
+class Trip {
   String? uniqueID; // unique ID for the widget timeline
   RouteType? routeType;
   Location? location;
   Stop? stop;
   Route? route;
-  RouteDirection? direction;
+  Direction? direction;
+  int? index;
   // todo: add GeoPath as an attribute
 
   // Constructor
-  Transport();    // Empty Transport    // todo: delete this
+  Trip();    // Empty Transport    // todo: delete this
 
-  Transport.withStopRoute(Stop stop, Route route, RouteDirection direction) {
+  Trip.withStopRoute(Stop stop, Route route, Direction direction) {
     this.stop = stop;
     this.route = route;
     this.direction = direction;
   }
 
-  Transport.withAttributes(RouteType? routeType, Stop? stop, Route? route, RouteDirection? direction) {
+  Trip.withAttributes(RouteType? routeType, Stop? stop, Route? route, Direction? direction) {
     this.routeType = routeType;
     // this.location = location;
     this.stop = stop;
@@ -46,7 +47,7 @@ class Transport {
   }
 
   // isEqualTo method to compare all properties
-  bool isEqualTo(Transport other) {
+  bool isEqualTo(Trip other) {
     return uniqueID == other.uniqueID;
   }
 
@@ -63,7 +64,7 @@ class Transport {
     // Early exit if any of the prerequisites are null
     // if (routeType == null || stopId == null || directionId == null || routeId == null) {
     if (routeType == null || stopId == null || routeId == null) {
-      print("( transport.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
+      print("( trip.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
       return;
     }
 
@@ -89,7 +90,7 @@ class Transport {
       }
     }
 
-    // print("( transport.dart -> updatedDepartures() ) -- Updated Departures: \n $departures");
+    // print("( trip.dart -> updatedDepartures() ) -- Updated Departures: \n $departures");
 
     generateUniqueID();
   }
@@ -102,23 +103,23 @@ class Transport {
   }
 
   // DELETE LATER ITS BEING USED IN OLD SCREENS
-  Future<List<Transport>> splitByDirection() async {
+  Future<List<Trip>> splitByDirection() async {
 
     // Get the two directions a route can go, and set each new transport to one of them
-    List<RouteDirection> directions = await fetchRouteDirections();
-    Transport newTransport1 = Transport.withAttributes(routeType, stop, route, directions[0]);
-    Transport newTransport2 = Transport.withAttributes(routeType, stop, route, directions[1]);
+    List<Direction> directions = await fetchRouteDirections();
+    Trip newTransport1 = Trip.withAttributes(routeType, stop, route, directions[0]);
+    Trip newTransport2 = Trip.withAttributes(routeType, stop, route, directions[1]);
 
-    List<Transport> newTransportList = [newTransport1, newTransport2];
+    List<Trip> newTransportList = [newTransport1, newTransport2];
 
-    // print("( transport.dart -> getRouteDirections() ) -- newTransportList: \n$newTransportList");
+    // print("( trip.dart -> getRouteDirections() ) -- newTransportList: \n$newTransportList");
     return newTransportList;
   }
 
   // todo: use the ptv service version of this
-  Future<List<RouteDirection>> fetchRouteDirections() async {
+  Future<List<Direction>> fetchRouteDirections() async {
     String? routeId = route?.id.toString();
-    List<RouteDirection> directions = [];
+    List<Direction> directions = [];
 
     // Fetching Data and converting to JSON
     ApiData data = await PtvApiService().routeDirections(routeId!);
@@ -126,7 +127,7 @@ class Transport {
 
     // Early Exit
     if (data.response == null) {
-      print("( transport.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
+      print("( trip.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
       return [];
     }
 
@@ -135,13 +136,13 @@ class Transport {
       int id = direction["direction_id"];
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
-      RouteDirection newDirection =
-      RouteDirection(id: id, name: name, description: description);
+      Direction newDirection =
+      Direction(id: id, name: name, description: description);
 
       directions.add(newDirection);
     }
 
-    // print("( transport.dart -> fetchRouteDirections ) -- Directions: $directions");
+    // print("( trip.dart -> fetchRouteDirections ) -- Directions: $directions");
     return directions;
   }
 
@@ -151,6 +152,10 @@ class Transport {
     } catch (e) {
       print(e); // Logs unknown route type errors
     }
+  }
+
+  void setIndex(int index) {
+    this.index = index;
   }
 
   // Make the toString for list representation???~
@@ -171,6 +176,6 @@ class Transport {
   // todo: factory constructor fromDB
 
   // Methods for JSON Serialization
-  factory Transport.fromJson(Map<String, dynamic> json) => _$TransportFromJson(json);
-  Map<String, dynamic> toJson() => _$TransportToJson(this);
+  factory Trip.fromJson(Map<String, dynamic> json) => _$TripFromJson(json);
+  Map<String, dynamic> toJson() => _$TripToJson(this);
 }

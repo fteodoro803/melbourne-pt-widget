@@ -1,17 +1,17 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
-part 'route_direction_info.g.dart';
+part 'direction.g.dart';
 
 /// Represents a direction of travel for a route.
 @JsonSerializable()
-class RouteDirection {
+class Direction {
   int id;
   String name;
   String description;
   // RouteType type;       // todo: in the directions API, there is an attribute for type. Maybe there are some routes with different routeTypes depending on direction?
 
-  RouteDirection(
+  Direction(
       {required this.id, required this.name, required this.description});
 
   @override
@@ -22,8 +22,8 @@ class RouteDirection {
   }
 
   /// Factory constructor to create a Direction from the PTV API response
-  factory RouteDirection.fromApi(Map<String, dynamic> json) {
-    return RouteDirection(
+  factory Direction.fromApi(Map<String, dynamic> json) {
+    return Direction(
         id: json["direction_id"],
         name: json["direction_name"],
         description: json["route_direction_description"],
@@ -31,8 +31,8 @@ class RouteDirection {
   }
 
   /// Factory constructor to create a Direction from a database DirectionData object
-  factory RouteDirection.fromDb(db.DirectionsTableData dbDirection) {
-    return RouteDirection(
+  factory Direction.fromDb(db.DirectionsTableData dbDirection) {
+    return Direction(
         id: dbDirection.id,
         name: dbDirection.name,
         description: dbDirection.description
@@ -40,7 +40,7 @@ class RouteDirection {
   }
 
   // Methods for JSON Serialization
-  factory RouteDirection.fromJson(Map<String, dynamic> json) =>
-      _$RouteDirectionFromJson(json);
-  Map<String, dynamic> toJson() => _$RouteDirectionToJson(this);
+  factory Direction.fromJson(Map<String, dynamic> json) =>
+      _$DirectionFromJson(json);
+  Map<String, dynamic> toJson() => _$DirectionToJson(this);
 }

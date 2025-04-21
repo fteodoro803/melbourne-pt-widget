@@ -3,11 +3,11 @@
 import 'package:flutter_project/add_screens/controllers/sheet_navigator_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../ptv_info_classes/departure_info.dart';
-import '../../ptv_info_classes/route_info.dart' as pt_route;
-import '../../ptv_info_classes/stop_info.dart';
+import '../../domain/departure.dart';
+import '../../domain/route.dart' as pt_route;
+import '../../domain/stop.dart';
 import '../../ptv_service.dart';
-import '../../transport.dart';
+import '../../domain/trip.dart';
 import '../utility/search_utils.dart';
 import 'departure_details_controller.dart';
 import 'map_controller.dart';
@@ -21,8 +21,8 @@ class SearchDetails {
   Stop? stop;
   pt_route.Route? route;
   List<LatLng>? geoPath = [];
-  List<Transport> transportList = [];
-  Transport? transport;
+  List<Trip> transportList = [];
+  Trip? transport;
   Departure? departure;
 
   SearchDetails();
@@ -152,7 +152,7 @@ class SearchController extends GetxController {
   }
 
   /// Triggers loading Transport Details Sheet
-  Future<void> pushTransport(Transport transport) async {
+  Future<void> pushTransport(Trip transport) async {
     if (details.value.transport == null) {
       setTransport(transport);
     } else {
@@ -243,7 +243,7 @@ class SearchController extends GetxController {
 
   /// Sets new transport list based on stop and route pair
   Future<void> setTransportList() async {
-    List<Transport> newTransportList = await searchUtils.splitDirection(
+    List<Trip> newTransportList = await searchUtils.splitDirection(
         details.value.stop!, details.value.route!);
 
     details.update((d) => d?.transportList = newTransportList);
@@ -251,6 +251,6 @@ class SearchController extends GetxController {
 
   void resetDetails() => details.value = SearchDetails();
   void setStop(Stop stop) => details.update((d) => d?.stop = stop);
-  void setTransport(Transport transport) => details.update((d) => d?.transport = transport);
+  void setTransport(Trip transport) => details.update((d) => d?.transport = transport);
   void setDeparture(Departure departure) => details.update((d) => d?.departure = departure);
 }

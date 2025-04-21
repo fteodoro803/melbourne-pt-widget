@@ -10,12 +10,12 @@ import 'package:flutter_project/add_screens/sheets/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/sheets/transport_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
-import 'package:flutter_project/transport.dart';
+import 'package:flutter_project/trip.dart';
 import 'package:flutter_project/ptv_service.dart';
 
-import '../../ptv_info_classes/departure_info.dart';
-import '../../ptv_info_classes/stop_info.dart';
-import '../../ptv_info_classes/route_info.dart' as pt_route;
+import '../../domain/departure.dart';
+import '../../domain/stop.dart';
+import '../../domain/route.dart' as pt_route;
 
 import '../utility/map_utils.dart';
 import '../utility/search_utils.dart';

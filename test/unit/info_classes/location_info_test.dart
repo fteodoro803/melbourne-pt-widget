@@ -1,4 +1,4 @@
-import 'package:flutter_project/ptv_info_classes/location_info.dart';
+import 'package:flutter_project/domain/location.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

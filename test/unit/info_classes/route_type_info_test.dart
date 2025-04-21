@@ -1,4 +1,4 @@
-import 'package:flutter_project/ptv_info_classes/route_type_info.dart';
+import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

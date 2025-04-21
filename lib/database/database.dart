@@ -30,6 +30,8 @@ class DeparturesTable extends Table {
   IntColumn get directionId => integer().references(DirectionsTable, #id).nullable()();
 
   // todo: Column for Transport mapping? Because each Departure is mapped to a Transport
+  // todo: Add Column for Platform Number
+  // IntColumn get platform =>
 
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
@@ -94,12 +96,13 @@ class StopsTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-class TransportsTable extends Table {
+class TripsTable extends Table {
   TextColumn get uniqueId => text()();
   IntColumn get routeTypeId => integer()();
   IntColumn get routeId => integer()();
   IntColumn get stopId => integer()();
   IntColumn get directionId => integer()();
+  IntColumn get index => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {uniqueId};
@@ -134,7 +137,7 @@ class StopRouteTypesTable extends Table {
 //   IntColumn get routeId =>
 // }
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, RouteTypesTable, RoutesTable, StopsTable, TransportsTable, RouteStopsTable, StopRouteTypesTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -224,8 +227,8 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Transport Functions
-  Future<void> insertTransport(TransportsTableCompanion transport) async {
-    await mergeUpdate(transportsTable, transport, (t) => t.uniqueId.equals(transport.uniqueId.value));
+  Future<void> insertTransport(TripsTableCompanion transport) async {
+    await mergeUpdate(tripsTable, transport, (t) => t.uniqueId.equals(transport.uniqueId.value));
   }
 
   // RouteStops Functions

@@ -18,7 +18,7 @@ class StopDetailsController extends GetxController {
 
     for (var transport in searchController.details.value.transportList!) {
       // Check if the transport is already saved
-      bool isSaved = await ptvService.isTransportSaved(transport);
+      bool isSaved = await ptvService.isTripSaved(transport);
       tempSavedList.add(isSaved);
     }
 

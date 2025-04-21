@@ -1,8 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+part 'departure.g.dart';
 import '../add_screens/utility/time_utils.dart';
-
-part 'departure_info.g.dart';
 
 /// Represents a transport's departure, with information on its respective vehicle.
 /// Handles conversion from UTC time to Melbourne's local time
@@ -17,19 +16,14 @@ class Departure {
   DateTime? estimatedDeparture;
 
   // Departures as a formatted String
-  String? scheduledDepartureTime;   // send to widget
-  String? estimatedDepartureTime;   // send to widget
+  String? scheduledDepartureTime;
+  String? estimatedDepartureTime;
 
   // Vehicle Descriptions
   String? runRef;
-  bool? hasLowFloor;          // send to widget
-  bool? hasAirConditioning;   // send to widget
+  bool? hasLowFloor;
+  bool? hasAirConditioning;
   String? platformNumber;
-
-  // Widget attributes
-  String? timeUntilDeparture;
-  String? departureTime;
-  String? statusColor;
 
   TimeDifference? timeDifference;
   DepartureStatus? status;
@@ -38,6 +32,8 @@ class Departure {
   String? stopName;
   int? stopId;
   // todo: add attribute for if a stop has a high platform
+
+  // todo: URGENT: add platform number
 
   /// Creates a Departure object from a scheduled and estimated departure time in UTC.
   /// Also converts the UTC departure times to Melbourne time.
@@ -124,7 +120,7 @@ class Departure {
     }
     else {
       print(
-          "( departure_info.dart -> Departure.fromAPI ) -- runs for runRef $runRef is empty )");
+          "( departure.dart -> Departure.fromAPI ) -- runs for runRef $runRef is empty )");
     }
 
     return Departure(

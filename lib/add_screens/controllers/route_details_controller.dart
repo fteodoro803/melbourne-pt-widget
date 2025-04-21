@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
 
-import '../../ptv_info_classes/route_info.dart' as pt_route;
-import '../../ptv_info_classes/stop_info.dart';
+import '../../domain/route.dart' as pt_route;
+import '../../domain/stop.dart';
 import '../utility/search_utils.dart';
 
 class RouteDetailsController extends GetxController {

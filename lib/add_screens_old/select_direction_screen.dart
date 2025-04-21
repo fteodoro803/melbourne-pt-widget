@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
+import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
-import 'package:flutter_project/database/helpers/directionHelpers.dart';
+import 'package:flutter_project/database/helpers/direction_helpers.dart';
 
 class SelectDirectionScreen extends StatefulWidget {
   const SelectDirectionScreen({super.key, required this.arguments});
@@ -20,7 +20,7 @@ class SelectDirectionScreen extends StatefulWidget {
 
 class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   final String _screenName = "selectDirection";
-  List<RouteDirection> _directions = [];
+  List<Direction> _directions = [];
   PtvService ptvService = PtvService();
   DevTools tools = DevTools();
 
@@ -35,25 +35,25 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   }
 
   void getDirections() async {
-    int? routeId = widget.arguments.transport!.route?.id;
-    List<RouteDirection> directions = await ptvService.fetchDirections(routeId!);
+    int? routeId = widget.arguments.trip!.route?.id;
+    List<Direction> directions = await ptvService.fetchDirections(routeId!);
     _directions = directions;
     setState(() {});
   }
 
   void setDirection(int? index) {
     if (index != null) {
-      widget.arguments.transport!.direction = _directions[index];
+      widget.arguments.trip!.direction = _directions[index];
 
       int id = _directions[index].id;
       String name = _directions[index].name;
       String description = _directions[index].description;
-      int? routeId = widget.arguments.transport?.route?.id;
+      int? routeId = widget.arguments.trip?.route?.id;
 
       Get.find<db.AppDatabase>().addDirection(id, name, description, routeId!);
     }
     else {
-      widget.arguments.transport!.direction = null;
+      widget.arguments.trip!.direction = null;
     }
   }
 
