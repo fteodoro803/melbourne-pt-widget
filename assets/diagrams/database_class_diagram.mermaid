@@ -1,0 +1,113 @@
+classDiagram
+    direction TB
+    class AppDatabase {
+        -Duration expiry
+        -int schemaVersion
+        +insertDeparture(DeparturesTableCompanion)
+        +insertDirection(DirectionsTableCompanion)
+        +insertRouteType(RouteTypesTableCompanion)
+        +getRouteTypeNameFromRouteTypeId(int)
+        +insertRoute(RoutesTableCompanion)
+        +insertStop(StopsTableCompanion)
+        +insertTransport(TripsTableCompanion)
+        +insertRouteStopLink(RouteStopsTableCompanion)
+        +insertStopRouteTypeLink(StopRouteTypesTableCompanion)
+        +mergeUpdate(TableInfo, Insertable, Function)
+    }
+
+    class DeparturesTable {
+        +DateTime scheduledDepartureUtc
+        +DateTime estimatedDepartureUtc
+        +String scheduledDeparture
+        +String estimatedDeparture
+        +String runRef
+        +bool hasLowFloor
+        +bool hasAirConditioning
+        +int stopId
+        +int routeId
+        +int directionId
+        -DateTime lastUpdated
+    }
+
+    class DirectionsTable {
+        +int id
+        +String name
+        +String description
+        +int routeId
+        -DateTime lastUpdated
+    }
+
+    class RoutesTable {
+        +int id
+        +String name
+        +String number
+        +int routeTypeId
+        +String gtfsId
+        +String status
+        -DateTime lastUpdated
+    }
+
+    class RouteTypesTable {
+        +int id
+        +String name
+        -DateTime lastUpdated
+    }
+
+    class StopsTable {
+        +int id
+        +String name
+        +float latitude
+        +float longitude
+        +int sequence
+        +String zone
+        +bool isFreeFareZone
+        -DateTime lastUpdated
+    }
+
+    class TripsTable {
+        +String uniqueId
+        +int routeTypeId
+        +int routeId
+        +int stopId
+        +int directionId
+        +int index
+    }
+
+    class RouteStopsTable {
+        +int routeId
+        +int stopId
+        -DateTime lastUpdated
+    }
+
+    class StopRouteTypesTable {
+        +int stopId
+        +int routeTypeId
+        -DateTime lastUpdated
+    }
+
+    AppDatabase --> DeparturesTable : contains
+    AppDatabase --> DirectionsTable : contains
+    AppDatabase --> RoutesTable : contains
+    AppDatabase --> RouteTypesTable : contains
+    AppDatabase --> StopsTable : contains
+    AppDatabase --> TripsTable : contains
+    AppDatabase --> RouteStopsTable : contains
+    AppDatabase --> StopRouteTypesTable : contains
+
+    DeparturesTable --> StopsTable : references
+    DeparturesTable --> RoutesTable : references
+    DeparturesTable --> DirectionsTable : references
+
+    DirectionsTable --> RoutesTable : references
+
+    RoutesTable --> RouteTypesTable : references
+
+    RouteStopsTable --> RoutesTable : references
+    RouteStopsTable --> StopsTable : references
+
+    StopRouteTypesTable --> StopsTable : references
+    StopRouteTypesTable --> RouteTypesTable : references
+
+    TripsTable ..> RoutesTable : references
+    TripsTable ..> StopsTable : references
+    TripsTable ..> RouteTypesTable : references
