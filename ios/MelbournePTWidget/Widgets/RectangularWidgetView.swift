@@ -52,7 +52,7 @@ struct AccessoryRectangularWidgetView: View {
                     
                     // Tram and bus route number and direction => "[#] to [Direction]
                     else {
-                        Text("\(firstTransport.route.number)")
+                        Text("\(firstTransport.route.label)")
                             .font(.caption2)
                             .fontWeight(.bold)
                             .lineLimit(1)
@@ -62,8 +62,8 @@ struct AccessoryRectangularWidgetView: View {
                     }
                 }
                 
-                let departures = firstTransport.departures.prefix(2)
-                let departureText = departures.map { $0.scheduledDepartureTime ?? "Null" }
+//                let departures = firstTransport.departures.prefix(2)
+//                let departureText = departures.map { $0.departureTime ?? "Null" }
                 
                 // Cases:
                 // Now and in 15 min
@@ -73,71 +73,71 @@ struct AccessoryRectangularWidgetView: View {
                 // Now and at 5:24pm
                 
                 // Time remaining until next 2 departures, if applicable
-                HStack(spacing: 2) {
-                    if let timeDifference1 = TimeUtils.timeDifference(estimatedTime: departureText[0], scheduledTime: nil) {
-                        let minutes1 = timeDifference1.minutes
-                        // Case 1: first departure is now
-                        if minutes1 == 0 {
-                            Text("Now")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                        }
-                        // Case 2: first departure is in the next hour
-                        else if minutes1 > 0 && minutes1 < 60 {
-                            Text("In")
-                                .font(.caption2)
-                                .fontWeight(.regular)
-                            Text("\(minutes1) min")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                        }
-                        // Case 3: first departure is more than an hour away
-                        else {
-                            Text("At")
-                                .font(.caption2)
-                                .fontWeight(.regular)
-                            Text("\(departureText[0])")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                        }
-                        
-                        // If second departure exists
-                        if let timeDifference2 = TimeUtils.timeDifference(estimatedTime: departureText[1], scheduledTime: nil) {
-                            let minutes2 = timeDifference2.minutes
-                            
-                            Text("and")
-                                .font(.caption2)
-                                .fontWeight(.regular)
-                            
-                            // Case 1: second departure is in the next hour
-                            if minutes2 > 0 && minutes2 < 60 {
-                                
-                                // First departure is now
-                                if minutes1 == 0 {
-                                    Text("in")
-                                        .font(.caption2)
-                                        .fontWeight(.semibold)
-                                }
-                                
-                                Text("\(minutes2) min")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                            }
-                            
-                            // Case 2: second departure is more than an hour away
-                            else {
-                                if minutes1 > 0 && minutes1 < 60 {
-                                    Text("at")
-                                        .font(.caption2)
-                                        .fontWeight(.regular)
-                                }
-                                Text("\(departureText[1])")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                    }
-                }
+//                HStack(spacing: 2) {
+//                    if let timeDifference1 = TimeUtils.timeDifference(estimatedTime: departureText[0], scheduledTime: nil) {
+//                        let minutes1 = timeDifference1.minutes
+//                        // Case 1: first departure is now
+//                        if minutes1 == 0 {
+//                            Text("Now")
+//                                .font(.caption2)
+//                                .fontWeight(.semibold)
+//                        }
+//                        // Case 2: first departure is in the next hour
+//                        else if minutes1 > 0 && minutes1 < 60 {
+//                            Text("In")
+//                                .font(.caption2)
+//                                .fontWeight(.regular)
+//                            Text("\(minutes1) min")
+//                                .font(.caption2)
+//                                .fontWeight(.semibold)
+//                        }
+//                        // Case 3: first departure is more than an hour away
+//                        else {
+//                            Text("At")
+//                                .font(.caption2)
+//                                .fontWeight(.regular)
+//                            Text("\(departureText[0])")
+//                                .font(.caption2)
+//                                .fontWeight(.semibold)
+//                        }
+//                        
+//                        // If second departure exists
+//                        if let timeDifference2 = TimeUtils.timeDifference(estimatedTime: departureText[1], scheduledTime: nil) {
+//                            let minutes2 = timeDifference2.minutes
+//                            
+//                            Text("and")
+//                                .font(.caption2)
+//                                .fontWeight(.regular)
+//                            
+//                            // Case 1: second departure is in the next hour
+//                            if minutes2 > 0 && minutes2 < 60 {
+//                                
+//                                // First departure is now
+//                                if minutes1 == 0 {
+//                                    Text("in")
+//                                        .font(.caption2)
+//                                        .fontWeight(.semibold)
+//                                }
+//                                
+//                                Text("\(minutes2) min")
+//                                    .font(.caption2)
+//                                    .fontWeight(.semibold)
+//                            }
+//                            
+//                            // Case 2: second departure is more than an hour away
+//                            else {
+//                                if minutes1 > 0 && minutes1 < 60 {
+//                                    Text("at")
+//                                        .font(.caption2)
+//                                        .fontWeight(.regular)
+//                                }
+//                                Text("\(departureText[1])")
+//                                    .font(.caption2)
+//                                    .fontWeight(.semibold)
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }

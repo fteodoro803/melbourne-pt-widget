@@ -48,8 +48,7 @@ struct Provider: AppIntentTimelineProvider {
                 print("Stop Name: \(transport.stop.name)")
                 print("Direction ID: \(transport.direction.name)")
                 for departure in transport.departures {
-                    print("Scheduled Departure Time: \(departure.scheduledDepartureTime ?? "No scheduled departure")")
-//                    print("Estimated Departure Time: \(departure.estimatedDepartureTime ?? "No estimated departure")")
+                    print("Departure Time: \(departure.departureTime)")
                 }
                 
             }
@@ -73,7 +72,7 @@ struct Provider: AppIntentTimelineProvider {
             uniqueID: "placeholder",
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
-            route: Route(number: "19", colour: "FBD872", textColour: "FFFFFF"),
+            route: Route(label: "19", colour: "FBD872", textColour: "FFFFFF"),
             direction: Direction(name: "Flinders"),
             departures: []  // Empty array of Departures
             )]
@@ -86,7 +85,7 @@ struct Provider: AppIntentTimelineProvider {
             uniqueID: "snapshot",
             routeType: RouteType(name: "tram"),
             stop: Stop(name: "Melb Central"),
-            route: Route(number: "19", colour: "FBD872", textColour: "FFFFFF"),
+            route: Route(label: "19", colour: "FBD872", textColour: "FFFFFF"),
             direction: Direction(name: "Flinders"),
             departures: []  // Empty array of Departures
             )])
@@ -154,23 +153,33 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id1",
                         routeType: RouteType(name: "tram"),
                         stop: Stop(name: "Melbourne Central Station"),
-                        route: Route(number: "59", colour: "00653A", textColour: "FFFFFF"),
+                        route: Route(
+                            label: "59",
+                            colour: "00653A",
+                            textColour: "FFFFFF"
+                        ),
                         direction: Direction(name: "Airport West"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "6:45pm",
-                                scheduledDepartureTime: "6:46pm",
-                                hasLowFloor: true
+                                departureTime: "4:45pm",
+                                hasLowFloor: true,
+                                platformNumber: nil,
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: "6:49pm",
-                                scheduledDepartureTime: "6:49pm",
-                                hasLowFloor: true
+                                departureTime: "4:49pm",
+                                hasLowFloor: true,
+                                platformNumber: nil,
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "6:53pm",
-                                hasLowFloor: true
+                                departureTime: "4:35pm",
+                                hasLowFloor: true,
+                                platformNumber: nil,
+                                statusColour: "",
+                                timeString: ""
                             )
                         ]
                     ),
@@ -178,23 +187,29 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id2",
                         routeType: RouteType(name: "bus"),
                         stop: Stop(name: "Hope St/Melville Rd"),
-                        route: Route(number: "517", colour: "FF8200", textColour: "FFFFFF"),
+                        route: Route(label: "517", colour: "FF8200", textColour: "FFFFFF"),
                         direction: Direction(name: "Mooney Ponds"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "3:15pm",
-                                scheduledDepartureTime: "3:16pm",
-                                hasLowFloor: true
+                                departureTime: "3:15pm",
+                                hasLowFloor: true,
+                                platformNumber: nil,
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: "3:30pm",
-                                scheduledDepartureTime: "3:35pm",
-                                hasLowFloor: false
+                                departureTime: "3:30pm",
+                                hasLowFloor: false,
+                                platformNumber: nil,
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "3:50pm",
-                                hasLowFloor: true
+                                departureTime: "3:50pm",
+                                hasLowFloor: true,
+                                platformNumber: nil,
+                                statusColour: "",
+                                timeString: ""
                             )
                         ]
                     ),
@@ -202,23 +217,29 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id3",
                         routeType: RouteType(name: "vLine"),
                         stop: Stop(name: "Southern Cross Station"),
-                        route: Route(number: "", colour: "D92B26", textColour: "FFFFFF"),
+                        route: Route(label: "", colour: "D92B26", textColour: "FFFFFF"),
                         direction: Direction(name: "Geelong"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "4:15pm",
-                                scheduledDepartureTime: "4:16pm",
-                                hasLowFloor: false
+                                departureTime: "4:15pm",
+                                hasLowFloor: false,
+                                platformNumber: nil,
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: "4:30pm",
-                                scheduledDepartureTime: "4:35pm",
-                                hasLowFloor: false
+                                departureTime: "4:30pm",
+                                hasLowFloor: false,
+                                platformNumber: "2",
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "4:50pm",
-                                hasLowFloor: true
+                                departureTime: "4:45pm",
+                                hasLowFloor: true,
+                                platformNumber: "4",
+                                statusColour: "",
+                                timeString: ""
                             )
                         ]
                     ),
@@ -226,23 +247,29 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id4",
                         routeType: RouteType(name: "train"),
                         stop: Stop(name: "Royal Park Station"),
-                        route: Route(number: "", colour: "FFBE00", textColour: "000000"),
+                        route: Route(label: "", colour: "FFBE00", textColour: "000000"),
                         direction: Direction(name: "Upfield"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "3:15pm",
-                                scheduledDepartureTime: "3:16pm",
-                                hasLowFloor: true
+                                departureTime: "3:15pm",
+                                hasLowFloor: true,
+                                platformNumber: "6",
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: "3:30pm",
-                                scheduledDepartureTime: "3:35pm",
-                                hasLowFloor: true
+                                departureTime: "3:30pm",
+                                hasLowFloor: true,
+                                platformNumber: "1",
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "3:50pm",
-                                hasLowFloor: false
+                                departureTime: "3:30pm",
+                                hasLowFloor: false,
+                                platformNumber: "3",
+                                statusColour: "",
+                                timeString: ""
                             )
                         ]
                     )
@@ -254,23 +281,29 @@ struct MelbournePTWidget: Widget {
                         uniqueID: "id1",
                         routeType: RouteType(name: "train"),
                         stop: Stop(name: "Melbourne Central Station"),
-                        route: Route(number: "", colour: "FFBE00", textColour: "FFFFFF"),
+                        route: Route(label: "", colour: "FFBE00", textColour: "FFFFFF"),
                         direction: Direction(name: "Upfield"),
                         departures: [
                             Departure(
-                                estimatedDepartureTime: "5:47pm",
-                                scheduledDepartureTime: "5:47pm",
-                                hasLowFloor: true
+                                departureTime: "5:47pm",
+                                hasLowFloor: true,
+                                platformNumber: "3",
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: "8:30pm",
-                                scheduledDepartureTime: "8:35pm",
-                                hasLowFloor: true
+                                departureTime: "8:30pm",
+                                hasLowFloor: true,
+                                platformNumber: "3",
+                                statusColour: "",
+                                timeString: ""
                             ),
                             Departure(
-                                estimatedDepartureTime: nil,
-                                scheduledDepartureTime: "9:50pm",
-                                hasLowFloor: true
+                                departureTime: "3:30pm",
+                                hasLowFloor: true,
+                                platformNumber: "3",
+                                statusColour: "",
+                                timeString: ""
                             )
                         ]
                     )

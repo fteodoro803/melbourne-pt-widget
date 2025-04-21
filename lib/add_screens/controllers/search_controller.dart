@@ -162,7 +162,6 @@ class SearchController extends GetxController {
     }
     sheetController.pushSheet('Transport Details');
     showSheet.value = true;
-    Get.find<SheetNavigationController>().animateSheetTo(0.5);
     await Get.find<MapController>().transportPath?.setStop(details.value.transport!.stop!);
     if (details.value.transportList.isNotEmpty && transport.direction != details.value.transportList[0].direction) {
       await Get.find<MapController>().transportPath?.setDirection(true);

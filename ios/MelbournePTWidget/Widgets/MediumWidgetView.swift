@@ -12,8 +12,8 @@ struct SystemMediumWidgetView: View {
     var showFirstFourEntries: Bool = false
     
     var body: some View {
-        let transportsToShow = showFirstFourEntries ? entry.transports.prefix(4) : entry.transports.prefix(2)
-        
+        let transportsToShow: Array<Transport> = Array(showFirstFourEntries ? entry.transports.prefix(4) : entry.transports.prefix(2))
+
         if transportsToShow.isEmpty {
             Text("No transport routes to show.")
                 .fontWeight(.semibold)
@@ -36,71 +36,7 @@ struct SystemMediumWidgetView: View {
             }
             
             ForEach(Array(transportsToShow.enumerated()), id: \.element.uniqueID) { index, transport in
-                VStack(alignment: .leading, spacing: 3) {
-                    
-                    let departures = transport.departures.prefix(3) // First 3 departures
-                    
-                    HStack {
-                        VStack(alignment: .leading, spacing: 3) {
-                            // Location of stop
-                            WidgetUtils.stopLocationWidget(from: transport.stop.name)
-                            
-                            // Route number and direction
-                            HStack(spacing: 6) {
-                                WidgetUtils.transportTypeImage(transportType: transport.routeType.name, imageSize: 27, small: false)
-                                WidgetUtils.transportNameWidget(transport: transport, small: false)
-                                WidgetUtils.directionWidget(transportType: transport.routeType.name, direction: transport.direction.name, font: .caption, small: false)
-                            }
-                            
-                            HStack(spacing: 2) {
-                                ForEach(departures.indices, id: \.self) { index in
-                                    
-                                    let departure = departures[index]
-                                    let departureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime ?? ""
-                                    let trimmedTime = TimeUtils.trimTime(from: departureTime)
-                                    
-                                    Text(trimmedTime.timeElement)
-                                        .font(.footnote)
-                                        .fontWeight(.medium)
-                                        .multilineTextAlignment(.leading)
-                                    Text(trimmedTime.timeOfDay!)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                        .multilineTextAlignment(.leading)
-                                    
-                                    WidgetUtils.lowFloorIcon(hasLowFloor: departure.hasLowFloor, small: false, iconSize: 12)
-                                    
-                                    if index < 2 {
-                                        Text("•")
-                                            .font(.footnote)
-                                            .fontWeight(.medium)
-                                            .multilineTextAlignment(.leading)
-                                            .padding(.trailing, 2)
-                                    }
-                                }
-                            }
-                        }
-                        Spacer()
-                        
-                        // Time until first departure
-                        if !departures.isEmpty, let firstDeparture = departures.first, let timeDifference = TimeUtils.timeDifference(estimatedTime: firstDeparture.scheduledDepartureTime!, scheduledTime: nil) {
-                            
-                            WidgetUtils.timeUntilDepartureWidget(from: timeDifference)
-                            
-//                            VStack {
-//                                Image(systemName: "wifi")
-//                                    .resizable()
-//                                    .frame(width: 9.0, height: 6.0)
-////                                    .padding(.trailing, -4)
-////                                    .frame(maxWidth: .infinity, alignment: .trailing)
-////                                Text("On time")
-//                                WidgetUtils.timeUntilDepartureWidget(from: timeDifference)
-//                            }
-                        }
-                    }
-
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                TransportRowView(transport: transport, index: index, isLast: index == transportsToShow.count - 1)
                 
                 // Conditionally add divider if current entry is not final entry
                 if index < transportsToShow.count - 1 {
@@ -108,5 +44,67 @@ struct SystemMediumWidgetView: View {
                 }
             }
         }
+    }
+}
+
+
+struct TransportRowView: View {
+    let transport: Transport
+    let index: Int
+    let isLast: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            let departures = transport.departures
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    WidgetUtils.stopLocationWidget(from: transport.stop.name)
+                    
+                    HStack(spacing: 6) {
+                        WidgetUtils.transportTypeImage(transportType: transport.routeType.name, imageSize: 24, small: false)
+                        WidgetUtils.transportNameWidget(transport: transport, small: false)
+                        WidgetUtils.directionWidget(transportType: transport.routeType.name, direction: transport.direction.name, font: .caption, small: false)
+                    }
+                    
+                    HStack(spacing: 2) {
+                        Image(systemName: "clock.fill")
+                            .resizable()
+                            .frame(width: 13.0, height: 13.0)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, Color(hue: 0.609, saturation: 0.886, brightness: 0.682))
+                            .padding(.trailing, 2)
+                        ForEach(departures.indices, id: \.self) { index in
+                            let departure = departures[index]
+                            let trimmedTime = TimeUtils.trimTime(from: departure.departureTime)
+                            
+                            Text(trimmedTime.timeElement)
+                                .font(.footnote)
+                            Text(trimmedTime.timeOfDay!)
+                                .font(.caption)
+                            WidgetUtils.lowFloorIcon(hasLowFloor: departure.hasLowFloor, small: false, iconSize: 12)
+                                .padding(.trailing, 4)
+                            
+                            if index < 2 {
+                                Text("•")
+                                    .font(.footnote)
+                            }
+                        }
+                    }
+                }
+                Spacer()
+                if let firstDeparture = departures.first {
+                    if (firstDeparture.timeString != nil) {
+                        Text(firstDeparture.timeString!)
+                            .font(.caption)
+                            .padding(.horizontal, 4.0)
+                            .padding(.vertical, 1.0)
+                            .foregroundColor(.black)
+                            .background(RoundedRectangle(cornerRadius: 9).fill(Color(hex: firstDeparture.statusColour)))
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

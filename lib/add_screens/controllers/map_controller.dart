@@ -191,7 +191,7 @@ class MapController extends GetxController {
     Get.find<SheetNavigationController>().animateSheetTo(0.7);
     Get.find<NearbyStopsController>().scrollToStopItem(stopIndex);
   }
-
+  
   Future<void> setTransportPath() async {
     transportPath = TransportPath(
         searchController.details.value.geoPath!,

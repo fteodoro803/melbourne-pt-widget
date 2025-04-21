@@ -4,6 +4,7 @@ import 'package:flutter_project/ptv_info_classes/departure_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_direction_info.dart';
 import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
 import 'package:flutter_project/ptv_info_classes/stop_info.dart';
+import '../utility/trip_utils.dart';
 import '../utility/time_utils.dart';
 
 class LocationWidget extends StatelessWidget {
@@ -58,7 +59,7 @@ class RouteLabelContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String routeType = route.type.name;
-    String routeLabel = TransportUtils.getLabel(route, routeType);
+    String routeLabel = TripUtils.getLabel(route, routeType) ?? 'Unknown';
     Color routeColour = ColourUtils.hexToColour(route.colour!);
     Color routeTextColour = ColourUtils.hexToColour(route.textColour!);
 
@@ -101,7 +102,7 @@ class RouteWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String routeType = route.type.name;
-    String routeLabel = TransportUtils.getLabel(route, routeType);
+    String routeLabel = TripUtils.getLabel(route, routeType) ?? 'Unknown';
 
     return Row(
       children: [
@@ -215,7 +216,7 @@ class MinutesUntilDepartureWidget extends StatelessWidget {
     final DateTime scheduled = departure.scheduledDepartureUTC!;
     final DateTime estimated = departure.estimatedDepartureUTC ?? scheduled;
 
-    final status = TransportUtils.getDepartureStatus(estimated, scheduled);
+    final status = TimeUtils.getDepartureStatus(estimated, scheduled);
     final String minutesString = TimeUtils.minutesString(estimated, scheduled);
 
     // Check if minutesUntilNextDepartureText is null after calculation
@@ -228,7 +229,7 @@ class MinutesUntilDepartureWidget extends StatelessWidget {
         style: TextStyle(
         fontSize: 16, // Smaller font size for "Now"
         fontWeight: FontWeight.w600,
-        color: ColourUtils.getColorForStatus(status.status),
+        color: ColourUtils.hexToColour(status.getColorString),
       height: 1.1,
       ),
     );
@@ -367,7 +368,7 @@ class UnexpandedStopWidget extends StatelessWidget {
               spacing: 6,
               children: routes.map((route) {
 
-                String routeLabel = TransportUtils.getLabel(route, routeType);
+                String routeLabel = TripUtils.getLabel(route, routeType) ?? 'Unknown';
 
                 return Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -420,8 +421,8 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
         itemBuilder: (context, routeIndex) {
 
           final route = routes[routeIndex];
-          String routeLabel = TransportUtils.getLabel(route, routeType);
-          String? routeName = TransportUtils.getName(route, routeType);
+          String routeLabel = TripUtils.getLabel(route, routeType) ?? 'Unknown';
+          String? routeName = TripUtils.getName(route, routeType);
 
           return ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),

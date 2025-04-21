@@ -20,7 +20,7 @@ struct Stop: Codable {
 }
 
 struct Route: Codable {
-    let number: String
+    let label: String
     let colour: String
     let textColour: String
 }
@@ -30,9 +30,11 @@ struct Direction: Codable {
 }
 
 struct Departure: Codable {
-    let estimatedDepartureTime: String?
-    let scheduledDepartureTime: String?
+    let departureTime: String
     let hasLowFloor: Bool?
+    let platformNumber: String?
+    let statusColour: String
+    let timeString: String?
 }
 
 struct Transport: Codable, CustomStringConvertible {
@@ -47,11 +49,11 @@ struct Transport: Codable, CustomStringConvertible {
         return """
         Route Type: \(routeType.name) // Access name from RouteType
         Stop: \(stop.name)
-        Route Number: \(route.number)
+        Route Number: \(route.label)
         Direction: \(direction.name)
         Departures:
         \(departures.map { departure in
-            "Scheduled: \(departure.scheduledDepartureTime ?? "N/A"), Estimated: \(departure.estimatedDepartureTime ?? "N/A")"
+            "Departure Time: \(departure.departureTime)"
         }.joined(separator: "\n"))
         """
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
 import '../../ptv_info_classes/departure_info.dart';
+import '../utility/trip_utils.dart';
 import 'transport_widgets.dart';
 
 import '../utility/time_utils.dart';
@@ -40,13 +41,13 @@ class CustomListTile extends StatelessWidget {
     if (departure != null) {
       estimated = departure.estimatedDepartureUTC
         ?? departure.scheduledDepartureUTC;
-      status = TransportUtils.getDepartureStatus(
+      status = TimeUtils.getDepartureStatus(
         departure.scheduledDepartureUTC,
         departure.estimatedDepartureUTC,
       );
 
       minutesString =
-          TimeUtils.minutesString(estimated, departure.estimatedDepartureUTC!);
+          TimeUtils.minutesString(estimated, departure.scheduledDepartureUTC!);
     }
 
   // Enables the Widget to be Deleted/Dismissed by Swiping
@@ -96,7 +97,7 @@ class CustomListTile extends StatelessWidget {
                 ? Container(
                   padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                   decoration: BoxDecoration(
-                    color: ColourUtils.getColorForStatus(status.status),
+                    color: ColourUtils.hexToColour(status.getColorString),
                     borderRadius: BorderRadius.circular(12)
                   ),
                   child: Text(

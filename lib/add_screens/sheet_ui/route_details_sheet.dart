@@ -24,6 +24,24 @@ class RouteDetailsSheet extends StatelessWidget {
       final route = searchDetails.route;
       final suburbStops = routeDetailsController.suburbStops;
 
+// Handle scroll request if stopToScrollTo is set
+      if (routeDetailsController.stopToScrollTo.value != null) {
+        // Use Future.delayed to ensure the UI has been built
+        Future.delayed(Duration(milliseconds: 100), () {
+          final stop = routeDetailsController.stopToScrollTo.value!;
+          final key = routeDetailsController.getKeyForStop(stop);
+          if (key.currentContext != null) {
+            Scrollable.ensureVisible(
+              key.currentContext!,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: 0.5, // Center the item
+            );
+            routeDetailsController.stopToScrollTo.value = null; // Clear after scrolling
+          }
+        });
+      }
+
       if (suburbStops.isEmpty) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -87,7 +105,7 @@ class RouteDetailsSheet extends StatelessWidget {
             return SliverStickyHeader(
               header: Container(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 alignment: Alignment.centerLeft,
                 child: Text(
                   suburb.suburb,
@@ -103,6 +121,7 @@ class RouteDetailsSheet extends StatelessWidget {
                     return Column(
                       children: [
                         ListTile(
+                          key: routeDetailsController.getKeyForStop(stop),
                           visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                           dense: true,
                           contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),

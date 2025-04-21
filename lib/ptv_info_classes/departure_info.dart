@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../add_screens/utility/time_utils.dart';
+
 part 'departure_info.g.dart';
 
 /// Represents a transport's departure, with information on its respective vehicle.
@@ -15,14 +17,22 @@ class Departure {
   DateTime? estimatedDeparture;
 
   // Departures as a formatted String
-  String? scheduledDepartureTime;
-  String? estimatedDepartureTime;
+  String? scheduledDepartureTime;   // send to widget
+  String? estimatedDepartureTime;   // send to widget
 
   // Vehicle Descriptions
   String? runRef;
-  bool? hasLowFloor;
-  bool? hasAirConditioning;
+  bool? hasLowFloor;          // send to widget
+  bool? hasAirConditioning;   // send to widget
   String? platformNumber;
+
+  // Widget attributes
+  String? timeUntilDeparture;
+  String? departureTime;
+  String? statusColor;
+
+  TimeDifference? timeDifference;
+  DepartureStatus? status;
 
   // Stop Description     // todo: i feel like there's a smarter way to do this. Stop name being here seems redundant. It's only used in fetchPattern.
   String? stopName;

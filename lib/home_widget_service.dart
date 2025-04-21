@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter_project/transport.dart';
 import 'package:home_widget/home_widget.dart';
 
+import 'add_screens/utility/trip_utils.dart';
+
 class HomeWidgetService {
   late bool isMobile;    // Android or iOS
 
@@ -60,16 +62,17 @@ class HomeWidgetService {
         'routeType': {'name': transport.routeType?.name ?? "No routeType"},
         'stop': {'name': transport.stop?.name ?? "No stop"},
         'route': {
-          'number': transport.route?.number ?? "No route",
+          'label': TripUtils.getLabel(transport.route, transport.routeType?.name) ?? "No route",
           'colour': transport.route?.colour ?? "No colour",
           'textColour': transport.route?.textColour ?? "No text colour",
         },
         'direction': {'name': transport.direction?.name ?? "No direction"},
-        'departures': transport.departures
-            ?.map((d) => {
-          'scheduledDepartureTime': d.scheduledDepartureTime,
-          'estimatedDepartureTime': d.estimatedDepartureTime,
+        'departures': (transport.departures?.take(3).toList())?.map((d) => {
+          'departureTime': d.estimatedDepartureTime ?? d.scheduledDepartureTime,
           'hasLowFloor': d.hasLowFloor,
+          'platformNumber': d.platformNumber,
+          'statusColour': TripUtils.getStatusColor(d),
+          'timeString': TripUtils.getTimeString(d),
         })
             .toList() ??
             []

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../controllers/departure_details_controller.dart';
 import '../controllers/search_controller.dart' as search_controller;
+import '../utility/trip_utils.dart';
 import '../utility/time_utils.dart';
 import '../widgets/transport_widgets.dart';
 
@@ -23,7 +24,7 @@ class DepartureDetailsSheet extends StatelessWidget {
     return Obx(() {
       final searchDetails = searchController.details.value;
       final departure = searchDetails.departure!;
-      final DepartureStatus status = TransportUtils.getDepartureStatus(
+      final DepartureStatus status = TimeUtils.getDepartureStatus(
         departure.scheduledDepartureUTC,
         departure.estimatedDepartureUTC,
       );
@@ -101,7 +102,7 @@ class DepartureDetailsSheet extends StatelessWidget {
                                             padding: EdgeInsets.symmetric(vertical: 1, horizontal: 6),
                                             decoration: BoxDecoration(
 
-                                                color: ColourUtils.getColorForStatus(status.status),
+                                                color: ColourUtils.hexToColour(status.getColorString),
                                                 borderRadius: BorderRadius.circular(8)
                                             ),
                                             child: Text(
@@ -123,7 +124,7 @@ class DepartureDetailsSheet extends StatelessWidget {
                                             child: Text(
                                               "Estimated: ${departure.estimatedDepartureTime ?? 'N/A'}",
                                               style: TextStyle(
-                                                  color: ColourUtils.getColorForStatus(status.status),
+                                                  color: ColourUtils.hexToColour(status.getColorString),
                                                   fontSize: 13
                                               ),),
                                           ),

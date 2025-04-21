@@ -25,7 +25,7 @@ class StopDetailsSheet extends StatelessWidget {
       }
 
       final searchDetails = searchController.details.value;
-      final transportsList = searchDetails.transportList!;
+      final transportsList = searchDetails.transportList;
       final savedList = stopDetailsController.savedList;
 
       return ListView(
@@ -34,7 +34,7 @@ class StopDetailsSheet extends StatelessWidget {
         physics: ClampingScrollPhysics(),
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(left: 12, right: 16, top: 16, bottom: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -65,7 +65,10 @@ class StopDetailsSheet extends StatelessWidget {
                     ],
                   ),
                   trailing: GestureDetector(
-                    child: FavoriteButton(isSaved: savedList.contains(true)),
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: FavoriteButton(isSaved: savedList.contains(true)),
+                    ),
                     onTap: () async {
                       if (transportsList.length > 1) {
                         await showModalBottomSheet(

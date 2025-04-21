@@ -27,7 +27,7 @@ struct SystemSmallWidgetView: View {
                 
                 // Route number
                 HStack(spacing: 6) {
-                    WidgetUtils.transportTypeImage(transportType: firstTransport.routeType.name, imageSize: 31, small: false)
+                    WidgetUtils.transportTypeImage(transportType: firstTransport.routeType.name, imageSize: 28, small: false)
                     WidgetUtils.transportNameWidget(transport: firstTransport, small: true)
                 }
                 
@@ -38,13 +38,12 @@ struct SystemSmallWidgetView: View {
                 // Information about first 3 departures
                 ForEach(departures.indices, id: \.self) { index in
                     let departure = departures[index]
-                    let departureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime ?? ""
-                    let trimmedDepartureTime = TimeUtils.trimTime(from: departureTime)
+                    let trimmedDepartureTime = TimeUtils.trimTime(from: departure.departureTime)
                     
                     HStack(spacing: 0) {
                         Text(trimmedDepartureTime.timeElement)
                             .font(.callout)
-                            .fontWeight(.medium)
+                            .fontWeight(.regular)
                             .multilineTextAlignment(.leading)
                             .padding(.trailing, 1)
                         Text(trimmedDepartureTime.timeOfDay!)
@@ -56,13 +55,17 @@ struct SystemSmallWidgetView: View {
                         Spacer().frame(width: 2)
                         
                         WidgetUtils.lowFloorIcon(hasLowFloor: departure.hasLowFloor, small: true, iconSize: 11)
-                        
-                        // Time until departure
-//                        if let departureTime = departure.estimatedDepartureTime ?? departure.scheduledDepartureTime, let timeDifference = TimeUtils.timeDifference(from: departureTime) {
-                            
-                        WidgetUtils.timeUntilDepartureWidgetWithStatus(estimatedTime: departure.estimatedDepartureTime, scheduledTime: departure.scheduledDepartureTime!)
-//                            WidgetUtils.timeUntilDepartureWidget(from: timeDifference)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+                        if departure.timeString != nil {
+                            Text(departure.timeString!)
+                                .font(.caption)
+                                .fontWeight(.regular)
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.trailing)
+                                .padding(.horizontal, 4.0)
+                                .padding(.vertical, 1.0)
+                                .background(RoundedRectangle(cornerRadius: 9).fill(Color(hex: departure.statusColour)))
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                        }
                     }
                 }
             }

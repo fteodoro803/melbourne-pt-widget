@@ -1,43 +1,64 @@
-import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-import 'package:flutter_project/ptv_info_classes/route_info.dart' as pt_route;
+class TimeDifference {
+  final int days;
+  final int hours;
+  final int minutes;
+
+  TimeDifference(this.days, this.hours, this.minutes);
+}
 
 class DepartureStatus {
   final String status;
   final int? timeDifference;
   final bool? hasDeparted;
   final bool isWithinAnHour;
+  String? colorString;
 
   DepartureStatus(this.status, this.timeDifference, this.hasDeparted, this.isWithinAnHour);
+
+  String get getColorString {
+    switch (status) {
+      case "Late":
+        return "C57070"; // Red for late
+      case "Early":
+        return "C5B972"; // Yellow for early
+      case "On time":
+        return "99CC99"; // Yellow for early
+      case "Scheduled":
+      default:
+        return "B8B8B8"; // Green for on-time or default
+    }
+  }
 }
 
-class TransportUtils {
-  // Function to compare estimated and scheduled departure times for a transport departure
+class TimeUtils {
+
+  /// Function to compare estimated and scheduled departure times for a transport departure
   static DepartureStatus getDepartureStatus(DateTime? estimated, DateTime? scheduled) {
     if (estimated == null || scheduled == null) {
       return DepartureStatus("Scheduled", null, false, false); // Default to On-time if either value is null
     }
 
-    Map<String, int>? timeMap = TimeUtils.timeDifference(estimated);
-    Map<String, int>? statusTimeMap = TimeUtils.timeDifference(scheduled, estimated);
+    TimeDifference? timeMap = TimeUtils.timeDifference(estimated);
+    TimeDifference? statusTimeMap = TimeUtils.timeDifference(scheduled, estimated);
 
     if (timeMap == null || statusTimeMap == null) {
       return DepartureStatus("Scheduled", null, false, false);
     }
 
     bool hasDeparted = TimeUtils.hasDeparted(timeMap);
-    bool isWithinAnHour = timeMap['hours']! == 0 && timeMap['days']! == 0;
+    bool isWithinAnHour = timeMap.hours == 0 && timeMap.days == 0;
 
     try {
-      int? minutes = statusTimeMap['minutes'];
+      int minutes = statusTimeMap.minutes;
 
       // Compare the times
-      if (minutes != null && minutes > 0) {
+      if (minutes > 0) {
         return DepartureStatus("Late", minutes.abs(), hasDeparted, isWithinAnHour); // Estimated departure is later than scheduled, so it's late
-      } else if (minutes != null && minutes < 0) {
+      } else if (minutes < 0) {
         return DepartureStatus("Early", minutes.abs(), hasDeparted, isWithinAnHour); // Estimated departure is earlier than scheduled, so it's early
-      } else if (minutes != null && minutes == 0){
+      } else if (minutes == 0){
         return DepartureStatus("On time", null, hasDeparted, isWithinAnHour); // Both times are the same, so it's on-time
       } else {
         return DepartureStatus("Scheduled", null, hasDeparted, isWithinAnHour);
@@ -47,42 +68,6 @@ class TransportUtils {
     }
   }
 
-  static getLabel(pt_route.Route route, String routeType) {
-    String routeLabel;
-    if (routeType == "train") {
-      routeLabel = route.name;
-    }
-    else if (routeType == "vLine") {
-      routeLabel = "V/Line";
-    }
-    else {
-      routeLabel = route.number;
-      String tempRouteLabel = routeLabel.toLowerCase();
-      if (tempRouteLabel.contains("combined")) {
-        routeLabel = routeLabel.toLowerCase();
-        routeLabel = routeLabel.replaceAll(" combined", "");
-      }
-      if (routeLabel == "") {
-        List<String> nameComponents = route.name.split(' ');
-        routeLabel = nameComponents[0];
-      }
-    }
-    return routeLabel;
-  }
-
-  static getName(pt_route.Route route, String routeType) {
-    String? routeName;
-    if (routeType == "train") {
-      routeName = null;
-    }
-    else {
-      routeName = route.name;
-    }
-    return routeName;
-  }
-}
-
-class TimeUtils {
   /// Calculates time difference between two ISO 8601 UTC formatted times or between
   /// one ISO 8601 UTC time and the current system time.
   ///
@@ -90,7 +75,7 @@ class TimeUtils {
   ///
   /// Returns a map containing the difference in days, hours, and minutes,
   /// or null if there's an error parsing the input.
-  static Map<String, int>? timeDifference(DateTime inputDate1, [DateTime? inputDate2]) {
+  static TimeDifference? timeDifference(DateTime inputDate1, [DateTime? inputDate2]) {
     try {
       // Determine the reference time (either second ISO time or current time)
       DateTime referenceTime;
@@ -121,7 +106,7 @@ class TimeUtils {
       }
 
       // Return the difference with sign
-      return {'days': days, 'hours': hours, 'minutes': minutes};
+      return TimeDifference(days, hours, minutes);
     } catch (e) {
       return null; // If the input format is incorrect or other errors
     }
@@ -180,18 +165,7 @@ class TimeUtils {
     return weekdays[weekday - 1];
   }
 
-  // Departed late • 4:45 pm          1 min ago
-  // Departed on time • 4:45 pm       1 min ago
-  // Departed early • 4:22 pm         1 min ago
-
-  // 4 min late • /4:45 pm            1 min
-  // On time • 4:45 pm                1 min
-  // 4 min early • /4:45 pm
-  // Scheduled • 4:45 pm              1 min
-
-  // 4 min ago
-  // 4 min ago
-  // 6 min ago
+  /// Helper function to convert departure status into a string
   static String statusString(DepartureStatus status) {
     if (status.hasDeparted!) {
       if (status.status == "Scheduled") {
@@ -209,10 +183,10 @@ class TimeUtils {
   }
 
   static bool showDepartureTime(DateTime isoTime) {
-    Map<String, int>? timeDifference = TimeUtils.timeDifference(isoTime);
+    TimeDifference? timeDifference = TimeUtils.timeDifference(isoTime);
     if (timeDifference != null
-        && (timeDifference['hours']!.abs() == 0
-        || timeDifference['days']! > 0)) {
+        && (timeDifference.hours == 0
+        || timeDifference.days.abs() > 0)) {
       return true;
     } else {
       return false;
@@ -220,8 +194,8 @@ class TimeUtils {
   }
 
   /// Helper function to determine whether transport has departed
-  static bool hasDeparted(Map<String, int>? timeMap) {
-    if (timeMap!['days']! < 0 || timeMap['hours']! < 0 || timeMap['minutes']! < 0) {
+  static bool hasDeparted(TimeDifference? timeMap) {
+    if (timeMap != null && (timeMap.days < 0 || timeMap.hours < 0 || timeMap.minutes < 0)) {
       return true;
     }
     return false;
@@ -233,7 +207,7 @@ class TimeUtils {
   /// Otherwise, return the time or date of departure in a simplified format
   static String minutesString(DateTime? isoTimeEstimated, DateTime isoTimeScheduled) {
     DateTime isoTime = isoTimeEstimated ?? isoTimeScheduled;
-    Map<String, int>? timeMap = timeDifference(isoTime);
+    TimeDifference? timeMap = timeDifference(isoTime);
 
     if (timeMap == null) {
       return "";
@@ -241,12 +215,12 @@ class TimeUtils {
 
     bool hasDeparted = TimeUtils.hasDeparted(timeMap);
 
-    if (timeMap['days']! == 0 && timeMap['hours']! == 0 && timeMap['minutes']!.abs() >= 0) {
-      if (timeMap['minutes'] == 0) {
+    if (timeMap.days == 0 && timeMap.hours == 0 && timeMap.minutes.abs() >= 0) {
+      if (timeMap.minutes == 0) {
         return "Now";
       }
       else {
-        String minutes = timeMap['minutes']!.abs().toString();
+        String minutes = timeMap.minutes.abs().toString();
         if (hasDeparted) {
           return "$minutes min ago";
         } else {
@@ -254,12 +228,12 @@ class TimeUtils {
         }
       }
     } else {
-      return shouldShowMonth(isoTime, timeMap['days']);
+      return shouldShowMonth(isoTime, timeMap.days);
     }
   }
 
   static String shouldShowMonth(DateTime isoTime, [int? days]) {
-    final differenceInDays = days?.abs() ?? TimeUtils.timeDifference(isoTime)!['days']!.abs();
+    final differenceInDays = days?.abs() ?? TimeUtils.timeDifference(isoTime)!.days.abs();
     if (differenceInDays > 0) {
       return trimTime(isoTime, true);
     } else {
@@ -283,37 +257,6 @@ class TimeUtils {
         minute = "0$minute";
       }
       return "$hour:$minute $period";
-    }
-  }
-}
-
-class ColourUtils {
-  /// Function to convert hex string to Color
-  static Color hexToColour(String hexColour) {
-    // Remove the '#' if it's there, just in case
-    hexColour = hexColour.replaceAll('#', '');
-
-    // Add the alpha value to the hex code if it's missing
-    if (hexColour.length == 6) {
-      hexColour = 'FF' + hexColour; // Default alpha value (FF for full opacity)
-    }
-
-    // Convert hex string to integer and create Color object
-    return Color(int.parse('0x$hexColour'));
-  }
-
-  /// Function to return color based on departure status
-  static Color getColorForStatus(String status) {
-    switch (status) {
-      case "Late":
-        return Color(0xFFC57070); // Red for late
-      case "Early":
-        return Color(0xFFC5B972); // Yellow for early
-      case "On time":
-        return Color(0xFF8ECF93); // Yellow for early
-      case "Scheduled":
-      default:
-        return Color(0xFFB8B8B8); // Green for on-time or default
     }
   }
 }

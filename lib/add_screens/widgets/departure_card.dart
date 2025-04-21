@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/transport.dart';
+import '../utility/trip_utils.dart';
 import '../utility/time_utils.dart';
 import '../../ptv_info_classes/departure_info.dart';
 
@@ -28,7 +29,7 @@ class _DepartureCardState extends State<DepartureCard> {
     final DateTime scheduled = departure.scheduledDepartureUTC!;
     final DateTime estimated = departure.estimatedDepartureUTC ?? scheduled;
 
-    final status = TransportUtils.getDepartureStatus(scheduled, estimated);
+    final status = TimeUtils.getDepartureStatus(scheduled, estimated);
     final bool hasLowFloor = departure.hasLowFloor ?? false;
     final String minutesString = TimeUtils.minutesString(estimated, scheduled);
     final String statusString = TimeUtils.statusString(status);
@@ -55,14 +56,14 @@ class _DepartureCardState extends State<DepartureCard> {
                 Text(
                   statusString,
                   style: TextStyle(
-                    color: ColourUtils.getColorForStatus(status.status),
+                    color: ColourUtils.hexToColour(status.getColorString),
                   ),
                 ),
 
                 Text(
                   " • ",
                   style: TextStyle(
-                    color: ColourUtils.getColorForStatus(status.status),
+                    color: ColourUtils.hexToColour(status.getColorString),
                   ),
                 ),
 
@@ -71,15 +72,15 @@ class _DepartureCardState extends State<DepartureCard> {
                   Text(
                     timeStringScheduled,
                     style: TextStyle(
-                      color: ColourUtils.getColorForStatus(status.status),
+                      color: ColourUtils.hexToColour(status.getColorString),
                       decoration: status.timeDifference != null ? TextDecoration.lineThrough : null,
-                      decorationColor: ColourUtils.getColorForStatus(status.status),
+                      decorationColor: ColourUtils.hexToColour(status.getColorString),
                     ),
                   ),
                   Text(
                     " • ",
                     style: TextStyle(
-                      color: ColourUtils.getColorForStatus(status.status),
+                      color: ColourUtils.hexToColour(status.getColorString),
                     ),
                   ),
                 ],
@@ -101,7 +102,7 @@ class _DepartureCardState extends State<DepartureCard> {
           minutesString,
           style: TextStyle(
             fontSize: 15,
-            color: ColourUtils.getColorForStatus(status.status),
+            color: ColourUtils.hexToColour(status.getColorString),
           ),
         ),
         onTap: () {

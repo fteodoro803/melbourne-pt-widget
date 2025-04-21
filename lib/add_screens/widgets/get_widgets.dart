@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../ptv_info_classes/route_info.dart' as pt_route;
 import '../../ptv_info_classes/stop_info.dart';
-import '../utility/time_utils.dart';
+import '../utility/trip_utils.dart';
 
 class LocationWidget extends StatelessWidget {
   const LocationWidget({
@@ -109,7 +109,7 @@ class UnexpandedStopWidget extends StatelessWidget {
               spacing: 6,
               children: routes.map((route) {
 
-                String routeLabel = TransportUtils.getLabel(route, routeType);
+                String? routeLabel = TripUtils.getLabel(route, routeType);
 
                 return Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -120,7 +120,7 @@ class UnexpandedStopWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    routeLabel,
+                    routeLabel ?? 'Unknown',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -162,8 +162,8 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
         itemBuilder: (context, routeIndex) {
 
           final route = routes[routeIndex];
-          String routeLabel = TransportUtils.getLabel(route, routeType);
-          String? routeName = TransportUtils.getName(route, routeType);
+          String? routeLabel = TripUtils.getLabel(route, routeType);
+          String? routeName = TripUtils.getName(route, routeType);
 
           return ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
@@ -181,7 +181,7 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
                   maxWidth: 280, // Limit the width to a maximum, or you can adjust the value
                 ),
                 child: Text(
-                  routeLabel,
+                  routeLabel!,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

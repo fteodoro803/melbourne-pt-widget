@@ -25,6 +25,25 @@ extension Color {
     }
 }
 
+struct TimeUtils {
+    
+    static func trimTime(from inputTime: String) -> (timeElement: String, timeOfDay: String?) {
+        guard inputTime.count > 5 else { return (inputTime, nil) }
+        
+        var timeElement: String
+        let timeOfDay = String(inputTime.suffix(2))
+        
+
+        if inputTime.hasPrefix("0") {
+            timeElement = String(inputTime[inputTime.index(inputTime.startIndex, offsetBy: 1)..<inputTime.index(inputTime.endIndex, offsetBy: -2)])
+        } else {
+            timeElement = String(inputTime[inputTime.index(inputTime.startIndex, offsetBy: 0)..<inputTime.index(inputTime.endIndex, offsetBy: -2)])
+        }
+        return (timeElement, timeOfDay)
+        
+    }
+}
+
 struct TransportTypeUtils {
     
     private static let validTransportTypes = ["tram", "bus", "train", "vLine", "nightBus"]
@@ -60,11 +79,11 @@ struct WidgetUtils {
     }
     
     static func transportNameWidget(transport: Transport, small: Bool) -> some View {
-        let isTrain = transport.route.number == ""
-        let name = isTrain ? transport.direction.name : transport.route.number
+        let isTrain = transport.route.label == ""
+        let name = isTrain ? transport.direction.name : transport.route.label
         let (backgroundColour, textColour) = TransportTypeUtils.routeColour(routeColour: transport.route.colour, textColour: transport.route.textColour)
         return Text(name)
-            .font(small ? (isTrain ? .title3 : .title2) : (isTrain ? .headline : .title3))
+            .font(small ? (isTrain ? .system(size: 16) : .system(size: 19)) : (isTrain ? .system(size: 13) : . system(size: 16)))
             .fontWeight(.semibold)
             .foregroundColor(textColour)
             .padding(.vertical, small ? 3.0 : 2.0)
@@ -89,59 +108,12 @@ struct WidgetUtils {
     static func lowFloorIcon(hasLowFloor: Bool?, small: Bool, iconSize: Double) -> some View {
         Group {
             if hasLowFloor == true {
-                Image("Low Floor Tram")
+                Image(systemName: "figure.roll.circle.fill")
                     .resizable()
-                    .frame(width: iconSize, height: iconSize)
-                    .padding(.trailing, small ? 0 : 2)
-            }
-            else {
-                EmptyView()
-            }
-        }
-    }
-    
-    static func timeUntilDepartureWidgetWithStatus(estimatedTime: String?, scheduledTime: String) -> some View {
-        
-        Group {
-            let estimatedTime = estimatedTime ?? scheduledTime
-            let status = TimeUtils.getStatus(estimatedTime: estimatedTime, scheduledTime: scheduledTime)
-            let timeDifference = TimeUtils.timeDifference(estimatedTime: estimatedTime, scheduledTime: nil)
-            
-            if timeDifference!.minutes >= 0 && timeDifference!.minutes < 60 && timeDifference!.days == 0 && timeDifference!.hours == 0 {
-                
-                let isNow = timeDifference!.minutes == 0
-                let minutesString = isNow ? "Now" : "\(timeDifference!.minutes) min"
-                
-                Text(minutesString)
-                    .font(.caption)
-                    .fontWeight(.regular)
-                    .foregroundColor(Color(status.textColour))
-                    .multilineTextAlignment(.trailing)
-                    .padding(.horizontal, 4.0)
-                    .padding(.vertical, 1.0)
-                    .background(RoundedRectangle(cornerRadius: 9).fill(Color(status.colour)))
-            }
-            else {
-                EmptyView()
-            }
-        }
-    }
-    
-    static func timeUntilDepartureWidget(from timeDifference: (days: Int, hours: Int, minutes: Int)?) -> some View {
-        Group {
-            if timeDifference!.minutes >= 0 && timeDifference!.minutes < 60 && timeDifference!.days == 0 && timeDifference!.hours == 0 {
-                
-                let isNow = timeDifference!.minutes == 0
-                let minutesString = isNow ? "Now" : "\(timeDifference!.minutes) min"
-                
-                Text(minutesString)
-                    .font(.caption)
-                    .fontWeight(.regular)
-                    .foregroundColor(isNow ? Color(hue: 0.324, saturation: 0.671, brightness: 0.656) : .black)
-                    .multilineTextAlignment(.trailing)
-                    .padding(.horizontal, 4.0)
-                    .padding(.vertical, 1.0)
-                    .background(RoundedRectangle(cornerRadius: 9).fill(Color(hue: 0.314, saturation: 0.216, brightness: 0.903)))
+                    .frame(width: 13.0, height: 13.0)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, Color(hue: 0.609, saturation: 0.886, brightness: 0.682))
+                    .padding(.trailing, -4)
             }
             else {
                 EmptyView()
@@ -157,10 +129,9 @@ struct WidgetUtils {
                     .multilineTextAlignment(.leading)
                     .lineLimit(1)
             }
-            else if small {
-                Spacer().frame(height: 3)
+            if small {
+                Spacer().frame(height: 0.5)
                 Divider()
-                Spacer().frame(height: 2)
                 
             }
             else {
