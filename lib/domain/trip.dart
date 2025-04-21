@@ -122,7 +122,7 @@ class Trip {
     List<Direction> directions = [];
 
     // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().routeDirections(routeId!);
+    ApiData data = await PtvApiService().directions(routeId!);
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit

@@ -34,6 +34,7 @@ class PtvService {
 
 // Departure Functions
   // todo: use fromApi constructor
+  // todo: convert to int for ids
   Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
     List<Departure> departures = [];
 
@@ -79,7 +80,7 @@ class PtvService {
     }
 
     else {
-      ApiData data = await PtvApiService().routeDirections(routeId.toString());
+      ApiData data = await PtvApiService().directions(routeId.toString());
       Map<String, dynamic>? jsonResponse = data.response;
 
       // Early Exit
@@ -110,7 +111,7 @@ class PtvService {
     List<LatLng> pathList = [];
 
     // Fetches stops data via PTV API
-    ApiData data = await PtvApiService().stopsAlongRoute(
+    ApiData data = await PtvApiService().stopsRoute(
         route.id.toString(), route.type.id.toString(), geoPath: true);
     Map<String, dynamic>? jsonResponse = data.response;
 
@@ -376,7 +377,7 @@ class PtvService {
     // Fetches stops data via PTV API
     ApiData data;
     if (direction != null) {
-      data = await PtvApiService().stopsAlongRoute(
+      data = await PtvApiService().stopsRoute(
           route.id.toString(), route.type.id.toString(),
           directionId: direction.id.toString(),
           geoPath: true);
@@ -387,10 +388,10 @@ class PtvService {
       List<Direction> directions = await fetchDirections(route.id);
 
       if (directions.isNotEmpty) {
-        data = await PtvApiService().stopsAlongRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString(), geoPath: true);
+        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString(), geoPath: true);
       }
       else {
-        data = await PtvApiService().stopsAlongRoute(route.id.toString(), route.type.id.toString(), geoPath: true);
+        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString(), geoPath: true);
       }
     }
 
