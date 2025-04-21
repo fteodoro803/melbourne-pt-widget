@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/utility/time_utils.dart';
 
-import '../../ptv_info_classes/departure_info.dart';
-import '../../ptv_info_classes/route_info.dart' as pt_route;
+import 'package:flutter_project/domain/departure.dart';
+import 'package:flutter_project/domain/route.dart' as pt_route;
 
 class TripUtils {
 

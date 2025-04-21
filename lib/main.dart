@@ -166,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Updates all Departures
     for (var trip in tripList) {
-      await trip.updateDepartures();
+      await trip.updateDepartures(departureCount: 3);
     }
 
     setState(() {

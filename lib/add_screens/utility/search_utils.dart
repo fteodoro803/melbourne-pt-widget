@@ -74,8 +74,8 @@ class SearchUtils {
     for (var direction in directions) {
       Trip newTransport = Trip.withStopRoute(stop, route, direction);
       newTransport.routeType = RouteType.fromId(route.type.id);
-      await newTransport.updateDepartures();
-      await Future.delayed(Duration(milliseconds: 200));
+      await newTransport.updateDepartures(departureCount: 2);
+      await Future.delayed(Duration(milliseconds: 100));
       if (newTransport.departures != null && newTransport.departures!.isNotEmpty) {
         transportList.add(newTransport);
       }
@@ -196,12 +196,12 @@ class SearchUtils {
     return suburbStopsList;
   }
 
-  Future<void> handleSave(Transport transport) async {
-    bool isSaved = await ptvService.isTransportSaved(transport);
+  Future<void> handleSave(Trip transport) async {
+    bool isSaved = await ptvService.isTripSaved(transport);
     if (!isSaved) {
-      await ptvService.saveTransport(transport);  // Add transport to saved list
+      await ptvService.saveTrip(transport);  // Add transport to saved list
     } else {
-      await ptvService.deleteTransport(transport.uniqueID!);  // Remove transport from saved list
+      await ptvService.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
     }
   }
 }

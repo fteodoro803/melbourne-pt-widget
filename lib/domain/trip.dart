@@ -55,7 +55,8 @@ class Trip {
   List<Departure>? departures;
 
   // Update Departures
-  Future<void> updateDepartures() async {
+  Future<void> updateDepartures({int? departureCount}) async {
+    int defaultDepartureCount = 20;
     String? routeType = this.routeType?.id.toString();
     String? stopId = stop?.id.toString();
     String? directionId = direction?.id.toString();
@@ -70,7 +71,7 @@ class Trip {
 
     // Gets Departures and saves to instance
     PtvService ptvService = PtvService();
-    int departureCount = 20;
+    departureCount = departureCount ?? defaultDepartureCount;
     departures = await ptvService.fetchDepartures(
         routeType, stopId, routeId, directionId: directionId, maxResults: departureCount.toString());
 

@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
 part 'departure.g.dart';
-import '../add_screens/utility/time_utils.dart';
 
 /// Represents a transport's departure, with information on its respective vehicle.
 /// Handles conversion from UTC time to Melbourne's local time
@@ -25,8 +24,8 @@ class Departure {
   bool? hasAirConditioning;
   String? platformNumber;
 
-  TimeDifference? timeDifference;
-  DepartureStatus? status;
+  // TimeDifference? timeDifference;
+  // DepartureStatus? status;
 
   // Stop Description     // todo: i feel like there's a smarter way to do this. Stop name being here seems redundant. It's only used in fetchPattern.
   String? stopName;
