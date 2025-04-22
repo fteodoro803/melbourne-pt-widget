@@ -128,7 +128,7 @@ class _SearchScreenState extends State<SearchScreen> {
             controller: mapController.customInfoWindowController,
             height: 36,
             width: 360,
-            offset: 0,
+            offset: 15,
           ),
           Column(
             children: [

@@ -53,6 +53,7 @@ class MapController extends GetxController {
     polylines.clear();
     nearbyStopMarkers.clear();
     clearTransportPath();
+    customInfoWindowController.hideInfoWindow!();
   }
 
   /// Clears markers set and adds primary marker if location is set
@@ -158,7 +159,7 @@ class MapController extends GetxController {
 
   void handleStopTapOnMap(Stop stop) async {
     final largeIcon = await mapUtils.getResizedImage(
-        "assets/icons/PTV ${stop.routeType?.name} Logo Outlined.png", 35, 35);
+        "assets/icons/${stop.routeType?.name} Marker.png", 35, 55);
 
     for (var s in searchController.details.value.stops!) {
       searchController.setStopExpanded(s.id, false);
