@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/domain/route.dart' as ptv;
-import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/domain/trip.dart';
-import 'package:get/get.dart';
-
-import '../add_screens/widgets/custom_list_tile.dart';
+import 'package:flutter_project/api/gtfs_api_service.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -17,7 +12,8 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
-  final TextEditingController locationField = TextEditingController();
+  GtfsApiService gtfsApiService = GtfsApiService();
+  final TextEditingController gtfsRouteId = TextEditingController();
   List<Trip> transportList = [];
 
   @override
@@ -29,7 +25,7 @@ class _TestScreenState extends State<TestScreen> {
 
   @override
   void dispose() {
-    locationField.dispose();
+    gtfsRouteId.dispose();
     super.dispose();
   }
 
@@ -46,46 +42,30 @@ class _TestScreenState extends State<TestScreen> {
     setState(() {});
   }
 
-  Future<void> fromDbTest() async {
-    int routeId = 725;
+  Future<void> gtfsTest(String gtfsId) async {
+    var gtfsResponse = await gtfsApiService.getTripUpdatesRoute(gtfsId);
 
-    var database = Get.find<db.AppDatabase>();
-    var dbRoute = await database.getRouteById(routeId);
-
-    print("Db Route: ${dbRoute.toString()}");
-
-    ptv.Route? domainRoute = dbRoute != null ? ptv.Route.fromDb(dbRoute) : null;
-    print("Domain Route: $domainRoute");
+    print(gtfsResponse.toString());
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Test Screen")),
-      // body: Column(
-      //   children: [
-      //     // TextField(
-      //     //   controller: locationField,
-      //     //   keyboardType: TextInputType.number,
-      //     //   decoration: InputDecoration(labelText: "Location"),
-      //     // ),
-      //     // ElevatedButton(onPressed: () {
-      //     //   fromDbTest();
-      //     // }, child: Text("FromDb - Route")),
-      //   ],
-      // ),
-
-      body: ListView.builder(
-        itemCount: transportList.length,
-        itemBuilder: (context, index) {
-          final transport = transportList[index];
-          return CustomListTile(
-              transport: transport,
-              onTap: () {
-                print("DB Transport Info:\n$transport");
-              });
-        },
+      body: Column(
+        children: [
+          TextField(
+            controller: gtfsRouteId,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: "Gtfs Route Id"),
+          ),
+          ElevatedButton(onPressed: () {
+            gtfsTest(gtfsRouteId.text);
+          }, child: Text("Gtfs Test")),
+        ],
       ),
     );
   }
 }
+
