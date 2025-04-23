@@ -1,16 +1,15 @@
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/domain/departure.dart';
-import 'package:flutter_project/domain/location.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../ptv_service.dart';
+import 'package:flutter_project/ptv_service.dart';
 
-import '../database/helpers/departure_helpers.dart';
-import '../database/database.dart' as db;
+import 'package:flutter_project/database/helpers/departure_helpers.dart';
+import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
 
 part 'trip.g.dart';
@@ -18,7 +17,6 @@ part 'trip.g.dart';
 @JsonSerializable()
 class Trip {
   String? uniqueID; // unique ID for the widget timeline
-  Location? location;   // todo: delete this
   Stop? stop;
   Route? route;
   Direction? direction;
@@ -153,7 +151,6 @@ class Trip {
   String toString() {
     String str = "";
 
-    if (location != null) {str += location.toString();}
     if (stop != null) {str += stop.toString();}
     if (route != null) {str += route.toString();}
     if (direction != null) {str += direction.toString();}
