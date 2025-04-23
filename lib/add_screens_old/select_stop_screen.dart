@@ -40,7 +40,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   // Fetch each Route that each Stop is on
   Future<void> getStopsAndRoutes() async {
     String? location = widget.arguments.trip!.location?.coordinates;
-    int? routeType = widget.arguments.trip!.routeType?.id;
+    int? routeType = widget.arguments.selectedRouteType?.id;
     int maxDistance = 300;
 
     // Create temporary lists to hold the new data

@@ -4,7 +4,6 @@ import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/domain/location.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
-import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -19,8 +18,7 @@ part 'trip.g.dart';
 @JsonSerializable()
 class Trip {
   String? uniqueID; // unique ID for the widget timeline
-  RouteType? routeType;     // todo: is this even used? since it's in route, maybe we can delete this
-  Location? location;
+  Location? location;   // todo: delete this
   Stop? stop;
   Route? route;
   Direction? direction;
@@ -36,8 +34,7 @@ class Trip {
     this.direction = direction;
   }
 
-  Trip.withAttributes(RouteType? routeType, Stop? stop, Route? route, Direction? direction) {
-    this.routeType = routeType;
+  Trip.withAttributes(Stop? stop, Route? route, Direction? direction) {
     // this.location = location;
     this.stop = stop;
     this.route = route;
@@ -57,7 +54,7 @@ class Trip {
   // Update Departures
   Future<void> updateDepartures({int? departureCount}) async {
     int defaultDepartureCount = 20;
-    String? routeType = this.routeType?.id.toString();
+    String? routeType = route?.type.id.toString();
     String? stopId = stop?.id.toString();
     String? directionId = direction?.id.toString();
     String? routeId = route?.id.toString();
@@ -98,8 +95,8 @@ class Trip {
 
   // todo: this should probably be made in the constructor, rather than in the updating departures
   void generateUniqueID() {
-    if (routeType != null && stop != null && route != null && direction != null) {
-      uniqueID = "${routeType?.id}-${stop?.id}-${route?.id}-${direction?.id}";
+    if (stop != null && route != null && direction != null) {
+      uniqueID = "${stop?.id}-${route?.id}-${direction?.id}";
     }
   }
 
@@ -108,8 +105,8 @@ class Trip {
 
     // Get the two directions a route can go, and set each new transport to one of them
     List<Direction> directions = await fetchRouteDirections();
-    Trip newTransport1 = Trip.withAttributes(routeType, stop, route, directions[0]);
-    Trip newTransport2 = Trip.withAttributes(routeType, stop, route, directions[1]);
+    Trip newTransport1 = Trip.withAttributes(stop, route, directions[0]);
+    Trip newTransport2 = Trip.withAttributes(stop, route, directions[1]);
 
     List<Trip> newTransportList = [newTransport1, newTransport2];
 
@@ -147,14 +144,6 @@ class Trip {
     return directions;
   }
 
-  void setRouteType(int id) {
-    try {
-      routeType = RouteType.fromId(id);     // todo: remove the try/catch, it might already be covered in the creation of the enum? Or maybe keep it bc it helps with crashes
-    } catch (e) {
-      print(e); // Logs unknown route type errors
-    }
-  }
-
   void setIndex(int index) {
     this.index = index;
   }
@@ -164,7 +153,6 @@ class Trip {
   String toString() {
     String str = "";
 
-    if (routeType != null) {str += routeType.toString();}
     if (location != null) {str += location.toString();}
     if (stop != null) {str += stop.toString();}
     if (route != null) {str += route.toString();}
