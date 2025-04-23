@@ -8,6 +8,7 @@ import 'package:flutter_project/database/helpers/route_type_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/trip_helpers.dart';
+import 'package:flutter_project/domain/disruption.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -52,7 +53,7 @@ class PtvService {
     // Empty JSON Response
     if (jsonResponse == null) {
       print(
-          "( ptv_service.dart -> fetchDepartures ) -- Null data response, Improper Location Data");
+          "( ptv_service.dart -> fetchDepartures ) -- Null data response");
       return departures;
     }
 
@@ -103,6 +104,41 @@ class PtvService {
     }
 
     return directionList;
+  }
+
+// Disruption Functions
+  /// Fetches disruptions for a given route.
+  Future<List<Disruption>> fetchDisruptions(Route route) async {
+    List<Disruption> disruptions = [];
+
+    // Fetches disruption data via PTV API
+    ApiData data = await PtvApiService().disruptions(route.id.toString());
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Empty JSON Response
+    if (jsonResponse == null) {
+      print("( ptv_service.dart -> fetchDisruptions ) -- Null data response");
+      return [];
+    }
+
+    String routeType = "";
+    if (route.type == RouteType.train) {    // todo: add the other route types (vLine, nightBus)
+      routeType = "metro_train";
+    }
+    else if (route.type == RouteType.tram) {
+      routeType = "metro_tram";
+    }
+    else if (route.type == RouteType.bus) {
+      routeType = "metro_bus";
+    }
+
+    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
+    for (var disruption in jsonResponse["disruptions"][routeType]) {
+      Disruption newDisruption = Disruption.fromApi(data: disruption);
+      disruptions.add(newDisruption);
+    }
+
+    return disruptions;
   }
 
 // GeoPath Functions

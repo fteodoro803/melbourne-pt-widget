@@ -171,6 +171,14 @@ class PtvApiService {
     return ApiData(url, response);
   }
 
+  // Disruptions
+  Future<ApiData> disruptions(String routeId) async {
+    String request = "/v3/disruptions/route/$routeId";
+    Uri url = getURL(request);
+    Map<String, dynamic>? response = await getResponse(url);
+    return ApiData(url, response);
+  }
+
   /// Handles parameters
   // todo: test if this messes with getURLs signature
   Map<String, Object> handleParameters({String? routeTypes, String? maxResults,
