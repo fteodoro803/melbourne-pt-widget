@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/database/helpers/route_helpers.dart';
-import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/ptv_service.dart';
-import 'package:flutter_project/domain/route.dart' as ptv;
-import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/domain/trip.dart';
-import 'package:get/get.dart';
+import 'package:flutter_project/api/gtfs_api_service.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -16,7 +12,8 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
-  final TextEditingController routeIdField = TextEditingController();
+  GtfsApiService gtfsApiService = GtfsApiService();
+  final TextEditingController gtfsRouteId = TextEditingController();
   List<Trip> transportList = [];
 
   @override
@@ -28,7 +25,7 @@ class _TestScreenState extends State<TestScreen> {
 
   @override
   void dispose() {
-    routeIdField.dispose();
+    gtfsRouteId.dispose();
     super.dispose();
   }
 
@@ -45,28 +42,12 @@ class _TestScreenState extends State<TestScreen> {
     setState(() {});
   }
 
-  Future<void> fromDbTest() async {
-    int routeId = 725;
+  Future<void> gtfsTest(String gtfsId) async {
+    var gtfsResponse = await gtfsApiService.getTripUpdatesRoute(gtfsId);
 
-    var database = Get.find<db.AppDatabase>();
-    var dbRoute = await database.getRouteById(routeId);
-
-    print("Db Route: ${dbRoute.toString()}");
-
-    ptv.Route? domainRoute = dbRoute != null ? ptv.Route.fromDb(dbRoute) : null;
-    print("Domain Route: $domainRoute");
+    print(gtfsResponse.toString());
   }
 
-  Future<void> disruptionTest(int? routeId) async {
-    print(routeId);
-    if (routeId == null) {return;}
-
-    RouteType type = RouteType.tram;
-    ptv.Route route = ptv.Route(name: "", id: routeId, gtfsId: "", status: "", number: "", type: type);
-
-    var disruptions = await ptvService.fetchDisruptions(route);
-    print(disruptions);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,15 +56,16 @@ class _TestScreenState extends State<TestScreen> {
       body: Column(
         children: [
           TextField(
-            controller: routeIdField,
+            controller: gtfsRouteId,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Route ID"),
+            decoration: InputDecoration(labelText: "Gtfs Route Id"),
           ),
           ElevatedButton(onPressed: () {
-            disruptionTest(int.tryParse(routeIdField.text.toString()));
-          }, child: Text("Disruptions")),
+            gtfsTest(gtfsRouteId.text);
+          }, child: Text("Gtfs Test")),
         ],
       ),
     );
   }
 }
+
