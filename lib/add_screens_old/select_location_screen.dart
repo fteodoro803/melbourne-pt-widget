@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/domain/location.dart';
+import 'package:flutter_project/dev/location.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -76,7 +76,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     // Normalize the location input by removing spaces
     newLocation.coordinates = newLocation.coordinates.replaceAll(' ', '');
 
-    widget.arguments.trip!.location = newLocation;
+    widget.arguments.testLocation = newLocation;
   }
 
   void setMapLocation() {
@@ -85,7 +85,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     String? location = "$latitude,$longitude";
 
     Location newLocation = Location(coordinates: location);
-    widget.arguments.trip!.location = newLocation;
+    widget.arguments.testLocation = newLocation;
   }
 
   // Rendering
