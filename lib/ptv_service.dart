@@ -34,8 +34,8 @@ class StopRouteLists {
 class PtvService {
 
 // Departure Functions
-  // todo: use fromApi constructor
   // todo: convert to int for ids
+  // todo: change definition to fetchDepartures(Route route, Stop stop, {...})
   Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
     List<Departure> departures = [];
 
@@ -184,7 +184,7 @@ class PtvService {
 
     String expands = "Stop";
     String? runRef = departure.runRef;
-    RouteType? routeType = trip.routeType;
+    RouteType? routeType = trip.route?.type;
     ApiData data = await PtvApiService().patterns(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -350,7 +350,7 @@ class PtvService {
   Future<void> fetchRuns(Trip trip) async {
     String expands = "All";
     String? runRef = trip.departures?[0].runRef;
-    RouteType? routeType = trip.routeType;
+    RouteType? routeType = trip.route?.type;
     ApiData data = await PtvApiService().runs(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -556,7 +556,7 @@ class PtvService {
 
   Future<void> saveTrip(Trip trip) async {
     String? uniqueId = trip.uniqueID;
-    int? routeTypeId = trip.routeType?.id;
+    int? routeTypeId = trip.route?.type.id;
     int? routeId = trip.route?.id;
     int? stopId = trip.stop?.id;
     int? directionId = trip.direction?.id;
@@ -585,7 +585,6 @@ class PtvService {
     db.AppDatabase database = Get.find<db.AppDatabase>();
 
     var dbTrips = await Get.find<db.AppDatabase>().getTrips();
-    RouteType? routeType;
     Route? route;
     Stop? stop;
     Direction? direction;
@@ -594,7 +593,6 @@ class PtvService {
 
     // Convert database trip to domain trip
     for (var dbTrip in dbTrips) {
-      routeType = RouteType.fromId(dbTrip.routeTypeId);
 
       var dbRoute = await database.getRouteById(dbTrip.routeId);
       route = dbRoute != null ? Route.fromDb(dbRoute) : null;
@@ -607,7 +605,7 @@ class PtvService {
 
       index = dbTrip.index ?? 999;
 
-      Trip newTrip = Trip.withAttributes(routeType, stop, route, direction);
+      Trip newTrip = Trip.withAttributes(stop, route, direction);
       newTrip.setIndex(index);
       tripList.add(newTrip);
     }
