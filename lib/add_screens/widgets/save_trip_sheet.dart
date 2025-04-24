@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../controllers/search_controller.dart';
-import 'transport_widgets.dart';
+import 'trip_widgets.dart';
 
-class SaveTransportSheet extends StatelessWidget {
+class SaveTripSheet extends StatelessWidget {
   final SearchDetails searchDetails;
   final List<bool> savedList;
   final Function(List<bool>) onConfirmPressed;
 
-  const SaveTransportSheet({
+  const SaveTripSheet({
     super.key,
     required this.searchDetails,
     required this.savedList,
@@ -19,7 +19,7 @@ class SaveTransportSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final route = searchDetails.route!;
     final stopName = searchDetails.stop!.name;
-    final transportList = searchDetails.transportList!;
+    final tripList = searchDetails.tripList;
 
     List<bool> tempSavedList = List.from(savedList);
     bool hasListChanged = false;
@@ -64,7 +64,7 @@ class SaveTransportSheet extends StatelessWidget {
               }
             ),
             title: Text(
-              "Save Transport",
+              "Save Trip",
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold
@@ -85,8 +85,8 @@ class SaveTransportSheet extends StatelessWidget {
           Text("Choose direction:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
           SizedBox(height: 8),
           Column(
-            children: transportList.map((transport) {
-              var index = transportList.indexOf(transport);
+            children: tripList.map((trip) {
+              var index = tripList.indexOf(trip);
               return Card(
                 color: Colors.black,
                 margin: const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 6),
@@ -96,7 +96,7 @@ class SaveTransportSheet extends StatelessWidget {
                   visualDensity: VisualDensity(horizontal: 2, vertical: 0),
                   dense: true,
                   title: Text(
-                    "${transport.direction?.name}",
+                    "${trip.direction?.name}",
                     style: TextStyle(fontSize: 18),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,

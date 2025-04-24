@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/search_screen.dart';
-import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
+import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
 import 'package:get/get.dart';
 import '../../domain/route.dart' as pt_route;
 import '../../ptv_service.dart';

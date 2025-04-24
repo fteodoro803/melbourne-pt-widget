@@ -30,28 +30,30 @@ class DepartureStatus {
         return "B8B8B8"; // Green for on-time or default
     }
   }
+
+  // todo: scheduled minutesString for home widget
 }
 
 class TimeUtils {
 
   /// Function to compare estimated and scheduled departure times for a transport departure
   static DepartureStatus getDepartureStatus(DateTime? scheduled, DateTime? estimated) {
-    if (estimated == null || scheduled == null) {
+    if (scheduled == null) {
       return DepartureStatus("Scheduled", null, false, false); // Default to On-time if either value is null
     }
 
-    TimeDifference? timeMap = TimeUtils.timeDifference(estimated);
+    TimeDifference? timeMap = TimeUtils.timeDifference(estimated ?? scheduled);
+    bool hasDeparted = TimeUtils.hasDeparted(timeMap);
+
+    bool isWithinAnHour = timeMap!.hours == 0 && timeMap.days == 0;
+
+    if (estimated == null) {
+      return DepartureStatus("Scheduled", null, hasDeparted, isWithinAnHour);
+    }
     TimeDifference? statusTimeMap = TimeUtils.timeDifference(estimated, scheduled);
 
-    if (timeMap == null || statusTimeMap == null) {
-      return DepartureStatus("Scheduled", null, false, false);
-    }
-
-    bool hasDeparted = TimeUtils.hasDeparted(timeMap);
-    bool isWithinAnHour = timeMap.hours == 0 && timeMap.days == 0;
-
     try {
-      int minutes = statusTimeMap.minutes;
+      int minutes = statusTimeMap!.minutes;
 
       // Compare the times
       if (minutes > 0) {
@@ -258,5 +260,18 @@ class TimeUtils {
       }
       return "$hour:$minute $period";
     }
+  }
+
+  static String fullDateString(DateTime isoTime) {
+    Map<String, dynamic>? dateMap = TimeUtils.convertIsoToReadable(isoTime);
+    String month = dateMap['month'].toString();
+    String day = dateMap['day'].toString();
+    String weekday = dateMap['weekday'].toString();
+    String hour = dateMap['hour'].toString();
+    String minute = dateMap['minute'].toString();
+    minute = minute.length == 2 ? minute : "0$minute";
+    String period = dateMap['period'].toString();
+
+    return "$hour:$minute $period, $weekday $day $month";
   }
 }

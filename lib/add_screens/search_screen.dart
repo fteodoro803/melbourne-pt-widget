@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/sheet_ui/route_details_sheet.dart';
 import 'package:flutter_project/add_screens/sheet_ui/sheet_navigator_widget.dart';
 import 'package:flutter_project/add_screens/sheet_ui/stop_details_sheet.dart';
-import 'package:flutter_project/add_screens/sheet_ui/transport_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheet_ui/trip_details_sheet.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -19,7 +19,7 @@ import 'widgets/suggestions_search.dart';
 import 'sheet_ui/departure_details_sheet.dart';
 import 'sheet_ui/nearby_stops_sheet.dart';
 
-// todo: fix forward/backward navigation between pages; fix camera view when first rendering marker/transport path
+// todo: fix forward/backward navigation between pages; fix camera view when first rendering marker/trip path
 
 class SearchScreen extends StatefulWidget {
   final bool enableSearch;
@@ -51,9 +51,9 @@ class _SearchScreenState extends State<SearchScreen> {
       searchController.setDetails(widget.searchDetails);
 
       if (!widget.enableSearch) {
-        if (widget.searchDetails.transport != null) {
+        if (widget.searchDetails.trip != null) {
           sheetNavigationController.initialSheetSize = 0.5;
-          searchController.pushTransport(widget.searchDetails.transport!);
+          searchController.pushTrip(widget.searchDetails.trip!);
         } else {
           sheetNavigationController.initialSheetSize = 0.4;
           searchController.pushRoute();
@@ -63,7 +63,7 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     });
 
-    // Set up a timer to update the transport list every 30 seconds
+    // Set up a timer to update the trip list every 30 seconds
     _timer = Timer.periodic(Duration(seconds: 30), (timer) {
       searchController.updateDepartures();
     });
@@ -211,7 +211,7 @@ class _SearchScreenState extends State<SearchScreen> {
         'Stop Details': (ctx, scroll) => StopDetailsSheet(
           scrollController: scroll,
         ),
-        'Transport Details': (ctx, scroll) => TransportDetailsSheet(
+        'Trip Details': (ctx, scroll) => TripDetailsSheet(
           scrollController: scroll,
         ),
         'Departure Details': (ctx, scroll) => DepartureDetailsSheet(

@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'trip_utils.dart';
 import '../../domain/stop.dart';
 
-class TransportPath {
+class TripPath {
   final List<LatLng> geoPath;
   List<Stop>? stopsAlongRoute;
   Stop? selectedStop;
@@ -29,7 +29,7 @@ class TransportPath {
   bool showPreviousMarkers = false;
   MapUtils mapUtils = MapUtils();
 
-  TransportPath(this.geoPath, this.stopsAlongRoute, this.selectedStop, this.routeColour, this.markerPosition);
+  TripPath(this.geoPath, this.stopsAlongRoute, this.selectedStop, this.routeColour, this.markerPosition);
 
   Future<void> initializeFullPath() async {
     // Early exit if GeoPath is empty

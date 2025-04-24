@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/widgets/transport_widgets.dart';
+import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
 import 'package:get/get.dart';
 import '../controllers/route_details_controller.dart';
 import '../controllers/search_controller.dart' as search_controller;

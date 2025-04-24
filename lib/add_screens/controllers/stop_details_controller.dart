@@ -16,9 +16,9 @@ class StopDetailsController extends GetxController {
     await Future.delayed(Duration(milliseconds: 300));
     List<bool> tempSavedList = [];
 
-    for (var transport in searchController.details.value.transportList!) {
+    for (var trip in searchController.details.value.tripList) {
       // Check if the transport is already saved
-      bool isSaved = await ptvService.isTripSaved(transport);
+      bool isSaved = await ptvService.isTripSaved(trip);
       tempSavedList.add(isSaved);
     }
 
@@ -33,12 +33,12 @@ class StopDetailsController extends GetxController {
   }
 
   Future<void> onConfirmPressed(List<bool> tempSavedList) async {
-    for (var transport in searchController.details.value.transportList!) {
-      int index = searchController.details.value.transportList!.indexOf(transport);
+    for (var trip in searchController.details.value.tripList) {
+      int index = searchController.details.value.tripList.indexOf(trip);
       bool wasSaved = savedList[index];
       bool isNowSaved = tempSavedList[index];
       if (wasSaved != isNowSaved) {
-        await searchUtils.handleSave(transport);
+        await searchUtils.handleSave(trip);
       }
     }
     savedList.assignAll(tempSavedList);

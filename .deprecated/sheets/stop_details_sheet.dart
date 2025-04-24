@@ -5,8 +5,8 @@ import '../../domain/departure.dart';
 import '../../trip.dart';
 import '../.deprecated/search_details.dart';
 import '../.deprecated/departure_card.dart';
-import '../.deprecated/save_transport_sheet.dart';
-import '../widgets/transport_widgets.dart';
+import '../.deprecated/save_trip_sheet.dart';
+import '../widgets/trip_widgets.dart';
 
 class StopDetailsSheet extends StatefulWidget {
 

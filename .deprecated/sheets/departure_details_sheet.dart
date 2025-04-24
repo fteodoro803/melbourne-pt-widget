@@ -8,7 +8,7 @@ import '../../ptv_service.dart';
 import '../.deprecated/search_details.dart';
 import '../utility/time_utils.dart';
 import '../../trip.dart';
-import '../widgets/transport_widgets.dart';
+import '../widgets/trip_widgets.dart';
 
 class DepartureDetailsSheet extends StatefulWidget {
   final SearchDetails searchDetails;

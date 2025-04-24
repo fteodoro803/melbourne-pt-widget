@@ -4,15 +4,15 @@ import '../utility/time_utils.dart';
 import '../utility/trip_utils.dart';
 import '../../domain/departure.dart';
 
-// Widget for the Address input section with transport type toggle
+// Widget for the Address input section with trip type toggle
 class DepartureCard extends StatefulWidget {
-  final Trip transport;
+  final Trip trip;
   final Departure departure;
   final Function(Departure)? onDepartureTapped;
 
   const DepartureCard({
     super.key,
-    required this.transport,
+    required this.trip,
     required this.departure,
     this.onDepartureTapped,
   });
@@ -33,6 +33,9 @@ class _DepartureCardState extends State<DepartureCard> {
     final bool hasLowFloor = departure.hasLowFloor ?? false;
     final String minutesString = TimeUtils.minutesString(estimated, scheduled);
     final String statusString = TimeUtils.statusString(status);
+    print(statusString);
+    print(status.hasDeparted);
+    print(status.isWithinAnHour);
     final String timeStringScheduled = TimeUtils.trimTime(scheduled, false);
 
     return Card(
@@ -41,7 +44,7 @@ class _DepartureCardState extends State<DepartureCard> {
       child: ListTile(
         contentPadding: EdgeInsets.only(left: 16, right: 16),
         title: Text(
-          "${widget.transport.direction?.name}",
+          "${widget.trip.direction?.name}",
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

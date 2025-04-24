@@ -25,13 +25,13 @@ class DepartureDetailsController extends GetxController {
   }
 
   Future<void> fetchPattern(bool refreshSheet) async {
-    List<Departure> newPattern = await ptvService.fetchPattern(searchController.details.value.transport!, searchController.details.value.departure!);
+    List<Departure> newPattern = await ptvService.fetchPattern(searchController.details.value.trip!, searchController.details.value.departure!);
     pattern.assignAll(newPattern);
 
     if (refreshSheet) {
       // Find the current stop index
       currentStopIndex.value = pattern.indexWhere(
-              (stop) => stop.stopName?.trim().toLowerCase() == searchController.details.value.transport!.stop?.name.trim().toLowerCase()
+              (stop) => stop.stopName?.trim().toLowerCase() == searchController.details.value.trip!.stop?.name.trim().toLowerCase()
       );
 
       // If the stop isn't found, default to 0

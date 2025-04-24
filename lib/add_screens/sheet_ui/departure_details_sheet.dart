@@ -6,7 +6,7 @@ import '../controllers/departure_details_controller.dart';
 import '../controllers/search_controller.dart' as search_controller;
 import '../utility/trip_utils.dart';
 import '../utility/time_utils.dart';
-import '../widgets/transport_widgets.dart';
+import '../widgets/trip_widgets.dart';
 
 class DepartureDetailsSheet extends StatelessWidget {
   final search_controller.SearchController searchController = Get.find<search_controller.SearchController>();
@@ -61,7 +61,7 @@ class DepartureDetailsSheet extends StatelessWidget {
                         fit: FlexFit.tight,
                         child: Column(
                           children: [
-                            LocationWidget(textField: searchDetails.transport!.stop!.name, textSize: 18, scrollable: true),
+                            LocationWidget(textField: searchDetails.trip!.stop!.name, textSize: 18, scrollable: true),
                             SizedBox(height: 4),
                             Row(
                               children: [
@@ -79,7 +79,7 @@ class DepartureDetailsSheet extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(searchDetails.transport!.direction!.name, style: TextStyle(fontSize: 16, height: 1.1), overflow: TextOverflow.ellipsis, maxLines: 2),
+                                      Text(searchDetails.trip!.direction!.name, style: TextStyle(fontSize: 16, height: 1.1), overflow: TextOverflow.ellipsis, maxLines: 2),
                                       SizedBox(height: 8),
                                       RouteWidget(route: searchDetails.route!, scrollable: true),
                                       SizedBox(height: 4)

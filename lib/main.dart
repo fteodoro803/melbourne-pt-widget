@@ -246,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           onTap: () =>
                             Get.to(
-                              () => SearchScreen(searchDetails: SearchDetails.withTransport(_tripList[index]), enableSearch: false),
+                              () => SearchScreen(searchDetails: SearchDetails.withTrip(_tripList[index]), enableSearch: false),
                               binding: SearchBinding(searchDetails: SearchDetails()),
                             )
                         ),

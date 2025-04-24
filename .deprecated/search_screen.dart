@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/search_details.dart';
 import 'package:flutter_project/add_screens/sheets/route_details_sheet.dart';
-import 'package:flutter_project/add_screens/transport_path.dart';
+import 'package:flutter_project/add_screens/trip_path.dart';
 import 'package:flutter_project/add_screens/widgets/sheet_navigator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 
 import 'package:flutter_project/add_screens/sheets/stop_details_sheet.dart';
-import 'package:flutter_project/add_screens/sheets/transport_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheets/trip_details_sheet.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/trip.dart';

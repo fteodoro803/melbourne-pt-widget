@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/stop.dart';
 import '../utility/map_utils.dart';
-import '../utility/transport_path.dart';
+import '../utility/trip_path.dart';
 import 'nearby_stops_controller.dart';
 import '../controllers/search_controller.dart' as search_controller;
 
@@ -29,7 +29,7 @@ class MapController extends GetxController {
   RxSet<Circle> circles = <Circle>{}.obs;
   RxSet<Polyline> polylines = <Polyline>{}.obs;
   Set<Marker> nearbyStopMarkers = {};
-  TransportPath? transportPath;
+  TripPath? tripPath;
 
   String? tappedStopId;
   Marker? tappedStopMarker;
@@ -53,7 +53,7 @@ class MapController extends GetxController {
     circles.clear();
     polylines.clear();
     nearbyStopMarkers.clear();
-    clearTransportPath();
+    clearTripPath();
     customInfoWindowController.hideInfoWindow!();
   }
 
@@ -67,8 +67,8 @@ class MapController extends GetxController {
     }
   }
 
-  void clearTransportPath() {
-    transportPath = null;
+  void clearTripPath() {
+    tripPath = null;
   }
 
   /// On pin drop
@@ -203,23 +203,23 @@ class MapController extends GetxController {
     Get.find<NearbyStopsController>().scrollToStopItem(stopIndex);
   }
   
-  Future<void> setTransportPath() async {
-    transportPath = TransportPath(
+  Future<void> setTripPath() async {
+    tripPath = TripPath(
         searchController.details.value.geoPath!,
         searchController.details.value.route!.stopsAlongRoute,
         searchController.details.value.stop,
         searchController.details.value.route!.colour!,
         markerPos
     );
-    await transportPath!.initializeFullPath();
+    await tripPath!.initializeFullPath();
   }
 
   Future<void> showPolyLine() async {
     /// Move camera to show marker
-    if (transportPath!.polyLines.isNotEmpty &&
+    if (tripPath!.polyLines.isNotEmpty &&
         searchController.details.value.geoPath!.isNotEmpty) {
       await mapUtils.centerMapOnPolyLine(
-        transportPath!.showDirection ? transportPath!.futurePolyLine!.points : searchController
+        tripPath!.showDirection ? tripPath!.futurePolyLine!.points : searchController
             .details.value.geoPath!,
         mapController,
         Get.context!,
@@ -228,22 +228,22 @@ class MapController extends GetxController {
     }
   }
 
-  Future<void> renderTransportPath() async {
+  Future<void> renderTripPath() async {
     hideNearbyStopMarkers();
 
-    polylines.assignAll(transportPath!.polyLines);
+    polylines.assignAll(tripPath!.polyLines);
     shouldRenderMarkers = false;
 
     await Future.delayed(Duration(milliseconds: 300));
     shouldRenderMarkers = true;
-    transportPath?.onZoomChange(currentZoom.value);
+    tripPath?.onZoomChange(currentZoom.value);
 
     if (locationMarker != null) {
       markers.assignAll({
         locationMarker!,
-        ...transportPath!.markers});
+        ...tripPath!.markers});
     } else {
-      markers = {...transportPath!.markers}.obs;
+      markers = {...tripPath!.markers}.obs;
     }
   }
 
@@ -252,14 +252,14 @@ class MapController extends GetxController {
     if (searchController.details.value.route != null
         && currentZoom.value != position.zoom && shouldRenderMarkers) {
       if (mapUtils.didZoomChange(currentZoom.value, position.zoom)) {
-        transportPath?.onZoomChange(position.zoom);
+        tripPath?.onZoomChange(position.zoom);
 
         if (locationMarker != null) {
           markers.assignAll({
             locationMarker!,
-            ...transportPath?.markers ?? {}});
+            ...tripPath?.markers ?? {}});
         } else {
-          markers = {...transportPath?.markers ?? {}}.obs;
+          markers = {...tripPath?.markers ?? {}}.obs;
         }
 
         currentZoom.value = position.zoom;

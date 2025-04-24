@@ -190,10 +190,10 @@ class FavoriteButton extends StatelessWidget {
   }
 }
 
-class SaveTransportService {
+class SaveTripService {
   static void renderSnackBar(BuildContext context, bool isSaved) {
     floatingSnackBar(
-      message: isSaved ? 'Added to Saved Transports.' : 'Removed from Saved Transports.',
+      message: isSaved ? 'Added to Saved Trips.' : 'Removed from Saved Trips.',
       context: context,
       textStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       duration: const Duration(milliseconds: 2000),

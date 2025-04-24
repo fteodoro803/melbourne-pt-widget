@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import '../controllers/search_controller.dart' as search_controller;
 import '../controllers/stop_details_controller.dart';
 import '../widgets/departure_card.dart';
-import '../widgets/save_transport_sheet.dart';
-import '../widgets/transport_widgets.dart';
+import '../widgets/save_trip_sheet.dart';
+import '../widgets/trip_widgets.dart';
 
 class StopDetailsSheet extends StatelessWidget {
   final search_controller.SearchController searchController = Get.find<search_controller.SearchController>();
@@ -25,7 +25,7 @@ class StopDetailsSheet extends StatelessWidget {
       }
 
       final searchDetails = searchController.details.value;
-      final transportsList = searchDetails.transportList;
+      final transportsList = searchDetails.tripList;
       final savedList = stopDetailsController.savedList;
 
       return ListView(
@@ -75,7 +75,7 @@ class StopDetailsSheet extends StatelessWidget {
                           constraints: BoxConstraints(maxHeight: 320),
                           context: context,
                           builder: (BuildContext context) {
-                            return SaveTransportSheet(
+                            return SaveTripSheet(
                               savedList: savedList,
                               searchDetails: searchDetails,
                               onConfirmPressed: stopDetailsController
@@ -87,7 +87,7 @@ class StopDetailsSheet extends StatelessWidget {
                         List<bool> tempSavedList = [...savedList];
                         tempSavedList[0] = !tempSavedList[0];
                         await stopDetailsController.onConfirmPressed(tempSavedList);
-                        SaveTransportService.renderSnackBar(context, tempSavedList[0]);
+                        SaveTripService.renderSnackBar(context, tempSavedList[0]);
                       }
                     },
                   ),
@@ -131,7 +131,7 @@ class StopDetailsSheet extends StatelessWidget {
                                   ],
                                 ),
                                 onTap: () =>
-                                    searchController.pushTransport(transport),
+                                    searchController.pushTrip(transport),
                               ),
                             ),
                           ),
@@ -145,10 +145,10 @@ class StopDetailsSheet extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final departure = departures[index];
                               return DepartureCard(
-                                  transport: transport,
+                                  trip: transport,
                                   departure: departure,
                                   onDepartureTapped: (departure) {
-                                    searchController.setTransport(transport);
+                                    searchController.setTrip(transport);
                                     searchController.pushDeparture(departure);
                                   });
                             },

@@ -6,7 +6,7 @@ import '../../domain/route.dart' as pt_route;
 import '../.deprecated/search_details.dart';
 import '../widgets/distance_filter.dart';
 import '../widgets/screen_widgets.dart' as ScreenWidgets;
-import '../widgets/transport_widgets.dart';
+import '../widgets/trip_widgets.dart';
 
 enum ToggleableFilter {
   lowFloor(name: "Low Floor"),
