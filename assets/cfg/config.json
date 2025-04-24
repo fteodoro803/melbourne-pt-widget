@@ -1,5 +1,6 @@
 {
   "ptvUserId": "",
   "ptvApiKey": "",
-  "googleApiKey": ""
+  "googleApiKey": "",
+  "Ocp-Apim-Subscription-Key": ""
 }
