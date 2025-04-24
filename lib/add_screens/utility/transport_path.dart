@@ -1,11 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_project/add_screens/utility/map_utils.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import '../controllers/route_details_controller.dart';
-import '../controllers/sheet_navigator_controller.dart';
 import 'trip_utils.dart';
 import '../../domain/stop.dart';
 
@@ -67,9 +63,6 @@ class TransportPath {
         consumeTapEvents: true,
         onTap: () {
           print('Marker Tapped');
-          if (Get.find<SheetNavigationController>().currentSheet.value == 'Route Details') {
-            Get.find<RouteDetailsController>().scrollToStop(stop);
-          }
         }
       );
 

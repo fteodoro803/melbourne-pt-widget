@@ -35,13 +35,13 @@ class DepartureStatus {
 class TimeUtils {
 
   /// Function to compare estimated and scheduled departure times for a transport departure
-  static DepartureStatus getDepartureStatus(DateTime? estimated, DateTime? scheduled) {
+  static DepartureStatus getDepartureStatus(DateTime? scheduled, DateTime? estimated) {
     if (estimated == null || scheduled == null) {
       return DepartureStatus("Scheduled", null, false, false); // Default to On-time if either value is null
     }
 
     TimeDifference? timeMap = TimeUtils.timeDifference(estimated);
-    TimeDifference? statusTimeMap = TimeUtils.timeDifference(scheduled, estimated);
+    TimeDifference? statusTimeMap = TimeUtils.timeDifference(estimated, scheduled);
 
     if (timeMap == null || statusTimeMap == null) {
       return DepartureStatus("Scheduled", null, false, false);

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
 
@@ -14,40 +13,16 @@ class RouteDetailsController extends GetxController {
   late String direction;
   final directionReversed = false.obs;
 
-  final stopToScrollTo = Rx<Stop?>(null);
-  final keysByStop = <Stop, GlobalKey>{};
 
-// Method to request scrolling to a specific stop
-  void scrollToStop(Stop stop) {
-    stopToScrollTo.value = stop;
-    print("Requesting scroll to: ${stop.name}");
-
-    // Force a UI update to ensure keys are registered
-    update();
-
-    // Try multiple times with increasing delays to ensure the widget is built
-    for (int delay = 100; delay <= 1000; delay += 100) {
-      Future.delayed(Duration(milliseconds: delay), () {
-        final key = getKeyForStop(stop);
-        print(key);
-        if (key.currentContext != null) {
-          print("Found context for ${stop.name} at ${delay}ms, scrolling...");
-          Scrollable.ensureVisible(
-            key.currentContext!,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-          stopToScrollTo.value = null;
-        } else {
-          print("No context found for ${stop.name} at ${delay}ms attempt");
+  Stop? findMatchingStop(Stop targetStop) {
+    for (var suburb in suburbStops) {
+      for (var stop in suburb.stops) {
+        if (stop.id == targetStop.id) {
+          return stop;
         }
-      });
+      }
     }
-  }
-
-// Method to get or create a key for a stop
-  GlobalKey getKeyForStop(Stop stop) {
-    return keysByStop.putIfAbsent(stop, () => GlobalKey());
+    return null;
   }
 
   Future<void> getSuburbStops() async {
@@ -65,10 +40,6 @@ class RouteDetailsController extends GetxController {
       }
       suburbStops.assignAll(suburbStops.reversed.toList());
       direction = direction == route.directions![0].name ? route.directions![1].name : route.directions![0].name;
-  }
-
-  void setExpanded(SuburbStops suburb) {
-    suburb.isExpanded.value = !suburb.isExpanded.value;
   }
 
   @override

@@ -33,6 +33,7 @@ class MapController extends GetxController {
 
   String? tappedStopId;
   Marker? tappedStopMarker;
+  Marker? locationMarker;
 
   RxDouble currentZoom = 15.0.obs;
   Rx<LatLng> currentPosition = LatLng(-37.813812122509205,
@@ -58,17 +59,12 @@ class MapController extends GetxController {
 
   /// Clears markers set and adds primary marker if location is set
   void resetMarkers() {
-    Set<Marker> newMarkers = {};
-    if (markerPos != null) {
-      MarkerId id = MarkerId(markerPos.toString());
-
-      newMarkers.add(Marker(
-        markerId: id,
-        position: markerPos!,
-        consumeTapEvents: true,
-      ));
+    if (locationMarker != null) {
+      markers = {locationMarker!}.obs;
     }
-    markers.assignAll(newMarkers);
+    else {
+      markers.clear();
+    }
   }
 
   void clearTransportPath() {
@@ -79,6 +75,14 @@ class MapController extends GetxController {
   Future<void> onLocationSelected(LatLng location) async {
     clearMap();
     markerPos = location;
+
+    MarkerId id = MarkerId(markerPos.toString());
+
+    locationMarker = Marker(
+      markerId: id,
+      position: markerPos!,
+      consumeTapEvents: true,
+    );
     resetMarkers();
 
     String address = await mapUtils.getAddressFromCoordinates(
@@ -140,9 +144,10 @@ class MapController extends GetxController {
   Future<void> showNearbyStopMarkers() async {
     isNearbyStopsButtonToggled.value = true;
 
-    resetMarkers();
+    Set<Marker> newMarkers = {};
+    newMarkers.add(locationMarker!);
     markers.assignAll({
-      ...markers,
+      ...newMarkers,
       ...nearbyStopMarkers,
     });
 
@@ -152,7 +157,12 @@ class MapController extends GetxController {
   void hideNearbyStopMarkers() {
     isNearbyStopsButtonToggled.value = false;
 
-    resetMarkers();
+    if (locationMarker != null) {
+      markers = {locationMarker!}.obs;
+    } else {
+      markers.clear();
+    }
+
     circles.clear();
     customInfoWindowController.hideInfoWindow!();
   }
@@ -204,13 +214,7 @@ class MapController extends GetxController {
     await transportPath!.initializeFullPath();
   }
 
-  Future<void> renderTransportPath() async {
-    hideNearbyStopMarkers();
-
-    polylines.assignAll(transportPath!.polyLines);
-    resetMarkers();
-    shouldRenderMarkers = false;
-
+  Future<void> showPolyLine() async {
     /// Move camera to show marker
     if (transportPath!.polyLines.isNotEmpty &&
         searchController.details.value.geoPath!.isNotEmpty) {
@@ -222,15 +226,25 @@ class MapController extends GetxController {
         true,
       );
     }
+  }
+
+  Future<void> renderTransportPath() async {
+    hideNearbyStopMarkers();
+
+    polylines.assignAll(transportPath!.polyLines);
+    shouldRenderMarkers = false;
 
     await Future.delayed(Duration(milliseconds: 300));
     shouldRenderMarkers = true;
     transportPath?.onZoomChange(currentZoom.value);
 
-    markers.assignAll({
-      ...markers,
-      ...transportPath!.markers,
-    });
+    if (locationMarker != null) {
+      markers.assignAll({
+        locationMarker!,
+        ...transportPath!.markers});
+    } else {
+      markers = {...transportPath!.markers}.obs;
+    }
   }
 
   /// Handles zoom and camera move events
@@ -239,10 +253,15 @@ class MapController extends GetxController {
         && currentZoom.value != position.zoom && shouldRenderMarkers) {
       if (mapUtils.didZoomChange(currentZoom.value, position.zoom)) {
         transportPath?.onZoomChange(position.zoom);
-        resetMarkers();
-        markers.assignAll({
-          ...markers,
-          ...transportPath?.markers ?? {}});
+
+        if (locationMarker != null) {
+          markers.assignAll({
+            locationMarker!,
+            ...transportPath?.markers ?? {}});
+        } else {
+          markers = {...transportPath?.markers ?? {}}.obs;
+        }
+
         currentZoom.value = position.zoom;
       }
     }

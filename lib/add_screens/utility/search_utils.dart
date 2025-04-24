@@ -1,4 +1,3 @@
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:flutter_project/api_data.dart';
@@ -33,7 +32,6 @@ class UniqueStop {
 class SuburbStops {
   final String suburb;
   List<Stop> stops;
-  RxBool isExpanded = true.obs;
 
   SuburbStops({
     required this.suburb,

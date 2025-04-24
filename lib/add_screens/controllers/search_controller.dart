@@ -46,6 +46,9 @@ class SearchController extends GetxController {
   }
 
   void handleBackButton() {
+
+    // new case: stop details -> transport details
+
     final currentSheet = sheetController.currentSheet.value;
     final sheetHistory = sheetController.sheetHistory.toList();
 
@@ -77,19 +80,29 @@ class SearchController extends GetxController {
       // If we are navigating back to Stop Details
       if (prevSheet == 'Stop Details') {
         details.update((details) => details?.transport = null); // Clear transport
+        for (var transport in details.value.transportList) {
+          transport.updateDepartures(departureCount: 2);
+        }
 
         Get.find<MapController>().transportPath?.hideDirection();
         Get.find<MapController>().renderTransportPath(); // Reload map without direction
       }
 
-      if (currentSheet == 'Departure Details') details.update((details) => details?.departure = null);
+      if (currentSheet == 'Departure Details') {
+        details.update((details) => details?.departure = null);
+        if (prevSheet == 'Transport Details') {
+          details.value.transport!.updateDepartures(departureCount: 20);
+        }
+      }
 
       if (currentSheet == 'Stop Details') {
         // Reset stop and route state
-        details.update((details) {
-          details?.stop = null;
-          details?.transportList = [];
-        });
+        if (prevSheet != 'Transport Details') {
+          details.update((details) {
+            details?.stop = null;
+            details?.transportList = [];
+          });
+        }
         if (prevSheet == 'Nearby Stops') {
           details.update((details) {
             details?.route = null;
@@ -97,9 +110,11 @@ class SearchController extends GetxController {
           });
           Get.find<MapController>().clearMap();
           Get.find<MapController>().resetMarkers();
-        } else {                          // Previous sheet is Route Details
+        } else if (prevSheet == 'Route Details') {
           Get.find<MapController>().transportPath?.hideStopMarker();
           Get.find<MapController>().renderTransportPath();
+        } else {                // Previous sheet is Route Details
+          pushTransport(details.value.transport!);
         }
       }
 
@@ -129,7 +144,7 @@ class SearchController extends GetxController {
   Future<void> pushStop(Stop stop) async { // todo: show marker of given stop
     setStop(stop);
     await setTransportList();
-    if (sheetController.currentSheet.value == 'Nearby Stops') {
+    if (sheetController.currentSheet.value == 'Nearby Stops' || sheetController.currentSheet.value == 'Transport Details') {
       await Get.find<MapController>().setTransportPath();
     }
     sheetController.pushSheet('Stop Details');
@@ -137,6 +152,10 @@ class SearchController extends GetxController {
     Get.find<SheetNavigationController>().animateSheetTo(0.3);
     await Get.find<MapController>().transportPath?.setStop(stop);
     await Get.find<MapController>().renderTransportPath();
+
+    if (sheetController.sheetHistory.last == 'Nearby Stops' || sheetController.sheetHistory.last == 'Transport Details') {
+      await Get.find<MapController>().showPolyLine();
+    }
   }
 
   /// Triggers loading Route Details Sheet
@@ -149,15 +168,18 @@ class SearchController extends GetxController {
 
     await Get.find<MapController>().setTransportPath();
     await Get.find<MapController>().renderTransportPath();
+    await Get.find<MapController>().showPolyLine();
   }
 
   /// Triggers loading Transport Details Sheet
   Future<void> pushTransport(Trip transport) async {
     if (details.value.transport == null) {
       setTransport(transport);
+      await details.value.transport!.updateDepartures(departureCount: 20);
     } else {
       setStop(details.value.transport!.stop!);
       await setRoute(details.value.transport!.route!);
+      await details.value.transport!.updateDepartures(departureCount: 20);
       Get.find<MapController>().setTransportPath();
     }
     sheetController.pushSheet('Transport Details');
@@ -170,6 +192,7 @@ class SearchController extends GetxController {
     }
 
     await Get.find<MapController>().renderTransportPath();
+    await Get.find<MapController>().showPolyLine();
   }
 
   /// Triggers loading Departure Details sheet from Stop Details/Transport Details)
@@ -179,11 +202,12 @@ class SearchController extends GetxController {
     if (sheetController.currentSheet.value != 'Transport Details') {
       await Get.find<MapController>().transportPath?.setDirection(false);
       await Get.find<MapController>().renderTransportPath();
+      await Get.find<MapController>().showPolyLine();
     }
     sheetController.pushSheet('Departure Details');
 
     if (Get.isRegistered<DepartureDetailsController>()) {
-      Get.find<DepartureDetailsController>().fetchPattern();
+      Get.find<DepartureDetailsController>().fetchPattern(true);
     }
   }
 
@@ -191,16 +215,17 @@ class SearchController extends GetxController {
     if (sheetController.currentSheet.value == 'Stop Details'
         && details.value.transportList.isNotEmpty) {
       for (var transport in details.value.transportList) {
-        await transport.updateDepartures();
+        await transport.updateDepartures(departureCount: 2);
         details.refresh();
       }
     } else if (sheetController.currentSheet.value == 'Transport Details'
         && details.value.transport != null) {
-      await details.value.transport!.updateDepartures();
+      await details.value.transport!.updateDepartures(departureCount: 20);
       details.refresh();
     } else if (sheetController.currentSheet.value == 'Departure Details'
         && Get.isRegistered<DepartureDetailsController>()) {
-      Get.find<DepartureDetailsController>().fetchPattern();
+      await details.value.transport!.updateDepartures();
+      Get.find<DepartureDetailsController>().fetchPattern(false);
       details.refresh();
     }
   }

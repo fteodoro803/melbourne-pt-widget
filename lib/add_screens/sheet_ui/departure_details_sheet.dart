@@ -50,7 +50,7 @@ class DepartureDetailsSheet extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(left: 12.0, right: 22.0, bottom: 12.0, top: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -101,7 +101,6 @@ class DepartureDetailsSheet extends StatelessWidget {
                                           Container(
                                             padding: EdgeInsets.symmetric(vertical: 1, horizontal: 6),
                                             decoration: BoxDecoration(
-
                                                 color: ColourUtils.hexToColour(status.getColorString),
                                                 borderRadius: BorderRadius.circular(8)
                                             ),
@@ -184,6 +183,9 @@ class DepartureDetailsSheet extends StatelessWidget {
                           Expanded(child: Text(stopName!, overflow: TextOverflow.ellipsis, maxLines: 2,)),
                         ],
                       ),
+                      onTap: () {
+
+                      }
                     ),
                   );
                 },

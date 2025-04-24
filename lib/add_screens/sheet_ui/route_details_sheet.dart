@@ -19,28 +19,12 @@ class RouteDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Obx(() {
       final searchDetails = searchController.details.value;
       final route = searchDetails.route;
       final suburbStops = routeDetailsController.suburbStops;
-
-// Handle scroll request if stopToScrollTo is set
-      if (routeDetailsController.stopToScrollTo.value != null) {
-        // Use Future.delayed to ensure the UI has been built
-        Future.delayed(Duration(milliseconds: 100), () {
-          final stop = routeDetailsController.stopToScrollTo.value!;
-          final key = routeDetailsController.getKeyForStop(stop);
-          if (key.currentContext != null) {
-            Scrollable.ensureVisible(
-              key.currentContext!,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              alignment: 0.5, // Center the item
-            );
-            routeDetailsController.stopToScrollTo.value = null; // Clear after scrolling
-          }
-        });
-      }
 
       if (suburbStops.isEmpty) {
         return const Center(child: CircularProgressIndicator());
@@ -121,7 +105,6 @@ class RouteDetailsSheet extends StatelessWidget {
                     return Column(
                       children: [
                         ListTile(
-                          key: routeDetailsController.getKeyForStop(stop),
                           visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                           dense: true,
                           contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),

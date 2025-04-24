@@ -39,6 +39,14 @@ class Stop {
         "\tSuburb: $suburb\n";
   }
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Stop && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   /// Factory constructor to create a Route from the PTV API response
   factory Stop.fromApi(Map<String, dynamic> json) {
     return Stop(

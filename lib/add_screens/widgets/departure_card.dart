@@ -27,7 +27,7 @@ class _DepartureCardState extends State<DepartureCard> {
   Widget build(BuildContext context) {
     final departure = widget.departure;
     final DateTime scheduled = departure.scheduledDepartureUTC!;
-    final DateTime estimated = departure.estimatedDepartureUTC ?? scheduled;
+    final DateTime? estimated = departure.estimatedDepartureUTC;
 
     final status = TimeUtils.getDepartureStatus(scheduled, estimated);
     final bool hasLowFloor = departure.hasLowFloor ?? false;
@@ -39,7 +39,12 @@ class _DepartureCardState extends State<DepartureCard> {
       margin: const EdgeInsets.symmetric(vertical: 2.0),
       elevation: 1,
       child: ListTile(
-        title: Text("${widget.transport.direction?.name}"),
+        contentPadding: EdgeInsets.only(left: 16, right: 16),
+        title: Text(
+          "${widget.transport.direction?.name}",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -77,21 +82,27 @@ class _DepartureCardState extends State<DepartureCard> {
                       decorationColor: ColourUtils.hexToColour(status.getColorString),
                     ),
                   ),
-                  Text(
-                    " • ",
-                    style: TextStyle(
-                      color: ColourUtils.hexToColour(status.getColorString),
+                  if (status.hasDeparted == false)
+                    Text(
+                      " • ",
+                      style: TextStyle(
+                        color: ColourUtils.hexToColour(status.getColorString),
+                      ),
                     ),
-                  ),
+
                 ],
 
-                if (hasLowFloor) ...[
-                  Icon(Icons.accessible, size: 18),
-                  SizedBox(width: 2)
-                ],
-                // Icon(Icons.people_outline, size: 20),
-                Icon(Icons.people_outline_outlined, size: 20),
-                // Icon(Icons.people_sharp, size: 20)
+                if (status.hasDeparted == false)...[
+                  if (hasLowFloor) ...[
+                    Icon(Icons.accessible, size: 18),
+                    SizedBox(width: 2)
+                  ],
+                  // Icon(Icons.people_outline, size: 20),
+                  Icon(Icons.people_outline_outlined, size: 20),
+                  // Icon(Icons.people_sharp, size: 20)
+                ]
+
+
               ],
             ),
           ],
