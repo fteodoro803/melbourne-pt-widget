@@ -8,6 +8,7 @@ import 'package:flutter_project/database/helpers/route_type_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/trip_helpers.dart';
+import 'package:flutter_project/domain/disruption.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -33,8 +34,8 @@ class StopRouteLists {
 class PtvService {
 
 // Departure Functions
-  // todo: use fromApi constructor
   // todo: convert to int for ids
+  // todo: change definition to fetchDepartures(Route route, Stop stop, {...})
   Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
     List<Departure> departures = [];
 
@@ -52,7 +53,7 @@ class PtvService {
     // Empty JSON Response
     if (jsonResponse == null) {
       print(
-          "( ptv_service.dart -> fetchDepartures ) -- Null data response, Improper Location Data");
+          "( ptv_service.dart -> fetchDepartures ) -- Null data response");
       return departures;
     }
 
@@ -105,6 +106,41 @@ class PtvService {
     return directionList;
   }
 
+// Disruption Functions
+  /// Fetches disruptions for a given route.
+  Future<List<Disruption>> fetchDisruptions(Route route) async {
+    List<Disruption> disruptions = [];
+
+    // Fetches disruption data via PTV API
+    ApiData data = await PtvApiService().disruptions(route.id.toString());
+    Map<String, dynamic>? jsonResponse = data.response;
+
+    // Empty JSON Response
+    if (jsonResponse == null) {
+      print("( ptv_service.dart -> fetchDisruptions ) -- Null data response");
+      return [];
+    }
+
+    String routeType = "";
+    if (route.type == RouteType.train) {    // todo: add the other route types (vLine, nightBus)
+      routeType = "metro_train";
+    }
+    else if (route.type == RouteType.tram) {
+      routeType = "metro_tram";
+    }
+    else if (route.type == RouteType.bus) {
+      routeType = "metro_bus";
+    }
+
+    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
+    for (var disruption in jsonResponse["disruptions"][routeType]) {
+      Disruption newDisruption = Disruption.fromApi(data: disruption);
+      disruptions.add(newDisruption);
+    }
+
+    return disruptions;
+  }
+
 // GeoPath Functions
   // todo: add to database
   Future<List<LatLng>> fetchGeoPath(Route route) async {
@@ -148,7 +184,7 @@ class PtvService {
 
     String expands = "Stop";
     String? runRef = departure.runRef;
-    RouteType? routeType = trip.routeType;
+    RouteType? routeType = trip.route?.type;
     ApiData data = await PtvApiService().patterns(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -314,7 +350,7 @@ class PtvService {
   Future<void> fetchRuns(Trip trip) async {
     String expands = "All";
     String? runRef = trip.departures?[0].runRef;
-    RouteType? routeType = trip.routeType;
+    RouteType? routeType = trip.route?.type;
     ApiData data = await PtvApiService().runs(
         runRef!, routeType!.name, expand: expands);
     Map<String, dynamic>? jsonResponse = data.response;
@@ -520,7 +556,7 @@ class PtvService {
 
   Future<void> saveTrip(Trip trip) async {
     String? uniqueId = trip.uniqueID;
-    int? routeTypeId = trip.routeType?.id;
+    int? routeTypeId = trip.route?.type.id;
     int? routeId = trip.route?.id;
     int? stopId = trip.stop?.id;
     int? directionId = trip.direction?.id;
@@ -549,7 +585,6 @@ class PtvService {
     db.AppDatabase database = Get.find<db.AppDatabase>();
 
     var dbTrips = await Get.find<db.AppDatabase>().getTrips();
-    RouteType? routeType;
     Route? route;
     Stop? stop;
     Direction? direction;
@@ -558,7 +593,6 @@ class PtvService {
 
     // Convert database trip to domain trip
     for (var dbTrip in dbTrips) {
-      routeType = RouteType.fromId(dbTrip.routeTypeId);
 
       var dbRoute = await database.getRouteById(dbTrip.routeId);
       route = dbRoute != null ? Route.fromDb(dbRoute) : null;
@@ -571,7 +605,7 @@ class PtvService {
 
       index = dbTrip.index ?? 999;
 
-      Trip newTrip = Trip.withAttributes(routeType, stop, route, direction);
+      Trip newTrip = Trip.withAttributes(stop, route, direction);
       newTrip.setIndex(index);
       tripList.add(newTrip);
     }

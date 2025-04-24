@@ -84,7 +84,12 @@ class _MyAppState extends State<MyApp> {
               name: '/findRoutes',
               page: () => FindRoutesScreen(),
               binding: BindingsBuilder(() {})
-          )
+          ),
+          GetPage(
+            name: '/testScreen',
+            page: () => TestScreen(),
+            binding: BindingsBuilder(() {}),
+          ),
         ],
 
         // Pages/Screens
@@ -217,6 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Column(
           children: [
+            ElevatedButton(onPressed: () => Get.to(() => TestScreen()), child: Text("Test Screen")),
             Divider(),
 
             // INFORMATION TILES AS LIST
