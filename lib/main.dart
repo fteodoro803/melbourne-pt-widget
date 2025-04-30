@@ -240,9 +240,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: CustomListTile(
                           transport: _tripList[index],
                           dismissible: true,
-                          onDismiss: () {
-                            ptvService.deleteTrip(_tripList[index].uniqueID!);
-                            _updateMainPage();
+                          onDismiss: () async {
+                            await ptvService.deleteTrip(_tripList[index].uniqueID!);
+                            await _updateMainPage();
                           },
                           onTap: () =>
                             Get.to(

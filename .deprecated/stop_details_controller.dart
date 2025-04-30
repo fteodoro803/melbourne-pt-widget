@@ -1,7 +1,7 @@
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
-import '../../ptv_service.dart';
-import '../utility/search_utils.dart';
+import '../lib/ptv_service.dart';
+import '../lib/add_screens/utility/search_utils.dart';
 
 class StopDetailsController extends GetxController {
   final search_controller.SearchController searchController = Get.find<search_controller.SearchController>();

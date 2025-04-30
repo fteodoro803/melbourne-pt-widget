@@ -9,7 +9,6 @@ import '../../domain/stop.dart';
 import '../../ptv_service.dart';
 import '../../domain/trip.dart';
 import '../utility/search_utils.dart';
-import 'departure_details_controller.dart';
 import 'map_controller.dart';
 
 class SearchDetails {
@@ -114,7 +113,7 @@ class SearchController extends GetxController {
           Get.find<MapController>().tripPath?.hideStopMarker();
           Get.find<MapController>().renderTripPath();
         } else {                // Previous sheet is Route Details
-          pushTrip(details.value.trip!);
+          pushTrip(details.value.trip!); // todo: find better solution -- this fails when a new transport is set and you want to go back to an old transport
         }
       }
 
@@ -140,11 +139,13 @@ class SearchController extends GetxController {
     await Get.find<MapController>().initialiseNearbyStopMarkers();
   }
 
-  /// Triggers loading Stop Details Sheet from Route Details/Nearby Stops
+  /// Triggers loading Stop Details Sheet from Route Details/Nearby Stops/TransportDetails
   Future<void> pushStop(Stop stop) async { // todo: show marker of given stop
+    String currentSheet = sheetController.currentSheet.value;
+
     setStop(stop);
     await setTripList();
-    if (sheetController.currentSheet.value == 'Nearby Stops' || sheetController.currentSheet.value == 'Trip Details') {
+    if (currentSheet == 'Nearby Stops' || currentSheet == 'Trip Details') {
       await Get.find<MapController>().setTripPath();
     }
     sheetController.pushSheet('Stop Details');
@@ -153,7 +154,7 @@ class SearchController extends GetxController {
     await Get.find<MapController>().tripPath?.setStop(stop);
     await Get.find<MapController>().renderTripPath();
 
-    if (sheetController.sheetHistory.last == 'Nearby Stops' || sheetController.sheetHistory.last == 'Trip Details') {
+    if (currentSheet == 'Nearby Stops' || currentSheet == 'Trip Details') {
       await Get.find<MapController>().showPolyLine();
     }
   }
@@ -206,29 +207,19 @@ class SearchController extends GetxController {
     }
     sheetController.pushSheet('Departure Details');
 
-    if (Get.isRegistered<DepartureDetailsController>()) {
-      Get.find<DepartureDetailsController>().fetchPattern(true);
-    }
+    // if (Get.isRegistered<DepartureDetailsController>()) {
+    //   Get.find<DepartureDetailsController>().fetchPattern(true);
+    // }
   }
 
-  Future<void> updateDepartures() async {
-    if (sheetController.currentSheet.value == 'Stop Details'
-        && details.value.tripList.isNotEmpty) {
-      for (var trip in details.value.tripList) {
-        await trip.updateDepartures(departureCount: 2);
-        details.refresh();
-      }
-    } else if (sheetController.currentSheet.value == 'Trip Details'
-        && details.value.trip != null) {
-      await details.value.trip!.updateDepartures(departureCount: 20);
-      details.refresh();
-    } else if (sheetController.currentSheet.value == 'Departure Details'
-        && Get.isRegistered<DepartureDetailsController>()) {
-      await details.value.trip!.updateDepartures();
-      Get.find<DepartureDetailsController>().fetchPattern(false);
-      details.refresh();
-    }
-  }
+  // Future<void> updateDepartures() async {
+  //    if (sheetController.currentSheet.value == 'Departure Details'
+  //       && Get.isRegistered<DepartureDetailsController>()) {
+  //     await details.value.trip!.updateDepartures();
+  //     Get.find<DepartureDetailsController>().fetchPattern(false);
+  //     details.refresh();
+  //   }
+  // }
 
   /// Sets new stops list & initializes expansion states
   Future<void> setStops(String routeType, int distance) async {

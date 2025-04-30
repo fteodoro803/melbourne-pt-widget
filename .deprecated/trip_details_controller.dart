@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
 import 'package:get/get.dart';
-import '../../domain/departure.dart';
-import '../../domain/disruption.dart';
-import '../../ptv_service.dart';
-import '../utility/search_utils.dart';
+import '../lib/domain/departure.dart';
+import '../lib/domain/disruption.dart';
+import '../lib/ptv_service.dart';
+import '../lib/add_screens/utility/search_utils.dart';
 
 class TripDetailsController extends GetxController {
   final searchDetails = Get.find<search_controller.SearchController>().details.value;

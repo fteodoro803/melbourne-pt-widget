@@ -4,8 +4,8 @@ import 'package:flutter_project/add_screens/controllers/sheet_navigator_controll
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../../domain/departure.dart';
-import '../../ptv_service.dart';
+import '../lib/domain/departure.dart';
+import '../lib/ptv_service.dart';
 
 class DepartureDetailsController extends GetxController {
 

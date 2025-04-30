@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/sheet_ui/route_details_sheet.dart';
@@ -41,7 +39,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final searchController = Get.put(search_controller.SearchController());
   final mapController = Get.put(MapController());
   final nearbyStopsController = Get.put(NearbyStopsController());
-  late Timer _timer;
 
   @override
   void initState() {
@@ -61,11 +58,6 @@ class _SearchScreenState extends State<SearchScreen> {
       } else {
         sheetNavigationController.initialSheetSize = 0.4;
       }
-    });
-
-    // Set up a timer to update the trip list every 30 seconds
-    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
-      searchController.updateDepartures();
     });
   }
 
@@ -98,7 +90,6 @@ class _SearchScreenState extends State<SearchScreen> {
     } catch (e) {
       // print("Error during controller disposal: $e");
     }
-    _timer.cancel();
 
     super.dispose();
   }
@@ -206,15 +197,22 @@ class _SearchScreenState extends State<SearchScreen> {
           scrollController: scroll,
         ),
         'Route Details': (ctx, scroll) => RouteDetailsSheet(
+          route: searchController.details.value.route!,
           scrollController: scroll,
         ),
         'Stop Details': (ctx, scroll) => StopDetailsSheet(
+          route: searchController.details.value.route!,
+          stop: searchController.details.value.stop!,
           scrollController: scroll,
         ),
         'Trip Details': (ctx, scroll) => TripDetailsSheet(
+          trip: searchController.details.value.trip!,
+          disruptions: null,
           scrollController: scroll,
         ),
         'Departure Details': (ctx, scroll) => DepartureDetailsSheet(
+          trip: searchController.details.value.trip!,
+          departure: searchController.details.value.departure!,
           scrollController: scroll,
         ),
       },

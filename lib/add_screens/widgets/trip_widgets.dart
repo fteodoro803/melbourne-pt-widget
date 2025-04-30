@@ -154,7 +154,7 @@ class RouteWidget extends StatelessWidget {
             child: Text(
               direction?.name ?? "No Data",
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,

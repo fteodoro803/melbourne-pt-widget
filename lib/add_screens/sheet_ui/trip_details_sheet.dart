@@ -1,29 +1,119 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:get/get.dart';
+import '../../domain/departure.dart';
+import '../../domain/disruption.dart';
+import '../../domain/trip.dart';
+import '../../ptv_service.dart';
 import '../controllers/search_controller.dart' as search_controller;
-import '../controllers/trip_details_controller.dart';
+import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
 import '../widgets/trip_widgets.dart';
 import '../widgets/trip_details.dart';
 
-class TripDetailsSheet extends StatelessWidget {
+class TripDetailsSheet extends StatefulWidget {
+  final Trip trip;
+  final List<Disruption>? disruptions;
   final ScrollController scrollController;
-  final search_controller.SearchController searchController = Get.find<search_controller.SearchController>();
-  final TripDetailsController tripDetailsController = Get.put(TripDetailsController());
 
-  TripDetailsSheet({
+  const TripDetailsSheet({
     super.key,
-    required this.scrollController,});
+    required this.trip,
+    required this.disruptions,
+    required this.scrollController,
+  });
+
+  @override
+  _TripDetailsSheetState createState() => _TripDetailsSheetState();
+}
+
+class _TripDetailsSheetState extends State<TripDetailsSheet> {
+  PtvService ptvService = PtvService();
+  SearchUtils searchUtils = SearchUtils();
+
+  late Trip _trip;
+  late bool _isSaved;
+  late List<Disruption> _disruptions;
+  Map<String, bool> _filters = {}; // todo: initialize these!
+  late List<Departure> _filteredDepartures;
+  late Timer _departureUpdateTimer;
+
+  bool _areDisruptionsInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _trip = widget.trip;
+    _filteredDepartures = widget.trip.departures!;
+    _checkSaved();
+    _getDisruptions();
+
+    _departureUpdateTimer = Timer.periodic(Duration(seconds: 30), (_) {
+      _updateDepartures();
+    });
+  }
+
+  @override
+  void dispose() {
+    _departureUpdateTimer.cancel();
+    super.dispose();
+  }
+
+  Future<void> _updateDepartures() async {
+    if (!mounted) return;
+
+    try {
+      await _trip.updateDepartures(departureCount: 2);
+
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error updating departures: $e');
+    }
+  }
+
+  void _setFilters(String key) {
+    _filters[key] = !_filters[key]!;
+    if (_filters['Low Floor'] == true) {
+      _filteredDepartures = _filteredDepartures.where(
+        (departure) => departure.hasLowFloor
+        == _filters['Low Floor']).toList();
+    }
+  }
+
+  Future<void> _getDisruptions() async {
+    List<Disruption> disruptionsList = widget.disruptions != null
+        ? widget.disruptions!
+        : await ptvService.fetchDisruptions(widget.trip.route!);
+    setState(() {
+      _disruptions = disruptionsList;
+      _areDisruptionsInitialized = true;
+    });
+  }
+
+  Future<void> _handleSave() async {
+    _isSaved = !_isSaved;
+    searchUtils.handleSave(widget.trip);
+  }
+
+  Future<void> _checkSaved() async {
+    _isSaved = await ptvService.isTripSaved(widget.trip);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final trip = widget.trip;
 
-    return Obx(() {
-      final searchDetails = searchController.details.value;
-      final trip = searchDetails.trip!;
-      return CustomScrollView(
-        controller: scrollController,
+    if (!_areDisruptionsInitialized) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    return CustomScrollView(
+        controller: widget.scrollController,
         physics: ClampingScrollPhysics(),
         slivers: [
           SliverToBoxAdapter(
@@ -51,7 +141,7 @@ class TripDetailsSheet extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                if (tripDetailsController.disruptions.isNotEmpty)...[
+                                if (_disruptions.isNotEmpty)...[
                                   GestureDetector(
                                     child: Icon(Icons.warning_outlined, color: Color(
                                         0xFFF6833C)),
@@ -61,9 +151,9 @@ class TripDetailsSheet extends StatelessWidget {
                                         context: context,
                                         builder: (BuildContext context) {
                                           return TripDetails(
-                                            route: searchDetails.route!,
-                                            stop: searchDetails.stop!,
-                                            disruptions: tripDetailsController.disruptions
+                                            route: trip.route!,
+                                            stop: trip.stop!,
+                                            disruptions: _disruptions
                                           );
                                         }
                                       );
@@ -100,9 +190,9 @@ class TripDetailsSheet extends StatelessWidget {
                                           context: context,
                                           builder: (BuildContext context) {
                                             return TripDetails(
-                                              route: searchDetails.route!,
-                                              stop: searchDetails.stop!,
-                                              disruptions: tripDetailsController.disruptions
+                                              route: trip.route!,
+                                              stop: trip.stop!,
+                                              disruptions: _disruptions
                                             );
                                           }
                                         );
@@ -112,13 +202,13 @@ class TripDetailsSheet extends StatelessWidget {
                                     SizedBox(width: 4),
                                     GestureDetector(
                                       onTap: () async {
-                                        tripDetailsController.handleSave();
-                                        SaveTripService.renderSnackBar(context, tripDetailsController.isSaved.value);
+                                        _handleSave();
+                                        SaveTripService.renderSnackBar(context, _isSaved);
                                       },
                                       child: Icon(
-                                        tripDetailsController.isSaved.value ? Icons.star : Icons.star_border,
+                                        _isSaved ? Icons.star : Icons.star_border,
                                         size: 30,
-                                        color: tripDetailsController.isSaved.value ? Colors.yellow : null,
+                                        color: _isSaved ? Colors.yellow : null,
                                       ),
                                     ),
                                   ],
@@ -132,12 +222,12 @@ class TripDetailsSheet extends StatelessWidget {
                   ),
                   Wrap(
                     spacing: 5.0,
-                    children: tripDetailsController.filters.entries.map((MapEntry<String,bool> filter) {
+                    children: _filters.entries.map((MapEntry<String,bool> filter) {
                       return FilterChip(
                           label: Text(filter.key),
                           selected: filter.value,
                           onSelected: (bool selected) {
-                            tripDetailsController.setFilters(filter.key);
+                            _setFilters(filter.key);
                           }
                       );
                     }).toList(),
@@ -171,22 +261,21 @@ class TripDetailsSheet extends StatelessWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                final departure = tripDetailsController.filteredDepartures[index];
+                final departure = _filteredDepartures[index];
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   child: DepartureCard(
-                    trip: searchDetails.trip!,
+                    trip: trip,
                     departure: departure,
                     onDepartureTapped: (departure) {
-                      searchController.pushDeparture(departure);
+                      Get.find<search_controller.SearchController>().pushDeparture(departure);
                   }),
                 );
               },
-              childCount: tripDetailsController.filteredDepartures.length,
+              childCount: _filteredDepartures.length,
             )),
           ),
         ],
       );
-    });
   }
 }

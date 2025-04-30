@@ -67,7 +67,7 @@ class CustomListTile extends StatelessWidget {
 
     // Information Tile
     child: ListTile(
-      contentPadding: EdgeInsets.only(left: 12, right: 16, top: 4),
+      contentPadding: EdgeInsets.only(left: 12, right: 0, top: 4),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -76,18 +76,38 @@ class CustomListTile extends StatelessWidget {
               textField: transport.stop!.name,
               textSize: 16,
               scrollable: false),
-          SizedBox(height: 2),
-          RouteWidget(
-            route: transport.route!,
-            direction: transport.direction,
-            scrollable: false,),
+          Row(children: [
+            Expanded(
+              child: RouteWidget(
+                route: transport.route!,
+                direction: transport.direction,
+                scrollable: false,),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (String choice) {
+                if (choice == 'Remove from Favourites') {
+                  onDismiss!();
+                }
+              },
+              icon: const Icon(Icons.more_vert, size: 30),
+              itemBuilder: (BuildContext context) {
+                return {'Remove from Favourites'}.map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Text(choice),
+                  );
+                }).toList();
+              },
+            ),
+          ]),
+
 
           // Row for the vertical line and the rest of the widgets
           if (transport.departures != null)
             ListTile(
               visualDensity: VisualDensity(horizontal: -4, vertical: -4),
               dense: true,
-              contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+              contentPadding: EdgeInsets.only(left: 0, right: 16, top: 0, bottom: 0),
               leading: Icon(Icons.access_time_filled),
               title: DeparturesStringWidget(departures: transport.departures),
               trailing: departure != null

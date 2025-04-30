@@ -1,25 +1,29 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../controllers/search_controller.dart';
+import '../../domain/route.dart' as pt_route;
+import '../../domain/stop.dart';
+import '../../domain/trip.dart';
 import 'trip_widgets.dart';
 
 class SaveTripSheet extends StatelessWidget {
-  final SearchDetails searchDetails;
+  final pt_route.Route route;
+  final Stop stop;
   final List<bool> savedList;
+  final List<Trip> tripList;
   final Function(List<bool>) onConfirmPressed;
 
   const SaveTripSheet({
     super.key,
-    required this.searchDetails,
+    required this.route,
+    required this.stop,
+    required this.tripList,
     required this.savedList,
     required this.onConfirmPressed
   });
 
   @override
   Widget build(BuildContext context) {
-    final route = searchDetails.route!;
-    final stopName = searchDetails.stop!.name;
-    final tripList = searchDetails.tripList;
+    final stopName = stop.name;
 
     List<bool> tempSavedList = List.from(savedList);
     bool hasListChanged = false;

@@ -33,9 +33,6 @@ class _DepartureCardState extends State<DepartureCard> {
     final bool hasLowFloor = departure.hasLowFloor ?? false;
     final String minutesString = TimeUtils.minutesString(estimated, scheduled);
     final String statusString = TimeUtils.statusString(status);
-    print(statusString);
-    print(status.hasDeparted);
-    print(status.isWithinAnHour);
     final String timeStringScheduled = TimeUtils.trimTime(scheduled, false);
 
     return Card(
