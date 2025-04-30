@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
+import 'package:flutter_project/services/gtfs_service.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -13,6 +14,7 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   GtfsApiService gtfsApiService = GtfsApiService();
+  GtfsService gtfsService = GtfsService();
   final TextEditingController gtfsRouteId = TextEditingController();
   List<Trip> transportList = [];
 
@@ -43,11 +45,14 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> gtfsTest(String gtfsId) async {
-    var gtfsResponse = await gtfsApiService.getTripUpdatesRoute(gtfsId);
-
-    print(gtfsResponse.toString());
+    var gtfsResponse = await gtfsApiService.getTramPosition(gtfsId);
+    //
+    // print(gtfsResponse.toString());
   }
 
+  Future<void> initialiseGtfsService() async {
+    gtfsService.initialise();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,14 +60,16 @@ class _TestScreenState extends State<TestScreen> {
       appBar: AppBar(title: const Text("Test Screen")),
       body: Column(
         children: [
-          TextField(
-            controller: gtfsRouteId,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Gtfs Route Id"),
-          ),
-          ElevatedButton(onPressed: () {
-            gtfsTest(gtfsRouteId.text);
-          }, child: Text("Gtfs Test")),
+          // TextField(
+          //   controller: gtfsRouteId,
+          //   keyboardType: TextInputType.number,
+          //   decoration: InputDecoration(labelText: "Gtfs Route Id"),
+          // ),
+          // ElevatedButton(onPressed: () {
+          //   gtfsTest(gtfsRouteId.text);
+          // }, child: Text("Gtfs Test")),
+          
+          ElevatedButton(onPressed: initialiseGtfsService, child: Text("Initialise GTFS Service"))
         ],
       ),
     );
