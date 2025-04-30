@@ -41,6 +41,7 @@ class DeparturesTable extends Table {
   Set<Column> get primaryKey => {runRef, stopId, routeId, directionId};
 }
 
+// In GTFS, Direction is TripHeadsign
 class DirectionsTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
@@ -104,6 +105,9 @@ class TripsTable extends Table {
   IntColumn get directionId => integer()();
   IntColumn get index => integer().nullable()();
 
+  // GTFS
+  TextColumn get gtfsTripId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {uniqueId};
 }
@@ -137,7 +141,27 @@ class StopRouteTypesTable extends Table {
 //   IntColumn get routeId =>
 // }
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable])
+// Static GTFS Tables   // this is a test
+class GtfsTripsTable extends Table {
+  TextColumn get tripId => text()();
+  TextColumn get routeId => text().references(GtfsRoutesTable, #routeId)();
+  // TextColumn get shapeId => text()();
+  IntColumn get tripHeadsign => integer()();
+  IntColumn get wheelchairAccessible => integer()();
+
+  @override
+  Set<Column> get primaryKey => {tripId};
+}
+
+class GtfsRoutesTable extends Table {
+  TextColumn get routeId => text()();
+  TextColumn get shortName => text()();
+  TextColumn get longName => text()();
+
+}
+
+
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -257,10 +281,20 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-// Table Functions
-//   Future<void> clearData() async {
-//     await delete(departures).go();
-//   }
+  // GTFS Route Functions
+  Future<void> insertGtfsRoute(GtfsRoutesTableCompanion route) async {
+    await mergeUpdate(gtfsRoutesTable, route, (r) => r.routeId.equals(route.routeId.value));
+  }
+
+  // GTFS Trip Functions
+  Future<void> insertGtfsTrip(GtfsTripsTableCompanion trip) async {
+    await mergeUpdate(gtfsTripsTable, trip, (t) => t.tripId.equals(trip.tripId.value));
+  }
+
+  // Table Functions
+  //   Future<void> clearData() async {
+  //     await delete(departures).go();
+  //   }
 
   /// Generic method to merge and update records.
   /// Only updates fields that are present in the new data.
