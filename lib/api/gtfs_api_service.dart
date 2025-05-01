@@ -17,7 +17,7 @@ class GtfsApiService {
       };
 
   // Fetch tram trip updates
-  Future<FeedMessage> getTramTripUpdates() async {
+  Future<FeedMessage> tramTripUpdates() async {
     final String tramTripUpdatesUrl = "https://data-exchange-api.vicroads.vic.gov.au/opendata/gtfsr/v1/tram/tripupdates";
     try {
       final response = await http.get(
@@ -39,7 +39,7 @@ class GtfsApiService {
   }
 
   // Fetch tram service alerts
-  Future<FeedMessage> getTramServiceAlerts() async {
+  Future<FeedMessage> tramServiceAlerts() async {
     final String serviceAlertsUrl = "https://data-exchange-api.vicroads.vic.gov.au/opendata/gtfsr/v1/tram/servicealert";
     try {
       final response = await http.get(
@@ -61,7 +61,7 @@ class GtfsApiService {
   }
 
   // Fetch vehicle positions
-  Future<FeedMessage> getTramVehiclePositions() async {
+  Future<FeedMessage> tramVehiclePositions() async {
     final String vehiclePositionsUrl = "https://data-exchange-api.vicroads.vic.gov.au/opendata/gtfsr/v1/tram/vehicleposition";
     try {
       final response = await http.get(
@@ -80,37 +80,5 @@ class GtfsApiService {
     } catch(e) {
       throw Exception("( gtfs_api_service.dart -> getTramVehiclePositions ) -- Error fetching vehicle positions $e");
     }
-  }
-
-  /// Get Updates for a specific tram route via GTFS
-  // todo: move this to ptv_service
-  Future<List<TripUpdate>> getTripUpdatesRoute(String routeId) async {
-    final feedMessage = await getTramTripUpdates();
-
-    // for (var entity in feedMessage.entity) {
-    // }
-
-    return feedMessage.entity
-        .where((entity) => entity.hasTripUpdate())          // filters entities to trips with tripUpdates
-        .map((entity) => entity.tripUpdate)                 // turns all those entities to tripUpdates
-        .where((update) => update.trip.routeId == routeId)  // filters all tripUpdates to those with same routeId
-        .toList();                                          // turns it into a list
-  }
-
-  Future<void> getTramAlert(String id) async {
-    final feedMessage = await getTramServiceAlerts();
-
-    print(feedMessage);
-  }
-
-  Future<void> getTramPosition(String id) async {
-    final feedMessage = await getTramVehiclePositions();
-
-    // for (var entity in feedMessage.entity) {
-    //   // if (entity.vehicle.trip.tripId)
-    //   print(entity);
-    // }
-
-    print(feedMessage);
   }
 }

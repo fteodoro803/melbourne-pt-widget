@@ -94,4 +94,41 @@ class GtfsService {
 
     return mapList;
   }
+
+  // todo:
+  // todo: map ptv routeId to gtfs routeId by name (shortname then longname)
+  // todo: edge case, combined routes (501-503)
+  Future<void> getTramPositions(int routeId) async {
+    final feedMessage = await gtfsApiService.tramVehiclePositions();
+
+    // for (var entity in feedMessage.entity) {
+    //   // if (entity.vehicle.trip.tripId)
+    //   print(entity);
+    // }
+
+    print(feedMessage);
+  }
+
+// /// Get status Updates for a specific tram route via GTFS
+// // todo: move this to ptv_service
+// Future<List<TripUpdate>> getTripUpdatesRoute(String routeId) async {
+//   final feedMessage = await tramTripUpdates();
+//
+//   // for (var entity in feedMessage.entity) {
+//   // }
+//
+//   print(feedMessage);
+//
+//   return feedMessage.entity
+//       .where((entity) => entity.hasTripUpdate())          // filters entities to trips with tripUpdates
+//       .map((entity) => entity.tripUpdate)                 // turns all those entities to tripUpdates
+//       .where((update) => update.trip.routeId == routeId)  // filters all tripUpdates to those with same routeId
+//       .toList();                                          // turns it into a list
+// }
+//
+// Future<void> getTramAlert(String id) async {
+//   final feedMessage = await tramServiceAlerts();
+//
+//   print(feedMessage);
+// }
 }
