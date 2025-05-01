@@ -5,8 +5,8 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../domain/route.dart' as pt_route;
 import '../.deprecated/search_details.dart';
 import '../widgets/distance_filter.dart';
-import '../widgets/screen_widgets.dart' as ScreenWidgets;
-import '../widgets/trip_widgets.dart';
+import '../widgets/buttons.dart' as ScreenWidgets;
+import '../widgets/trip_info_widgets.dart';
 
 enum ToggleableFilter {
   lowFloor(name: "Low Floor"),

@@ -93,3 +93,64 @@ class HandleWidget extends StatelessWidget {
     );
   }
 }
+
+class FavoriteButton extends StatelessWidget {
+  const FavoriteButton({
+    super.key,
+    required bool isSaved,
+  }) : _isSaved = isSaved;
+
+  final bool _isSaved;
+
+  @override
+  Widget build(BuildContext context) {
+
+    return SizedBox(
+      width: 30,
+      height: 30,
+      child: Center(
+        child: Icon(
+          _isSaved ? Icons.star : Icons.star_border,
+          size: 30,
+          color: _isSaved ? Colors.yellow : null,
+        ),
+      ),
+    );
+  }
+}
+
+class NearbyStopsButton extends StatelessWidget {
+  const NearbyStopsButton({
+    super.key,
+    required this.isNearbyStopsButtonToggled,
+    required this.onPressed,
+  });
+
+  final bool isNearbyStopsButtonToggled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 14),
+        backgroundColor: !isNearbyStopsButtonToggled
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.primaryContainer,
+        minimumSize: Size(40, 40),
+      ),
+      child: SizedBox(
+        height: 40,
+        width: 40,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.location_pin),
+            Icon(Icons.tram),
+          ],
+        ),
+      ),
+    );
+  }
+}

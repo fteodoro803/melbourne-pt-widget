@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/domain/trip.dart';
 import '../utility/trip_utils.dart';
-import 'trip_widgets.dart';
+import 'trip_info_widgets.dart';
 
 import '../utility/time_utils.dart';
 
@@ -129,10 +129,11 @@ class CustomListTile extends StatelessWidget {
                   ))
                 : null,
             ),
-        ],
+          ],
+        ),
+        onTap: onTap,
       ),
-      onTap: onTap,
-    ),
-  );  }
+    );
+  }
 }
 

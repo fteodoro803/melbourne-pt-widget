@@ -59,7 +59,6 @@ class TripUtils {
           departure.scheduledDepartureUTC!);
     }
   }
-
 }
 
 class ColourUtils {
@@ -76,19 +75,4 @@ class ColourUtils {
     // Convert hex string to integer and create Color object
     return Color(int.parse('0x$hexColour'));
   }
-
-  // /// Function to return color based on departure status
-  // static Color getColorForStatus(String status) {
-  //   switch (status) {
-  //     case "Late":
-  //       return Color(0xFFC57070); // Red for late
-  //     case "Early":
-  //       return Color(0xFFC5B972); // Yellow for early
-  //     case "On time":
-  //       return Color(0xFF8ECF93); // Yellow for early
-  //     case "Scheduled":
-  //     default:
-  //       return Color(0xFFB8B8B8); // Green for on-time or default
-  //   }
-  // }
 }

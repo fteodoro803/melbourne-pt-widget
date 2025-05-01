@@ -1,9 +1,9 @@
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/sheet_ui/route_details_sheet.dart';
-import 'package:flutter_project/add_screens/sheet_ui/sheet_navigator_widget.dart';
-import 'package:flutter_project/add_screens/sheet_ui/stop_details_sheet.dart';
-import 'package:flutter_project/add_screens/sheet_ui/trip_details_sheet.dart';
+import 'package:flutter_project/add_screens/detail_sheets/route_details.dart';
+import 'package:flutter_project/add_screens/widgets/sheet_navigator_widget.dart';
+import 'package:flutter_project/add_screens/detail_sheets/stop_details.dart';
+import 'package:flutter_project/add_screens/detail_sheets/trip_details.dart';
 import 'package:flutter_project/add_screens/controllers/navigation_service.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -14,10 +14,10 @@ import 'controllers/map_controller.dart';
 import 'controllers/nearby_stops_controller.dart';
 import 'controllers/sheet_controller.dart';
 import 'widgets/bottom_navigation_bar.dart';
-import 'widgets/screen_widgets.dart';
+import 'widgets/buttons.dart';
 import 'widgets/suggestions_search.dart';
-import 'sheet_ui/departure_details_sheet.dart';
-import 'sheet_ui/nearby_stops_sheet.dart';
+import 'detail_sheets/departure_details.dart';
+import 'detail_sheets/nearby_stops.dart';
 
 // todo: fix forward/backward navigation between pages; fix camera view when first rendering marker/trip path
 
@@ -39,28 +39,27 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
 
-  final sheetNavigationController = Get.put(SheetController());
+  final sheetController = Get.put(SheetController());
   final mapController = Get.put(MapController());
   final nearbyStopsController = Get.put(NearbyStopsController());
-  final NavigationService navigationService = Get.put(NavigationService());
+  final navigationService = Get.put(NavigationService());
 
   @override
   void initState() {
     super.initState();
     // print("search_screen.dart --> INITIALIZING STATE");
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // searchController.setDetails(widget.searchDetails);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!widget.enableSearch) {
         if (widget.trip != null) {
-          sheetNavigationController.initialSheetSize = 0.5;
+          sheetController.initialSheetSize = 0.5;
           navigationService.navigateToTrip(widget.trip!, null, null);
         } else {
-          sheetNavigationController.initialSheetSize = 0.4;
+          sheetController.initialSheetSize = 0.4;
           navigationService.navigateToRoute(widget.route!);
         }
       } else {
-        sheetNavigationController.initialSheetSize = 0.4;
+        sheetController.initialSheetSize = 0.4;
       }
     });
   }
@@ -141,8 +140,10 @@ class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
               Obx(() {
-                if (sheetNavigationController.currentSheet.value == 'Nearby Stops') {
-                  return ElevatedButton(
+                if (sheetController.currentSheet.value == 'Nearby Stops') {
+                  return NearbyStopsButton(
+                    isNearbyStopsButtonToggled:
+                      mapController.isNearbyStopsButtonToggled.value,
                     onPressed: () async {
                       if (mapController.isNearbyStopsButtonToggled.value) {
                         mapController.hideNearbyStopMarkers();
@@ -150,26 +151,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         mapController.initialiseNearbyStopMarkers();
                         mapController.showNearbyStopMarkers();
                       }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
-                      backgroundColor: !mapController.isNearbyStopsButtonToggled.value
-                          ? Theme.of(context).colorScheme.surfaceContainerHighest
-                          : Theme.of(context).colorScheme.primaryContainer,
-                      minimumSize: Size(40, 40),
-                    ),
-                    child: SizedBox(
-                      height: 40,
-                      width: 40,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.location_pin),
-                          Icon(Icons.tram),
-                        ],
-                      ),
-                    ),
-                  );
+                    });
                 } else {
                   return SizedBox.shrink(); // Hide the button
                 }
@@ -189,7 +171,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildSheets() {
     // Get sheet navigation controller
     return SheetNavigatorWidget(
-      controller: sheetNavigationController,
+      controller: sheetController,
       sheets: {
         'Nearby Stops': (ctx, scroll) => NearbyStopsSheet(
           scrollController: scroll,
@@ -210,3 +192,4 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
+

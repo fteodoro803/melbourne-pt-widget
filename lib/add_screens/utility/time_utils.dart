@@ -30,8 +30,6 @@ class DepartureStatus {
         return "B8B8B8"; // Green for on-time or default
     }
   }
-
-  // todo: scheduled minutesString for home widget
 }
 
 class TimeUtils {

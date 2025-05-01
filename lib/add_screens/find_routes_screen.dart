@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/search_screen.dart';
-import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
+import 'package:flutter_project/add_screens/widgets/trip_info_widgets.dart';
 import 'package:get/get.dart';
-import '../../domain/route.dart' as pt_route;
-import '../../ptv_service.dart';
-import '../search_binding.dart';
-import '../widgets/bottom_navigation_bar.dart';
-import '../widgets/screen_widgets.dart' as ScreenWidgets;
+import '../domain/route.dart' as pt_route;
+import '../ptv_service.dart';
+import 'search_binding.dart';
+import 'widgets/bottom_navigation_bar.dart';
+import 'widgets/buttons.dart' as ScreenWidgets;
 
 enum BusFilter {
   metro(name: "Metro", id: "4"),
@@ -305,6 +305,18 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
           ],
 
           if (!(_selectedRouteType == "all" && _searchController.text == ""))...[
+            if (_filteredRoutesBySearch.isEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30.0),
+                child: Text(
+                  "No routes found.",
+                  style: TextStyle(
+                      fontSize: 16
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
             Expanded(
               child: ListView.builder(
                 itemCount: _filteredRoutesBySearch.length,

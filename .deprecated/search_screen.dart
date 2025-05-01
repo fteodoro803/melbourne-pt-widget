@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/search_details.dart';
-import 'package:flutter_project/add_screens/sheets/route_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheets/route_details.dart';
 import 'package:flutter_project/add_screens/trip_path.dart';
 import 'package:flutter_project/add_screens/widgets/sheet_navigator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 
-import 'package:flutter_project/add_screens/sheets/stop_details_sheet.dart';
-import 'package:flutter_project/add_screens/sheets/trip_details_sheet.dart';
+import 'package:flutter_project/add_screens/sheets/stop_details.dart';
+import 'package:flutter_project/add_screens/sheets/trip_details.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/trip.dart';
@@ -21,10 +21,10 @@ import '../utility/map_utils.dart';
 import '../utility/search_utils.dart';
 
 import '../widgets/bottom_navigation_bar.dart';
-import '../widgets/screen_widgets.dart';
+import '../widgets/buttons.dart';
 
-import '../sheets/departure_details_sheet.dart';
-import '../sheets/nearby_stops_sheet.dart';
+import '../sheets/departure_details.dart';
+import '../sheets/nearby_stops.dart';
 import '../widgets/suggestions_search.dart';
 
 class SearchScreen extends StatefulWidget {

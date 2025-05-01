@@ -4,9 +4,10 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../controllers/nearby_stops_controller.dart';
 import '../controllers/navigation_service.dart';
-import '../widgets/distance_filter.dart';
-import '../widgets/screen_widgets.dart' as screen_widgets;
-import '../widgets/get_widgets.dart';
+import '../overlay_sheets/distance_filter.dart';
+import '../widgets/buttons.dart' as screen_widgets;
+import '../widgets/nearby_stop_widgets.dart';
+import '../widgets/trip_info_widgets.dart';
 
 
 class NearbyStopsSheet extends StatelessWidget {

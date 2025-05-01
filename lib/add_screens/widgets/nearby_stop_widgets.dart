@@ -1,49 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/widgets/trip_info_widgets.dart';
 
 import '../../domain/route.dart' as pt_route;
 import '../../domain/stop.dart';
 import '../utility/trip_utils.dart';
-
-class LocationWidget extends StatelessWidget {
-  const LocationWidget({
-    super.key,
-    required this.textField,
-    required this.textSize,
-    required this.scrollable,
-  });
-
-  final String textField;
-  final double textSize;
-  final bool scrollable;
-
-  @override
-  Widget build(BuildContext context) {
-
-    var textLine = Text(
-      textField,
-      style: TextStyle(fontSize: textSize),
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-    );
-
-    return Row(
-      children: [
-        Icon(Icons.location_pin, size: textSize + 2),
-        SizedBox(width: 4),
-        scrollable ?
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: textLine,
-          ),
-        )
-            : Flexible(
-          child: textLine,
-        ),
-      ],
-    );
-  }
-}
 
 class ExpandedStopWidget extends StatelessWidget {
   const ExpandedStopWidget({

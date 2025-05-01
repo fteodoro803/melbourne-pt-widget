@@ -11,13 +11,13 @@ import '../controllers/navigation_service.dart';
 import '../controllers/sheet_controller.dart';
 import '../utility/trip_utils.dart';
 import '../utility/time_utils.dart';
-import '../widgets/trip_widgets.dart';
+import '../widgets/trip_info_widgets.dart';
 
-class DepartureDetailsScreenState {
+class DepartureDetailsState {
   final Trip trip;
   Departure departure;
 
-  DepartureDetailsScreenState({
+  DepartureDetailsState({
     required this.trip,
     required this.departure,
   });

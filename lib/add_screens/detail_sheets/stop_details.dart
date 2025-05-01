@@ -10,17 +10,18 @@ import '../../ptv_service.dart';
 import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
-import '../widgets/save_trip_sheet.dart';
-import '../widgets/trip_details.dart';
-import '../widgets/trip_widgets.dart';
+import '../overlay_sheets/save_trip.dart';
+import '../overlay_sheets/trip_info.dart';
+import '../widgets/buttons.dart';
+import '../widgets/trip_info_widgets.dart';
 
-class StopDetailsScreenState {
+class StopDetailsState {
   final Stop stop;
   final pt_route.Route route;
   List<Trip>? trips;
   List<Disruption>? disruptions;
 
-  StopDetailsScreenState({
+  StopDetailsState({
     required this.stop,
     required this.route,
     this.trips,
@@ -54,7 +55,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   List<Trip> _trips = [];
   List<Disruption> _disruptions = [];
 
-  late StopDetailsScreenState _state;
+  late StopDetailsState _state;
   late Timer _departureUpdateTimer;
 
   @override
@@ -67,7 +68,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
       _stop = _initialState.stop;
       _route = _initialState.route;
 
-      _state = StopDetailsScreenState(stop: _stop, route: _route);
+      _state = StopDetailsState(stop: _stop, route: _route);
 
       if (_initialState.trips != null) {
         _trips = _initialState.trips;
@@ -215,7 +216,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                 constraints: BoxConstraints(maxHeight: 500),
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return TripDetails(
+                                  return TripInfoSheet(
                                       route: _route,
                                       stop: _stop,
                                       disruptions: _disruptions,
@@ -248,7 +249,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                               List<bool> tempSavedList = [..._savedList];
                               tempSavedList[0] = !tempSavedList[0];
                               await _onConfirmPressed(tempSavedList);
-                              SaveTripService.renderSnackBar(context, tempSavedList[0]);
+                              SearchUtils.renderSnackBar(context, tempSavedList[0]);
                             }
                           },
                         ),
@@ -284,7 +285,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                             constraints: const BoxConstraints(maxHeight: 500),
                                             context: context,
                                             builder: (BuildContext context) {
-                                              return TripDetails(
+                                              return TripInfoSheet(
                                                 route: _route,
                                                 stop: _stop,
                                                 disruptions: _disruptions,

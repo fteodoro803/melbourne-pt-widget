@@ -11,16 +11,16 @@ import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../utility/time_utils.dart';
 import '../utility/trip_utils.dart';
-import 'get_widgets.dart';
+import '../widgets/trip_info_widgets.dart';
 
 
-class TripDetails extends StatefulWidget {
+class TripInfoSheet extends StatefulWidget {
   final pt_route.Route route;
   final Stop stop;
   final dynamic state;
   final List<Disruption> disruptions;
 
-  const TripDetails({
+  const TripInfoSheet({
     super.key,
     required this.route,
     required this.stop,
@@ -29,10 +29,10 @@ class TripDetails extends StatefulWidget {
   });
 
   @override
-  TripDetailsState createState() => TripDetailsState();
+  TripInfoSheetState createState() => TripInfoSheetState();
 }
 
-class TripDetailsState extends State<TripDetails> {
+class TripInfoSheetState extends State<TripInfoSheet> {
   final NavigationService navigationService = Get.find<NavigationService>();
 
   List<Stop> nearbyStops = [];
@@ -58,7 +58,7 @@ class TripDetailsState extends State<TripDetails> {
 
   Future<void> getConnections() async {
     LatLng stopLocation = LatLng(widget.stop.latitude!, widget.stop.longitude!);
-    List<Stop> uniqueStops = await searchUtils.getStops(stopLocation, "all", 200);
+    List<Stop> uniqueStops = await searchUtils.getUniqueStops(stopLocation, "all", 200);
     setState(() {
       nearbyStops = uniqueStops;
     });

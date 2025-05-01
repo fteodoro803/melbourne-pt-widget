@@ -70,7 +70,7 @@ class NearbyStopsController extends GetxController {
 
   /// Sets new stops list & initializes expansion states
   Future<void> setStops(String routeType, int distance) async {
-    List<Stop> uniqueStops = await searchUtils.getStops(Get.find<MapController>().markerPos!, routeType, distance);
+    List<Stop> uniqueStops = await searchUtils.getUniqueStops(Get.find<MapController>().markerPos!, routeType, distance);
 
     stops.value = uniqueStops.obs;
 

@@ -8,7 +8,7 @@ import '../../screen_arguments.dart';
 import '../.deprecated/search_details.dart';
 import '../.deprecated/departure_card.dart';
 import '../../trip.dart';
-import '../widgets/trip_widgets.dart';
+import '../widgets/trip_info_widgets.dart';
 
 class TransportDetailsSheet extends StatefulWidget {
   final ScreenArguments arguments;

@@ -10,15 +10,15 @@ import '../../ptv_service.dart';
 import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
-import '../widgets/trip_widgets.dart';
-import '../widgets/trip_details.dart';
+import '../widgets/trip_info_widgets.dart';
+import '../overlay_sheets/trip_info.dart';
 
-class TripDetailsScreenState {
+class TripDetailsState {
   final Trip trip;
   List<Disruption>? disruptions;
   Map<String, bool>? filters;
 
-  TripDetailsScreenState({
+  TripDetailsState({
     required this.trip,
     this.disruptions,
     this.filters,
@@ -51,7 +51,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   Map<String, bool> _filters = {}; // todo: initialize these!
   late List<Departure> _filteredDepartures;
 
-  late TripDetailsScreenState _state;
+  late TripDetailsState _state;
   late Timer _departureUpdateTimer;
 
   bool _areDisruptionsInitialized = false;
@@ -64,7 +64,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
     if (_initialState != null) {
       _trip = _initialState.trip;
       _filteredDepartures = _initialState.trip.departures;
-      _state = TripDetailsScreenState(trip: _trip);
+      _state = TripDetailsState(trip: _trip);
 
       if (_initialState.disruptions != null) {
         _disruptions = _initialState.disruptions;
@@ -179,7 +179,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                                         constraints: BoxConstraints(maxHeight: 500),
                                         context: context,
                                         builder: (BuildContext context) {
-                                          return TripDetails(
+                                          return TripInfoSheet(
                                             route: _trip.route!,
                                             stop: _trip.stop!,
                                             disruptions: _disruptions,
@@ -219,7 +219,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                                           constraints: BoxConstraints(maxHeight: 500),
                                           context: context,
                                           builder: (BuildContext context) {
-                                            return TripDetails(
+                                            return TripInfoSheet(
                                               route: _trip.route!,
                                               stop: _trip.stop!,
                                               disruptions: _disruptions,
@@ -234,7 +234,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                                     GestureDetector(
                                       onTap: () async {
                                         _handleSave();
-                                        SaveTripService.renderSnackBar(context, _isSaved);
+                                        SearchUtils.renderSnackBar(context, _isSaved);
                                       },
                                       child: Icon(
                                         _isSaved ? Icons.star : Icons.star_border,

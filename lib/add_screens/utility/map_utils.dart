@@ -65,7 +65,7 @@ class MapUtils {
   double zoomThresholdLarge = 12.8; // Zoom level threshold to hide the marker
   double zoomThresholdSmall = 13.4;
 
-  // Calculate polyline extent to adjust padding based on polyline size
+  /// Calculate polyline extent to adjust padding based on polyline size
   static double calculatePolylineExtent(List<LatLng> points) {
     LatLngBounds bounds = calculatePolylineBounds(points);
 
@@ -186,7 +186,7 @@ class MapUtils {
     return !(wasSmallHidden == hideSmall && wasLargeHidden == hideLarge);
   }
 
-  // map_utils.dart
+  ///
   Future<Marker> createNearbyStopMarker({
     required Stop stop,
     required BitmapDescriptor icon,
@@ -201,6 +201,7 @@ class MapUtils {
     );
   }
 
+  ///
   Future<Set<Marker>> generateNearbyStopMarkers({
     required List<Stop> stops,
     required Future<BitmapDescriptor> Function(Stop stop) getIcon,
@@ -219,6 +220,7 @@ class MapUtils {
     return markers;
   }
 
+  ///
   Future<void> moveCameraToFitRadiusWithVerticalOffset({
     required GoogleMapController controller,
     required LatLng center,
@@ -256,7 +258,7 @@ class MapUtils {
     );
   }
 
-  // Helper method to calculate bounds that include all points in the polyline
+  /// Helper method to calculate bounds that include all points in the polyline
   static LatLngBounds calculatePolylineBounds(List<LatLng> points) {
     double minLat = 90.0, maxLat = -90.0;
     double minLng = 180.0, maxLng = -180.0;
@@ -274,6 +276,7 @@ class MapUtils {
     );
   }
 
+  ///
   static LatLng calculatePolylineCenter(List<LatLng> points) {
     double sumLat = 0.0, sumLng = 0.0;
 
@@ -288,6 +291,7 @@ class MapUtils {
     );
   }
 
+  ///
   Future<void> centerMapOnPolyLine(List<LatLng> polyLine, GoogleMapController mapController, BuildContext context, bool enableSearch) async {
     LatLngBounds bounds = MapUtils.calculatePolylineBounds(polyLine);
 
@@ -340,6 +344,7 @@ class MapUtils {
     );
   }
 
+  /// Creates a custom marker from an image
   Future<BitmapDescriptor> getResizedImage(String assetPath, double width, double height) async {
     // Load the image from assets
     final ByteData data = await rootBundle.load(assetPath);
@@ -365,24 +370,6 @@ class MapUtils {
 
     // Return the resized BitmapDescriptor
     return BitmapDescriptor.bytes(resizedBytes);
-  }
-
-  /// Returns set of markers with only location pin marker
-  static Set<Marker> resetMarkers(LatLng? markerPosition) {
-
-    Set<Marker> newMarkers = {};
-
-    if (markerPosition != null) {
-      MarkerId id = MarkerId(markerPosition.toString()); // Unique ID based on position
-
-      newMarkers.add(Marker(
-        markerId: id,
-        position: markerPosition,
-        consumeTapEvents: true,
-      ));
-    }
-
-    return newMarkers;
   }
 }
 
@@ -444,6 +431,7 @@ class GeoPathUtils {
     return distance;
   }
 
+  ///
   static bool isBetween(LatLng point, LatLng pointA, LatLng pointB) {
     // Simple distance-based check or use a geometry-based approach for precision
     double distanceAB = calculateDistance(pointA, pointB);

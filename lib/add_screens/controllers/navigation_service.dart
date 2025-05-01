@@ -2,10 +2,10 @@
 
 import 'package:get/get.dart';
 import '../../domain/disruption.dart';
-import '../sheet_ui/departure_details_sheet.dart';
-import '../sheet_ui/route_details_sheet.dart';
-import '../sheet_ui/stop_details_sheet.dart';
-import '../sheet_ui/trip_details_sheet.dart';
+import '../detail_sheets/departure_details.dart';
+import '../detail_sheets/route_details.dart';
+import '../detail_sheets/stop_details.dart';
+import '../detail_sheets/trip_details.dart';
 import '../utility/search_utils.dart';
 import 'nearby_stops_controller.dart';
 import 'sheet_controller.dart';
@@ -120,7 +120,7 @@ class NavigationService extends GetxService {
 
     _navigationStack.add({'type': currentSheet, 'state': currentState});
 
-    StopDetailsScreenState newState = StopDetailsScreenState(stop: stop, route: newRoute);
+    StopDetailsState newState = StopDetailsState(stop: stop, route: newRoute);
     stateToPush = newState;
 
     sheetController.pushSheet('Stop Details');
@@ -139,7 +139,7 @@ class NavigationService extends GetxService {
     pt_route.Route newRoute = await searchUtils.initializeRoute(route);
 
     _navigationStack.clear();
-    RouteDetailsScreenState newState = RouteDetailsScreenState(route: newRoute);
+    RouteDetailsState newState = RouteDetailsState(route: newRoute);
     stateToPush = newState;
 
     sheetController.pushSheet('Route Details');
@@ -155,7 +155,7 @@ class NavigationService extends GetxService {
   Future<void> navigateToTrip(Trip trip, List<Disruption>? disruptions, dynamic state) async {
     await trip.updateDepartures(departureCount: 20);
 
-    TripDetailsScreenState newState = TripDetailsScreenState(trip: trip, disruptions: disruptions);
+    TripDetailsState newState = TripDetailsState(trip: trip, disruptions: disruptions);
     stateToPush = newState;
 
     if (_navigationStack.isEmpty) {
@@ -177,7 +177,7 @@ class NavigationService extends GetxService {
   Future<void> navigateToDeparture(Trip trip, Departure departure, dynamic state) async {
     _navigationStack.add({'type': sheetController.currentSheet.value, 'state': state});
 
-    DepartureDetailsScreenState newState = DepartureDetailsScreenState(trip: trip, departure: departure);
+    DepartureDetailsState newState = DepartureDetailsState(trip: trip, departure: departure);
     stateToPush = newState;
 
     if (sheetController.currentSheet.value != 'Trip Details') {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/sheet_controller.dart';
-import '../widgets/screen_widgets.dart';
+import 'buttons.dart';
 
 class SheetNavigatorWidget extends StatelessWidget {
   final Map<String, Widget Function(BuildContext, ScrollController)> sheets;

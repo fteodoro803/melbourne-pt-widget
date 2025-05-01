@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../domain/route.dart' as pt_route;
 import '../../domain/stop.dart';
 import '../../domain/trip.dart';
-import 'trip_widgets.dart';
+import '../widgets/buttons.dart';
+import '../widgets/trip_info_widgets.dart';
 
 class SaveTripSheet extends StatelessWidget {
   final pt_route.Route route;

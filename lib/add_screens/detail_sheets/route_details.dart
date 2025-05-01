@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
+import 'package:flutter_project/add_screens/widgets/trip_info_widgets.dart';
 import 'package:get/get.dart';
 import '../../domain/route.dart' as pt_route;
 import '../../domain/stop.dart';
@@ -9,10 +9,10 @@ import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../widgets/sticky_header_delegate.dart';
 
-class RouteDetailsScreenState {
+class RouteDetailsState {
   final pt_route.Route route;
 
-  RouteDetailsScreenState({
+  RouteDetailsState({
     required this.route,
   });
 }
@@ -33,7 +33,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   SearchUtils searchUtils = SearchUtils();
   final NavigationService navigationService = Get.find<NavigationService>();
   late dynamic _initialState;
-  late RouteDetailsScreenState _state;
+  late RouteDetailsState _state;
 
   late String _direction;
   late pt_route.Route _route;
@@ -47,7 +47,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
 
     if (_initialState != null) {
       _route = _initialState.route;
-      _state = RouteDetailsScreenState(route: _route);
+      _state = RouteDetailsState(route: _route);
     }
 
     if (_route.directions != null && _route.directions!.isNotEmpty) {
