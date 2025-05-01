@@ -26,22 +26,36 @@ class GtfsService {
   db.AppDatabase database = Get.find<db.AppDatabase>();
 
   /// Adds GTFS Schedule data to database
+  // todo: add functionality to skip initialisation if the data is up to date
   Future<void> initialise() async {
+    await _initialiseRoutes();
+    await _initialiseTrips();
+  }
+
+  /// Add gtfs routes to database.
+  Future<void> _initialiseRoutes() async {
     try {
-      // Add gtfs routes to database
       final gtfsRoutesMap = await csvToMapList(routesFilePath);
       for (var route in gtfsRoutesMap) {
         String routeId = route["route_id"];
         String shortName = route["route_short_name"];
         String longName = route["route_long_name"];
 
-        await database.addGtfsRoute(id: routeId, shortName: shortName, longName: longName);
+        await database.addGtfsRoute(
+            id: routeId, shortName: shortName, longName: longName);
       }
+    } catch (e) {
+      print("Error $e");
+    }
+  }
 
-      // Add gtfs trips to database
+  /// Add gtfs trips to database.
+  Future<void> _initialiseTrips() async {
+    try {
+      List<db.GtfsTripsTableCompanion> gtfsTripList = [];
       final gtfsTripsMap = await csvToMapList(tripsFilePath);
 
-      // todo: turn this to a batch and transaction
+      // Add gtfs trips to database, by adding the rows in the map to a list, and batch inserting it to the database.
       for (var trip in gtfsTripsMap) {
         String tripId = trip["trip_id"];
         String routeId = trip["route_id"];
@@ -49,16 +63,17 @@ class GtfsService {
         // int wheelchairAccessible = trip["wheelchair_accessible"];
         int wheelchairAccessible = int.tryParse(trip["wheelchair_accessible"]) ?? 0;    // todo: fix this. It takes a long time (maybe bc its big) but seems a bit buggy
 
-        await database.addGtfsTrip(tripId: tripId, routeId: routeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
+        var newGtfsTrip = database.createGtfsTripCompanion(tripId: tripId, routeId: routeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
+        gtfsTripList.add(newGtfsTrip);
       }
+
+      // Batch inserting trips to database
+      await database.addGtfsTrips(trips: gtfsTripList);
     }
     catch (e) {
       print("Error $e");
     }
-
-    print("( gtfs_service.dart -> initialise ) -- Finished initialising");
   }
-
 
   /// Converts CSV to Map
   Future<List<Map<String, dynamic>>> csvToMapList(String filePath) async {
