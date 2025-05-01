@@ -322,7 +322,7 @@ class AppDatabase extends _$AppDatabase {
   Future<void> batchInsert<T extends Table, D extends DataClass>(
       TableInfo<T, D> table,
       List<Insertable<D>> entries,
-      {int batchSize = 100}
+      {int batchSize = 150}
     ) async {
 
     // Process batches in chunks
