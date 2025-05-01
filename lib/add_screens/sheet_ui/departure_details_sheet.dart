@@ -7,21 +7,27 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../domain/departure.dart';
 import '../../domain/trip.dart';
 import '../../ptv_service.dart';
-import '../controllers/sheet_navigator_controller.dart';
+import '../controllers/navigation_service.dart';
+import '../controllers/sheet_controller.dart';
 import '../utility/trip_utils.dart';
 import '../utility/time_utils.dart';
 import '../widgets/trip_widgets.dart';
 
+class DepartureDetailsScreenState {
+  final Trip trip;
+  Departure departure;
+
+  DepartureDetailsScreenState({
+    required this.trip,
+    required this.departure,
+  });
+}
 
 class DepartureDetailsSheet extends StatefulWidget {
   final ScrollController scrollController;
-  final Departure departure;
-  final Trip trip;
 
   const DepartureDetailsSheet({
     super.key,
-    required this.departure,
-    required this.trip,
     required this.scrollController,
   });
 
@@ -30,25 +36,76 @@ class DepartureDetailsSheet extends StatefulWidget {
 }
 
 class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
+  final NavigationService navigationService = Get.find<NavigationService>();
+  late dynamic _initialState;
+  late Departure _departure;
+  late Trip _trip;
+
   PtvService ptvService = PtvService();
   ItemScrollController itemScrollController = ItemScrollController();
   ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
 
   List<Departure> _pattern = [];
+
+  late DepartureStatus _status;
+  late String _minutesString;
+  late Timer _departureUpdateTimer;
+
   int _currentStopIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _initialState = navigationService.stateToPush;
+
+    if (_initialState != null) {
+      _departure = _initialState.departure;
+      _trip = _initialState.trip;
+
+      _status = TimeUtils.getDepartureStatus(
+        _departure.scheduledDepartureUTC,
+        _departure.estimatedDepartureUTC,
+      );
+      _minutesString = TimeUtils.minutesString(_departure.estimatedDepartureUTC, _departure.scheduledDepartureUTC!);
+    }
 
     _moveToStopIndex();
 
-    // todo: add timer to update this departure
+    _departureUpdateTimer = Timer.periodic(Duration(seconds: 30), (_) {
+      _updateDeparture();
+    });
+  }
+
+  @override
+  void dispose() {
+    _departureUpdateTimer.cancel();
+    super.dispose();
+  }
+
+  Future<void> _updateDeparture() async {
+    if (!mounted) return;
+
+    try {
+      // await _trip.updateDepartures(departureCount: 2);
+      // todo: create backend function to update only the chosen departure
+
+      if (mounted) {
+        setState(() {
+          _status = TimeUtils.getDepartureStatus(
+            _departure.scheduledDepartureUTC,
+            _departure.estimatedDepartureUTC,
+          );
+          _minutesString = TimeUtils.minutesString(_departure.estimatedDepartureUTC, _departure.scheduledDepartureUTC!);
+        });
+      }
+    } catch (e) {
+      print('Error updating departures: $e');
+    }
   }
 
   Future<void> _fetchPattern() async {
     List<Departure> newPattern = await ptvService.fetchPattern(
-        widget.trip, widget.departure);
+        _trip, _departure);
 
     setState(() {
       _pattern = newPattern;
@@ -60,7 +117,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
 
     // Find the current stop index
     _currentStopIndex = _pattern.indexWhere(
-            (stop) => stop.stopName?.trim().toLowerCase() == widget.trip.stop?.name.trim().toLowerCase()
+            (stop) => stop.stopName?.trim().toLowerCase() == _trip.stop?.name.trim().toLowerCase()
     );
 
     // If the stop isn't found, default to 0
@@ -68,7 +125,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
       _currentStopIndex = 0;
     }
 
-    Get.find<SheetNavigationController>().animateSheetTo(0.4);
+    Get.find<SheetController>().animateSheetTo(0.4);
 
     // Scroll to the item after the build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -87,15 +144,6 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-
-    final departure = widget.departure;
-    final trip = widget.trip;
-    final DepartureStatus status = TimeUtils.getDepartureStatus(
-      departure.scheduledDepartureUTC,
-      departure.estimatedDepartureUTC,
-    );
-
-    final String minutesString = TimeUtils.minutesString(departure.estimatedDepartureUTC, departure.scheduledDepartureUTC!);
 
     // Add listener to the ItemPositionsListener
     itemPositionsListener.itemPositions.addListener(() {
@@ -127,7 +175,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                       fit: FlexFit.tight,
                       child: Column(
                         children: [
-                          LocationWidget(textField: trip.stop!.name, textSize: 18, scrollable: true),
+                          LocationWidget(textField: _trip.stop!.name, textSize: 18, scrollable: true),
                           SizedBox(height: 4),
                           Row(
                             children: [
@@ -145,9 +193,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(trip.direction!.name, style: TextStyle(fontSize: 16, height: 1.1), overflow: TextOverflow.ellipsis, maxLines: 2),
+                                    Text(_trip.direction!.name, style: TextStyle(fontSize: 16, height: 1.1), overflow: TextOverflow.ellipsis, maxLines: 2),
                                     SizedBox(height: 8),
-                                    RouteWidget(route: trip.route!, scrollable: true),
+                                    RouteWidget(route: _trip.route!, scrollable: true),
                                     SizedBox(height: 4)
                                   ],
                                 ),
@@ -167,11 +215,11 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                         Container(
                                           padding: EdgeInsets.symmetric(vertical: 1, horizontal: 6),
                                           decoration: BoxDecoration(
-                                              color: ColourUtils.hexToColour(status.getColorString),
+                                              color: ColourUtils.hexToColour(_status.getColorString),
                                               borderRadius: BorderRadius.circular(8)
                                           ),
                                           child: Text(
-                                            minutesString,
+                                            _minutesString,
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontWeight: FontWeight.w500,
@@ -182,14 +230,14 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                         SizedBox(height: 2),
                                         Padding(
                                           padding: const EdgeInsets.only(left: 2.0),
-                                          child: Text("Scheduled: ${departure.scheduledDepartureTime}", style: TextStyle(fontSize: 13)),
+                                          child: Text("Scheduled: ${_departure.scheduledDepartureTime}", style: TextStyle(fontSize: 13)),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.only(left: 2.0),
                                           child: Text(
-                                            "Estimated: ${departure.estimatedDepartureTime ?? 'N/A'}",
+                                            "Estimated: ${_departure.estimatedDepartureTime ?? 'N/A'}",
                                             style: TextStyle(
-                                                color: ColourUtils.hexToColour(status.getColorString),
+                                                color: ColourUtils.hexToColour(_status.getColorString),
                                                 fontSize: 13
                                             ),),
                                         ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/sheet_navigator_controller.dart';
+import '../controllers/sheet_controller.dart';
 import '../widgets/screen_widgets.dart';
 
 class SheetNavigatorWidget extends StatelessWidget {
   final Map<String, Widget Function(BuildContext, ScrollController)> sheets;
-  final SheetNavigationController controller;
+  final SheetController controller;
 
   const SheetNavigatorWidget({
     super.key,

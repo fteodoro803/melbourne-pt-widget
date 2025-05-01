@@ -3,19 +3,25 @@ import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
 import 'package:get/get.dart';
 import '../../domain/route.dart' as pt_route;
 import '../../domain/stop.dart';
-import '../controllers/search_controller.dart' as search_controller;
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
+import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../widgets/sticky_header_delegate.dart';
 
+class RouteDetailsScreenState {
+  final pt_route.Route route;
+
+  RouteDetailsScreenState({
+    required this.route,
+  });
+}
+
 class RouteDetailsSheet extends StatefulWidget {
   final ScrollController scrollController;
-  final pt_route.Route route;
 
   const RouteDetailsSheet({
     super.key,
-    required this.route,
     required this.scrollController,
   });
 
@@ -25,25 +31,35 @@ class RouteDetailsSheet extends StatefulWidget {
 
 class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   SearchUtils searchUtils = SearchUtils();
+  final NavigationService navigationService = Get.find<NavigationService>();
+  late dynamic _initialState;
+  late RouteDetailsScreenState _state;
 
   late String _direction;
+  late pt_route.Route _route;
   bool _isDirectionReversed = false;
   List<SuburbStops> _suburbStops = [];
 
   @override
   void initState() {
     super.initState();
+    _initialState = navigationService.stateToPush;
 
-    if (widget.route.directions != null && widget.route.directions!.isNotEmpty) {
-      _direction = widget.route.directions![0].name;
+    if (_initialState != null) {
+      _route = _initialState.route;
+      _state = RouteDetailsScreenState(route: _route);
+    }
+
+    if (_route.directions != null && _route.directions!.isNotEmpty) {
+      _direction = _route.directions![0].name;
     }
 
     _getSuburbStops();
   }
 
   Future<void> _getSuburbStops() async {
-    List<Stop> stopsAlongRoute = widget.route.stopsAlongRoute!;
-    List<SuburbStops> newSuburbStops = await searchUtils.getSuburbStops(stopsAlongRoute, widget.route);
+    List<Stop> stopsAlongRoute = _route.stopsAlongRoute!;
+    List<SuburbStops> newSuburbStops = await searchUtils.getSuburbStops(stopsAlongRoute, _route);
 
     setState(() {
       _suburbStops = newSuburbStops;
@@ -51,7 +67,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   }
 
   void _changeDirection() {
-    if (widget.route.directions != null && widget.route.directions!.length > 1) {
+    if (_route.directions != null && _route.directions!.length > 1) {
       for (var suburb in _suburbStops) {
         suburb.stops = suburb.stops.reversed.toList();
       }
@@ -59,16 +75,15 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
       setState(() {
         _isDirectionReversed = !_isDirectionReversed;
         _suburbStops = _suburbStops.reversed.toList();
-        _direction = _direction == widget.route.directions![0].name
-            ? widget.route.directions![1].name
-            : widget.route.directions![0].name;
+        _direction = _direction == _route.directions![0].name
+            ? _route.directions![1].name
+            : _route.directions![0].name;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final route = widget.route;
 
     if (_suburbStops.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -87,7 +102,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RouteWidget(route: route, scrollable: false),
+                  RouteWidget(route: _route, scrollable: false),
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.symmetric(horizontal: 4),
@@ -152,8 +167,9 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                         title: Text(stop.name, style: TextStyle(fontSize: 15)),
                         trailing: Icon(Icons.keyboard_arrow_right),
                         onTap: () async {
-                          Get.find<search_controller.SearchController>().setRoute(route);
-                          Get.find<search_controller.SearchController>().pushStop(stop);
+                          // Get.find<search_controller.SearchController>().setRoute(_route);
+                          navigationService.navigateToStop(stop, _route, _state);
+                          // Get.find<search_controller.SearchController>().pushStop(stop);
                         },
                       ),
                       if (index < suburb.stops.length - 1)

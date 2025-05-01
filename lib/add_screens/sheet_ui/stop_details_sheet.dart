@@ -7,22 +7,32 @@ import '../../domain/route.dart' as pt_route;
 import '../../domain/stop.dart';
 import '../../domain/trip.dart';
 import '../../ptv_service.dart';
-import '../controllers/search_controller.dart' as search_controller;
+import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
 import '../widgets/save_trip_sheet.dart';
 import '../widgets/trip_details.dart';
 import '../widgets/trip_widgets.dart';
 
-class StopDetailsSheet extends StatefulWidget {
+class StopDetailsScreenState {
   final Stop stop;
   final pt_route.Route route;
+  List<Trip>? trips;
+  List<Disruption>? disruptions;
+
+  StopDetailsScreenState({
+    required this.stop,
+    required this.route,
+    this.trips,
+    this.disruptions,
+  });
+}
+
+class StopDetailsSheet extends StatefulWidget {
   final ScrollController scrollController;
 
   const StopDetailsSheet({
     super.key,
-    required this.stop,
-    required this.route,
     required this.scrollController,
   });
 
@@ -31,6 +41,11 @@ class StopDetailsSheet extends StatefulWidget {
 }
 
 class _StopDetailsSheetState extends State<StopDetailsSheet> {
+  final NavigationService navigationService = Get.find<NavigationService>();
+  late dynamic _initialState;
+  late Stop _stop;
+  late pt_route.Route _route;
+
   SearchUtils searchUtils = SearchUtils();
   PtvService ptvService = PtvService();
 
@@ -39,14 +54,37 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   List<Trip> _trips = [];
   List<Disruption> _disruptions = [];
 
+  late StopDetailsScreenState _state;
   late Timer _departureUpdateTimer;
 
   @override
   void initState() {
     super.initState();
 
-    _getTripList();
-    _getDisruptions();
+    _initialState = navigationService.stateToPush;
+
+    if (_initialState != null) {
+      _stop = _initialState.stop;
+      _route = _initialState.route;
+
+      _state = StopDetailsScreenState(stop: _stop, route: _route);
+
+      if (_initialState.trips != null) {
+        _trips = _initialState.trips;
+        _state.trips = _trips;
+      } else {
+        _getTripList();
+      }
+
+      if (_initialState.disruptions != null) {
+        _disruptions = _initialState.disruptions;
+        _state.disruptions = _disruptions;
+      } else {
+        _getDisruptions();
+      }
+    }
+
+    _getSavedList();
 
     _departureUpdateTimer = Timer.periodic(Duration(seconds: 30), (_) {
       _updateDepartures();
@@ -59,19 +97,26 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     super.dispose();
   }
 
-  Future<void> _getTripList() async {
-    List<Trip> newTripList = await searchUtils.splitDirection(widget.stop, widget.route);
+  Future<void> _getSavedList() async {
     List<bool> newSavedList = [];
 
-    for (var trip in newTripList) {
+    for (var trip in _trips) {
       bool isSaved = await ptvService.isTripSaved(trip);
       newSavedList.add(isSaved);
     }
 
     setState(() {
       _savedList = newSavedList;
-      _trips = newTripList;
       _isSavedListInitialized = true;
+    });
+  }
+
+  Future<void> _getTripList() async {
+    List<Trip> newTripList = await searchUtils.splitDirection(_stop, _route);
+
+    setState(() {
+      _trips = newTripList;
+      _state.trips = _trips;
     });
   }
 
@@ -107,16 +152,15 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   }
 
   Future<void> _getDisruptions() async {
-    List<Disruption> disruptionsList = await ptvService.fetchDisruptions(widget.route);
+    List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_route);
     setState(() {
       _disruptions = disruptionsList;
+      _state.disruptions = disruptionsList;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final stop = widget.stop;
-    final route = widget.route;
 
     if (!_isSavedListInitialized) {
       return Center(child: CircularProgressIndicator());
@@ -132,7 +176,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LocationWidget(textField: stop.name,
+                LocationWidget(textField: _stop.name,
                     textSize: 18,
                     scrollable: true),
 
@@ -154,7 +198,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                         ),
                       ),
                       SizedBox(width: 10),
-                      RouteWidget(route: route, scrollable: false),
+                      RouteWidget(route: _route, scrollable: false),
                     ],
                   ),
                   trailing: SizedBox(
@@ -172,9 +216,10 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return TripDetails(
-                                      route: route,
-                                      stop: stop,
-                                      disruptions: _disruptions
+                                      route: _route,
+                                      stop: _stop,
+                                      disruptions: _disruptions,
+                                      state: _state,
                                   );
                                 }
                             );
@@ -192,8 +237,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                 builder: (BuildContext context) {
                                   return SaveTripSheet(
                                     savedList: _savedList,
-                                    route: route,
-                                    stop: stop,
+                                    route: _route,
+                                    stop: _stop,
                                     tripList: _trips,
                                     onConfirmPressed: _onConfirmPressed,
                                   );
@@ -217,8 +262,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                 // Departures for each direction
                 Column(
-                  children: _trips.map((transport) {
-                    var departures = transport.departures;
+                  children: _trips.map((trip) {
+                    var departures = trip.departures;
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Column(
@@ -240,9 +285,10 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                             context: context,
                                             builder: (BuildContext context) {
                                               return TripDetails(
-                                                route: route,
-                                                stop: stop,
+                                                route: _route,
+                                                stop: _stop,
                                                 disruptions: _disruptions,
+                                                state: _state,
                                               );
                                             },
                                           );
@@ -255,7 +301,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
                                         child: Text(
-                                          "Towards ${transport.direction?.name ?? ''}",
+                                          "Towards ${trip.direction?.name ?? ''}",
                                           style: const TextStyle(fontSize: 18),
                                           overflow: TextOverflow.fade,
                                           softWrap: false,
@@ -268,8 +314,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                               // Right section: "See all >"
                               GestureDetector(
-                                onTap: () =>
-                                    Get.find<search_controller.SearchController>().pushTrip(transport),
+                                onTap: () => navigationService.navigateToTrip(trip, _disruptions, _state),
+                                    // Get.find<search_controller.SearchController>().pushTrip(transport),
                                 child: Row(
                                   children: const [
                                     SizedBox(width: 4),
@@ -290,11 +336,12 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                             itemBuilder: (context, index) {
                               final departure = departures[index];
                               return DepartureCard(
-                                  trip: transport,
+                                  trip: trip,
                                   departure: departure,
                                   onDepartureTapped: (departure) {
-                                    Get.find<search_controller.SearchController>().setTrip(transport);
-                                    Get.find<search_controller.SearchController>().pushDeparture(departure);
+                                    // Get.find<search_controller.SearchController>().setTrip(trip);
+                                    navigationService.navigateToDeparture(trip, departure, _state);
+                                    // Get.find<search_controller.SearchController>().pushDeparture(departure);
                                   });
                             },
                           ),
@@ -316,6 +363,5 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
           ),
         ],
       );
-
   }
 }

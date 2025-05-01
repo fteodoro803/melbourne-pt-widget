@@ -3,16 +3,16 @@ import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../controllers/nearby_stops_controller.dart';
-import '../controllers/search_controller.dart' as search_controller;
+import '../controllers/navigation_service.dart';
 import '../widgets/distance_filter.dart';
 import '../widgets/screen_widgets.dart' as screen_widgets;
 import '../widgets/get_widgets.dart';
 
 
 class NearbyStopsSheet extends StatelessWidget {
-  final search_controller.SearchController searchController = Get.find<search_controller.SearchController>();
   final NearbyStopsController nearbyController = Get.find<NearbyStopsController>();
   final ScrollController scrollController;
+  final NavigationService navigationService = Get.find<NavigationService>();
 
   NearbyStopsSheet({super.key, required this.scrollController});
 
@@ -44,7 +44,7 @@ class NearbyStopsSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 LocationWidget(
-                    textField: searchController.details.value.address ?? "Address not found",
+                    textField: nearbyController.address.value,
                     textSize: 18,
                     scrollable: true
                 ),
@@ -133,7 +133,7 @@ class NearbyStopsSheet extends StatelessWidget {
                   final stop = nearbyController.filteredStops[stopIndex];
 
                   return Obx(() {
-                    final isExpanded = searchController.stopExpansionState[stop.id]?.value ?? false;
+                    final isExpanded = nearbyController.stopExpansionState[stop.id]?.value ?? false;
                     final routes = stop.routes ?? [];
                     final stopName = stop.name;
                     final distance = stop.distance;
@@ -179,10 +179,10 @@ class NearbyStopsSheet extends StatelessWidget {
                                         .expand_more),
                                 onTap: () {
                                   if (isExpanded) {
-                                    searchController.setStopExpanded(
+                                    nearbyController.setStopExpanded(
                                         stop.id, false);
                                   } else {
-                                    searchController.setStopExpanded(
+                                    nearbyController.setStopExpanded(
                                         stop.id, true);
                                   }
                                 }
@@ -195,8 +195,9 @@ class NearbyStopsSheet extends StatelessWidget {
                                 routeType: routeType,
                                 stop: stop,
                                 onStopTapped: (stop, route) async {
-                                  await searchController.setRoute(route);
-                                  await searchController.pushStop(stop);
+                                  // await searchController.setRoute(route);
+                                  await navigationService.navigateToStop(stop, route, null);
+
                                   // sheetNavigator.pushSheet("Stop Details");
                                 },
                               ),

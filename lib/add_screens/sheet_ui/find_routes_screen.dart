@@ -4,7 +4,6 @@ import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
 import 'package:get/get.dart';
 import '../../domain/route.dart' as pt_route;
 import '../../ptv_service.dart';
-import '../controllers/search_controller.dart';
 import '../search_binding.dart';
 import '../widgets/bottom_navigation_bar.dart';
 import '../widgets/screen_widgets.dart' as ScreenWidgets;
@@ -47,7 +46,6 @@ class FindRoutesScreen extends StatefulWidget {
 }
 
 class _FindRoutesScreenState extends State<FindRoutesScreen> {
-  SearchDetails searchDetails = SearchDetails();
   TextEditingController _searchController = TextEditingController();
 
   Map<String, bool> _transportTypeFilters = {};
@@ -335,10 +333,8 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
                       onTap: () =>
                         Get.to(
-                              () => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false),
-                          binding: SearchBinding(
-                            searchDetails: SearchDetails.withRoute(route), // Pass actual data
-                          ),
+                              () => SearchScreen(route: route, enableSearch: false),
+                          binding: SearchBinding(),
                         )
                     )
                   );

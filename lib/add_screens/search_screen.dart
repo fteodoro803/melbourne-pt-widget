@@ -4,13 +4,15 @@ import 'package:flutter_project/add_screens/sheet_ui/route_details_sheet.dart';
 import 'package:flutter_project/add_screens/sheet_ui/sheet_navigator_widget.dart';
 import 'package:flutter_project/add_screens/sheet_ui/stop_details_sheet.dart';
 import 'package:flutter_project/add_screens/sheet_ui/trip_details_sheet.dart';
+import 'package:flutter_project/add_screens/controllers/navigation_service.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../domain/route.dart' as pt_route;
+import '../domain/trip.dart';
 import 'controllers/map_controller.dart';
 import 'controllers/nearby_stops_controller.dart';
-import 'controllers/search_controller.dart' as search_controller;
-import 'controllers/sheet_navigator_controller.dart';
+import 'controllers/sheet_controller.dart';
 import 'widgets/bottom_navigation_bar.dart';
 import 'widgets/screen_widgets.dart';
 import 'widgets/suggestions_search.dart';
@@ -21,12 +23,14 @@ import 'sheet_ui/nearby_stops_sheet.dart';
 
 class SearchScreen extends StatefulWidget {
   final bool enableSearch;
-  final search_controller.SearchDetails searchDetails;
+  final pt_route.Route? route;
+  final Trip? trip;
 
   const SearchScreen({
     super.key,
     required this.enableSearch,
-    required this.searchDetails,
+    this.route,
+    this.trip,
   });
 
   @override
@@ -35,25 +39,25 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
 
-  final sheetNavigationController = Get.put(SheetNavigationController());
-  final searchController = Get.put(search_controller.SearchController());
+  final sheetNavigationController = Get.put(SheetController());
   final mapController = Get.put(MapController());
   final nearbyStopsController = Get.put(NearbyStopsController());
+  final NavigationService navigationService = Get.put(NavigationService());
 
   @override
   void initState() {
     super.initState();
     // print("search_screen.dart --> INITIALIZING STATE");
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      searchController.setDetails(widget.searchDetails);
+      // searchController.setDetails(widget.searchDetails);
 
       if (!widget.enableSearch) {
-        if (widget.searchDetails.trip != null) {
+        if (widget.trip != null) {
           sheetNavigationController.initialSheetSize = 0.5;
-          searchController.pushTrip(widget.searchDetails.trip!);
+          navigationService.navigateToTrip(widget.trip!, null, null);
         } else {
           sheetNavigationController.initialSheetSize = 0.4;
-          searchController.pushRoute();
+          navigationService.navigateToRoute(widget.route!);
         }
       } else {
         sheetNavigationController.initialSheetSize = 0.4;
@@ -66,29 +70,23 @@ class _SearchScreenState extends State<SearchScreen> {
     // print("search_screen.dart --> RUNNING DISPOSE");
 
     try {
-      // Use direct controller references instead of Get.find
-      if (Get.isRegistered<SheetNavigationController>()) {
-        final controller = Get.find<SheetNavigationController>();
-        Get.delete<SheetNavigationController>(force: true);
-        // print("SheetNavigationController deleted in SearchScreen dispose");
-      }
-
-      if (Get.isRegistered<search_controller.SearchController>()) {
-        Get.delete<search_controller.SearchController>(force: true);
-        // print("SearchController deleted in SearchScreen dispose");
+      if (Get.isRegistered<SheetController>()) {
+        Get.delete<SheetController>(force: true);
       }
 
       if (Get.isRegistered<NearbyStopsController>()) {
         Get.delete<NearbyStopsController>(force: true);
-        // print("NearbyStopsController deleted in SearchScreen dispose");
       }
 
       if (Get.isRegistered<MapController>()) {
         Get.delete<MapController>(force: true);
-        // print("MapController deleted in SearchScreen dispose");
+      }
+
+      if (Get.isRegistered<NavigationService>()) {
+        Get.delete<NavigationService>(force: true);
       }
     } catch (e) {
-      // print("Error during controller disposal: $e");
+      print("Error during controller disposal: $e");
     }
 
     super.dispose();
@@ -128,7 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   SizedBox(width: 18),
                   GestureDetector(
-                    onTap: searchController.handleBackButton,
+                    onTap: navigationService.handleBackNavigation,
                     child: BackButtonWidget(),
                   ),
                   SizedBox(width: 10),
@@ -178,7 +176,7 @@ class _SearchScreenState extends State<SearchScreen> {
               }),
             ],
           ),
-          if (searchController.showSheet.value) _buildSheets(),
+          if (navigationService.showSheet.value) _buildSheets(),
         ],
       )),
       bottomNavigationBar: BottomNavigation(
@@ -197,22 +195,15 @@ class _SearchScreenState extends State<SearchScreen> {
           scrollController: scroll,
         ),
         'Route Details': (ctx, scroll) => RouteDetailsSheet(
-          route: searchController.details.value.route!,
           scrollController: scroll,
         ),
         'Stop Details': (ctx, scroll) => StopDetailsSheet(
-          route: searchController.details.value.route!,
-          stop: searchController.details.value.stop!,
           scrollController: scroll,
         ),
         'Trip Details': (ctx, scroll) => TripDetailsSheet(
-          trip: searchController.details.value.trip!,
-          disruptions: null,
           scrollController: scroll,
         ),
         'Departure Details': (ctx, scroll) => DepartureDetailsSheet(
-          trip: searchController.details.value.trip!,
-          departure: searchController.details.value.departure!,
           scrollController: scroll,
         ),
       },

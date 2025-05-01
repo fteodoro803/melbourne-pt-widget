@@ -202,4 +202,14 @@ class SearchUtils {
       await ptvService.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
     }
   }
+
+  Future<pt_route.Route> initializeRoute(pt_route.Route route) async {
+    List<Direction> directions = await ptvService.fetchDirections(route.id);
+    List<Stop> stopsAlongRoute = await getStopsAlongRoute(directions, route);
+    pt_route.Route newRoute = route;
+    newRoute.directions = directions;
+    newRoute.stopsAlongRoute = stopsAlongRoute;
+
+    return newRoute;
+  }
 }

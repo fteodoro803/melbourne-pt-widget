@@ -7,10 +7,9 @@ import 'package:get/get.dart';
 
 import '../../main.dart';
 import '../controllers/map_controller.dart';
+import '../controllers/navigation_service.dart';
 import '../controllers/nearby_stops_controller.dart';
-import '../controllers/search_controller.dart';
-import '../controllers/search_controller.dart' as search_controller;
-import '../controllers/sheet_navigator_controller.dart';
+import '../controllers/sheet_controller.dart';
 import '../search_binding.dart';
 import '../search_screen.dart';
 
@@ -52,11 +51,11 @@ class BottomNavigation extends StatelessWidget {
             if (currentIndex != 1) {} // todo: save state of search screen when navigating to home
 
             // Force delete all existing controllers to ensure fresh state
-            if (Get.isRegistered<SheetNavigationController>()) {
-              Get.delete<SheetNavigationController>(force: true);
+            if (Get.isRegistered<SheetController>()) {
+              Get.delete<SheetController>(force: true);
             }
-            if (Get.isRegistered<search_controller.SearchController>()) {
-              Get.delete<search_controller.SearchController>(force: true);
+            if (Get.isRegistered<NavigationService>()) {
+              Get.delete<NavigationService>(force: true);
             }
             if (Get.isRegistered<NearbyStopsController>()) {
               Get.delete<NearbyStopsController>(force: true);
@@ -77,11 +76,11 @@ class BottomNavigation extends StatelessWidget {
               // print("Creating new search screen instance");
               Get.to(
                     () => SearchScreen(
-                    searchDetails: SearchDetails(),
+                    // searchDetails: SearchDetails(),
                     enableSearch: true
                 ),
                 preventDuplicates: false, // Allow duplicates
-                binding: SearchBinding(searchDetails: SearchDetails()),
+                binding: SearchBinding(),
               );
             });
             break;

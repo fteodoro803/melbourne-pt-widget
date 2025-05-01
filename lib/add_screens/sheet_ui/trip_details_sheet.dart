@@ -7,21 +7,29 @@ import '../../domain/departure.dart';
 import '../../domain/disruption.dart';
 import '../../domain/trip.dart';
 import '../../ptv_service.dart';
-import '../controllers/search_controller.dart' as search_controller;
+import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
 import '../widgets/trip_widgets.dart';
 import '../widgets/trip_details.dart';
 
-class TripDetailsSheet extends StatefulWidget {
+class TripDetailsScreenState {
   final Trip trip;
-  final List<Disruption>? disruptions;
+  List<Disruption>? disruptions;
+  Map<String, bool>? filters;
+
+  TripDetailsScreenState({
+    required this.trip,
+    this.disruptions,
+    this.filters,
+  });
+}
+
+class TripDetailsSheet extends StatefulWidget {
   final ScrollController scrollController;
 
   const TripDetailsSheet({
     super.key,
-    required this.trip,
-    required this.disruptions,
     required this.scrollController,
   });
 
@@ -30,14 +38,20 @@ class TripDetailsSheet extends StatefulWidget {
 }
 
 class _TripDetailsSheetState extends State<TripDetailsSheet> {
+  final NavigationService navigationService = Get.find<NavigationService>();
+  late dynamic _initialState;
+
   PtvService ptvService = PtvService();
   SearchUtils searchUtils = SearchUtils();
 
   late Trip _trip;
   late bool _isSaved;
+  bool _isSavedInitialized = false;
   late List<Disruption> _disruptions;
   Map<String, bool> _filters = {}; // todo: initialize these!
   late List<Departure> _filteredDepartures;
+
+  late TripDetailsScreenState _state;
   late Timer _departureUpdateTimer;
 
   bool _areDisruptionsInitialized = false;
@@ -45,11 +59,22 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   @override
   void initState() {
     super.initState();
+    _initialState = navigationService.stateToPush;
 
-    _trip = widget.trip;
-    _filteredDepartures = widget.trip.departures!;
+    if (_initialState != null) {
+      _trip = _initialState.trip;
+      _filteredDepartures = _initialState.trip.departures;
+      _state = TripDetailsScreenState(trip: _trip);
+
+      if (_initialState.disruptions != null) {
+        _disruptions = _initialState.disruptions;
+        _areDisruptionsInitialized = true;
+      } else {
+        _getDisruptions();
+      }
+    }
+
     _checkSaved();
-    _getDisruptions();
 
     _departureUpdateTimer = Timer.periodic(Duration(seconds: 30), (_) {
       _updateDepartures();
@@ -86,29 +111,33 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   }
 
   Future<void> _getDisruptions() async {
-    List<Disruption> disruptionsList = widget.disruptions != null
-        ? widget.disruptions!
-        : await ptvService.fetchDisruptions(widget.trip.route!);
+    List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_initialState.trip.route!);
     setState(() {
+      _state.disruptions = disruptionsList;
       _disruptions = disruptionsList;
       _areDisruptionsInitialized = true;
     });
   }
 
   Future<void> _handleSave() async {
-    _isSaved = !_isSaved;
-    searchUtils.handleSave(widget.trip);
+    setState(() {
+      _isSaved = !_isSaved;
+    });
+    searchUtils.handleSave(_initialState.trip);
   }
 
   Future<void> _checkSaved() async {
-    _isSaved = await ptvService.isTripSaved(widget.trip);
+    bool isSaved = await ptvService.isTripSaved(_initialState.trip);
+    setState(() {
+      _isSaved = isSaved;
+      _isSavedInitialized = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final trip = widget.trip;
 
-    if (!_areDisruptionsInitialized) {
+    if (!_areDisruptionsInitialized || !_isSavedInitialized) {
       return Center(child: CircularProgressIndicator());
     }
 
@@ -121,7 +150,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
               padding: const EdgeInsets.only(left: 12.0, right: 22.0, bottom: 12.0, top: 16.0),
               child: Column(
                 children: [
-                  LocationWidget(textField: trip.stop!.name, textSize: 18, scrollable: true),
+                  LocationWidget(textField: _trip.stop!.name, textSize: 18, scrollable: true),
                   SizedBox(height: 6),
                   Row(
                     children: [
@@ -151,9 +180,10 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                                         context: context,
                                         builder: (BuildContext context) {
                                           return TripDetails(
-                                            route: trip.route!,
-                                            stop: trip.stop!,
-                                            disruptions: _disruptions
+                                            route: _trip.route!,
+                                            stop: _trip.stop!,
+                                            disruptions: _disruptions,
+                                            state: _state,
                                           );
                                         }
                                       );
@@ -161,7 +191,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                                   ),
                                   SizedBox(width: 2),
                                 ],
-                                Text("Towards ${trip.direction!.name}",
+                                Text("Towards ${_trip.direction!.name}",
                                     style: TextStyle(
                                         fontSize: 16,
                                         height: 1.4
@@ -174,7 +204,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                               contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                               visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                               dense: true,
-                              title: RouteWidget(route: trip.route!, scrollable: true),
+                              title: RouteWidget(route: _trip.route!, scrollable: true),
                               trailing: SizedBox(
                                 width: 63,
                                 child: Row(
@@ -190,9 +220,10 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                                           context: context,
                                           builder: (BuildContext context) {
                                             return TripDetails(
-                                              route: trip.route!,
-                                              stop: trip.stop!,
-                                              disruptions: _disruptions
+                                              route: _trip.route!,
+                                              stop: _trip.stop!,
+                                              disruptions: _disruptions,
+                                              state: _state,
                                             );
                                           }
                                         );
@@ -265,10 +296,11 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   child: DepartureCard(
-                    trip: trip,
+                    trip: _trip,
                     departure: departure,
                     onDepartureTapped: (departure) {
-                      Get.find<search_controller.SearchController>().pushDeparture(departure);
+                      navigationService.navigateToDeparture(_trip, departure, _state);
+                      // Get.find<search_controller.SearchController>().pushDeparture(departure);
                   }),
                 );
               },

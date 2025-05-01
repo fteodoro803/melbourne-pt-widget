@@ -1,33 +1,37 @@
 // controllers/map_controller.dart
 
 import 'package:custom_info_window/custom_info_window.dart';
-import 'package:flutter_project/add_screens/controllers/sheet_navigator_controller.dart';
+import 'package:flutter_project/add_screens/controllers/sheet_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
+import '../../domain/route.dart' as pt_route;
 import '../../domain/stop.dart';
+import '../../ptv_service.dart';
+import 'navigation_service.dart';
 import '../utility/map_utils.dart';
 import '../utility/trip_path.dart';
 import 'nearby_stops_controller.dart';
-import '../controllers/search_controller.dart' as search_controller;
 
 class MapController extends GetxController {
   final CustomInfoWindowController customInfoWindowController
     = CustomInfoWindowController();
   late GoogleMapController mapController;
 
-  search_controller.SearchController get searchController {
-    return Get.find<search_controller.SearchController>();
+  NavigationService get navigationService {
+    return Get.find<NavigationService>();
   }
 
   final MapUtils mapUtils = MapUtils();
+  PtvService ptvService = PtvService();
 
   late Circle radiusCircle;
   LatLng? markerPos;
   RxSet<Marker> markers = <Marker>{}.obs;
   RxSet<Circle> circles = <Circle>{}.obs;
   RxSet<Polyline> polylines = <Polyline>{}.obs;
+  List<LatLng> geoPath = [];
   Set<Marker> nearbyStopMarkers = {};
   TripPath? tripPath;
 
@@ -71,6 +75,10 @@ class MapController extends GetxController {
     tripPath = null;
   }
 
+  void setGeoPath(List<LatLng> newGeoPath) {
+    geoPath = newGeoPath;
+  }
+
   /// On pin drop
   Future<void> onLocationSelected(LatLng location) async {
     clearMap();
@@ -89,10 +97,10 @@ class MapController extends GetxController {
       location.latitude,
       location.longitude
     );
-    final searchController = Get.find<search_controller.SearchController>();
-    await searchController.pushLocation(location, address);
 
-    Get.find<SheetNavigationController>().animateSheetTo(0.5);
+    await navigationService.navigateToNearbyStops(markerPos!, address);
+
+    Get.find<SheetController>().animateSheetTo(0.5);
 
     await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
       controller: mapController,
@@ -171,10 +179,10 @@ class MapController extends GetxController {
     final largeIcon = await mapUtils.getResizedImage(
         "assets/icons/${stop.routeType?.name} Marker.png", 35, 55);
 
-    for (var s in searchController.details.value.stops!) {
-      searchController.setStopExpanded(s.id, false);
+    for (var s in Get.find<NearbyStopsController>().stops) {
+      Get.find<NearbyStopsController>().setStopExpanded(s.id, false);
     }
-    searchController.setStopExpanded(stop.id, true);
+    Get.find<NearbyStopsController>().setStopExpanded(stop.id, true);
 
     if (tappedStopId != null) {
       markers.removeWhere((m) => m.markerId == MarkerId(tappedStopId!));
@@ -199,16 +207,19 @@ class MapController extends GetxController {
     );
 
     int stopIndex = Get.find<NearbyStopsController>().filteredStops.indexOf(stop);
-    Get.find<SheetNavigationController>().animateSheetTo(0.7);
+    Get.find<SheetController>().animateSheetTo(0.7);
     Get.find<NearbyStopsController>().scrollToStopItem(stopIndex);
   }
   
-  Future<void> setTripPath() async {
+  Future<void> setTripPath(pt_route.Route route, {Stop? stop}) async {
+    List<LatLng> geoPath = await ptvService.fetchGeoPath(route);
+    setGeoPath(geoPath);
+
     tripPath = TripPath(
-        searchController.details.value.geoPath!,
-        searchController.details.value.route!.stopsAlongRoute,
-        searchController.details.value.stop,
-        searchController.details.value.route!.colour!,
+        geoPath,
+        route.stopsAlongRoute,
+        stop,
+        route.colour!,
         markerPos
     );
     await tripPath!.initializeFullPath();
@@ -216,11 +227,9 @@ class MapController extends GetxController {
 
   Future<void> showPolyLine() async {
     /// Move camera to show marker
-    if (tripPath!.polyLines.isNotEmpty &&
-        searchController.details.value.geoPath!.isNotEmpty) {
+    if (tripPath!.polyLines.isNotEmpty && geoPath.isNotEmpty) {
       await mapUtils.centerMapOnPolyLine(
-        tripPath!.showDirection ? tripPath!.futurePolyLine!.points : searchController
-            .details.value.geoPath!,
+        tripPath!.showDirection ? tripPath!.futurePolyLine!.points : geoPath,
         mapController,
         Get.context!,
         true,
@@ -249,8 +258,7 @@ class MapController extends GetxController {
 
   /// Handles zoom and camera move events
   void onCameraMove(CameraPosition position) {
-    if (searchController.details.value.route != null
-        && currentZoom.value != position.zoom && shouldRenderMarkers) {
+    if (Get.find<SheetController>().currentSheet.value != "Nearby Stops" && currentZoom.value != position.zoom && shouldRenderMarkers) {
       if (mapUtils.didZoomChange(currentZoom.value, position.zoom)) {
         tripPath?.onZoomChange(position.zoom);
 

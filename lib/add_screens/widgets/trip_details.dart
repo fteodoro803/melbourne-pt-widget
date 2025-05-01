@@ -7,7 +7,7 @@ import '../../domain/disruption.dart';
 import '../../domain/stop.dart';
 import '../../domain/route.dart' as pt_route;
 import '../../ptv_service.dart';
-import '../controllers/search_controller.dart' as search_controller;
+import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../utility/time_utils.dart';
 import '../utility/trip_utils.dart';
@@ -17,12 +17,14 @@ import 'get_widgets.dart';
 class TripDetails extends StatefulWidget {
   final pt_route.Route route;
   final Stop stop;
+  final dynamic state;
   final List<Disruption> disruptions;
 
   const TripDetails({
     super.key,
     required this.route,
     required this.stop,
+    required this.state,
     required this.disruptions
   });
 
@@ -31,6 +33,8 @@ class TripDetails extends StatefulWidget {
 }
 
 class TripDetailsState extends State<TripDetails> {
+  final NavigationService navigationService = Get.find<NavigationService>();
+
   List<Stop> nearbyStops = [];
   List<Disruption> plannedDisruptions = [];
   List<Disruption> currentDisruptions = [];
@@ -281,8 +285,9 @@ class TripDetailsState extends State<TripDetails> {
                           ? Text(routeName, style: TextStyle(fontSize: 14, height: 1.1))
                           : null,
                       onTap: () async {
-                        await Get.find<search_controller.SearchController>().setRoute(route);
-                        await Get.find<search_controller.SearchController>().pushStop(stop);
+                        // await Get.find<search_controller.SearchController>().setRoute(route);
+                        navigationService.navigateToStop(stop, route, widget.state);
+                        // await Get.find<search_controller.SearchController>().pushStop(stop);
                         Navigator.pop(context);
                       }
                   );

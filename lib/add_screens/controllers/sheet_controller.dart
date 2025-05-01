@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
-class SheetNavigationController extends GetxController {
+class SheetController extends GetxController {
+
   final Rx<String> currentSheet = ''.obs;
   final RxList<String> sheetHistory = <String>[].obs;
+
   final Rx<Map<String, double>> scrollPositions = Rx<Map<String, double>>({});
   Rx<bool> isSheetExpanded = false.obs;
   double initialSheetSize = 0.4;
 
-  // Don't use late - initialize immediately
   final DraggableScrollableController scrollableController = DraggableScrollableController();
   bool _isListenerAdded = false;
 

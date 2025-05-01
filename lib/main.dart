@@ -19,7 +19,6 @@ import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
-import "add_screens/controllers/search_controller.dart";
 import "add_screens/search_binding.dart";
 import "add_screens/sheet_ui/find_routes_screen.dart";
 
@@ -74,7 +73,8 @@ class _MyAppState extends State<MyApp> {
                 final args = Get.arguments as Map<String, dynamic>?;
 
                 return SearchScreen(
-                  searchDetails: args?['searchDetails'] ?? SearchDetails(),
+                  route: args?['route'],
+                  trip: args?['trip'],
                   enableSearch: args?['enableSearch'] ?? false,
                 );
               },
@@ -246,8 +246,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           onTap: () =>
                             Get.to(
-                              () => SearchScreen(searchDetails: SearchDetails.withTrip(_tripList[index]), enableSearch: false),
-                              binding: SearchBinding(searchDetails: SearchDetails()),
+                              () => SearchScreen(trip: _tripList[index], enableSearch: false),
+                              binding: SearchBinding(),
                             )
                         ),
                       ),
@@ -277,10 +277,9 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Icon(Icons.search),
             label: 'Map Search',
             onTap: () => Get.to(() => SearchScreen(
-              searchDetails: SearchDetails(),
               enableSearch: true,
             ),
-              binding: SearchBinding(searchDetails: SearchDetails()),
+              binding: SearchBinding(),
             ),
           ),
         ],
