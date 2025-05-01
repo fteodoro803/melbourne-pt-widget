@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart';
+import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
@@ -21,21 +23,41 @@ import 'package:csv/csv.dart';
 */
 
 class GtfsService {
-  String routesFilePath = "lib/dev/routes.txt";
-  String tripsFilePath = "lib/dev/trips.txt";
+  GtfsApiService gtfsApiService = GtfsApiService();
+  String tramRoutesFile = "lib/dev/gtfs/metroTramRoutes.txt";
+  String tramTripsFile = "lib/dev/gtfs/metroTramTrips.txt";
+  String trainRoutesFile = "lib/dev/gtfs/metroTrainRoutes.txt";
+  String trainTripsFile = "lib/dev/gtfs/metroTrainTrips.txt";
+  String busRoutesFile = "lib/dev/gtfs/metroBusRoutes.txt";
+  String busTripsFile = "lib/dev/gtfs/metroBusTrips.txt";
   db.AppDatabase database = Get.find<db.AppDatabase>();
 
   /// Adds GTFS Schedule data to database
   // todo: add functionality to skip initialisation if the data is up to date
   Future<void> initialise() async {
-    await _initialiseRoutes();
-    await _initialiseTrips();
+    DateTime startTime = DateTime.now();
+
+    // Metro trains
+    await _initialiseRoutes(trainRoutesFile);
+    await _initialiseTrips(trainTripsFile);
+
+    // Metro trams
+    await _initialiseRoutes(tramRoutesFile);
+    await _initialiseTrips(tramTripsFile);
+
+    // Metro buses
+    await _initialiseRoutes(busRoutesFile);
+    await _initialiseTrips(busTripsFile);
+
+    DateTime endTime = DateTime.now();
+    int duration = endTime.difference(startTime).inSeconds;
+    print("( gtfs_service.dart -> initialise ) -- finished in $duration seconds");
   }
 
   /// Add gtfs routes to database.
-  Future<void> _initialiseRoutes() async {
+  Future<void> _initialiseRoutes(String routeFilePath) async {
     try {
-      final gtfsRoutesMap = await csvToMapList(routesFilePath);
+      final gtfsRoutesMap = await csvToMapList(routeFilePath);
       for (var route in gtfsRoutesMap) {
         String routeId = route["route_id"];
         String shortName = route["route_short_name"];
@@ -50,10 +72,10 @@ class GtfsService {
   }
 
   /// Add gtfs trips to database.
-  Future<void> _initialiseTrips() async {
+  Future<void> _initialiseTrips(String tripFilePath) async {
     try {
       List<db.GtfsTripsTableCompanion> gtfsTripList = [];
-      final gtfsTripsMap = await csvToMapList(tripsFilePath);
+      final gtfsTripsMap = await csvToMapList(tripFilePath);
 
       // Add gtfs trips to database, by adding the rows in the map to a list, and batch inserting it to the database.
       for (var trip in gtfsTripsMap) {

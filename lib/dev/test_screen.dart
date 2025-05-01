@@ -44,8 +44,10 @@ class _TestScreenState extends State<TestScreen> {
     setState(() {});
   }
 
-  Future<void> gtfsTest(String gtfsId) async {
-    var gtfsResponse = await gtfsApiService.getTramPosition(gtfsId);
+  Future<void> gtfsTest(String id) async {
+    int ptvRouteId = int.tryParse(id) != null ? int.parse(id) : 0;
+
+    var gtfsResponse = await gtfsService.getTramPositions(ptvRouteId);
     //
     // print(gtfsResponse.toString());
   }
@@ -60,16 +62,16 @@ class _TestScreenState extends State<TestScreen> {
       appBar: AppBar(title: const Text("Test Screen")),
       body: Column(
         children: [
-          // TextField(
-          //   controller: gtfsRouteId,
-          //   keyboardType: TextInputType.number,
-          //   decoration: InputDecoration(labelText: "Gtfs Route Id"),
-          // ),
-          // ElevatedButton(onPressed: () {
-          //   gtfsTest(gtfsRouteId.text);
-          // }, child: Text("Gtfs Test")),
-          
-          ElevatedButton(onPressed: initialiseGtfsService, child: Text("Initialise GTFS Service"))
+          ElevatedButton(onPressed: initialiseGtfsService, child: Text("Initialise GTFS Service")),
+          Divider(),
+          TextField(
+            controller: gtfsRouteId,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: "Gtfs Route Id"),
+          ),
+          ElevatedButton(onPressed: () {
+            gtfsTest(gtfsRouteId.text);
+          }, child: Text("Gtfs Test")),
         ],
       ),
     );
