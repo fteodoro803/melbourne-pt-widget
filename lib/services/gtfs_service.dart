@@ -22,19 +22,41 @@ import 'package:csv/csv.dart';
 
 class GtfsService {
   String routesFilePath = "lib/dev/routes.txt";
+  String tripsFilePath = "lib/dev/trips.txt";
+  db.AppDatabase database = Get.find<db.AppDatabase>();
 
   /// Adds GTFS Schedule data to database
   Future<void> initialise() async {
     try {
-      // final routesFile = File("lib/dev/routes.txt");
-      // final routesFileContents = await routesFile.readAsString();
-      // print(routesFileContents);
+      // Add gtfs routes to database
+      final gtfsRoutesMap = await csvToMapList(routesFilePath);
+      for (var route in gtfsRoutesMap) {
+        String routeId = route["route_id"];
+        String shortName = route["route_short_name"];
+        String longName = route["route_long_name"];
 
-      csvToMapList(routesFilePath);
+        await database.addGtfsRoute(id: routeId, shortName: shortName, longName: longName);
+      }
+
+      // Add gtfs trips to database
+      final gtfsTripsMap = await csvToMapList(tripsFilePath);
+
+      // todo: turn this to a batch and transaction
+      for (var trip in gtfsTripsMap) {
+        String tripId = trip["trip_id"];
+        String routeId = trip["route_id"];
+        String tripHeadsign = trip["trip_headsign"];
+        // int wheelchairAccessible = trip["wheelchair_accessible"];
+        int wheelchairAccessible = int.tryParse(trip["wheelchair_accessible"]) ?? 0;    // todo: fix this. It takes a long time (maybe bc its big) but seems a bit buggy
+
+        await database.addGtfsTrip(tripId: tripId, routeId: routeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
+      }
     }
     catch (e) {
       print("Error $e");
     }
+
+    print("( gtfs_service.dart -> initialise ) -- Finished initialising");
   }
 
 
