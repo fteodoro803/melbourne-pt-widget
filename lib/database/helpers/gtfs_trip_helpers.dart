@@ -2,8 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
 extension GtfsTripHelpers on AppDatabase {
-  Future<GtfsTripsTableCompanion> createGtfsTripCompanion({required String tripId, required String routeId, required String tripHeadsign, required int wheelchairAccessible})
-  async {
+  GtfsTripsTableCompanion createGtfsTripCompanion({required String tripId, required String routeId, required String tripHeadsign, required int wheelchairAccessible}) {
     return GtfsTripsTableCompanion(
       tripId: drift.Value(tripId),
       routeId: drift.Value(routeId),
@@ -13,7 +12,11 @@ extension GtfsTripHelpers on AppDatabase {
   }
 
   Future<void> addGtfsTrip({required String tripId, required String routeId, required String tripHeadsign, required int wheelchairAccessible}) async {
-    GtfsTripsTableCompanion trip = await createGtfsTripCompanion(tripId: tripId, routeId: routeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
+    GtfsTripsTableCompanion trip = createGtfsTripCompanion(tripId: tripId, routeId: routeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
     await insertGtfsTrip(trip);
+  }
+
+  Future<void> addGtfsTrips({required List<GtfsTripsTableCompanion> trips}) async {
+    await batchInsert(gtfsTripsTable, trips);
   }
 }
