@@ -146,7 +146,7 @@ class GtfsTripsTable extends Table {
   TextColumn get tripId => text()();
   TextColumn get routeId => text().references(GtfsRoutesTable, #routeId)();
   // TextColumn get shapeId => text()();
-  IntColumn get tripHeadsign => integer()();
+  TextColumn get tripHeadsign => text()();
   IntColumn get wheelchairAccessible => integer()();
 
   @override
@@ -158,6 +158,8 @@ class GtfsRoutesTable extends Table {
   TextColumn get shortName => text()();
   TextColumn get longName => text()();
 
+  @override
+  Set<Column> get primaryKey => {routeId};
 }
 
 
