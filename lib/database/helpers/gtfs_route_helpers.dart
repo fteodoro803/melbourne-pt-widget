@@ -15,4 +15,21 @@ extension GtfsRouteHelpers on AppDatabase {
     GtfsRoutesTableCompanion route = await createGtfsRouteCompanion(routeId: id, shortName: shortName, longName: longName);
     await insertGtfsRoute(route);
   }
+
+  Future<GtfsRoutesTableData?> getGtfsRouteFromPtvRoute(RoutesTableCompanion ptvRoute, String routeType) async {
+    String name = ptvRoute.name.value;
+    String number = ptvRoute.number.value;
+    
+    drift.SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData> query;
+    if (routeType == "tram") {
+      query = select(gtfsRoutesTable)
+        ..where((tbl) => tbl.shortName.equals(number));
+    }
+    else {
+      query = select(gtfsRoutesTable);
+    }
+
+    final result = await query.getSingleOrNull();
+    return result;
+  }
 }
