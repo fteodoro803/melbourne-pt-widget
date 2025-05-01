@@ -19,4 +19,12 @@ extension GtfsTripHelpers on AppDatabase {
   Future<void> addGtfsTrips({required List<GtfsTripsTableCompanion> trips}) async {
     await batchInsert(gtfsTripsTable, trips);
   }
+
+  Future<List<GtfsTripsTableData>> getGtfsTripsByRouteId(String gtfsRouteId) async {
+    drift.SimpleSelectStatement<$GtfsTripsTableTable, GtfsTripsTableData> query;
+    query = select(gtfsTripsTable)..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    var result = await query.get();
+
+    return result;
+  }
 }
