@@ -86,10 +86,10 @@ class _MyAppState extends State<MyApp> {
               binding: BindingsBuilder(() {})
           ),
           GetPage(
-            name: '/testScreen',
-            page: () => TestScreen(),
-            binding: BindingsBuilder(() {}),
-          ),
+              name: '/testScreen',
+              page: () => TestScreen(),
+              binding: BindingsBuilder(() {})
+          )
         ],
 
         // Pages/Screens
@@ -222,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            ElevatedButton(onPressed: () => Get.to(() => TestScreen()), child: Text("Test Screen")),
+            ElevatedButton(onPressed: () => Get.to(() => TestScreen()), child: Text("Go to Test Screen")),      // todo: remove this in final version
             Divider(),
 
             // INFORMATION TILES AS LIST
