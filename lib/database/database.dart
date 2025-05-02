@@ -144,23 +144,24 @@ class StopRouteTypesTable extends Table {
 
 // Static GTFS Tables   // this is a test
 class GtfsTripsTable extends Table {
-  TextColumn get tripId => text()();
-  TextColumn get routeId => text().references(GtfsRoutesTable, #routeId)();
-  // TextColumn get shapeId => text()();
+  TextColumn get id => text()();
+  TextColumn get routeId => text().references(GtfsRoutesTable, #id)();
+  TextColumn get shapeId => text().references(GeoPathsTable, #id)();
   TextColumn get tripHeadsign => text()();
   IntColumn get wheelchairAccessible => integer()();
+  // todo: add last Updated here, and get it from the file's last updated data
 
   @override
-  Set<Column> get primaryKey => {tripId};
+  Set<Column> get primaryKey => {id};
 }
 
 class GtfsRoutesTable extends Table {
-  TextColumn get routeId => text()();
+  TextColumn get id => text()();
   TextColumn get shortName => text()();
   TextColumn get longName => text()();
 
   @override
-  Set<Column> get primaryKey => {routeId};
+  Set<Column> get primaryKey => {id};
 }
 
 
@@ -286,12 +287,12 @@ class AppDatabase extends _$AppDatabase {
 
   // GTFS Route Functions
   Future<void> insertGtfsRoute(GtfsRoutesTableCompanion route) async {
-    await mergeUpdate(gtfsRoutesTable, route, (r) => r.routeId.equals(route.routeId.value));
+    await mergeUpdate(gtfsRoutesTable, route, (r) => r.id.equals(route.id.value));
   }
 
   // GTFS Trip Functions
   Future<void> insertGtfsTrip(GtfsTripsTableCompanion trip) async {
-    await mergeUpdate(gtfsTripsTable, trip, (t) => t.tripId.equals(trip.tripId.value));
+    await mergeUpdate(gtfsTripsTable, trip, (t) => t.id.equals(trip.id.value));
   }
 
   // Table Functions

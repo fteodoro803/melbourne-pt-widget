@@ -134,13 +134,13 @@ class GtfsService {
       var ptvRoute = ptvRouteData.toCompanion(true);
       var gtfsRoute = await database.getGtfsRouteFromPtvRoute(ptvRoute, "tram");
 
-      gtfsRouteId = gtfsRoute?.routeId;
+      gtfsRouteId = gtfsRoute?.id;
       // print("( gtfs_service.dart -> getTramPositions ) -- \n\tptvRoute: $ptvRouteData, \n\tgtfsRoute: $gtfsRoute");
     }
 
     // 2. Get GTFS route IDs associated with the route
     List<db.GtfsTripsTableData>? trips = gtfsRouteId != null ? await database.getGtfsTripsByRouteId(gtfsRouteId) : null;
-    List<String>? tripIds = trips?.map((t) => t.tripId).toList();     // Converts trips to tripIds
+    List<String>? tripIds = trips?.map((t) => t.id).toList();     // Converts trips to tripIds
 
     // 3. Collect positions of vehicles
     if (tripIds != null) {

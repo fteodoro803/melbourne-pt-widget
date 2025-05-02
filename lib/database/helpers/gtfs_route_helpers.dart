@@ -5,7 +5,7 @@ extension GtfsRouteHelpers on AppDatabase {
   Future<GtfsRoutesTableCompanion> createGtfsRouteCompanion({required String routeId, required String shortName, required String longName})
   async {
     return GtfsRoutesTableCompanion(
-      routeId: drift.Value(routeId),
+      id: drift.Value(routeId),
       shortName: drift.Value(shortName),
       longName: drift.Value(longName),
     );
@@ -16,6 +16,8 @@ extension GtfsRouteHelpers on AppDatabase {
     await insertGtfsRoute(route);
   }
 
+  // todo: move this function to a ptv-gtfs route map helper
+  // todo: add trains and buses
   Future<GtfsRoutesTableData?> getGtfsRouteFromPtvRoute(RoutesTableCompanion ptvRoute, String routeType) async {
     String name = ptvRoute.name.value;
     String number = ptvRoute.number.value;
