@@ -47,7 +47,7 @@ class _TestScreenState extends State<TestScreen> {
   Future<void> gtfsTest(String id) async {
     int ptvRouteId = int.tryParse(id) != null ? int.parse(id) : 0;
 
-    var gtfsResponse = await gtfsService.getTramPositions(ptvRouteId);
+    // var gtfsResponse = await gtfsService.fetchGeoPath(routeId);
     // var gtfsResponse = await gtfsService.getTramTripUpdates();
 
     //

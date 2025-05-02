@@ -138,9 +138,15 @@ class StopRouteTypesTable extends Table {
   Set<Column> get primaryKey => {stopId, routeTypeId};
 }
 
-// class GeoPaths extends Table {
-//   IntColumn get routeId =>
-// }
+class GeoPathsTable extends Table {
+  TextColumn get id => text()();
+  IntColumn get sequence => integer()();
+  RealColumn get latitude => real()();
+  RealColumn get longitude => real()();
+
+  @override
+  Set<Column> get primaryKey => {id, sequence};
+}
 
 // Static GTFS Tables   // this is a test
 class GtfsTripsTable extends Table {
@@ -165,7 +171,7 @@ class GtfsRoutesTable extends Table {
 }
 
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
