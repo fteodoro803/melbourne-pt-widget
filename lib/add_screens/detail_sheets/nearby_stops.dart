@@ -4,23 +4,21 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../controllers/nearby_stops_controller.dart';
 import '../controllers/navigation_service.dart';
-import '../overlay_sheets/distance_filter.dart';
-import '../widgets/buttons.dart' as screen_widgets;
 import '../widgets/nearby_stop_widgets.dart';
 import '../widgets/trip_info_widgets.dart';
 
 
 class NearbyStopsSheet extends StatelessWidget {
-  final NearbyStopsController nearbyController = Get.find<NearbyStopsController>();
   final ScrollController scrollController;
-  final NavigationService navigationService = Get.find<NavigationService>();
+  NearbyStopsController get nearbyController => Get.find<NearbyStopsController>();
+  NavigationService get navigationService => Get.find<NavigationService>();
 
-  NearbyStopsSheet({super.key, required this.scrollController});
+  const NearbyStopsSheet({super.key, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
 
-    // Add listener to the ItemPositionsListener
+    // Show header and filters if user scrolls up from list of stops
     nearbyController.itemPositionsListener.itemPositions.addListener(() {
       final firstVisibleItem = nearbyController.itemPositionsListener.itemPositions.value.isNotEmpty
           ? nearbyController.itemPositionsListener.itemPositions.value.first
@@ -44,69 +42,25 @@ class NearbyStopsSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Location of stop
                 LocationWidget(
-                    textField: nearbyController.address.value,
-                    textSize: 18,
-                    scrollable: true
+                  textField: nearbyController.address.value,
+                  textSize: 18,
+                  scrollable: true
                 ),
+
+                // Search Filters
                 SizedBox(height: 8),
-                Row(
-                  spacing: 8,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: nearbyController.transportTypeFilters.keys.map((transportType) {
-                    final isSelected = nearbyController.transportTypeFilters[transportType] ?? false;
-                    return screen_widgets.TransportToggleButton(
-                      isSelected: isSelected,
-                      transportType: transportType,
-                      handleTransportToggle: (transportType) {
-                        nearbyController.toggleTransport(transportType);
-                      }
-                    );
-                  }).toList(),
-                ),
+                RouteTypeButtons(),
                 SizedBox(height: 4),
                 Divider(),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      ActionChip(
-                        avatar: Icon(Icons.keyboard_arrow_down_sharp),
-                        label: Text('Within ${nearbyController.selectedDistance.value}${nearbyController.selectedUnit.value}'),
-                        onPressed: () async {
-                          await showModalBottomSheet(
-                            constraints: BoxConstraints(maxHeight: 500),
-                            context: context,
-                            builder: (BuildContext context) {
-                              return DistanceFilterSheet(
-                                selectedDistance: nearbyController.selectedDistance.value,
-                                selectedUnit: nearbyController.selectedUnit.value,
-                                onConfirmPressed: (distance, unit) {
-                                  nearbyController.updateDistance(distance, unit);
-                                }
-                              );
-                            });
-                        },
-
-                      ),
+                      DistanceFilterChip(),
                       SizedBox(width: 5.0),
-                      Wrap(
-                        spacing: 5.0,
-                        children:
-                        ToggleableFilter.values.map((ToggleableFilter result) {
-                          return FilterChip(
-                              label: Text(result.name),
-                              selected: nearbyController.filters.contains(result),
-                              onSelected: (bool selected) {
-                                if (selected) {
-                                  nearbyController.filters.add(result);
-                                } else {
-                                  nearbyController.filters.remove(result);
-                                }
-                              }
-                          );
-                        }).toList(),
-                      ),
+                      ToggleFilterChips(),
                     ],
                   ),
                 ),
@@ -129,7 +83,6 @@ class NearbyStopsSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(0.0),
                 itemCount: nearbyController.filteredStops.length,
                 itemBuilder: (context, index) {
-                  // Stop items
                   final stopIndex = index;
                   final stop = nearbyController.filteredStops[stopIndex];
 
@@ -159,34 +112,32 @@ class NearbyStopsSheet extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ListTile(
-                                dense: true,
-                                visualDensity: VisualDensity(
-                                    horizontal: -3, vertical: 0),
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 0),
-                                title: !isExpanded
-                                    ? UnexpandedStopWidget(stopName: stopName,
-                                    routes: routes,
-                                    routeType: routeType)
-                                    : ExpandedStopWidget(
-                                    stopName: stopName, distance: distance),
-                                leading: Image.asset(
-                                  "assets/icons/PTV $routeType Logo.png",
-                                  width: 40,
-                                  height: 40,
-                                ),
-                                trailing: Icon(
-                                    isExpanded ? Icons.expand_less : Icons
-                                        .expand_more),
-                                onTap: () {
-                                  if (isExpanded) {
-                                    nearbyController.setStopExpanded(
-                                        stop.id, false);
-                                  } else {
-                                    nearbyController.setStopExpanded(
-                                        stop.id, true);
-                                  }
+                              dense: true,
+                              visualDensity: VisualDensity(
+                                  horizontal: -3, vertical: 0),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 0),
+                              title: !isExpanded
+                                ? UnexpandedStopWidget(stopName: stopName,
+                                  routes: routes, routeType: routeType)
+                                : ExpandedStopWidget(
+                                  stopName: stopName, distance: distance),
+                              leading: Image.asset(
+                                "assets/icons/PTV $routeType Logo.png",
+                                width: 40,
+                                height: 40,
+                              ),
+                              trailing: Icon(isExpanded
+                                  ? Icons.expand_less : Icons.expand_more),
+                              onTap: () {
+                                if (isExpanded) {
+                                  nearbyController.setStopExpanded(
+                                      stop.id, false);
+                                } else {
+                                  nearbyController.setStopExpanded(
+                                      stop.id, true);
                                 }
+                              }
                             ),
 
                             if (isExpanded)...[
@@ -196,10 +147,8 @@ class NearbyStopsSheet extends StatelessWidget {
                                 routeType: routeType,
                                 stop: stop,
                                 onStopTapped: (stop, route) async {
-                                  // await searchController.setRoute(route);
-                                  await navigationService.navigateToStop(stop, route, null);
-
-                                  // sheetNavigator.pushSheet("Stop Details");
+                                  await navigationService.navigateToStop(
+                                    stop, route, null);
                                 },
                               ),
                             ],

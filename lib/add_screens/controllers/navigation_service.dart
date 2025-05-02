@@ -1,23 +1,22 @@
 // services/navigation_service.dart
 
 import 'package:get/get.dart';
-import '../../domain/disruption.dart';
-import '../detail_sheets/departure_details.dart';
-import '../detail_sheets/route_details.dart';
-import '../detail_sheets/stop_details.dart';
-import '../detail_sheets/trip_details.dart';
-import '../utility/search_utils.dart';
+import 'package:flutter_project/domain/disruption.dart';
+import 'package:flutter_project/add_screens/detail_sheets/departure_details.dart';
+import 'package:flutter_project/add_screens/detail_sheets/route_details.dart';
+import 'package:flutter_project/add_screens/detail_sheets/stop_details.dart';
+import 'package:flutter_project/add_screens/detail_sheets/trip_details.dart';
+import 'package:flutter_project/add_screens/utility/search_utils.dart';
 import 'nearby_stops_controller.dart';
 import 'sheet_controller.dart';
 import 'map_controller.dart';
-import '../../domain/stop.dart';
-import '../../domain/route.dart' as pt_route;
-import '../../domain/trip.dart';
-import '../../domain/departure.dart';
+import 'package:flutter_project/domain/stop.dart';
+import 'package:flutter_project/domain/route.dart' as pt_route;
+import 'package:flutter_project/domain/trip.dart';
+import 'package:flutter_project/domain/departure.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class NavigationService extends GetxService {
-  // Controllers accessed via GetX dependency injection
   SheetController get sheetController => Get.find<SheetController>();
   MapController get mapController => Get.find<MapController>();
 
@@ -32,7 +31,7 @@ class NavigationService extends GetxService {
     return this;
   }
 
-  // Handle back button navigation
+  /// Handle back button navigation
   void handleBackNavigation() {
     final currentSheet = sheetController.currentSheet.value;
     final sheetHistory = sheetController.sheetHistory.toList();
@@ -95,7 +94,7 @@ class NavigationService extends GetxService {
     Get.back(); // Use GetX navigation
   }
 
-  // Navigate to Nearby Stops with location
+  /// Navigate to Nearby Stops with location
   Future<void> navigateToNearbyStops(LatLng pos, String address) async {
     _navigationStack.clear();
 
@@ -105,10 +104,13 @@ class NavigationService extends GetxService {
     sheetController.pushSheet('Nearby Stops');
     showSheet.value = true;
     sheetController.animateSheetTo(0.4);
-    await mapController.initialiseNearbyStopMarkers();
+
+    if (mapController.isNearbyStopsButtonToggled.value) {
+      mapController.showNearbyStopMarkers();
+    }
   }
 
-  // Navigate to Stop Details
+  /// Navigate to Stop Details
   Future<void> navigateToStop(Stop stop, pt_route.Route route, dynamic currentState) async {
     String currentSheet = sheetController.currentSheet.value;
     pt_route.Route newRoute = route;
@@ -134,7 +136,7 @@ class NavigationService extends GetxService {
     }
   }
 
-  // Navigate to Route Details
+  /// Navigate to Route Details
   Future<void> navigateToRoute(pt_route.Route route) async {
     pt_route.Route newRoute = await searchUtils.initializeRoute(route);
 
@@ -151,7 +153,7 @@ class NavigationService extends GetxService {
     await mapController.showPolyLine();
   }
 
-  // Navigate to Trip Details
+  /// Navigate to Trip Details
   Future<void> navigateToTrip(Trip trip, List<Disruption>? disruptions, dynamic state) async {
     await trip.updateDepartures(departureCount: 20);
 
@@ -173,7 +175,7 @@ class NavigationService extends GetxService {
     await mapController.showPolyLine();
   }
 
-  // Navigate to Departure Details
+  /// Navigate to Departure Details
   Future<void> navigateToDeparture(Trip trip, Departure departure, dynamic state) async {
     _navigationStack.add({'type': sheetController.currentSheet.value, 'state': state});
 
@@ -186,14 +188,5 @@ class NavigationService extends GetxService {
       await mapController.showPolyLine();
     }
     sheetController.pushSheet('Departure Details');
-  }
-
-  // Expand or collapse the sheet
-  void toggleSheetExpansion() {
-    if (sheetController.isSheetExpanded.value) {
-      sheetController.animateSheetTo(0.6);
-    } else {
-      sheetController.animateSheetTo(1.0);
-    }
   }
 }

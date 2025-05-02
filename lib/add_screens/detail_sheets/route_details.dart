@@ -57,6 +57,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
     _getSuburbStops();
   }
 
+  /// Retrieves list of suburbs and stops the route passes through
   Future<void> _getSuburbStops() async {
     List<Stop> stopsAlongRoute = _route.stopsAlongRoute!;
     List<SuburbStops> newSuburbStops = await searchUtils.getSuburbStops(stopsAlongRoute, _route);
@@ -66,6 +67,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
     });
   }
 
+  /// Reverses order of stops/suburbs shown
   void _changeDirection() {
     if (_route.directions != null && _route.directions!.length > 1) {
       for (var suburb in _suburbStops) {
@@ -103,6 +105,8 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RouteWidget(route: _route, scrollable: false),
+
+                  // Animates route direction text when direction is changed
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.symmetric(horizontal: 4),
@@ -140,8 +144,10 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
           ),
         ),
 
-        // Suburb sticky headers + stops
+        // List of stops (and suburbs)
         ..._suburbStops.map((suburb) {
+
+          // Suburb sticky header
           return SliverStickyHeader(
             header: Container(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -155,38 +161,39 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                 ),
               ),
             ),
+
+            // Stops in a given suburb
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                  final stop = suburb.stops[index];
-                  return Column(
-                    children: [
-                      ListTile(
-                        visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                        dense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),
-                        title: Text(stop.name, style: TextStyle(fontSize: 15)),
-                        trailing: Icon(Icons.keyboard_arrow_right),
-                        onTap: () async {
-                          // Get.find<search_controller.SearchController>().setRoute(_route);
-                          navigationService.navigateToStop(stop, _route, _state);
-                          // Get.find<search_controller.SearchController>().pushStop(stop);
-                        },
+                final stop = suburb.stops[index];
+                return Column(
+                  children: [
+                    ListTile(
+                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                      dense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),
+                      title: Text(stop.name, style: TextStyle(fontSize: 15)),
+                      trailing: Icon(Icons.keyboard_arrow_right),
+                      onTap: () async {
+                        navigationService.navigateToStop(stop, _route, _state);
+                      },
+                    ),
+
+                    // Show divider for every stop except the last
+                    if (index < suburb.stops.length - 1)
+                      Divider(
+                        height: 1,
+                        thickness: 0.7,
+                        indent: 16,
+                        endIndent: 16,
+                        color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
                       ),
-                      if (index < suburb.stops.length - 1)
-                        Divider(
-                          height: 1,
-                          thickness: 0.7,
-                          indent: 16,
-                          endIndent: 16,
-                          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-                        ),
-                    ],
-                  );
-                },
-                childCount: suburb.stops.length,
+                  ],
+                );
+              },
+              childCount: suburb.stops.length,
               ),
             ),
-
           );
         }),
       ],

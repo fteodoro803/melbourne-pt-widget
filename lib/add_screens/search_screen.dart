@@ -113,7 +113,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           CustomInfoWindow(
-            controller: mapController.customInfoWindowController,
+            controller: mapController.infoWindowController,
             height: 36,
             width: 360,
             offset: 15,
@@ -148,7 +148,6 @@ class _SearchScreenState extends State<SearchScreen> {
                       if (mapController.isNearbyStopsButtonToggled.value) {
                         mapController.hideNearbyStopMarkers();
                       } else {
-                        mapController.initialiseNearbyStopMarkers();
                         mapController.showNearbyStopMarkers();
                       }
                     });

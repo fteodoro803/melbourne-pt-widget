@@ -3,7 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import '../../domain/stop.dart';
+import 'package:flutter_project/domain/stop.dart';
 import '../utility/search_utils.dart';
 import 'map_controller.dart';
 
@@ -24,14 +24,13 @@ class NearbyStopsController extends GetxController {
   final RxSet<ToggleableFilter> filters = <ToggleableFilter>{}.obs;
   final RxString selectedRouteType = "all".obs;
   final RxList<Stop> stops = <Stop>[].obs;
-  RxString address = "".obs;
-
+  final RxString address = "".obs;
   final RxInt savedScrollIndex = 0.obs;
   final RxMap<int, RxBool> stopExpansionState = <int, RxBool>{}.obs;
 
-  SearchUtils searchUtils = SearchUtils();
+  final SearchUtils searchUtils = SearchUtils();
 
-  RxMap<String, bool> transportTypeFilters = {
+  final RxMap<String, bool> routeTypeFilters = {
     "all": true,
     "tram": false,
     "bus": false,
@@ -39,14 +38,14 @@ class NearbyStopsController extends GetxController {
     "vLine": false,
   }.obs;
 
+  /// Returns subset of nearby stops that match current filters
   List<Stop> get filteredStops {
-    final activeTypes = transportTypeFilters.entries
+    final activeTypes = routeTypeFilters.entries
         .where((e) => e.value && e.key != "all")
         .map((e) => e.key)
         .toSet();
 
-    // If "all" is selected, show all stops
-    if (transportTypeFilters["all"] == true || activeTypes.isEmpty) {
+    if (routeTypeFilters["all"] == true || activeTypes.isEmpty) {
       return stops;
     }
 
@@ -56,6 +55,7 @@ class NearbyStopsController extends GetxController {
     }).toList();
   }
 
+  /// Converts distance string to a double representing meters
   double get distanceInMeters {
     if (selectedUnit.value == "m") {
       return double.parse(selectedDistance.value);
@@ -64,9 +64,7 @@ class NearbyStopsController extends GetxController {
     }
   }
 
-  void setAddress(String newAddress) {
-    address = newAddress.obs;
-  }
+  void setAddress(String newAddress) => address.value = newAddress;
 
   /// Sets new stops list & initializes expansion states
   Future<void> setStops(String routeType, int distance) async {
@@ -77,12 +75,14 @@ class NearbyStopsController extends GetxController {
     resetStopExpanded();
   }
 
+  /// Set all stops as unexpanded
   void resetStopExpanded() {
     for (var stop in stops) {
       stopExpansionState[stop.id] = false.obs;
     }
   }
 
+  /// Expand a given stop
   void setStopExpanded(int stopId, bool expand) {
     if (stopExpansionState.containsKey(stopId)) {
       stopExpansionState[stopId]!.value = expand;
@@ -91,6 +91,7 @@ class NearbyStopsController extends GetxController {
     }
   }
 
+  /// Automatically scroll to a given stop
   void scrollToStopItem(int stopIndex) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (itemScrollController.isAttached) {
@@ -104,15 +105,20 @@ class NearbyStopsController extends GetxController {
     });
   }
 
+  /// Handles change in distance filter
   Future<void> updateDistance(String distance, String unit) async {
     selectedDistance.value = distance;
     selectedUnit.value = unit;
     await setStops(selectedRouteType.value,
         unit == "m" ? int.parse(distance) : int.parse(distance * 1000)
     );
-    await Get.find<MapController>().initialiseNearbyStopMarkers();
+    if (Get.find<MapController>().isNearbyStopsButtonToggled.value) {
+      Get.find<MapController>().initialiseNearbyStopMarkers();
+      Get.find<MapController>().showNearbyStopMarkers();
+    }
   }
 
+  /// Updates value of toggleable filters
   void toggleFilter(ToggleableFilter filter) {
     if (filters.contains(filter)) {
       filters.remove(filter);
@@ -121,19 +127,24 @@ class NearbyStopsController extends GetxController {
     }
   }
 
-  Future<void> toggleTransport(String type) async {
-    final isSelected = transportTypeFilters[type]!;
+  /// Handles change in routeType filter
+  Future<void> toggleRouteType(String type) async {
+    final isSelected = routeTypeFilters[type]!;
     String toggleTo = isSelected ? "all" : type;
     resetStopExpanded();
-    transportTypeFilters.updateAll((key, value) => key == toggleTo);
-    await Get.find<MapController>().initialiseNearbyStopMarkers();
+    routeTypeFilters.updateAll((key, value) => key == toggleTo);
+    if (Get.find<MapController>().isNearbyStopsButtonToggled.value) {
+      Get.find<MapController>().initialiseNearbyStopMarkers();
+      Get.find<MapController>().showNearbyStopMarkers();
+    }
   }
 
+  /// Resets all filters
   void resetFilters() {
     selectedDistance.value = "300";
     selectedUnit.value = "m";
     filters.clear();
-    transportTypeFilters.value = {
+    routeTypeFilters.value = {
       "all": true,
       "tram": false,
       "bus": false,

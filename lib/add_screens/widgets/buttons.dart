@@ -30,24 +30,24 @@ class BackButtonWidget extends StatelessWidget {
   }
 }
 
-class TransportToggleButton extends StatelessWidget {
-  const TransportToggleButton({
+class RouteTypeToggleButton extends StatelessWidget {
+  const RouteTypeToggleButton({
     super.key,
     required this.isSelected,
-    required this.transportType,
-    required this.handleTransportToggle
+    required this.routeType,
+    required this.handleRouteTypeToggle
 });
 
   final bool isSelected;
-  final String transportType;
-  final Function(String transportType) handleTransportToggle;
+  final String routeType;
+  final Function(String transportType) handleRouteTypeToggle;
 
   @override
   Widget build(BuildContext context) {
-    final bool isAll = transportType == "all" ? true : false;
+    final bool isAll = routeType == "all" ? true : false;
 
     return ElevatedButton(
-      onPressed: () => handleTransportToggle(transportType),
+      onPressed: () => handleRouteTypeToggle(routeType),
       style: ElevatedButton.styleFrom(
         padding: isAll ? EdgeInsets.symmetric(horizontal: 14) : EdgeInsets.zero,
         backgroundColor: isSelected ?
@@ -56,14 +56,14 @@ class TransportToggleButton extends StatelessWidget {
         minimumSize: Size(50, 50),
         shape: isAll ? null : CircleBorder(),
       ),
-      child: transportType == "all"
+      child: routeType == "all"
         ? Text(
           "All Transport",
           style: TextStyle(color: isSelected ? Colors.white : Colors.black),
         )
       : ClipOval(
         child: Image.asset(
-          "assets/icons/PTV $transportType Logo.png",
+          "assets/icons/PTV $routeType Logo.png",
           width: 30,
           height: 30,
           fit: BoxFit.cover,

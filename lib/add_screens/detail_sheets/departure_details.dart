@@ -36,17 +36,17 @@ class DepartureDetailsSheet extends StatefulWidget {
 }
 
 class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
-  final NavigationService navigationService = Get.find<NavigationService>();
+  NavigationService get navigationService => Get.find<NavigationService>();
+  final PtvService ptvService = PtvService();
+
   late dynamic _initialState;
   late Departure _departure;
   late Trip _trip;
 
-  PtvService ptvService = PtvService();
   ItemScrollController itemScrollController = ItemScrollController();
   ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
 
   List<Departure> _pattern = [];
-
   late DepartureStatus _status;
   late String _minutesString;
   late Timer _departureUpdateTimer;
@@ -117,7 +117,8 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
 
     // Find the current stop index
     _currentStopIndex = _pattern.indexWhere(
-            (stop) => stop.stopName?.trim().toLowerCase() == _trip.stop?.name.trim().toLowerCase()
+      (stop) => stop.stopName?.trim().toLowerCase()
+        == _trip.stop?.name.trim().toLowerCase()
     );
 
     // If the stop isn't found, default to 0
@@ -164,7 +165,12 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.only(left: 12.0, right: 22.0, bottom: 12.0, top: 16.0),
+            padding: const EdgeInsets.only(
+              left: 12.0,
+              right: 22.0,
+              bottom: 12.0,
+              top: 16.0
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -175,7 +181,10 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                       fit: FlexFit.tight,
                       child: Column(
                         children: [
-                          LocationWidget(textField: _trip.stop!.name, textSize: 18, scrollable: true),
+                          LocationWidget(
+                            textField: _trip.stop!.name,
+                            textSize: 18,
+                            scrollable: true),
                           SizedBox(height: 4),
                           Row(
                             children: [
@@ -193,57 +202,25 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(_trip.direction!.name, style: TextStyle(fontSize: 16, height: 1.1), overflow: TextOverflow.ellipsis, maxLines: 2),
+                                    Text(_trip.direction!.name,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        height: 1.1),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2),
                                     SizedBox(height: 8),
-                                    RouteWidget(route: _trip.route!, scrollable: true),
+                                    RouteWidget(route: _trip.route!,
+                                        scrollable: true),
                                     SizedBox(height: 4)
                                   ],
                                 ),
                               ),
                               SizedBox(width: 8),
 
-                              Card(
-                                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                                  elevation: 1,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 2),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(vertical: 1, horizontal: 6),
-                                          decoration: BoxDecoration(
-                                              color: ColourUtils.hexToColour(_status.getColorString),
-                                              borderRadius: BorderRadius.circular(8)
-                                          ),
-                                          child: Text(
-                                            _minutesString,
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 16
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 2),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 2.0),
-                                          child: Text("Scheduled: ${_departure.scheduledDepartureTime}", style: TextStyle(fontSize: 13)),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 2.0),
-                                          child: Text(
-                                            "Estimated: ${_departure.estimatedDepartureTime ?? 'N/A'}",
-                                            style: TextStyle(
-                                                color: ColourUtils.hexToColour(_status.getColorString),
-                                                fontSize: 13
-                                            ),),
-                                        ),
-                                      ],
-                                    ),
-                                  )
+                              DepartureTimeDetails(
+                                status: _status,
+                                minutesString: _minutesString,
+                                departure: _departure
                               ),
                             ],
                           ),
@@ -252,7 +229,6 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                     ),
                   ],
                 ),
-
                 Divider(),
               ],
             ),
@@ -278,23 +254,28 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                 final timeDifference = TimeUtils.timeDifference(departureTime);
 
                 return Card(
-                  color: index == _currentStopIndex ? Theme.of(context).colorScheme.surfaceContainerHigh : null,
+                  color: index == _currentStopIndex
+                      ? Theme.of(context).colorScheme.surfaceContainerHigh
+                      : null,
                   margin: const EdgeInsets.symmetric(vertical: 2.0),
                   elevation: 1,
                   child: ListTile(
                     leading: SizedBox(
                       width: 55,
-                      child: Text(timeString, style: TextStyle(fontSize: 12),),
+                      child: Text(timeString, style: TextStyle(fontSize: 12)),
                     ),
                     title: Row(
                       children: [
                         Container(
-                          width: 5, // Width of the vertical line
-                          color:  TimeUtils.hasDeparted(timeDifference) ? Colors.grey : Colors.green, // Color of the vertical line
-                          height: 60, // Adjust the height of the vertical line
+                          width: 5,
+                          color:  TimeUtils.hasDeparted(timeDifference)
+                              ? Colors.grey : Colors.green,
+                          height: 60,
                         ),
                         SizedBox(width: 12),
-                        Expanded(child: Text(stopName!, overflow: TextOverflow.ellipsis, maxLines: 2,)),
+                        Expanded(child: Text(stopName!,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,)),
                       ],
                     ),
                     onTap: () {}
@@ -306,6 +287,76 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
         ),
       ],
     );
+  }
+}
 
+class DepartureTimeDetails extends StatelessWidget {
+  const DepartureTimeDetails({
+    super.key,
+    required DepartureStatus status,
+    required String minutesString,
+    required Departure departure,
+  }) : _status = status, _minutesString = minutesString, _departure = departure;
+
+  final DepartureStatus _status;
+  final String _minutesString;
+  final Departure _departure;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme
+        .surfaceContainerHigh,
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 2),
+            Container(
+              padding: EdgeInsets.symmetric(
+                vertical: 1, horizontal: 6),
+              decoration: BoxDecoration(
+                color: ColourUtils.hexToColour(
+                  _status.getColorString),
+                borderRadius: BorderRadius.circular(8)
+              ),
+              child: Text(
+                _minutesString,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16
+                ),
+              ),
+            ),
+            SizedBox(height: 2),
+            Padding(
+              padding: const EdgeInsets.only(left: 2.0),
+              child: Text("Scheduled: "
+                "${_departure.scheduledDepartureTime}",
+                style: TextStyle(fontSize: 13)),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 2.0),
+              child: Text(
+                "Estimated: ${_departure
+                    .estimatedDepartureTime
+                    ?? 'N/A'}",
+                style: TextStyle(
+                  color: ColourUtils.hexToColour(
+                      _status.getColorString),
+                  fontSize: 13
+                )
+              ),
+            ),
+          ],
+        ),
+      )
+    );
   }
 }

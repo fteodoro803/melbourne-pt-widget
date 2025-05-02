@@ -3,21 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/disruption.dart';
-import '../../domain/route.dart' as pt_route;
+import '../../domain/route.dart' as pt;
 import '../../domain/stop.dart';
 import '../../domain/trip.dart';
 import '../../ptv_service.dart';
 import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
-import '../overlay_sheets/save_trip.dart';
 import '../overlay_sheets/trip_info.dart';
-import '../widgets/buttons.dart';
-import '../widgets/trip_info_widgets.dart';
+import '../widgets/new_widgets.dart';
 
 class StopDetailsState {
   final Stop stop;
-  final pt_route.Route route;
+  final pt.Route route;
   List<Trip>? trips;
   List<Disruption>? disruptions;
 
@@ -42,20 +40,20 @@ class StopDetailsSheet extends StatefulWidget {
 }
 
 class _StopDetailsSheetState extends State<StopDetailsSheet> {
-  final NavigationService navigationService = Get.find<NavigationService>();
+  NavigationService get navigationService => Get.find<NavigationService>();
+  final SearchUtils searchUtils = SearchUtils();
+  final PtvService ptvService = PtvService();
+
   late dynamic _initialState;
   late Stop _stop;
-  late pt_route.Route _route;
+  late pt.Route _route;
 
-  SearchUtils searchUtils = SearchUtils();
-  PtvService ptvService = PtvService();
-
-  bool _isSavedListInitialized = false;
   List<bool> _savedList = [];
   List<Trip> _trips = [];
   List<Disruption> _disruptions = [];
-
   late StopDetailsState _state;
+
+  bool _isSavedListInitialized = false;
   late Timer _departureUpdateTimer;
 
   @override
@@ -73,6 +71,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
       if (_initialState.trips != null) {
         _trips = _initialState.trips;
         _state.trips = _trips;
+        _getSavedList();
       } else {
         _getTripList();
       }
@@ -85,8 +84,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
       }
     }
 
-    _getSavedList();
-
     _departureUpdateTimer = Timer.periodic(Duration(seconds: 30), (_) {
       _updateDepartures();
     });
@@ -98,6 +95,16 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     super.dispose();
   }
 
+  /// Gets a list of trips for a given route and stop
+  Future<void> _getTripList() async {
+    List<Trip> newTripList = await searchUtils.splitDirection(_stop, _route);
+    _trips = newTripList;
+    _state.trips = _trips;
+
+    await _getSavedList();
+  }
+
+  /// Checks the favourite status of each trip
   Future<void> _getSavedList() async {
     List<bool> newSavedList = [];
 
@@ -112,15 +119,16 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     });
   }
 
-  Future<void> _getTripList() async {
-    List<Trip> newTripList = await searchUtils.splitDirection(_stop, _route);
-
+  /// Gets list of disruptions for route
+  Future<void> _getDisruptions() async {
+    List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_route);
     setState(() {
-      _trips = newTripList;
-      _state.trips = _trips;
+      _disruptions = disruptionsList;
+      _state.disruptions = disruptionsList;
     });
   }
 
+  /// Updates the departures for each trip
   Future<void> _updateDepartures() async {
     if (!mounted) return;
 
@@ -138,6 +146,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     }
   }
 
+  /// Callback function to add trip to favourites
   Future<void> _onConfirmPressed(List<bool> tempSavedList) async {
     for (var trip in _trips) {
       int index = _trips.indexOf(trip);
@@ -152,14 +161,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     });
   }
 
-  Future<void> _getDisruptions() async {
-    List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_route);
-    setState(() {
-      _disruptions = disruptionsList;
-      _state.disruptions = disruptionsList;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -168,201 +169,120 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     }
 
     return ListView(
-        padding: EdgeInsets.zero,
-        controller: widget.scrollController,
-        physics: ClampingScrollPhysics(),
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 18, right: 18, top: 16, bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LocationWidget(textField: _stop.name,
-                    textSize: 18,
-                    scrollable: true),
-
-                // Stop location
-                ListTile(
-                  contentPadding: EdgeInsets.all(0),
-                  visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                  dense: true,
-                  title: Row(
-                    children: [
-                      SizedBox(width: 8),
-                      Container(
-                        width: 4,
-
-                        height: 42,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(2),
-                          color: Color(0xFF717171),
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      RouteWidget(route: _route, scrollable: false),
-                    ],
-                  ),
-                  trailing: SizedBox(
-                    width: 63,
-                    child: Row(
+      padding: EdgeInsets.zero,
+      controller: widget.scrollController,
+      physics: ClampingScrollPhysics(),
+      children: [
+        RouteHeaderWidget(
+          showDirection: false,
+          stop: _stop,
+          route: _route,
+          trips: _trips,
+          disruptions: _disruptions,
+          state: _state,
+          savedList: _savedList,
+          handleSave: _onConfirmPressed,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 18, right: 18, bottom: 12),
+          child: Column(
+            children: _trips.map((trip) {
+              var departures = trip.departures;
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        GestureDetector(
-                          child: Icon(Icons.info, color: Color(
-                              0xFF4F82FF), size: 27),
-                          onTap: () async {
-                            await showModalBottomSheet(
-                                constraints: BoxConstraints(maxHeight: 500),
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return TripInfoSheet(
-                                      route: _route,
-                                      stop: _stop,
-                                      disruptions: _disruptions,
-                                      state: _state,
-                                  );
-                                }
-                            );
-                          },
-                        ),
-
-                        SizedBox(width: 4),
-                        GestureDetector(
-                          child: FavoriteButton(isSaved: _savedList.contains(true)),
-                          onTap: () async {
-                            if (_trips.length > 1) {
-                              await showModalBottomSheet(
-                                constraints: BoxConstraints(maxHeight: 320),
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return SaveTripSheet(
-                                    savedList: _savedList,
-                                    route: _route,
-                                    stop: _stop,
-                                    tripList: _trips,
-                                    onConfirmPressed: _onConfirmPressed,
-                                  );
-                                }
-                              );
-                            } else {
-                              List<bool> tempSavedList = [..._savedList];
-                              tempSavedList[0] = !tempSavedList[0];
-                              await _onConfirmPressed(tempSavedList);
-                              SearchUtils.renderSnackBar(context, tempSavedList[0]);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-
-                ),
-
-                Divider(),
-
-                // Departures for each direction
-                Column(
-                  children: _trips.map((trip) {
-                    var departures = trip.departures;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                        // Left section: Warning icon + scrollable "Towards..." text
+                        Expanded(
+                          child: Row(
                             children: [
-                              // Left section: Warning icon + scrollable "Towards..." text
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    if (_disruptions.isNotEmpty) ...[
-                                      GestureDetector(
-                                        onTap: () async {
-                                          await showModalBottomSheet(
-                                            constraints: const BoxConstraints(maxHeight: 500),
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return TripInfoSheet(
-                                                route: _route,
-                                                stop: _stop,
-                                                disruptions: _disruptions,
-                                                state: _state,
-                                              );
-                                            },
-                                          );
-                                        },
-                                        child: const Icon(Icons.warning_outlined, color: Color(0xFFF6833C)),
-                                      ),
-                                      const SizedBox(width: 4),
-                                    ],
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Text(
-                                          "Towards ${trip.direction?.name ?? ''}",
-                                          style: const TextStyle(fontSize: 18),
-                                          overflow: TextOverflow.fade,
-                                          softWrap: false,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              if (_disruptions.isNotEmpty) ...[
+                                GestureDetector(
+                                  onTap: () async {
+                                    await showModalBottomSheet(
+                                      constraints: BoxConstraints(maxHeight: 500),
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return TripInfoSheet(
+                                          route: _route,
+                                          stop: _stop,
+                                          disruptions: _disruptions,
+                                          state: _state,
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Icon(Icons.warning_outlined, color: Color(0xFFF6833C)),
                                 ),
-                              ),
-
-                              // Right section: "See all >"
-                              GestureDetector(
-                                onTap: () => navigationService.navigateToTrip(trip, _disruptions, _state),
-                                    // Get.find<search_controller.SearchController>().pushTrip(transport),
-                                child: Row(
-                                  children: const [
-                                    SizedBox(width: 4),
-                                    Text("See all", style: TextStyle(fontSize: 16)),
-                                    Icon(Icons.keyboard_arrow_right),
-                                  ],
+                                const SizedBox(width: 4),
+                              ],
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Text(
+                                    "Towards ${trip.direction?.name ?? ''}",
+                                    style: TextStyle(fontSize: 18),
+                                    overflow: TextOverflow.fade,
+                                    softWrap: false,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
+                        ),
 
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.all(0.0),
-                            itemCount: departures!.length > 2 ? 2 : departures
-                                .length,
-                            itemBuilder: (context, index) {
-                              final departure = departures[index];
-                              return DepartureCard(
-                                  trip: trip,
-                                  departure: departure,
-                                  onDepartureTapped: (departure) {
-                                    // Get.find<search_controller.SearchController>().setTrip(trip);
-                                    navigationService.navigateToDeparture(trip, departure, _state);
-                                    // Get.find<search_controller.SearchController>().pushDeparture(departure);
-                                  });
-                            },
+                        // Right section: "See all >"
+                        GestureDetector(
+                          onTap: () => navigationService
+                              .navigateToTrip(trip, _disruptions, _state),
+                          child: Row(
+                            children: [
+                              SizedBox(width: 4),
+                              Text("See all", style: TextStyle(fontSize: 16)),
+                              Icon(Icons.keyboard_arrow_right),
+                            ],
                           ),
+                        ),
+                      ],
+                    ),
 
-                          // Display a message if no departures
-                          if (departures.isEmpty)
-                            Card(
-                              margin: const EdgeInsets.symmetric(vertical: 2),
-                              elevation: 1,
-                              child: Text("No departures to show."),
-                            ),
-                        ],
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.all(0.0),
+                      itemCount: departures!.length > 2
+                        ? 2 : departures.length,
+                      itemBuilder: (context, index) {
+                        final departure = departures[index];
+                        return DepartureCard(
+                          trip: trip,
+                          departure: departure,
+                          onDepartureTapped: (departure) {
+                            navigationService
+                                .navigateToDeparture(trip, departure, _state);
+                          });
+                      },
+                    ),
+
+                    // Display a message if no departures
+                    if (departures.isEmpty)
+                      Card(
+                        margin: EdgeInsets.symmetric(vertical: 2),
+                        elevation: 1,
+                        child: Text("No departures to show."),
                       ),
-                    );
-                  }).toList(),
+                  ],
                 ),
-              ],
-            ),
+              );
+            }).toList(),
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 }

@@ -20,7 +20,7 @@ class SheetController extends GetxController {
 
     // Add listener to the controller
     try {
-      scrollableController.addListener(handleScrollChange);
+      scrollableController.addListener(handleSizeChange);
       _isListenerAdded = true;
       print("SheetNavigationController: Listener added successfully");
     } catch (e) {
@@ -32,7 +32,7 @@ class SheetController extends GetxController {
     initialSheetSize = size;
   }
 
-  void handleScrollChange() {
+  void handleSizeChange() {
     try {
       if (scrollableController.size >= 0.75 && !isSheetExpanded.value) {
         isSheetExpanded.value = true;
@@ -65,25 +65,6 @@ class SheetController extends GetxController {
         }
       });
     }
-  }
-
-  @override
-  void onClose() {
-    print("SheetNavigationController: onClose called");
-
-    try {
-      if (_isListenerAdded) {
-        scrollableController.removeListener(handleScrollChange);
-        _isListenerAdded = false;
-      }
-
-      scrollableController.dispose();
-      print("SheetNavigationController: Controller successfully disposed");
-    } catch (e) {
-      print("SheetNavigationController: Error disposing controller - $e");
-    }
-
-    super.onClose();
   }
 
   void pushSheet(String newSheet) {
@@ -119,5 +100,24 @@ class SheetController extends GetxController {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  @override
+  void onClose() {
+    print("SheetNavigationController: onClose called");
+
+    try {
+      if (_isListenerAdded) {
+        scrollableController.removeListener(handleSizeChange);
+        _isListenerAdded = false;
+      }
+
+      scrollableController.dispose();
+      print("SheetNavigationController: Controller successfully disposed");
+    } catch (e) {
+      print("SheetNavigationController: Error disposing controller - $e");
+    }
+
+    super.onClose();
   }
 }

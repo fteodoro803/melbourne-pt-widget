@@ -24,8 +24,8 @@ class SaveTripSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stopName = stop.name;
 
+    final stopName = stop.name;
     List<bool> tempSavedList = List.from(savedList);
     bool hasListChanged = false;
 
@@ -35,6 +35,8 @@ class SaveTripSheet extends StatelessWidget {
           ListTile(
             leading: Padding(
               padding: const EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
+
+              // Cancel button
               child: GestureDetector(
                 child: Text(
                   "Cancel",
@@ -48,6 +50,8 @@ class SaveTripSheet extends StatelessWidget {
                 }
               ),
             ),
+
+            // Confirm button
             trailing: GestureDetector(
               child: Padding(
                 padding: const EdgeInsets.only(right: 8.0, top: 10.0, bottom: 10.0),
@@ -68,6 +72,8 @@ class SaveTripSheet extends StatelessWidget {
                 }
               }
             ),
+
+            // Modal sheet title
             title: Text(
               "Save Trip",
               style: TextStyle(
@@ -77,6 +83,8 @@ class SaveTripSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
+
+          // Stop and route detail card
           Card(
             color: Colors.black,
             margin: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -86,9 +94,12 @@ class SaveTripSheet extends StatelessWidget {
               subtitle: RouteWidget(route: route, scrollable: false),
             ),
           ),
+
           SizedBox(height: 12),
           Text("Choose direction:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
           SizedBox(height: 8),
+
+          // List of trips (and saved status)
           Column(
             children: tripList.map((trip) {
               var index = tripList.indexOf(trip);

@@ -247,10 +247,10 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: _transportTypeFilters.keys.map((transportType) {
               final isSelected = _transportTypeFilters[transportType] ?? false;
-              return ScreenWidgets.TransportToggleButton(
+              return ScreenWidgets.RouteTypeToggleButton(
                 isSelected: isSelected,
-                transportType: transportType,
-                handleTransportToggle: _filterByType,
+                routeType: transportType,
+                handleRouteTypeToggle: _filterByType,
               );
             }).toList(),
           ),
