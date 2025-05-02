@@ -5,7 +5,10 @@ import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
+import 'package:flutter_project/database/helpers/route_helpers.dart';
+import 'package:flutter_project/domain/route.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 
@@ -17,19 +20,22 @@ import 'package:csv/csv.dart';
 1. Get GTFS Routes (route_id)
 2. Get GTFS Trips (trip_id, route_id, direction_id)
 
-- GeoPath
+- todo: GeoPath
 1. Get GTFS Shapes (shape_id)
 2. Get GTFS Trips(trip_id, shape_id, route_id)
+- todo: accurate stops locations
 */
 
 class GtfsService {
   GtfsApiService gtfsApiService = GtfsApiService();
-  String tramRoutesFile = "lib/dev/gtfs/metroTramRoutes.txt";
-  String tramTripsFile = "lib/dev/gtfs/metroTramTrips.txt";
-  String trainRoutesFile = "lib/dev/gtfs/metroTrainRoutes.txt";
-  String trainTripsFile = "lib/dev/gtfs/metroTrainTrips.txt";
-  String busRoutesFile = "lib/dev/gtfs/metroBusRoutes.txt";
-  String busTripsFile = "lib/dev/gtfs/metroBusTrips.txt";
+  String tramRoutesFile = "lib/dev/gtfs/metro_tram/routes.txt";
+  String tramTripsFile = "lib/dev/gtfs/metro_tram/trips.txt";
+
+  // String trainRoutesFile = "lib/dev/gtfs/metro_train/routes.txt";
+  // String trainTripsFile = "lib/dev/gtfs/metro_train/trips.txt";
+  //
+  // String busRoutesFile = "lib/dev/gtfs/metro_bus/routes.txt";
+  // String busTripsFile = "lib/dev/gtfs/metro_bus/trips.txt";
   db.AppDatabase database = Get.find<db.AppDatabase>();
 
   /// Adds GTFS Schedule data to database
@@ -37,17 +43,17 @@ class GtfsService {
   Future<void> initialise() async {
     DateTime startTime = DateTime.now();
 
-    // Metro trains
-    await _initialiseRoutes(trainRoutesFile);
-    await _initialiseTrips(trainTripsFile);
+    // // Metro trains
+    // await _initialiseRoutes(trainRoutesFile);
+    // await _initialiseTrips(trainTripsFile);
 
     // Metro trams
     await _initialiseRoutes(tramRoutesFile);
     await _initialiseTrips(tramTripsFile);
 
-    // Metro buses
-    await _initialiseRoutes(busRoutesFile);
-    await _initialiseTrips(busTripsFile);
+    // // Metro buses
+    // await _initialiseRoutes(busRoutesFile);
+    // await _initialiseTrips(busTripsFile);
 
     DateTime endTime = DateTime.now();
     int duration = endTime.difference(startTime).inSeconds;
@@ -120,37 +126,47 @@ class GtfsService {
   // todo:
   // todo: map ptv routeId to gtfs routeId by name (shortname then longname)
   // todo: edge case, combined routes (501-503)
+  // fixme: works functionally, but the results from the api dont match the dataset
   Future<void> getTramPositions(int routeId) async {
+    List<LatLng> locations = [];
     final feedMessage = await gtfsApiService.tramVehiclePositions();
+    String? gtfsRouteId;
+
+    // Maps PTV route id to GTFS' route id
+    var ptvRouteData = await database.getRouteById(routeId);
+    if (ptvRouteData != null) {
+      var ptvRoute = ptvRouteData.toCompanion(true);
+      var gtfsRoute = await database.getGtfsRouteFromPtvRoute(ptvRoute, "tram");
+
+      gtfsRouteId = gtfsRoute?.routeId;
+      print("( gtfs_service.dart -> getTramPositions ) -- \n\tptvRoute: $ptvRouteData, \n\tgtfsRoute: $gtfsRoute");
+    }
+
+    // Go through trips table and get trips with the routeId
+    List<db.GtfsTripsTableData>? trips = gtfsRouteId != null ? await database.getGtfsTripsByRouteId(gtfsRouteId) : null;
+    List<String>? tripIds = trips?.map((t) => t.tripId).toList();
+    // print(tripIds);
+
+    if (tripIds != null) {
+      for (var entity in feedMessage.entity) {
+        if (tripIds.contains(entity.vehicle.trip.tripId)) {
+          print(entity);
+        }
+      }
+    }
 
     // for (var entity in feedMessage.entity) {
-    //   // if (entity.vehicle.trip.tripId)
-    //   print(entity);
+    //   print(entity.vehicle);
     // }
 
-    print(feedMessage);
+    // print(feedMessage);
   }
 
-// /// Get status Updates for a specific tram route via GTFS
-// // todo: move this to ptv_service
-// Future<List<TripUpdate>> getTripUpdatesRoute(String routeId) async {
-//   final feedMessage = await tramTripUpdates();
-//
-//   // for (var entity in feedMessage.entity) {
-//   // }
-//
-//   print(feedMessage);
-//
-//   return feedMessage.entity
-//       .where((entity) => entity.hasTripUpdate())          // filters entities to trips with tripUpdates
-//       .map((entity) => entity.tripUpdate)                 // turns all those entities to tripUpdates
-//       .where((update) => update.trip.routeId == routeId)  // filters all tripUpdates to those with same routeId
-//       .toList();                                          // turns it into a list
-// }
-//
-// Future<void> getTramAlert(String id) async {
-//   final feedMessage = await tramServiceAlerts();
-//
-//   print(feedMessage);
-// }
+  Future<void> getTramTripUpdates() async {
+    final feedMessage = await gtfsApiService.tramTripUpdates();
+
+    for (var entity in feedMessage.entity) {
+      print(entity);
+    }
+  }
 }
