@@ -48,6 +48,8 @@ class _TestScreenState extends State<TestScreen> {
     int ptvRouteId = int.tryParse(id) != null ? int.parse(id) : 0;
 
     var gtfsResponse = await gtfsService.getTramPositions(ptvRouteId);
+    // var gtfsResponse = await gtfsService.getTramTripUpdates();
+
     //
     // print(gtfsResponse.toString());
   }
