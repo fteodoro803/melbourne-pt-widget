@@ -16,22 +16,4 @@ extension GtfsRouteHelpers on AppDatabase {
     await insertGtfsRoute(route);
   }
 
-  // todo: move this function to a ptv-gtfs route map helper
-  // todo: add trains and buses
-  Future<GtfsRoutesTableData?> getGtfsRouteFromPtvRoute(RoutesTableCompanion ptvRoute, String routeType) async {
-    String name = ptvRoute.name.value;
-    String number = ptvRoute.number.value;
-    
-    drift.SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData> query;
-    if (routeType == "tram") {
-      query = select(gtfsRoutesTable)
-        ..where((tbl) => tbl.shortName.equals(number));
-    }
-    else {
-      query = select(gtfsRoutesTable);
-    }
-
-    final result = await query.getSingleOrNull();
-    return result;
-  }
 }

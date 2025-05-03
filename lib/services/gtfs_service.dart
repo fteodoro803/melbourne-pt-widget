@@ -5,7 +5,7 @@ import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/database/helpers/geopath_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
-import 'package:flutter_project/database/helpers/route_helpers.dart';
+import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:csv/csv.dart';
@@ -60,6 +60,7 @@ class GtfsService {
   }
 
   /// Add gtfs routes to database.
+  // todo: Map GTFS route IDs to PTV route IDs
   Future<void> _initialiseRoutes(String routeFilePath) async {
     try {
       // 1. Collect routes and relevant information from the gtfsRoutesMap
@@ -70,8 +71,10 @@ class GtfsService {
         String longName = route["route_long_name"];
 
         // 2. Insert each trip to the database
-        await database.addGtfsRoute(
-            id: routeId, shortName: shortName, longName: longName);
+        await database.addGtfsRoute(id: routeId, shortName: shortName, longName: longName);
+
+        // 3. Map GTFS and PTV route IDs
+        await database.syncRouteMap();
       }
     } catch (e) {
       print("Error $e");
@@ -132,6 +135,11 @@ class GtfsService {
     }
   }
 
+  Future<void> fetchGeoPath(String gtfsRouteId) async {
+    var geopath = database.getGeoPath(gtfsRouteId);
+    print(geopath.toString());
+  } 
+
   /// Converts CSV to Map
   Future<List<Map<String, dynamic>>> csvToMapList(String filePath) async {
     List<Map<String, dynamic>> mapList = [];
@@ -158,17 +166,9 @@ class GtfsService {
   Future<List<LatLng>> getTramPositions(int routeId) async {
     List<LatLng> locations = [];
     final feedMessage = await gtfsApiService.tramVehiclePositions();
-    String? gtfsRouteId;
 
     // 1. Map PTV route ID to GTFS route ID
-    var ptvRouteData = await database.getRouteById(routeId);
-    if (ptvRouteData != null) {
-      var ptvRoute = ptvRouteData.toCompanion(true);
-      var gtfsRoute = await database.getGtfsRouteFromPtvRoute(ptvRoute, "tram");
-
-      gtfsRouteId = gtfsRoute?.id;
-      // print("( gtfs_service.dart -> getTramPositions ) -- \n\tptvRoute: $ptvRouteData, \n\tgtfsRoute: $gtfsRoute");
-    }
+    String? gtfsRouteId = await database.getGtfsRouteId(routeId);
 
     // 2. Get GTFS route IDs associated with the route
     List<db.GtfsTripsTableData>? trips = gtfsRouteId != null ? await database.getGtfsTripsByRouteId(gtfsRouteId) : null;

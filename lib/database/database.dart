@@ -170,8 +170,17 @@ class GtfsRoutesTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+// GTFS to PTV Route ID Mapping
+class RouteMapTable extends Table {
+  IntColumn get ptvId => integer().references(RoutesTable, #id)();
+  TextColumn get gtfsId => text().references(GtfsRoutesTable, #id)();
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable])
+  @override
+  Set<Column> get primaryKey => {ptvId, gtfsId};
+}
+
+
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -299,6 +308,11 @@ class AppDatabase extends _$AppDatabase {
   // GTFS Trip Functions
   Future<void> insertGtfsTrip(GtfsTripsTableCompanion trip) async {
     await mergeUpdate(gtfsTripsTable, trip, (t) => t.id.equals(trip.id.value));
+  }
+
+  // Route Map Functions
+  Future<void> insertRouteMap(RouteMapTableCompanion routeMap) async {
+    await mergeUpdate(routeMapTable, routeMap, (r) => r.ptvId.equals(routeMap.ptvId.value) & r.gtfsId.equals(routeMap.gtfsId.value));
   }
 
   // Table Functions

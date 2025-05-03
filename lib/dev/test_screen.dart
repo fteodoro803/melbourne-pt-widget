@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/database/database.dart';
+import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/services/gtfs_service.dart';
+import 'package:get/get.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -15,6 +18,7 @@ class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   GtfsApiService gtfsApiService = GtfsApiService();
   GtfsService gtfsService = GtfsService();
+  var database = Get.find<AppDatabase>();
   final TextEditingController gtfsRouteId = TextEditingController();
   List<Trip> transportList = [];
 
@@ -45,10 +49,9 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> gtfsTest(String id) async {
-    int ptvRouteId = int.tryParse(id) != null ? int.parse(id) : 0;
 
     // var gtfsResponse = await gtfsService.fetchGeoPath(routeId);
-    // var gtfsResponse = await gtfsService.getTramTripUpdates();
+    var gtfsResponse = await gtfsService.getTramPositions(int.parse(id));
 
     //
     // print(gtfsResponse.toString());
