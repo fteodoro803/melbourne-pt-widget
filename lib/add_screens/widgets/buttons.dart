@@ -30,24 +30,24 @@ class BackButtonWidget extends StatelessWidget {
   }
 }
 
-class TransportToggleButton extends StatelessWidget {
-  const TransportToggleButton({
+class RouteTypeToggleButton extends StatelessWidget {
+  const RouteTypeToggleButton({
     super.key,
     required this.isSelected,
-    required this.transportType,
-    required this.handleTransportToggle
+    required this.routeType,
+    required this.handleRouteTypeToggle
 });
 
   final bool isSelected;
-  final String transportType;
-  final Function(String transportType) handleTransportToggle;
+  final String routeType;
+  final Function(String transportType) handleRouteTypeToggle;
 
   @override
   Widget build(BuildContext context) {
-    final bool isAll = transportType == "all" ? true : false;
+    final bool isAll = routeType == "all" ? true : false;
 
     return ElevatedButton(
-      onPressed: () => handleTransportToggle(transportType),
+      onPressed: () => handleRouteTypeToggle(routeType),
       style: ElevatedButton.styleFrom(
         padding: isAll ? EdgeInsets.symmetric(horizontal: 14) : EdgeInsets.zero,
         backgroundColor: isSelected ?
@@ -56,14 +56,14 @@ class TransportToggleButton extends StatelessWidget {
         minimumSize: Size(50, 50),
         shape: isAll ? null : CircleBorder(),
       ),
-      child: transportType == "all"
+      child: routeType == "all"
         ? Text(
           "All Transport",
           style: TextStyle(color: isSelected ? Colors.white : Colors.black),
         )
       : ClipOval(
         child: Image.asset(
-          "assets/icons/PTV $transportType Logo.png",
+          "assets/icons/PTV $routeType Logo.png",
           width: 30,
           height: 30,
           fit: BoxFit.cover,
@@ -88,6 +88,67 @@ class HandleWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.grey,
           borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+}
+
+class FavoriteButton extends StatelessWidget {
+  const FavoriteButton({
+    super.key,
+    required bool isSaved,
+  }) : _isSaved = isSaved;
+
+  final bool _isSaved;
+
+  @override
+  Widget build(BuildContext context) {
+
+    return SizedBox(
+      width: 30,
+      height: 30,
+      child: Center(
+        child: Icon(
+          _isSaved ? Icons.star : Icons.star_border,
+          size: 30,
+          color: _isSaved ? Colors.yellow : null,
+        ),
+      ),
+    );
+  }
+}
+
+class NearbyStopsButton extends StatelessWidget {
+  const NearbyStopsButton({
+    super.key,
+    required this.isNearbyStopsButtonToggled,
+    required this.onPressed,
+  });
+
+  final bool isNearbyStopsButtonToggled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 14),
+        backgroundColor: !isNearbyStopsButtonToggled
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.primaryContainer,
+        minimumSize: Size(40, 40),
+      ),
+      child: SizedBox(
+        height: 40,
+        width: 40,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.location_pin),
+            Icon(Icons.tram),
+          ],
         ),
       ),
     );

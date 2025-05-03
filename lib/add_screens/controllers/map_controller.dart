@@ -1,33 +1,38 @@
 // controllers/map_controller.dart
 
 import 'package:custom_info_window/custom_info_window.dart';
-import 'package:flutter_project/add_screens/controllers/sheet_navigator_controller.dart';
+import 'package:flutter_project/add_screens/controllers/sheet_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/stop.dart';
-import '../utility/map_utils.dart';
-import '../utility/trip_path.dart';
+import 'package:flutter_project/domain/route.dart' as pt_route;
+import 'package:flutter_project/domain/stop.dart';
+import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/add_screens/utility/map_utils.dart';
+import 'package:flutter_project/add_screens/utility/trip_path.dart';
+
+import 'navigation_service.dart';
 import 'nearby_stops_controller.dart';
-import '../controllers/search_controller.dart' as search_controller;
 
 class MapController extends GetxController {
-  final CustomInfoWindowController customInfoWindowController
+  final CustomInfoWindowController infoWindowController
     = CustomInfoWindowController();
   late GoogleMapController mapController;
 
-  search_controller.SearchController get searchController {
-    return Get.find<search_controller.SearchController>();
-  }
+  NavigationService get navigationService => Get.find<NavigationService>();
+  NearbyStopsController get nearbyStopsController => Get.find<NearbyStopsController>();
+  SheetController get sheetController => Get.find<SheetController>();
 
   final MapUtils mapUtils = MapUtils();
+  final PtvService ptvService = PtvService();
 
   late Circle radiusCircle;
   LatLng? markerPos;
   RxSet<Marker> markers = <Marker>{}.obs;
   RxSet<Circle> circles = <Circle>{}.obs;
   RxSet<Polyline> polylines = <Polyline>{}.obs;
+  List<LatLng> geoPath = [];
   Set<Marker> nearbyStopMarkers = {};
   TripPath? tripPath;
 
@@ -40,39 +45,12 @@ class MapController extends GetxController {
       144.96358311072478).obs;
 
   RxBool isNearbyStopsButtonToggled = false.obs;
+  bool areNearbyStopMarkersInitialized = false;
   bool shouldRenderMarkers = false;
-
-  /// On map initialization
-  void setController(GoogleMapController controller) {
-    mapController = controller;
-    customInfoWindowController.googleMapController = controller;
-  }
-
-  void clearMap() {
-    markers.clear();
-    circles.clear();
-    polylines.clear();
-    nearbyStopMarkers.clear();
-    clearTripPath();
-    customInfoWindowController.hideInfoWindow!();
-  }
-
-  /// Clears markers set and adds primary marker if location is set
-  void resetMarkers() {
-    if (locationMarker != null) {
-      markers = {locationMarker!}.obs;
-    }
-    else {
-      markers.clear();
-    }
-  }
-
-  void clearTripPath() {
-    tripPath = null;
-  }
 
   /// On pin drop
   Future<void> onLocationSelected(LatLng location) async {
+    areNearbyStopMarkersInitialized = false;
     clearMap();
     markerPos = location;
 
@@ -89,34 +67,30 @@ class MapController extends GetxController {
       location.latitude,
       location.longitude
     );
-    final searchController = Get.find<search_controller.SearchController>();
-    await searchController.pushLocation(location, address);
 
-    Get.find<SheetNavigationController>().animateSheetTo(0.5);
+    await navigationService.navigateToNearbyStops(markerPos!, address);
 
     await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
       controller: mapController,
       center: location,
-      radiusInMeters: Get.find<NearbyStopsController>().distanceInMeters
+      radiusInMeters: nearbyStopsController.distanceInMeters
     );
   }
 
+  /// Initializes nearby stop markers (on pin drop/filter change)
   Future<void> initialiseNearbyStopMarkers() async {
-    // customInfoWindowController.hideInfoWindow!();
     tappedStopId = null;
     tappedStopMarker = null;
-    List<Stop> stops = Get.find<NearbyStopsController>().filteredStops;
+    List<Stop> stops = nearbyStopsController.filteredStops;
 
-    // Always update circle regardless of stop list
     radiusCircle = Circle(
       circleId: CircleId("circle"),
       center: markerPos!,
       fillColor: Colors.blue.withValues(alpha: 0.2),
       strokeWidth: 0,
-      radius: Get.find<NearbyStopsController>().distanceInMeters
+      radius: nearbyStopsController.distanceInMeters
     );
 
-    // Handle nearby stop markers
     if (stops.isEmpty) {
       nearbyStopMarkers.clear();
     } else {
@@ -127,21 +101,21 @@ class MapController extends GetxController {
           20,
           20,
         ),
-        onTapStop: handleStopTapOnMap,
+        onTapStop: handleNearbyStopTap,
       );
 
       nearbyStopMarkers
         ..clear()
         ..addAll(newNearbyStopMarkers);
     }
-
-    // Always update map if the toggle is on
-    if (isNearbyStopsButtonToggled.value) {
-      await showNearbyStopMarkers();
-    }
   }
 
+  /// Shows nearby stops on map
   Future<void> showNearbyStopMarkers() async {
+    if (!areNearbyStopMarkersInitialized) {
+      await initialiseNearbyStopMarkers();
+    }
+
     isNearbyStopsButtonToggled.value = true;
 
     Set<Marker> newMarkers = {};
@@ -154,6 +128,7 @@ class MapController extends GetxController {
     circles.assignAll({radiusCircle});
   }
 
+  /// Hides nearby stops from map
   void hideNearbyStopMarkers() {
     isNearbyStopsButtonToggled.value = false;
 
@@ -164,17 +139,18 @@ class MapController extends GetxController {
     }
 
     circles.clear();
-    customInfoWindowController.hideInfoWindow!();
+    infoWindowController.hideInfoWindow!();
   }
 
-  void handleStopTapOnMap(Stop stop) async {
+  /// Handles tapping on a nearby stop on map
+  void handleNearbyStopTap(Stop stop) async {
     final largeIcon = await mapUtils.getResizedImage(
         "assets/icons/${stop.routeType?.name} Marker.png", 35, 55);
 
-    for (var s in searchController.details.value.stops!) {
-      searchController.setStopExpanded(s.id, false);
+    for (var s in nearbyStopsController.stops) {
+      nearbyStopsController.setStopExpanded(s.id, false);
     }
-    searchController.setStopExpanded(stop.id, true);
+    nearbyStopsController.setStopExpanded(stop.id, true);
 
     if (tappedStopId != null) {
       markers.removeWhere((m) => m.markerId == MarkerId(tappedStopId!));
@@ -193,41 +169,32 @@ class MapController extends GetxController {
       consumeTapEvents: true,
     ));
 
-    customInfoWindowController.addInfoWindow!(
+    infoWindowController.addInfoWindow!(
       StopInfoWindow(stop: stop),
       LatLng(stop.latitude!, stop.longitude!),
     );
 
-    int stopIndex = Get.find<NearbyStopsController>().filteredStops.indexOf(stop);
-    Get.find<SheetNavigationController>().animateSheetTo(0.7);
-    Get.find<NearbyStopsController>().scrollToStopItem(stopIndex);
+    int stopIndex = nearbyStopsController.filteredStops.indexOf(stop);
+    sheetController.animateSheetTo(0.7);
+    nearbyStopsController.scrollToStopItem(stopIndex);
   }
-  
-  Future<void> setTripPath() async {
+
+  /// Initializes trip path for a new route
+  Future<void> setTripPath(pt_route.Route route, {Stop? stop}) async {
+    List<LatLng> geoPath = await ptvService.fetchGeoPath(route);
+    setGeoPath(geoPath);
+
     tripPath = TripPath(
-        searchController.details.value.geoPath!,
-        searchController.details.value.route!.stopsAlongRoute,
-        searchController.details.value.stop,
-        searchController.details.value.route!.colour!,
+        geoPath,
+        route.stopsAlongRoute,
+        stop,
+        route.colour!,
         markerPos
     );
     await tripPath!.initializeFullPath();
   }
 
-  Future<void> showPolyLine() async {
-    /// Move camera to show marker
-    if (tripPath!.polyLines.isNotEmpty &&
-        searchController.details.value.geoPath!.isNotEmpty) {
-      await mapUtils.centerMapOnPolyLine(
-        tripPath!.showDirection ? tripPath!.futurePolyLine!.points : searchController
-            .details.value.geoPath!,
-        mapController,
-        Get.context!,
-        true,
-      );
-    }
-  }
-
+  /// Renders full polyline on map
   Future<void> renderTripPath() async {
     hideNearbyStopMarkers();
 
@@ -247,10 +214,23 @@ class MapController extends GetxController {
     }
   }
 
+  /// Updates zoom/center of map to show chosen polyline segment
+  Future<void> showPolyLine() async {
+    if (tripPath!.polyLines.isNotEmpty && geoPath.isNotEmpty) {
+      await mapUtils.centerMapOnPolyLine(
+        tripPath!.showDirection ? tripPath!.futurePolyLine!.points : geoPath,
+        mapController,
+        Get.context!,
+        true,
+      );
+    }
+  }
+
   /// Handles zoom and camera move events
   void onCameraMove(CameraPosition position) {
-    if (searchController.details.value.route != null
-        && currentZoom.value != position.zoom && shouldRenderMarkers) {
+    if (sheetController.currentSheet.value != "Nearby Stops"
+        && currentZoom.value != position.zoom
+        && shouldRenderMarkers) {
       if (mapUtils.didZoomChange(currentZoom.value, position.zoom)) {
         tripPath?.onZoomChange(position.zoom);
 
@@ -267,9 +247,38 @@ class MapController extends GetxController {
     }
     else {
       currentZoom.value = position.zoom;
-      customInfoWindowController.onCameraMove!();
+      infoWindowController.onCameraMove!();
     }
   }
+
+  /// On map initialization
+  void setController(GoogleMapController controller) {
+    mapController = controller;
+    infoWindowController.googleMapController = controller;
+  }
+
+  /// Clears all polyLines, markers, and circles
+  void clearMap() {
+    markers.clear();
+    circles.clear();
+    polylines.clear();
+    nearbyStopMarkers.clear();
+    clearTripPath();
+    infoWindowController.hideInfoWindow!();
+  }
+
+  /// Clears markers set and adds primary marker if location is set
+  void resetMarkers() {
+    if (locationMarker != null) {
+      markers = {locationMarker!}.obs;
+    }
+    else {
+      markers.clear();
+    }
+  }
+
+  void clearTripPath() => tripPath = null;
+  void setGeoPath(List<LatLng> newGeoPath) => geoPath = newGeoPath;
 }
 
 

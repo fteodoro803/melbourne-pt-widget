@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/domain/trip.dart';
 import '../utility/trip_utils.dart';
-import 'trip_widgets.dart';
+import 'trip_info_widgets.dart';
 
 import '../utility/time_utils.dart';
 
@@ -66,73 +66,83 @@ class CustomListTile extends StatelessWidget {
     },
 
     // Information Tile
-    child: ListTile(
-      contentPadding: EdgeInsets.only(left: 12, right: 0, top: 4),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // LocationWidget above the vertical line
-          LocationWidget(
-              textField: transport.stop!.name,
-              textSize: 16,
-              scrollable: false),
-          Row(children: [
-            Expanded(
-              child: RouteWidget(
-                route: transport.route!,
-                direction: transport.direction,
-                scrollable: false,),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (String choice) {
-                if (choice == 'Remove from Favourites') {
-                  onDismiss!();
-                }
-              },
-              icon: const Icon(Icons.more_vert, size: 30),
-              itemBuilder: (BuildContext context) {
-                return {'Remove from Favourites'}.map((String choice) {
-                  return PopupMenuItem<String>(
-                    value: choice,
-                    child: Text(choice),
-                  );
-                }).toList();
-              },
-            ),
-          ]),
+    child: Stack(
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.only(left: 12, right: 30, top: 4, bottom: 0),
+          title: Column(
+            spacing: 2,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // LocationWidget above the vertical line
+              LocationWidget(
+                  textField: transport.stop!.name,
+                  textSize: 16,
+                  scrollable: false),
+              SizedBox(height: 2),
+              Row(children: [
+                Expanded(
+                  child: NewRouteWidget(
+                    route: transport.route!,
+                    direction: transport.direction,
+                    scrollable: false,),
+                ),
+              ]),
 
 
-          // Row for the vertical line and the rest of the widgets
-          if (transport.departures != null)
-            ListTile(
-              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-              dense: true,
-              contentPadding: EdgeInsets.only(left: 0, right: 16, top: 0, bottom: 0),
-              leading: Icon(Icons.access_time_filled),
-              title: DeparturesStringWidget(departures: transport.departures),
-              trailing: departure != null
-                  && status!.hasDeparted == false
-                  && status.isWithinAnHour == true
-                ? Container(
-                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: ColourUtils.hexToColour(status.getColorString),
-                    borderRadius: BorderRadius.circular(12)
-                  ),
-                  child: Text(
-                    minutesString!,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15
-                    ),
-                  ))
-                : null,
-            ),
-        ],
-      ),
-      onTap: onTap,
-    ),
-  );  }
+              if (transport.departures != null)
+                ListTile(
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.access_time_filled),
+                  title: DeparturesStringWidget(departures: transport.departures),
+                  trailing: departure != null
+                      && status!.hasDeparted == false
+                      && status.isWithinAnHour == true
+                      ? Container(
+                      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                      decoration: BoxDecoration(
+                          color: ColourUtils.hexToColour(status.getColorString),
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Text(
+                        minutesString!,
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15
+                        ),
+                      ))
+                      : null,
+                ),
+            ],
+          ),
+          onTap: onTap,
+        ),
+        Positioned(
+          right: -4,
+          top: 32,
+          child: PopupMenuButton<String>(
+            onSelected: (String choice) {
+              if (choice == 'Remove from Favourites') {
+                onDismiss!();
+              }
+            },
+            icon: const Icon(Icons.more_vert, size: 30),
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            itemBuilder: (BuildContext context) {
+              return {'Remove from Favourites'}.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice, style: TextStyle(fontSize: 16)),
+                );
+              }).toList();
+            },
+          ),
+        ),
+      ]),
+    );
+  }
 }
 

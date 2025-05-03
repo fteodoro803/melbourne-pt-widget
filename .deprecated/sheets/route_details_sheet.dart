@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
+import 'package:flutter_project/add_screens/widgets/trip_info_widgets.dart';
 
 import '../../domain/direction.dart';
 import '../../domain/route.dart' as pt_route;

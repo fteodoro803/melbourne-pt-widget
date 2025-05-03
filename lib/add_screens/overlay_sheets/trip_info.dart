@@ -7,19 +7,19 @@ import '../../domain/disruption.dart';
 import '../../domain/stop.dart';
 import '../../domain/route.dart' as pt_route;
 import '../../ptv_service.dart';
-import '../controllers/search_controller.dart' as search_controller;
+import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../utility/time_utils.dart';
 import '../utility/trip_utils.dart';
-import 'get_widgets.dart';
+import '../widgets/trip_info_widgets.dart';
 
 
-class TripDetails extends StatefulWidget {
+class TripInfoSheet extends StatefulWidget {
   final pt_route.Route route;
   final Stop stop;
   final List<Disruption> disruptions;
 
-  const TripDetails({
+  const TripInfoSheet({
     super.key,
     required this.route,
     required this.stop,
@@ -27,10 +27,12 @@ class TripDetails extends StatefulWidget {
   });
 
   @override
-  TripDetailsState createState() => TripDetailsState();
+  TripInfoSheetState createState() => TripInfoSheetState();
 }
 
-class TripDetailsState extends State<TripDetails> {
+class TripInfoSheetState extends State<TripInfoSheet> {
+  final NavigationService navigationService = Get.find<NavigationService>();
+
   List<Stop> nearbyStops = [];
   List<Disruption> plannedDisruptions = [];
   List<Disruption> currentDisruptions = [];
@@ -40,6 +42,7 @@ class TripDetailsState extends State<TripDetails> {
   @override
   void initState() {
     super.initState();
+
 
     for (var disruption in widget.disruptions) {
       if (disruption.status == 'Planned') {
@@ -54,7 +57,7 @@ class TripDetailsState extends State<TripDetails> {
 
   Future<void> getConnections() async {
     LatLng stopLocation = LatLng(widget.stop.latitude!, widget.stop.longitude!);
-    List<Stop> uniqueStops = await searchUtils.getStops(stopLocation, "all", 200);
+    List<Stop> uniqueStops = await searchUtils.getUniqueStops(stopLocation, "all", 200);
     setState(() {
       nearbyStops = uniqueStops;
     });
@@ -217,11 +220,7 @@ class TripDetailsState extends State<TripDetails> {
           children: [
             Row(
               children: [
-                Image.asset(
-                  "assets/icons/PTV ${stop.routeType?.name ?? 'default'} Logo.png",
-                  width: 25,
-                  height: 25,
-                ),
+                RouteTypeImage(routeType: stop.routeType!.name, size: 25),
                 SizedBox(width: 8),
                 Expanded(
                   child: LocationWidget(
@@ -250,41 +249,40 @@ class TripDetailsState extends State<TripDetails> {
                   final routeName = TripUtils.getName(route, route.type.name);
 
                   return ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                      trailing: Icon(Icons.keyboard_arrow_right_outlined),
-                      leading: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: route.colour != null
-                              ? ColourUtils.hexToColour(route.colour!)
-                              : Colors.grey,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 280),
-                          child: Text(
-                            routeLabel ?? '',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: route.textColour != null
-                                  ? ColourUtils.hexToColour(route.textColour!)
-                                  : Colors.black,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                    dense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                    trailing: Icon(Icons.keyboard_arrow_right_outlined),
+                    leading: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: route.colour != null
+                            ? ColourUtils.hexToColour(route.colour!)
+                            : Colors.grey,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 280),
+                        child: Text(
+                          routeLabel ?? '',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: route.textColour != null
+                                ? ColourUtils.hexToColour(route.textColour!)
+                                : Colors.black,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
-                      title: routeName != null
-                          ? Text(routeName, style: TextStyle(fontSize: 14, height: 1.1))
-                          : null,
-                      onTap: () async {
-                        await Get.find<search_controller.SearchController>().setRoute(route);
-                        await Get.find<search_controller.SearchController>().pushStop(stop);
-                        Navigator.pop(context);
-                      }
+                    ),
+                    title: routeName != null
+                        ? Text(routeName, style: TextStyle(fontSize: 14, height: 1.1))
+                        : null,
+                    onTap: () async {
+                      await navigationService.navigateToStop(stop, route);
+                      Navigator.pop(context);
+                    }
                   );
                 },
               ),
@@ -305,9 +303,9 @@ class TripDetailsState extends State<TripDetails> {
     return ListView.builder(
       physics: NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: plannedDisruptions.length,
+      itemCount: disruptions.length,
       itemBuilder: (context, index) {
-        final disruption = plannedDisruptions[index];
+        final disruption = disruptions[index];
         final startDate = disruption.fromDate;
         final endDate = disruption.toDate;
         String startDateString = "Unknown";

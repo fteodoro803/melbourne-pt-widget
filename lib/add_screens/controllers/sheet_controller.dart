@@ -1,14 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
-class SheetNavigationController extends GetxController {
-  final Rx<String> currentSheet = ''.obs;
-  final RxList<String> sheetHistory = <String>[].obs;
+class Sheet {
+  String? name;
+  dynamic state;
+
+  Sheet({this.name, this.state});
+
+  @override
+  String toString() {
+    return 'Sheet(name: $name, state: $state)';
+  }
+}
+
+class SheetController extends GetxController {
+
+  final RxList<Sheet> navigationStack = <Sheet>[].obs;
+  final Rx<Sheet> currentSheet = Sheet().obs;
+  final RxBool showSheet = false.obs;
+
   final Rx<Map<String, double>> scrollPositions = Rx<Map<String, double>>({});
   Rx<bool> isSheetExpanded = false.obs;
   double initialSheetSize = 0.4;
 
-  // Don't use late - initialize immediately
   final DraggableScrollableController scrollableController = DraggableScrollableController();
   bool _isListenerAdded = false;
 
@@ -19,7 +33,7 @@ class SheetNavigationController extends GetxController {
 
     // Add listener to the controller
     try {
-      scrollableController.addListener(handleScrollChange);
+      scrollableController.addListener(handleSizeChange);
       _isListenerAdded = true;
       print("SheetNavigationController: Listener added successfully");
     } catch (e) {
@@ -27,11 +41,7 @@ class SheetNavigationController extends GetxController {
     }
   }
 
-  void setInitialSheetSize(double size) {
-    initialSheetSize = size;
-  }
-
-  void handleScrollChange() {
+  void handleSizeChange() {
     try {
       if (scrollableController.size >= 0.75 && !isSheetExpanded.value) {
         isSheetExpanded.value = true;
@@ -66,46 +76,28 @@ class SheetNavigationController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    print("SheetNavigationController: onClose called");
+  void pushSheet(String newSheet, dynamic newState) {
 
-    try {
-      if (_isListenerAdded) {
-        scrollableController.removeListener(handleScrollChange);
-        _isListenerAdded = false;
-      }
+    if (scrollableController.isAttached) {
+      scrollPositions.value[currentSheet.value.name!] = scrollableController.size;
 
-      scrollableController.dispose();
-      print("SheetNavigationController: Controller successfully disposed");
-    } catch (e) {
-      print("SheetNavigationController: Error disposing controller - $e");
     }
-
-    super.onClose();
-  }
-
-  void pushSheet(String newSheet) {
-
-    if (currentSheet.value != newSheet) {
-      if (scrollableController.isAttached) {
-        scrollPositions.value[currentSheet.value] = scrollableController.size;
-
-      }
-      sheetHistory.add(currentSheet.value);
-      currentSheet.value = newSheet;
-      // _animateToSavedPosition(newSheet);
-    }
+    currentSheet.value = Sheet(name: newSheet, state: newState);
+    navigationStack.add(currentSheet.value);
+    print(navigationStack);
+    // _animateToSavedPosition(newSheet);
   }
 
   void popSheet() {
-    if (sheetHistory.isNotEmpty) {
-      final previous = sheetHistory.removeLast();
+    if (navigationStack.isNotEmpty) {
+      final previous = navigationStack.removeLast();
       if (scrollableController.isAttached) {
-        scrollPositions.value[currentSheet.value] = scrollableController.size;
+        scrollPositions.value[currentSheet.value.name!] = scrollableController.size;
       }
-      currentSheet.value = previous;
-      animateToSavedPosition(previous);
+      if (navigationStack.isNotEmpty) {
+        currentSheet.value = navigationStack.last;
+      }
+      animateToSavedPosition(previous.name!);
     }
   }
 
@@ -118,5 +110,24 @@ class SheetNavigationController extends GetxController {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  @override
+  void onClose() {
+    print("SheetNavigationController: onClose called");
+
+    try {
+      if (_isListenerAdded) {
+        scrollableController.removeListener(handleSizeChange);
+        _isListenerAdded = false;
+      }
+
+      scrollableController.dispose();
+      print("SheetNavigationController: Controller successfully disposed");
+    } catch (e) {
+      print("SheetNavigationController: Error disposing controller - $e");
+    }
+
+    super.onClose();
   }
 }

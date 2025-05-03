@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/add_screens/widgets/screen_widgets.dart';
+import 'package:flutter_project/add_screens/widgets/buttons.dart';
 
 class SheetNavigator extends StatefulWidget {
   final Map<String, Widget Function(BuildContext, ScrollController)> sheets;

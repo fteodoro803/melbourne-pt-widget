@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_project/add_screens/controllers/search_controller.dart' as search_controller;
-import 'package:flutter_project/add_screens/controllers/sheet_navigator_controller.dart';
+import 'package:flutter_project/add_screens/controllers/sheet_controller.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 

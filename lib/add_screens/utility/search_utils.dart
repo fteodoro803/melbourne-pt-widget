@@ -1,3 +1,6 @@
+import 'package:floating_snackbar/floating_snackbar.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:flutter_project/api_data.dart';
@@ -15,7 +18,6 @@ class UniqueStop {
 
   UniqueStop(this.id, this.type);
 
-  // Override == operator and hashCode to ensure uniqueness by both first and second elements.
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -42,6 +44,7 @@ class SuburbStops {
 class SearchUtils {
   PtvService ptvService = PtvService();
 
+  /// Returns all trips in all directions a given route travels from a stop
   Future<List<Trip>> splitDirection(Stop stop, pt_route.Route route) async {
     String? routeId = route.id.toString();
     List<Direction> directions = [];
@@ -82,7 +85,9 @@ class SearchUtils {
     return transportList;
   }
 
-  Future<List<Stop>> getStops(LatLng position, String transportType, int distance) async {
+  /// Finds all stops and routes of a given transport type at a given distance from a position
+  /// Separates stops by route type and prevents duplicates
+  Future<List<Stop>> getUniqueStops(LatLng position, String transportType, int distance) async {
     StopRouteLists stopRouteLists;
 
     if (transportType == "all") {
@@ -142,10 +147,8 @@ class SearchUtils {
     return uniqueStops;
   }
 
-  Future<List<Direction>> getRouteDirections(int routeId) async {
-    return await ptvService.fetchDirections(routeId);
-  }
-
+  /// Finds the sequence of stops along a given route
+  /// Removes stops that are no longer active
   Future<List<Stop>> getStopsAlongRoute(List<Direction> directions, pt_route.Route route) async {
     List<Stop> stops = [];
     if (directions.isNotEmpty) {
@@ -159,6 +162,7 @@ class SearchUtils {
     return stops;
   }
 
+  /// Takes a list of stops along a route and groups them based on suburb
   Future<List<SuburbStops>> getSuburbStops(List<Stop> stopsAlongRoute, pt_route.Route route) async {
 
     List<SuburbStops> suburbStopsList = [];
@@ -194,6 +198,7 @@ class SearchUtils {
     return suburbStopsList;
   }
 
+  /// Handles adding/remove transport from favourites
   Future<void> handleSave(Trip transport) async {
     bool isSaved = await ptvService.isTripSaved(transport);
     if (!isSaved) {
@@ -201,5 +206,26 @@ class SearchUtils {
     } else {
       await ptvService.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
     }
+  }
+
+  static void renderSnackBar(BuildContext context, bool isSaved) {
+    floatingSnackBar(
+      message: isSaved ? 'Added to Saved Trips.' : 'Removed from Saved Trips.',
+      context: context,
+      textStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+      duration: const Duration(milliseconds: 2000),
+      backgroundColor: isSaved ? Color(0xFF4E754F) : Color(0xFF7C291F),
+    );
+  }
+
+  /// Finds the stops along a route and the directions for a route
+  Future<pt_route.Route> initializeRoute(pt_route.Route route) async {
+    List<Direction> directions = await ptvService.fetchDirections(route.id);
+    List<Stop> stopsAlongRoute = await getStopsAlongRoute(directions, route);
+    pt_route.Route newRoute = route;
+    newRoute.directions = directions;
+    newRoute.stopsAlongRoute = stopsAlongRoute;
+
+    return newRoute;
   }
 }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/search_screen.dart';
-import 'package:flutter_project/add_screens/widgets/trip_widgets.dart';
+import 'package:flutter_project/add_screens/widgets/trip_info_widgets.dart';
 import 'package:get/get.dart';
-import '../../domain/route.dart' as pt_route;
-import '../../ptv_service.dart';
-import '../controllers/search_controller.dart';
-import '../search_binding.dart';
-import '../widgets/bottom_navigation_bar.dart';
-import '../widgets/screen_widgets.dart' as ScreenWidgets;
+import '../domain/route.dart' as pt_route;
+import '../ptv_service.dart';
+import 'search_binding.dart';
+import 'widgets/bottom_navigation_bar.dart';
+import 'widgets/buttons.dart' as ScreenWidgets;
 
 enum BusFilter {
   metro(name: "Metro", id: "4"),
@@ -47,7 +46,6 @@ class FindRoutesScreen extends StatefulWidget {
 }
 
 class _FindRoutesScreenState extends State<FindRoutesScreen> {
-  SearchDetails searchDetails = SearchDetails();
   TextEditingController _searchController = TextEditingController();
 
   Map<String, bool> _transportTypeFilters = {};
@@ -249,10 +247,10 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: _transportTypeFilters.keys.map((transportType) {
               final isSelected = _transportTypeFilters[transportType] ?? false;
-              return ScreenWidgets.TransportToggleButton(
+              return ScreenWidgets.RouteTypeToggleButton(
                 isSelected: isSelected,
-                transportType: transportType,
-                handleTransportToggle: _filterByType,
+                routeType: transportType,
+                handleRouteTypeToggle: _filterByType,
               );
             }).toList(),
           ),
@@ -307,6 +305,18 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
           ],
 
           if (!(_selectedRouteType == "all" && _searchController.text == ""))...[
+            if (_filteredRoutesBySearch.isEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30.0),
+                child: Text(
+                  "No routes found.",
+                  style: TextStyle(
+                      fontSize: 16
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
             Expanded(
               child: ListView.builder(
                 itemCount: _filteredRoutesBySearch.length,
@@ -321,7 +331,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                     child: ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      leading: RouteLabelContainer(route: route),
+                      leading: RouteLabelContainer(route: route, textSize: 16),
                       title: routeType != "train"
                         ? Text(
                             route.name,
@@ -335,10 +345,8 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                       trailing: Icon(Icons.arrow_forward_ios, size: 14),
                       onTap: () =>
                         Get.to(
-                              () => SearchScreen(searchDetails: SearchDetails.withRoute(route), enableSearch: false),
-                          binding: SearchBinding(
-                            searchDetails: SearchDetails.withRoute(route), // Pass actual data
-                          ),
+                              () => SearchScreen(route: route, enableSearch: false),
+                          binding: SearchBinding(),
                         )
                     )
                   );

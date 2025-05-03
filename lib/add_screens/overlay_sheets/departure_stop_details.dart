@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/stop.dart';
-import '../../domain/trip.dart';
-
 class ExtraStopDetails extends StatelessWidget {
 
   const ExtraStopDetails({

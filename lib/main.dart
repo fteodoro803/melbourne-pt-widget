@@ -19,9 +19,8 @@ import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
-import "add_screens/controllers/search_controller.dart";
 import "add_screens/search_binding.dart";
-import "add_screens/sheet_ui/find_routes_screen.dart";
+import "add_screens/find_routes_screen.dart";
 
 import "add_screens/search_screen.dart";
 import "home_widget_service.dart";
@@ -74,7 +73,8 @@ class _MyAppState extends State<MyApp> {
                 final args = Get.arguments as Map<String, dynamic>?;
 
                 return SearchScreen(
-                  searchDetails: args?['searchDetails'] ?? SearchDetails(),
+                  route: args?['route'],
+                  trip: args?['trip'],
                   enableSearch: args?['enableSearch'] ?? false,
                 );
               },
@@ -246,8 +246,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           onTap: () =>
                             Get.to(
-                              () => SearchScreen(searchDetails: SearchDetails.withTrip(_tripList[index]), enableSearch: false),
-                              binding: SearchBinding(searchDetails: SearchDetails()),
+                              () => SearchScreen(trip: _tripList[index], enableSearch: false),
+                              binding: SearchBinding(),
                             )
                         ),
                       ),
@@ -261,8 +261,9 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+
+      foregroundColor: Colors.white,
         overlayColor: Colors.black,
         overlayOpacity: 0.5,
         spacing: 10,
@@ -271,16 +272,17 @@ class _MyHomePageState extends State<MyHomePage> {
           SpeedDialChild(
             child: Icon(Icons.route),
             label: 'See All Routes',
+            labelStyle: TextStyle(fontSize: 16),
             onTap: () => Get.to(() => FindRoutesScreen()),
           ),
           SpeedDialChild(
             child: Icon(Icons.search),
             label: 'Map Search',
+            labelStyle: TextStyle(fontSize: 16),
             onTap: () => Get.to(() => SearchScreen(
-              searchDetails: SearchDetails(),
               enableSearch: true,
             ),
-              binding: SearchBinding(searchDetails: SearchDetails()),
+              binding: SearchBinding(),
             ),
           ),
         ],

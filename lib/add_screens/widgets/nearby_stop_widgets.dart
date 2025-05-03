@@ -1,49 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/add_screens/widgets/trip_info_widgets.dart';
+import 'package:get/get.dart';
 
 import '../../domain/route.dart' as pt_route;
 import '../../domain/stop.dart';
+import '../controllers/nearby_stops_controller.dart';
+import '../overlay_sheets/distance_filter.dart';
 import '../utility/trip_utils.dart';
-
-class LocationWidget extends StatelessWidget {
-  const LocationWidget({
-    super.key,
-    required this.textField,
-    required this.textSize,
-    required this.scrollable,
-  });
-
-  final String textField;
-  final double textSize;
-  final bool scrollable;
-
-  @override
-  Widget build(BuildContext context) {
-
-    var textLine = Text(
-      textField,
-      style: TextStyle(fontSize: textSize),
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-    );
-
-    return Row(
-      children: [
-        Icon(Icons.location_pin, size: textSize + 2),
-        SizedBox(width: 4),
-        scrollable ?
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: textLine,
-          ),
-        )
-            : Flexible(
-          child: textLine,
-        ),
-      ],
-    );
-  }
-}
+import 'buttons.dart' as screen_widgets;
 
 class ExpandedStopWidget extends StatelessWidget {
   const ExpandedStopWidget({
@@ -66,18 +30,18 @@ class ExpandedStopWidget extends StatelessWidget {
             Expanded(
               child: Text(
                 stopName,
-                style: TextStyle(fontSize: 17, height: 1.1, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 16, height: 1.1, fontWeight: FontWeight.w700),
 
               ),
             ),
           ],
         ),
-        SizedBox(height: 6),
+        SizedBox(height: 2),
         Row(
           children: [
             Icon(Icons.directions_walk, size: 20),
             SizedBox(width: 4),
-            Text("${distance?.round()}m", style: TextStyle(fontSize: 17)),
+            Text("${distance?.round()}m", style: TextStyle(fontSize: 16)),
           ],
         )
       ],);
@@ -100,7 +64,8 @@ class UnexpandedStopWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        LocationWidget(textField: stopName, textSize: 18, scrollable: false),
+        LocationWidget(textField: stopName, textSize: 16, scrollable: false),
+        SizedBox(height: 2),
         Align(
           alignment: Alignment.topLeft,
           child: SingleChildScrollView(
@@ -122,7 +87,7 @@ class UnexpandedStopWidget extends StatelessWidget {
                   child: Text(
                     routeLabel ?? 'Unknown',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: route.textColour != null
                           ? ColourUtils.hexToColour(route.textColour!)
@@ -194,12 +159,96 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
                 ),
               ),
             ),
-            title: routeName != null ? Text(routeName) : null,
+            title: routeName != null
+                ? Text(
+                  routeName,
+                  style: TextStyle(height: 1.2),
+                )
+                : null,
             onTap: ()  {
               onStopTapped(stop, route);
             },
           );
         }
+    );
+  }
+}
+
+class RouteTypeButtons extends StatelessWidget {
+  const RouteTypeButtons({super.key});
+
+  NearbyStopsController get nearbyController => Get.find<NearbyStopsController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: 8,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: nearbyController.routeTypeFilters.keys.map((routeType) {
+        final isSelected = nearbyController.routeTypeFilters[routeType] ?? false;
+        return screen_widgets.RouteTypeToggleButton(
+            isSelected: isSelected,
+            routeType: routeType,
+            handleRouteTypeToggle: (routeType) {
+              nearbyController.toggleRouteType(routeType);
+            }
+        );
+      }).toList(),
+    );
+  }
+}
+
+class ToggleFilterChips extends StatelessWidget {
+  const ToggleFilterChips({super.key});
+
+  NearbyStopsController get nearbyController => Get.find<NearbyStopsController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 5.0,
+      children:
+      ToggleableFilter.values.map((ToggleableFilter result) {
+        return FilterChip(
+            label: Text(result.name),
+            selected: nearbyController.filters.contains(result),
+            onSelected: (bool selected) {
+              if (selected) {
+                nearbyController.filters.add(result);
+              } else {
+                nearbyController.filters.remove(result);
+              }
+            }
+        );
+      }).toList(),
+    );
+  }
+}
+
+class DistanceFilterChip extends StatelessWidget {
+  const DistanceFilterChip({super.key});
+
+  NearbyStopsController get nearbyController => Get.find<NearbyStopsController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Icon(Icons.keyboard_arrow_down_sharp),
+      label: Text('Within ${nearbyController.selectedDistance.value}${nearbyController.selectedUnit.value}'),
+      onPressed: () async {
+        await showModalBottomSheet(
+            constraints: BoxConstraints(maxHeight: 500),
+            context: context,
+            builder: (BuildContext context) {
+              return DistanceFilterSheet(
+                  selectedDistance: nearbyController.selectedDistance.value,
+                  selectedUnit: nearbyController.selectedUnit.value,
+                  onConfirmPressed: (distance, unit) {
+                    nearbyController.updateDistance(distance, unit);
+                  }
+              );
+            });
+      },
     );
   }
 }
