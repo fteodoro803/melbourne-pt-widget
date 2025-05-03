@@ -17,14 +17,12 @@ import '../widgets/trip_info_widgets.dart';
 class TripInfoSheet extends StatefulWidget {
   final pt_route.Route route;
   final Stop stop;
-  final dynamic state;
   final List<Disruption> disruptions;
 
   const TripInfoSheet({
     super.key,
     required this.route,
     required this.stop,
-    required this.state,
     required this.disruptions
   });
 
@@ -44,6 +42,7 @@ class TripInfoSheetState extends State<TripInfoSheet> {
   @override
   void initState() {
     super.initState();
+
 
     for (var disruption in widget.disruptions) {
       if (disruption.status == 'Planned') {
@@ -221,11 +220,7 @@ class TripInfoSheetState extends State<TripInfoSheet> {
           children: [
             Row(
               children: [
-                Image.asset(
-                  "assets/icons/PTV ${stop.routeType?.name ?? 'default'} Logo.png",
-                  width: 25,
-                  height: 25,
-                ),
+                RouteTypeImage(routeType: stop.routeType!.name, size: 25),
                 SizedBox(width: 8),
                 Expanded(
                   child: LocationWidget(
@@ -254,42 +249,40 @@ class TripInfoSheetState extends State<TripInfoSheet> {
                   final routeName = TripUtils.getName(route, route.type.name);
 
                   return ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                      trailing: Icon(Icons.keyboard_arrow_right_outlined),
-                      leading: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: route.colour != null
-                              ? ColourUtils.hexToColour(route.colour!)
-                              : Colors.grey,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 280),
-                          child: Text(
-                            routeLabel ?? '',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: route.textColour != null
-                                  ? ColourUtils.hexToColour(route.textColour!)
-                                  : Colors.black,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                    dense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                    trailing: Icon(Icons.keyboard_arrow_right_outlined),
+                    leading: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: route.colour != null
+                            ? ColourUtils.hexToColour(route.colour!)
+                            : Colors.grey,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 280),
+                        child: Text(
+                          routeLabel ?? '',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: route.textColour != null
+                                ? ColourUtils.hexToColour(route.textColour!)
+                                : Colors.black,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
-                      title: routeName != null
-                          ? Text(routeName, style: TextStyle(fontSize: 14, height: 1.1))
-                          : null,
-                      onTap: () async {
-                        // await Get.find<search_controller.SearchController>().setRoute(route);
-                        navigationService.navigateToStop(stop, route, widget.state);
-                        // await Get.find<search_controller.SearchController>().pushStop(stop);
-                        Navigator.pop(context);
-                      }
+                    ),
+                    title: routeName != null
+                        ? Text(routeName, style: TextStyle(fontSize: 14, height: 1.1))
+                        : null,
+                    onTap: () async {
+                      await navigationService.navigateToStop(stop, route);
+                      Navigator.pop(context);
+                    }
                   );
                 },
               ),
@@ -310,9 +303,9 @@ class TripInfoSheetState extends State<TripInfoSheet> {
     return ListView.builder(
       physics: NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: plannedDisruptions.length,
+      itemCount: disruptions.length,
       itemBuilder: (context, index) {
-        final disruption = plannedDisruptions[index];
+        final disruption = disruptions[index];
         final startDate = disruption.fromDate;
         final endDate = disruption.toDate;
         String startDateString = "Unknown";

@@ -21,6 +21,11 @@ class DepartureDetailsState {
     required this.trip,
     required this.departure,
   });
+
+  @override
+  String toString() {
+    return 'DepartureDetailsState(trip: ${trip.uniqueID}, departure: $departure)';
+  }
 }
 
 class DepartureDetailsSheet extends StatefulWidget {
@@ -37,6 +42,7 @@ class DepartureDetailsSheet extends StatefulWidget {
 
 class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   NavigationService get navigationService => Get.find<NavigationService>();
+  SheetController get sheetController => Get.find<SheetController>();
   final PtvService ptvService = PtvService();
 
   late dynamic _initialState;
@@ -56,7 +62,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    _initialState = navigationService.stateToPush;
+    _initialState = sheetController.currentSheet.value.state;
 
     if (_initialState != null) {
       _departure = _initialState.departure;
@@ -126,7 +132,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
       _currentStopIndex = 0;
     }
 
-    Get.find<SheetController>().animateSheetTo(0.4);
+    // Get.find<SheetController>().animateSheetTo(0.4);
 
     // Scroll to the item after the build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) async {

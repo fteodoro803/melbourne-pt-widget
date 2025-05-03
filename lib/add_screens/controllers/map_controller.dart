@@ -70,8 +70,6 @@ class MapController extends GetxController {
 
     await navigationService.navigateToNearbyStops(markerPos!, address);
 
-    sheetController.animateSheetTo(0.5);
-
     await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
       controller: mapController,
       center: location,

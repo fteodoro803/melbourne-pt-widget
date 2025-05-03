@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../controllers/navigation_service.dart';
 import '../controllers/sheet_controller.dart';
-import 'buttons.dart';
+import '../widgets/buttons.dart';
 
 class SheetNavigatorWidget extends StatelessWidget {
   final Map<String, Widget Function(BuildContext, ScrollController)> sheets;
   final SheetController controller;
+  NavigationService get navigationService => Get.find<NavigationService>();
 
   const SheetNavigatorWidget({
     super.key,
@@ -39,42 +41,36 @@ class SheetNavigatorWidget extends StatelessWidget {
             ],
           ),
           child: Obx(() => controller.isSheetExpanded.value
-              ? Column(
-            children: [
-              const SizedBox(height: 50),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                    onPressed: () {
-                      if (controller.sheetHistory.last == "") {
-                        controller.animateSheetTo(0.6);
-                      } else {
-                        controller.popSheet();
-                      }
-                    }
-                  ),
-                  Expanded(
-                    child: Text(
-                      controller.currentSheet.value,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 18),
+            ? Column(
+              children: [
+                const SizedBox(height: 50),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      onPressed: navigationService.handleBackNavigation,
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.location_pin),
-                    onPressed: () => controller.scrollableController.jumpTo(0.6),
-                  ),
-                ],
-              ),
-              const Divider(),
-              Expanded(child: sheets[controller.currentSheet.value]!(context, scrollController)),
-            ],
-          )
-              : Column(
+                    Expanded(
+                      child: Text(
+                        controller.currentSheet.value.name!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.location_pin),
+                      onPressed: () => controller.scrollableController.jumpTo(0.6),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Expanded(child: sheets[controller.currentSheet.value.name]!(context, scrollController)),
+              ],
+            )
+            : Column(
               children: [
                 HandleWidget(),
-                Expanded(child: sheets[controller.currentSheet.value]!(context, scrollController))
+                Expanded(child: sheets[controller.currentSheet.value.name]!(context, scrollController))
               ]
           )),
         );

@@ -1,7 +1,7 @@
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/add_screens/detail_sheets/route_details.dart';
-import 'package:flutter_project/add_screens/widgets/sheet_navigator_widget.dart';
+import 'package:flutter_project/add_screens/detail_sheets/details_sheet.dart';
 import 'package:flutter_project/add_screens/detail_sheets/stop_details.dart';
 import 'package:flutter_project/add_screens/detail_sheets/trip_details.dart';
 import 'package:flutter_project/add_screens/controllers/navigation_service.dart';
@@ -53,7 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
       if (!widget.enableSearch) {
         if (widget.trip != null) {
           sheetController.initialSheetSize = 0.5;
-          navigationService.navigateToTrip(widget.trip!, null, null);
+          navigationService.navigateToTrip(widget.trip!, null);
         } else {
           sheetController.initialSheetSize = 0.4;
           navigationService.navigateToRoute(widget.route!);
@@ -157,7 +157,7 @@ class _SearchScreenState extends State<SearchScreen> {
               }),
             ],
           ),
-          if (navigationService.showSheet.value) _buildSheets(),
+          if (sheetController.showSheet.value) _buildSheets(),
         ],
       )),
       bottomNavigationBar: BottomNavigation(

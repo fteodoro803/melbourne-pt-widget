@@ -6,6 +6,7 @@ import '../../domain/stop.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import '../controllers/navigation_service.dart';
+import '../controllers/sheet_controller.dart';
 import '../utility/search_utils.dart';
 import '../widgets/sticky_header_delegate.dart';
 
@@ -15,6 +16,11 @@ class RouteDetailsState {
   RouteDetailsState({
     required this.route,
   });
+
+  @override
+  String toString() {
+    return 'RouteDetailsState(route: ${route.id})';
+  }
 }
 
 class RouteDetailsSheet extends StatefulWidget {
@@ -32,8 +38,8 @@ class RouteDetailsSheet extends StatefulWidget {
 class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   SearchUtils searchUtils = SearchUtils();
   final NavigationService navigationService = Get.find<NavigationService>();
+  SheetController get sheetController => Get.find<SheetController>();
   late dynamic _initialState;
-  late RouteDetailsState _state;
 
   late String _direction;
   late pt_route.Route _route;
@@ -43,11 +49,10 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    _initialState = navigationService.stateToPush;
+    _initialState = sheetController.currentSheet.value.state;
 
     if (_initialState != null) {
       _route = _initialState.route;
-      _state = RouteDetailsState(route: _route);
     }
 
     if (_route.directions != null && _route.directions!.isNotEmpty) {
@@ -175,7 +180,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                       title: Text(stop.name, style: TextStyle(fontSize: 15)),
                       trailing: Icon(Icons.keyboard_arrow_right),
                       onTap: () async {
-                        navigationService.navigateToStop(stop, _route, _state);
+                        navigationService.navigateToStop(stop, _route);
                       },
                     ),
 

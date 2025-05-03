@@ -8,10 +8,10 @@ import '../../domain/disruption.dart';
 import '../../domain/trip.dart';
 import '../../ptv_service.dart';
 import '../controllers/navigation_service.dart';
+import '../controllers/sheet_controller.dart';
 import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
-import '../widgets/trip_info_widgets.dart';
-import '../overlay_sheets/trip_info.dart';
+import '../widgets/sheet_header.dart';
 
 class TripDetailsState {
   final Trip trip;
@@ -23,6 +23,11 @@ class TripDetailsState {
     this.disruptions,
     this.filters,
   });
+
+  @override
+  String toString() {
+    return 'TripDetailsState(trip: ${trip.uniqueID}, filters: $filters, disruptions: ${disruptions != null})';
+  }
 }
 
 class TripDetailsSheet extends StatefulWidget {
@@ -39,6 +44,7 @@ class TripDetailsSheet extends StatefulWidget {
 
 class _TripDetailsSheetState extends State<TripDetailsSheet> {
   final NavigationService navigationService = Get.find<NavigationService>();
+  SheetController get sheetController => Get.find<SheetController>();
   late dynamic _initialState;
 
   PtvService ptvService = PtvService();
@@ -52,7 +58,6 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   late List<Departure> _allDepartures;
   late List<Departure> _filteredDepartures;
 
-  late TripDetailsState _state;
   late Timer _departureUpdateTimer;
 
   bool _areDisruptionsInitialized = false;
@@ -62,13 +67,12 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   @override
   void initState() {
     super.initState();
-    _initialState = navigationService.stateToPush;
+    _initialState = sheetController.currentSheet.value.state;
 
     if (_initialState != null) {
       _trip = _initialState.trip;
       _allDepartures = _initialState.trip.departures;
       _filteredDepartures = _allDepartures;
-      _state = TripDetailsState(trip: _trip);
 
       if (_initialState.disruptions != null) {
         _disruptions = _initialState.disruptions;
@@ -126,13 +130,13 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   Future<void> _getDisruptions() async {
     List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_initialState.trip.route!);
     setState(() {
-      _state.disruptions = disruptionsList;
+      sheetController.currentSheet.value.state.disruptions = disruptionsList;
       _disruptions = disruptionsList;
       _areDisruptionsInitialized = true;
     });
   }
 
-  Future<void> _handleSave() async {
+  Future<void> _handleSave(List<bool> list) async {
     setState(() {
       _isSaved = !_isSaved;
     });
@@ -159,116 +163,14 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
       physics: ClampingScrollPhysics(),
       slivers: [
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 12.0, right: 22.0, bottom: 12.0, top: 16.0),
-            child: Column(
-              children: [
-                LocationWidget(textField: _trip.stop!.name, textSize: 18, scrollable: true),
-                SizedBox(height: 6),
-                Row(
-                  children: [
-                    SizedBox(width: 8),
-                    Container(
-                      width: 4,
-                      height: 67,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(2),
-                        color: Color(0xFF717171),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              if (_disruptions.isNotEmpty)...[
-                                GestureDetector(
-                                  child: Icon(Icons.warning_outlined, color: Color(
-                                      0xFFF6833C)),
-                                  onTap: () async {
-                                    await showModalBottomSheet(
-                                      constraints: BoxConstraints(maxHeight: 500),
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return TripInfoSheet(
-                                          route: _trip.route!,
-                                          stop: _trip.stop!,
-                                          disruptions: _disruptions,
-                                          state: _state,
-                                        );
-                                      }
-                                    );
-                                  },
-                                ),
-                                SizedBox(width: 2),
-                              ],
-                              Text("Towards ${_trip.direction!.name}",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      height: 1.4
-                                  )
-                              ),
-                            ],
-                          ),
-
-                          ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                            dense: true,
-                            title: RouteWidget(route: _trip.route!, scrollable: true),
-                            trailing: SizedBox(
-                              width: 63,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    child: Icon(Icons.info, color: Color(
-                                        0xFF4F82FF), size: 27),
-                                    onTap: () async {
-                                      await showModalBottomSheet(
-                                        constraints: BoxConstraints(maxHeight: 500),
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return TripInfoSheet(
-                                            route: _trip.route!,
-                                            stop: _trip.stop!,
-                                            disruptions: _disruptions,
-                                            state: _state,
-                                          );
-                                        }
-                                      );
-                                    },
-                                  ),
-
-                                  SizedBox(width: 4),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      _handleSave();
-                                      SearchUtils.renderSnackBar(context, _isSaved);
-                                    },
-                                    child: Icon(
-                                      _isSaved ? Icons.star : Icons.star_border,
-                                      size: 30,
-                                      color: _isSaved ? Colors.yellow : null,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 12),
-                Divider(height: 0),
-              ],
-            ),
+          child: RouteHeaderWidget(
+            showDirection: true,
+            stop: _trip.stop!,
+            route: _trip.route!,
+            trips: [_trip],
+            disruptions: _disruptions,
+            savedList: [_isSaved],
+            handleSave: _handleSave,
           ),
         ),
 
@@ -290,7 +192,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                       title: Text(
                         "Upcoming Departures",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -341,7 +243,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
                   departure: departure,
                   onDepartureTapped: (departure) {
                     navigationService
-                        .navigateToDeparture(_trip, departure, _state);
+                        .navigateToDeparture(_trip, departure);
                 }),
               );
             },

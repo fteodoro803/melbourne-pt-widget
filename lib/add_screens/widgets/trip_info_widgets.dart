@@ -50,9 +50,11 @@ class RouteLabelContainer extends StatelessWidget {
   const RouteLabelContainer({
     super.key,
     required this.route,
+    required this.textSize,
   });
 
   final pt_route.Route route;
+  final double textSize;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +64,7 @@ class RouteLabelContainer extends StatelessWidget {
     Color routeTextColour = ColourUtils.hexToColour(route.textColour!);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: route.colour != null
             ? routeColour
@@ -72,7 +74,7 @@ class RouteLabelContainer extends StatelessWidget {
       child: Text(
         routeLabel,
         style: TextStyle(
-          fontSize: 16,
+          fontSize: textSize,
           fontWeight: FontWeight.bold,
           color: route.textColour != null
               ? routeTextColour
@@ -81,6 +83,65 @@ class RouteLabelContainer extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
       ),
+    );
+  }
+}
+
+class NewRouteWidget extends StatelessWidget {
+  const NewRouteWidget({
+    super.key,
+    required this.route,
+    this.direction,
+    required this.scrollable,
+  });
+
+  final pt_route.Route route;
+  final Direction? direction;
+  final bool scrollable;
+
+  @override
+  Widget build(BuildContext context) {
+    String routeType = route.type.name;
+
+    return Row(
+      children: [
+        RouteTypeImage(routeType: routeType, size: 27),
+        SizedBox(width: 8),
+        RouteLabelContainer(route: route, textSize: 14.5),
+        SizedBox(width: 10),
+
+        if (routeType != "train" && routeType != "vLine" && direction != null)
+          Flexible(
+            child: Text(
+              "to ${direction?.name}",
+              style: TextStyle(
+                fontSize: 16,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          )
+      ],
+    );
+  }
+}
+
+class RouteTypeImage extends StatelessWidget {
+  const RouteTypeImage({
+    super.key,
+    required this.size,
+    required this.routeType,
+  });
+
+  final String routeType;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      "assets/icons/PTV $routeType Logo.png",
+      width: size,
+      height: size,
     );
   }
 }
@@ -179,7 +240,7 @@ class DeparturesStringWidget extends StatelessWidget {
         if (departures == null || departures!.isEmpty)
           Text(
             "No times to show.",
-            style: TextStyle(height: 1.1),
+            style: TextStyle(height: 1.1, fontSize: 15),
           )
         else
           ...List.generate(
@@ -197,14 +258,14 @@ class DeparturesStringWidget extends StatelessWidget {
                       Text(
                         "At ",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                         ),
                       ),
                     Text(
                       timeString,
                       style: TextStyle(
-                        fontSize: 16,
-                        // fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (hasLowFloor) ...[
@@ -217,7 +278,7 @@ class DeparturesStringWidget extends StatelessWidget {
                         // "•",
                         "and",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                         ),
                       ),
                       SizedBox(width: 4),

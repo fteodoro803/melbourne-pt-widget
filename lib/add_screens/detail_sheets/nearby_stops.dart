@@ -45,7 +45,7 @@ class NearbyStopsSheet extends StatelessWidget {
                 // Location of stop
                 LocationWidget(
                   textField: nearbyController.address.value,
-                  textSize: 18,
+                  textSize: 17,
                   scrollable: true
                 ),
 
@@ -98,10 +98,8 @@ class NearbyStopsSheet extends StatelessWidget {
                           .of(context)
                           .colorScheme
                           .surfaceContainerHigh : null,
-                      margin: EdgeInsets.only(bottom: isExpanded ? 12 : 4,
-                          top: 8,
-                          left: 0,
-                          right: 0),
+                      margin: EdgeInsets.only(
+                          bottom: isExpanded ? 12 : 4, top: 8),
                       child: ListTile(
                         visualDensity: VisualDensity(
                             horizontal: -4, vertical: -4),
@@ -124,9 +122,37 @@ class NearbyStopsSheet extends StatelessWidget {
                                   stopName: stopName, distance: distance),
                               leading: Image.asset(
                                 "assets/icons/PTV $routeType Logo.png",
-                                width: 40,
-                                height: 40,
+                                width: 35,
+                                height: 35,
                               ),
+                              // leading: Column(
+                              //   children: [
+                              //     Image.asset(
+                              //       "assets/icons/PTV $routeType Logo.png",
+                              //       width: 35,
+                              //       height: 35,
+                              //     ),
+                              //     Expanded(
+                              //         child: SizedBox(
+                              //           width: 40,
+                              //           height: 15,
+                              //           child: Row(
+                              //             children: [
+                              //               Icon(Icons.directions_walk, size: 16),
+                              //               Flexible(
+                              //                 child: Text('5 min',
+                              //                   softWrap: true,
+                              //                   maxLines: 2,
+                              //                   overflow: TextOverflow.visible,
+                              //                   style: TextStyle(height: 0.9),
+                              //                   textAlign: TextAlign.center,
+                              //                 ),
+                              //               )
+                              //             ],
+                              //           ),
+                              //         )),
+                              //   ],
+                              // ),
                               trailing: Icon(isExpanded
                                   ? Icons.expand_less : Icons.expand_more),
                               onTap: () {
@@ -148,7 +174,7 @@ class NearbyStopsSheet extends StatelessWidget {
                                 stop: stop,
                                 onStopTapped: (stop, route) async {
                                   await navigationService.navigateToStop(
-                                    stop, route, null);
+                                    stop, route);
                                 },
                               ),
                             ],

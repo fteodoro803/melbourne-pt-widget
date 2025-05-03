@@ -331,7 +331,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
                     child: ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      leading: RouteLabelContainer(route: route),
+                      leading: RouteLabelContainer(route: route, textSize: 16),
                       title: routeType != "train"
                         ? Text(
                             route.name,

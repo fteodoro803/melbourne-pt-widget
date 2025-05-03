@@ -8,10 +8,11 @@ import '../../domain/stop.dart';
 import '../../domain/trip.dart';
 import '../../ptv_service.dart';
 import '../controllers/navigation_service.dart';
+import '../controllers/sheet_controller.dart';
 import '../utility/search_utils.dart';
 import '../widgets/departure_card.dart';
 import '../overlay_sheets/trip_info.dart';
-import '../widgets/new_widgets.dart';
+import '../widgets/sheet_header.dart';
 
 class StopDetailsState {
   final Stop stop;
@@ -25,6 +26,11 @@ class StopDetailsState {
     this.trips,
     this.disruptions,
   });
+
+  @override
+  String toString() {
+    return 'StopDetailsState(stop: ${stop.id}, route: ${route.id}, trips: ${trips?.length}, disruptions: ${disruptions != null})';
+  }
 }
 
 class StopDetailsSheet extends StatefulWidget {
@@ -41,65 +47,88 @@ class StopDetailsSheet extends StatefulWidget {
 
 class _StopDetailsSheetState extends State<StopDetailsSheet> {
   NavigationService get navigationService => Get.find<NavigationService>();
+  SheetController get sheetController => Get.find<SheetController>();
   final SearchUtils searchUtils = SearchUtils();
   final PtvService ptvService = PtvService();
 
-  late dynamic _initialState;
+  late StopDetailsState _currentState;
   late Stop _stop;
   late pt.Route _route;
 
   List<bool> _savedList = [];
   List<Trip> _trips = [];
   List<Disruption> _disruptions = [];
-  late StopDetailsState _state;
 
-  bool _isSavedListInitialized = false;
+  bool _isLoading = true;
   late Timer _departureUpdateTimer;
+  late StreamSubscription _sheetSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    _initialState = navigationService.stateToPush;
-
-    if (_initialState != null) {
-      _stop = _initialState.stop;
-      _route = _initialState.route;
-
-      _state = StopDetailsState(stop: _stop, route: _route);
-
-      if (_initialState.trips != null) {
-        _trips = _initialState.trips;
-        _state.trips = _trips;
-        _getSavedList();
-      } else {
-        _getTripList();
+    // Listen for changes to the current sheet
+    _sheetSubscription = sheetController.currentSheet.listen((sheet) {
+      if (sheet.name == 'Stop Details' && mounted) {
+        _updateStateFromSheet(sheet);
       }
+    });
 
-      if (_initialState.disruptions != null) {
-        _disruptions = _initialState.disruptions;
-        _state.disruptions = _disruptions;
-      } else {
-        _getDisruptions();
-      }
-    }
+    // Initialize with the current state
+    _updateStateFromSheet(sheetController.currentSheet.value);
 
     _departureUpdateTimer = Timer.periodic(Duration(seconds: 30), (_) {
       _updateDepartures();
     });
   }
 
+  void _updateStateFromSheet(Sheet sheet) {
+    if (sheet.state is StopDetailsState) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      _currentState = sheet.state as StopDetailsState;
+      _stop = _currentState.stop;
+      _route = _currentState.route;
+
+      if (_currentState.trips != null) {
+        _trips = _currentState.trips!;
+        _getSavedList();
+      } else {
+        _getTripList();
+      }
+
+      if (_currentState.disruptions != null) {
+        _disruptions = _currentState.disruptions!;
+      } else {
+        _getDisruptions();
+      }
+    }
+  }
+
   @override
   void dispose() {
     _departureUpdateTimer.cancel();
+    _sheetSubscription.cancel();
     super.dispose();
   }
 
   /// Gets a list of trips for a given route and stop
   Future<void> _getTripList() async {
     List<Trip> newTripList = await searchUtils.splitDirection(_stop, _route);
-    _trips = newTripList;
-    _state.trips = _trips;
+
+    if (mounted) {
+      setState(() {
+        _trips = newTripList;
+      });
+    }
+
+    // Update the state in the controller
+    if (sheetController.currentSheet.value.state is StopDetailsState) {
+      StopDetailsState state = sheetController.currentSheet.value.state;
+      state.trips = _trips;
+    }
 
     await _getSavedList();
   }
@@ -113,19 +142,29 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
       newSavedList.add(isSaved);
     }
 
-    setState(() {
-      _savedList = newSavedList;
-      _isSavedListInitialized = true;
-    });
+    if (mounted) {
+      setState(() {
+        _savedList = newSavedList;
+        _isLoading = false;
+      });
+    }
   }
 
   /// Gets list of disruptions for route
   Future<void> _getDisruptions() async {
     List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_route);
-    setState(() {
-      _disruptions = disruptionsList;
-      _state.disruptions = disruptionsList;
-    });
+
+    if (mounted) {
+      setState(() {
+        _disruptions = disruptionsList;
+      });
+    }
+
+    // Update the state in the controller
+    if (sheetController.currentSheet.value.state is StopDetailsState) {
+      StopDetailsState state = sheetController.currentSheet.value.state;
+      state.disruptions = _disruptions;
+    }
   }
 
   /// Updates the departures for each trip
@@ -163,8 +202,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-
-    if (!_isSavedListInitialized) {
+    if (_isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
@@ -179,7 +217,6 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
           route: _route,
           trips: _trips,
           disruptions: _disruptions,
-          state: _state,
           savedList: _savedList,
           handleSave: _onConfirmPressed,
         ),
@@ -212,12 +249,12 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                           route: _route,
                                           stop: _stop,
                                           disruptions: _disruptions,
-                                          state: _state,
                                         );
                                       },
                                     );
                                   },
-                                  child: Icon(Icons.warning_outlined, color: Color(0xFFF6833C)),
+                                  child: Icon(Icons.error, size: 22,
+                                      color: Color(0xFFFF8D66)),
                                 ),
                                 const SizedBox(width: 4),
                               ],
@@ -225,8 +262,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: Text(
-                                    "Towards ${trip.direction?.name ?? ''}",
-                                    style: TextStyle(fontSize: 18),
+                                    "To ${trip.direction?.name ?? ''}",
+                                    style: TextStyle(fontSize: 17),
                                     overflow: TextOverflow.fade,
                                     softWrap: false,
                                   ),
@@ -239,33 +276,41 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                         // Right section: "See all >"
                         GestureDetector(
                           onTap: () => navigationService
-                              .navigateToTrip(trip, _disruptions, _state),
+                              .navigateToTrip(trip, _disruptions),
                           child: Row(
                             children: [
-                              SizedBox(width: 4),
-                              Text("See all", style: TextStyle(fontSize: 16)),
-                              Icon(Icons.keyboard_arrow_right),
+                              SizedBox(width: 8),
+                              Text("See all",
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme
+                                    .secondaryFixedDim.withValues(alpha: 0.8),
+                                  fontSize: 16)),
+                              Icon(
+                                Icons.keyboard_arrow_right,
+                                color: Theme.of(context).colorScheme
+                                  .secondaryFixedDim.withValues(alpha: 0.8),
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
-
+                    SizedBox(height:4),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       padding: EdgeInsets.all(0.0),
                       itemCount: departures!.length > 2
-                        ? 2 : departures.length,
+                          ? 2 : departures.length,
                       itemBuilder: (context, index) {
                         final departure = departures[index];
                         return DepartureCard(
-                          trip: trip,
-                          departure: departure,
-                          onDepartureTapped: (departure) {
-                            navigationService
-                                .navigateToDeparture(trip, departure, _state);
-                          });
+                            trip: trip,
+                            departure: departure,
+                            onDepartureTapped: (departure) {
+                              navigationService
+                                  .navigateToDeparture(trip, departure);
+                            });
                       },
                     ),
 
@@ -274,7 +319,10 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                       Card(
                         margin: EdgeInsets.symmetric(vertical: 2),
                         elevation: 1,
-                        child: Text("No departures to show."),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("No departures to show."),
+                        ),
                       ),
                   ],
                 ),

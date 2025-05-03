@@ -30,18 +30,18 @@ class ExpandedStopWidget extends StatelessWidget {
             Expanded(
               child: Text(
                 stopName,
-                style: TextStyle(fontSize: 17, height: 1.1, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 16, height: 1.1, fontWeight: FontWeight.w700),
 
               ),
             ),
           ],
         ),
-        SizedBox(height: 6),
+        SizedBox(height: 2),
         Row(
           children: [
             Icon(Icons.directions_walk, size: 20),
             SizedBox(width: 4),
-            Text("${distance?.round()}m", style: TextStyle(fontSize: 17)),
+            Text("${distance?.round()}m", style: TextStyle(fontSize: 16)),
           ],
         )
       ],);
@@ -64,7 +64,8 @@ class UnexpandedStopWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        LocationWidget(textField: stopName, textSize: 18, scrollable: false),
+        LocationWidget(textField: stopName, textSize: 16, scrollable: false),
+        SizedBox(height: 2),
         Align(
           alignment: Alignment.topLeft,
           child: SingleChildScrollView(
@@ -86,7 +87,7 @@ class UnexpandedStopWidget extends StatelessWidget {
                   child: Text(
                     routeLabel ?? 'Unknown',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: route.textColour != null
                           ? ColourUtils.hexToColour(route.textColour!)
@@ -158,7 +159,12 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
                 ),
               ),
             ),
-            title: routeName != null ? Text(routeName) : null,
+            title: routeName != null
+                ? Text(
+                  routeName,
+                  style: TextStyle(height: 1.2),
+                )
+                : null,
             onTap: ()  {
               onStopTapped(stop, route);
             },

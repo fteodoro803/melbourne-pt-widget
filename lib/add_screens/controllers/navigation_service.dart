@@ -22,38 +22,27 @@ class NavigationService extends GetxService {
 
   SearchUtils searchUtils = SearchUtils();
 
-  final RxList<Map<String, dynamic>> _navigationStack = <Map<String, dynamic>>[].obs;
-  dynamic stateToPush;
-  final RxBool showSheet = false.obs;
-
-  // Initialize the service
   Future<NavigationService> init() async {
     return this;
   }
 
   /// Handle back button navigation
   void handleBackNavigation() {
-    final currentSheet = sheetController.currentSheet.value;
-    final sheetHistory = sheetController.sheetHistory.toList();
-
-    // If we're viewing Nearby Stops
-    if (currentSheet == 'Nearby Stops') {
-      mapController.clearMap();
-      showSheet.value = false;
-      sheetController.popSheet();
-      _navigationStack.clear();
-      return;
-    }
 
     // If we're in a nested sheet
-    if (sheetHistory.isNotEmpty) {
-      final prevSheet = sheetHistory.last;
+    if (sheetController.navigationStack.isNotEmpty) {
+      final originSheet = sheetController.currentSheet.value;
 
       // If there is no previous sheet (Nearby Stops/Route Details)
-      if (prevSheet == "") {
+      if (sheetController.navigationStack.length == 1) {
         if (sheetController.isSheetExpanded.value) {
           sheetController.animateSheetTo(0.6);
-          _navigationStack.clear();
+          return;
+        }
+        if (originSheet.name == 'Nearby Stops') {
+          mapController.clearMap();
+          sheetController.showSheet.value = false;
+          sheetController.popSheet();
           return;
         }
         else {
@@ -62,31 +51,27 @@ class NavigationService extends GetxService {
         }
       }
 
-      final previousSheet = _navigationStack.last;
-      stateToPush = previousSheet['state'];
-      // searchController.setState(previousSheet['state']);
+      final destinationSheet = sheetController.navigationStack[sheetController.navigationStack.length - 2];
 
       // If we are navigating back to Stop Details
-      if (prevSheet == 'Stop Details') {
+      if (destinationSheet.name == 'Stop Details') {
         mapController.tripPath?.hideDirection();
         mapController.renderTripPath(); // Reload map without direction
       }
 
-      if (currentSheet == 'Stop Details') {
-        if (prevSheet == 'Nearby Stops') {
+      if (originSheet.name == 'Stop Details') {
+        if (destinationSheet.name == 'Nearby Stops') {
           mapController.setGeoPath([]);
           mapController.clearMap();
           mapController.resetMarkers();
 
-        } else if (prevSheet == 'Route Details') {
+        } else if (destinationSheet.name == 'Route Details') {
           mapController.tripPath?.hideStopMarker();
           mapController.renderTripPath();
         }
       }
 
-      // Pop to previous sheet
       sheetController.popSheet();
-      _navigationStack.removeAt(_navigationStack.length - 1);
       return;
     }
 
@@ -96,13 +81,13 @@ class NavigationService extends GetxService {
 
   /// Navigate to Nearby Stops with location
   Future<void> navigateToNearbyStops(LatLng pos, String address) async {
-    _navigationStack.clear();
+    sheetController.navigationStack.clear();
 
     Get.find<NearbyStopsController>().setAddress(address);
     await Get.find<NearbyStopsController>().setStops("all", 300);
 
-    sheetController.pushSheet('Nearby Stops');
-    showSheet.value = true;
+    sheetController.pushSheet('Nearby Stops', null);
+    sheetController.showSheet.value = true;
     sheetController.animateSheetTo(0.4);
 
     if (mapController.isNearbyStopsButtonToggled.value) {
@@ -111,27 +96,23 @@ class NavigationService extends GetxService {
   }
 
   /// Navigate to Stop Details
-  Future<void> navigateToStop(Stop stop, pt_route.Route route, dynamic currentState) async {
-    String currentSheet = sheetController.currentSheet.value;
+  Future<void> navigateToStop(Stop stop, pt_route.Route route) async {
+    String? originSheet = sheetController.currentSheet.value.name;
     pt_route.Route newRoute = route;
 
-    if (currentSheet == 'Nearby Stops' || currentSheet == 'Trip Details') {
-      newRoute = await searchUtils.initializeRoute(route);
+    if (originSheet == 'Nearby Stops' || originSheet == 'Trip Details' || originSheet == 'Stop Details') {
+      newRoute = await searchUtils.initializeRoute(newRoute);
       await mapController.setTripPath(newRoute, stop: stop);
     }
 
-    _navigationStack.add({'type': currentSheet, 'state': currentState});
-
     StopDetailsState newState = StopDetailsState(stop: stop, route: newRoute);
-    stateToPush = newState;
-
-    sheetController.pushSheet('Stop Details');
+    sheetController.pushSheet('Stop Details', newState);
 
     sheetController.animateSheetTo(0.3);
     await mapController.tripPath?.setStop(stop);
     await mapController.renderTripPath();
 
-    if (currentSheet == 'Nearby Stops' || currentSheet == 'Trip Details') {
+    if (originSheet == 'Nearby Stops' || originSheet == 'Trip Details') {
       await mapController.showPolyLine();
     }
   }
@@ -140,12 +121,11 @@ class NavigationService extends GetxService {
   Future<void> navigateToRoute(pt_route.Route route) async {
     pt_route.Route newRoute = await searchUtils.initializeRoute(route);
 
-    _navigationStack.clear();
+    sheetController.navigationStack.clear();
     RouteDetailsState newState = RouteDetailsState(route: newRoute);
-    stateToPush = newState;
+    sheetController.pushSheet('Route Details', newState);
 
-    sheetController.pushSheet('Route Details');
-    showSheet.value = true;
+    sheetController.showSheet.value = true;
     sheetController.animateSheetTo(0.4);
 
     await mapController.setTripPath(newRoute);
@@ -154,20 +134,17 @@ class NavigationService extends GetxService {
   }
 
   /// Navigate to Trip Details
-  Future<void> navigateToTrip(Trip trip, List<Disruption>? disruptions, dynamic state) async {
+  Future<void> navigateToTrip(Trip trip, List<Disruption>? disruptions) async {
     await trip.updateDepartures(departureCount: 20);
 
-    TripDetailsState newState = TripDetailsState(trip: trip, disruptions: disruptions);
-    stateToPush = newState;
-
-    if (_navigationStack.isEmpty) {
+    if (sheetController.navigationStack.isEmpty) {
+      trip.route = await searchUtils.initializeRoute(trip.route!);
       await Get.find<MapController>().setTripPath(trip.route!);
-    } else {
-      _navigationStack.add({'type': sheetController.currentSheet.value, 'state': state});
     }
 
-    sheetController.pushSheet('Trip Details');
-    showSheet.value = true;
+    TripDetailsState newState = TripDetailsState(trip: trip, disruptions: disruptions);
+    sheetController.pushSheet('Trip Details', newState);
+    sheetController.showSheet.value = true;
 
     await mapController.tripPath?.setStop(trip.stop!);
     await mapController.tripPath?.setDirection(true);
@@ -176,17 +153,15 @@ class NavigationService extends GetxService {
   }
 
   /// Navigate to Departure Details
-  Future<void> navigateToDeparture(Trip trip, Departure departure, dynamic state) async {
-    _navigationStack.add({'type': sheetController.currentSheet.value, 'state': state});
+  Future<void> navigateToDeparture(Trip trip, Departure departure) async {
 
-    DepartureDetailsState newState = DepartureDetailsState(trip: trip, departure: departure);
-    stateToPush = newState;
-
-    if (sheetController.currentSheet.value != 'Trip Details') {
+    if (sheetController.currentSheet.value.name != 'Trip Details') {
       await mapController.tripPath?.setDirection(false);
       await mapController.renderTripPath();
       await mapController.showPolyLine();
     }
-    sheetController.pushSheet('Departure Details');
+
+    DepartureDetailsState newState = DepartureDetailsState(trip: trip, departure: departure);
+    sheetController.pushSheet('Departure Details', newState);
   }
 }

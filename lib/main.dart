@@ -261,8 +261,9 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+
+      foregroundColor: Colors.white,
         overlayColor: Colors.black,
         overlayOpacity: 0.5,
         spacing: 10,
@@ -271,11 +272,13 @@ class _MyHomePageState extends State<MyHomePage> {
           SpeedDialChild(
             child: Icon(Icons.route),
             label: 'See All Routes',
+            labelStyle: TextStyle(fontSize: 16),
             onTap: () => Get.to(() => FindRoutesScreen()),
           ),
           SpeedDialChild(
             child: Icon(Icons.search),
             label: 'Map Search',
+            labelStyle: TextStyle(fontSize: 16),
             onTap: () => Get.to(() => SearchScreen(
               enableSearch: true,
             ),
