@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/services/gtfs_service.dart';
+import 'package:get/get.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -15,6 +17,7 @@ class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   GtfsApiService gtfsApiService = GtfsApiService();
   GtfsService gtfsService = GtfsService();
+  var database = Get.find<AppDatabase>();
   final TextEditingController gtfsRouteId = TextEditingController();
   List<Trip> transportList = [];
 
@@ -44,14 +47,9 @@ class _TestScreenState extends State<TestScreen> {
     setState(() {});
   }
 
-  Future<void> gtfsTest(String id) async {
-    int ptvRouteId = int.tryParse(id) != null ? int.parse(id) : 0;
-
-    var gtfsResponse = await gtfsService.getTramPositions(ptvRouteId);
-    // var gtfsResponse = await gtfsService.getTramTripUpdates();
-
-    //
-    // print(gtfsResponse.toString());
+  Future<void> gtfsTest(int id) async {
+    var gtfsResponse = await gtfsService.fetchGeoPath(id);
+    print(gtfsResponse);
   }
 
   Future<void> initialiseGtfsService() async {
@@ -72,7 +70,7 @@ class _TestScreenState extends State<TestScreen> {
             decoration: InputDecoration(labelText: "Gtfs Route Id"),
           ),
           ElevatedButton(onPressed: () {
-            gtfsTest(gtfsRouteId.text);
+            gtfsTest(int.parse(gtfsRouteId.text));
           }, child: Text("Gtfs Test")),
         ],
       ),

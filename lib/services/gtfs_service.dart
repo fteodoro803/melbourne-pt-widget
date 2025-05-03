@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
+import 'package:flutter_project/database/helpers/geopath_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
-import 'package:flutter_project/database/helpers/route_helpers.dart';
+import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:csv/csv.dart';
@@ -47,6 +48,7 @@ class GtfsService {
     // Metro trams
     await _initialiseRoutes(tramRoutesFile);
     await _initialiseTrips(tramTripsFile);
+    await _initialiseGeoPaths();
 
     // // Metro buses
     // await _initialiseRoutes(busRoutesFile);
@@ -58,16 +60,21 @@ class GtfsService {
   }
 
   /// Add gtfs routes to database.
+  // todo: Map GTFS route IDs to PTV route IDs
   Future<void> _initialiseRoutes(String routeFilePath) async {
     try {
+      // 1. Collect routes and relevant information from the gtfsRoutesMap
       final gtfsRoutesMap = await csvToMapList(routeFilePath);
       for (var route in gtfsRoutesMap) {
         String routeId = route["route_id"];
         String shortName = route["route_short_name"];
         String longName = route["route_long_name"];
 
-        await database.addGtfsRoute(
-            id: routeId, shortName: shortName, longName: longName);
+        // 2. Insert each trip to the database
+        await database.addGtfsRoute(id: routeId, shortName: shortName, longName: longName);
+
+        // 3. Map GTFS and PTV route IDs
+        await database.syncRouteMap();
       }
     } catch (e) {
       print("Error $e");
@@ -78,26 +85,71 @@ class GtfsService {
   Future<void> _initialiseTrips(String tripFilePath) async {
     try {
       List<db.GtfsTripsTableCompanion> gtfsTripList = [];
-      final gtfsTripsMap = await csvToMapList(tripFilePath);
 
-      // Add gtfs trips to database, by adding the rows in the map to a list, and batch inserting it to the database.
+      // 1. Collect trips and relevant information from the gtfsTripsMap
+      final gtfsTripsMap = await csvToMapList(tripFilePath);
       for (var trip in gtfsTripsMap) {
         String tripId = trip["trip_id"];
         String routeId = trip["route_id"];
+        String shapeId = trip["shape_id"];
         String tripHeadsign = trip["trip_headsign"];
-        // int wheelchairAccessible = trip["wheelchair_accessible"];
-        int wheelchairAccessible = int.tryParse(trip["wheelchair_accessible"]) ?? 0;    // todo: fix this. It takes a long time (maybe bc its big) but seems a bit buggy
+        int wheelchairAccessible = int.tryParse(trip["wheelchair_accessible"]) ?? 0;    // 0 indicates "no data"
 
-        var newGtfsTrip = database.createGtfsTripCompanion(tripId: tripId, routeId: routeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
+        var newGtfsTrip = database.createGtfsTripCompanion(tripId: tripId, routeId: routeId, shapeId: shapeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
         gtfsTripList.add(newGtfsTrip);
       }
 
-      // Batch inserting trips to database
+      // 2. Batch insert trips to the database
       await database.addGtfsTrips(trips: gtfsTripList);
     }
     catch (e) {
       print("Error $e");
     }
+  }
+
+  /// Add gtfs shapes to database.
+  // fixme: this probably shouldn't be here. Maybe create an API endpoint that collects shapes for a specific route
+  Future<void> _initialiseGeoPaths() async {
+    String tempShapesFilePath = "lib/dev/gtfs/metro_tram/shapes.txt";
+
+    try {
+      List<db.GeoPathsTableCompanion> geoPaths = [];
+
+      // 1. Collect shapes from gtfsShapesMap
+      final gtfsShapesMap = await csvToMapList(tempShapesFilePath);
+      for (var geopath in gtfsShapesMap) {
+        String id = geopath["shape_id"];
+        int sequence = int.tryParse(geopath["shape_pt_sequence"]) ?? -1;
+        double latitude = double.tryParse(geopath["shape_pt_lat"]) ?? -1;
+        double longitude = double.tryParse(geopath["shape_pt_lon"]) ?? -1;
+
+        var newGeoPath = database.createGeoPathCompanion(id: id, sequence: sequence, latitude: latitude, longitude: longitude);
+        geoPaths.add(newGeoPath);
+      }
+
+      // 2. Batch insert geoPaths to the database
+      await database.addGeoPaths(geoPath: geoPaths);
+    }
+    catch (e) {
+      print("Error $e");
+    }
+  }
+
+  /// Fetches the general GeoPath of a Route
+  Future<List<LatLng>> fetchGeoPath(int ptvRouteId) async {
+    // 1. Convert PTV Route ID to GTFS Route ID
+    String? gtfsRouteId = await database.convertToGtfsRouteId(ptvRouteId);
+
+    if (gtfsRouteId == null || gtfsRouteId.isEmpty) {
+      return [];
+    }
+
+    // 2. Get GeoPath Data
+    List<db.GeoPathsTableData> geoPathData = await database.getGeoPath(gtfsRouteId);
+
+    // 3. Convert Data to LatLng
+    List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
+    return geoPath;
   }
 
   /// Converts CSV to Map
@@ -126,21 +178,13 @@ class GtfsService {
   Future<List<LatLng>> getTramPositions(int routeId) async {
     List<LatLng> locations = [];
     final feedMessage = await gtfsApiService.tramVehiclePositions();
-    String? gtfsRouteId;
 
     // 1. Map PTV route ID to GTFS route ID
-    var ptvRouteData = await database.getRouteById(routeId);
-    if (ptvRouteData != null) {
-      var ptvRoute = ptvRouteData.toCompanion(true);
-      var gtfsRoute = await database.getGtfsRouteFromPtvRoute(ptvRoute, "tram");
-
-      gtfsRouteId = gtfsRoute?.routeId;
-      // print("( gtfs_service.dart -> getTramPositions ) -- \n\tptvRoute: $ptvRouteData, \n\tgtfsRoute: $gtfsRoute");
-    }
+    String? gtfsRouteId = await database.convertToGtfsRouteId(routeId);
 
     // 2. Get GTFS route IDs associated with the route
     List<db.GtfsTripsTableData>? trips = gtfsRouteId != null ? await database.getGtfsTripsByRouteId(gtfsRouteId) : null;
-    List<String>? tripIds = trips?.map((t) => t.tripId).toList();     // Converts trips to tripIds
+    List<String>? tripIds = trips?.map((t) => t.id).toList();     // Converts trips to tripIds
 
     // 3. Collect positions of vehicles
     if (tripIds != null) {
