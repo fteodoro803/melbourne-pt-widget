@@ -54,7 +54,7 @@ extension RouteMapHelpers on AppDatabase {
     return result;
   }
 
-  Future<String?> getGtfsRouteId(int ptvRouteId) async {
+  Future<String?> convertToGtfsRouteId(int ptvRouteId) async {
     var query = select(routeMapTable)
         ..where((tbl) => tbl.ptvId.equals(ptvRouteId));
 
@@ -62,7 +62,7 @@ extension RouteMapHelpers on AppDatabase {
     return result?.gtfsId;
   }
 
-  Future<int?> getPtvRouteId(String gtfsRouteId) async {
+  Future<int?> convertToPtvRouteId(String gtfsRouteId) async {
     var query = select(routeMapTable)
       ..where((tbl) => tbl.gtfsId.equals(gtfsRouteId));
 

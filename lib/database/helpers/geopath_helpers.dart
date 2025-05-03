@@ -16,5 +16,42 @@ extension GeoPathHelpers on AppDatabase {
     await batchInsert(geoPathsTable, geoPath);
   }
 
-  // todo: get geopath of a route
+  /// Gets general GeoPath of a Route
+  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId) async {
+    // 1. Find Trips with a matching Route ID
+    final tripsQuery = select(gtfsTripsTable)
+      ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    final List<GtfsTripsTableData> trips = await tripsQuery.get();
+
+    if (trips.isEmpty) {
+      return [];
+    }
+
+    // 2. Find the most-used GeoPath (shape ID)
+    // count occurrences of a shape/path
+    Map<String, int> counter = {};
+    for (var trip in trips) {
+      counter[trip.shapeId] = (counter[trip.shapeId] ?? 0) + 1;
+    }
+
+    // set highest-occurring shape as the "general" shapeId
+    String shapeId = "";
+    int highestCount = 0;
+    counter.forEach((shape, count) {
+      if (count >= highestCount) {
+        shapeId = shape;
+        highestCount = count;
+      }
+    });
+
+    // 2. Get GeoPaths
+    final geoPathQuery = select(geoPathsTable)
+      ..where((tbl) => tbl.id.equals(shapeId))
+      ..orderBy([(t) => drift.OrderingTerm.asc(t.sequence)]);
+    final geoPath = await geoPathQuery.get();
+
+    return geoPath;
+  }
+
+  // todo: fetch geopath specified to a trip
 }

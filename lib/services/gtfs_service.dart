@@ -135,10 +135,22 @@ class GtfsService {
     }
   }
 
-  Future<void> fetchGeoPath(String gtfsRouteId) async {
-    var geopath = database.getGeoPath(gtfsRouteId);
-    print(geopath.toString());
-  } 
+  /// Fetches the general GeoPath of a Route
+  Future<List<LatLng>> fetchGeoPath(int ptvRouteId) async {
+    // 1. Convert PTV Route ID to GTFS Route ID
+    String? gtfsRouteId = await database.convertToGtfsRouteId(ptvRouteId);
+
+    if (gtfsRouteId == null || gtfsRouteId.isEmpty) {
+      return [];
+    }
+
+    // 2. Get GeoPath Data
+    List<db.GeoPathsTableData> geoPathData = await database.getGeoPath(gtfsRouteId);
+
+    // 3. Convert Data to LatLng
+    List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
+    return geoPath;
+  }
 
   /// Converts CSV to Map
   Future<List<Map<String, dynamic>>> csvToMapList(String filePath) async {
@@ -168,7 +180,7 @@ class GtfsService {
     final feedMessage = await gtfsApiService.tramVehiclePositions();
 
     // 1. Map PTV route ID to GTFS route ID
-    String? gtfsRouteId = await database.getGtfsRouteId(routeId);
+    String? gtfsRouteId = await database.convertToGtfsRouteId(routeId);
 
     // 2. Get GTFS route IDs associated with the route
     List<db.GtfsTripsTableData>? trips = gtfsRouteId != null ? await database.getGtfsTripsByRouteId(gtfsRouteId) : null;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/database/database.dart';
-import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
@@ -48,13 +47,9 @@ class _TestScreenState extends State<TestScreen> {
     setState(() {});
   }
 
-  Future<void> gtfsTest(String id) async {
-
-    // var gtfsResponse = await gtfsService.fetchGeoPath(routeId);
-    var gtfsResponse = await gtfsService.getTramPositions(int.parse(id));
-
-    //
-    // print(gtfsResponse.toString());
+  Future<void> gtfsTest(int id) async {
+    var gtfsResponse = await gtfsService.fetchGeoPath(id);
+    print(gtfsResponse);
   }
 
   Future<void> initialiseGtfsService() async {
@@ -75,7 +70,7 @@ class _TestScreenState extends State<TestScreen> {
             decoration: InputDecoration(labelText: "Gtfs Route Id"),
           ),
           ElevatedButton(onPressed: () {
-            gtfsTest(gtfsRouteId.text);
+            gtfsTest(int.parse(gtfsRouteId.text));
           }, child: Text("Gtfs Test")),
         ],
       ),
