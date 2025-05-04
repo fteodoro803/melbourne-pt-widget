@@ -92,6 +92,9 @@ flutter:
     - assets/cfg/
     - assets/icons/
     - assets/mapStyles/
+    - assets/gtfs/metro_tram/     # temporary
+#    - assets/gtfs/metro_train/
+#    - assets/gtfs/metro_bus/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

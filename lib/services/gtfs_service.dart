@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:flutter/services.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/database/helpers/geopath_helpers.dart';
@@ -26,8 +25,9 @@ import 'package:csv/csv.dart';
 
 class GtfsService {
   GtfsApiService gtfsApiService = GtfsApiService();
-  String tramRoutesFile = "lib/dev/gtfs/metro_tram/routes.txt";
-  String tramTripsFile = "lib/dev/gtfs/metro_tram/trips.txt";
+  String tramRoutesFile = "assets/gtfs/metro_tram/routes.txt";
+  String tramTripsFile = "assets/gtfs/metro_tram/trips.txt";
+  String tempShapesFilePath = "assets/gtfs/metro_tram/shapes.txt";      // fixme: temporary, this will be moved to a server api call
 
   // String trainRoutesFile = "lib/dev/gtfs/metro_train/routes.txt";
   // String trainTripsFile = "lib/dev/gtfs/metro_train/trips.txt";
@@ -110,7 +110,6 @@ class GtfsService {
   /// Add gtfs shapes to database.
   // fixme: this probably shouldn't be here. Maybe create an API endpoint that collects shapes for a specific route
   Future<void> _initialiseGeoPaths() async {
-    String tempShapesFilePath = "lib/dev/gtfs/metro_tram/shapes.txt";
 
     try {
       List<db.GeoPathsTableCompanion> geoPaths = [];
@@ -156,14 +155,13 @@ class GtfsService {
   Future<List<Map<String, dynamic>>> csvToMapList(String filePath) async {
     List<Map<String, dynamic>> mapList = [];
 
-    final file = File(filePath);
-    final content = await file.readAsString();
-
+    // 1. Load File and convert to List
+    final content = await rootBundle.loadString(filePath);
     List<List<dynamic>> rows = CsvToListConverter().convert(content);
     final headers = rows.first.map((c) => c.toString()).toList();
     final dataRows = rows.skip(1);    // skips the header row
 
-    // Creates a Map with headers as keys, and rows as values, and adds to list
+    // 2. Create a Map with headers as keys, and rows as values, and adds to list
     for (var row in dataRows) {
       final mappedRow = Map.fromIterables(headers, row);
       mapList.add(mappedRow);
