@@ -157,7 +157,15 @@ class GtfsService {
 
     // 1. Load File and convert to List
     final content = await rootBundle.loadString(filePath);
-    List<List<dynamic>> rows = CsvToListConverter().convert(content);
+
+    // 2. Configure CSV options for cross-platform support
+    final csvConverter = CsvToListConverter(
+        fieldDelimiter: ',',
+        eol: '\n'
+    );
+
+    // 3. Convert content to Rows
+    List<List<dynamic>> rows = csvConverter.convert(content);
     final headers = rows.first.map((c) => c.toString()).toList();
     final dataRows = rows.skip(1);    // skips the header row
 

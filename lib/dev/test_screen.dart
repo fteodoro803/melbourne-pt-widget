@@ -49,7 +49,7 @@ class _TestScreenState extends State<TestScreen> {
 
   Future<void> gtfsTest(int id) async {
     var gtfsResponse = await gtfsService.fetchGeoPath(id);
-    print(gtfsResponse);
+    // print(gtfsResponse);
   }
 
   Future<void> initialiseGtfsService() async {
