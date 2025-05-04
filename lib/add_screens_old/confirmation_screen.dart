@@ -97,7 +97,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
           itemBuilder: (context, index) {
             final transport = transportList[index];
             return CustomListTile(
-                transport: transport,
+                trip: transport,
                 onTap: () async {
                   await append(transportList[index]);
                   await _saveTransportToDb(transport);

@@ -253,10 +253,10 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                       },
                                     );
                                   },
-                                  child: Icon(Icons.error, size: 22,
-                                      color: Color(0xFFFF8D66)),
+                                  child: Icon(Icons.error, size: 20,
+                                      color: Color(0xFFFF7308)),
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 2),
                               ],
                               Expanded(
                                 child: SingleChildScrollView(

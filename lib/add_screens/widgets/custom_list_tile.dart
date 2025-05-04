@@ -6,7 +6,7 @@ import 'trip_info_widgets.dart';
 import '../utility/time_utils.dart';
 
 class CustomListTile extends StatelessWidget {
-  final Trip transport;
+  final Trip trip;
   final VoidCallback onTap;
   final bool? dismissible;
   final VoidCallback? onDismiss;
@@ -14,7 +14,7 @@ class CustomListTile extends StatelessWidget {
   // Constructor
   const CustomListTile({
     super.key,
-    required this.transport,
+    required this.trip,
     this.onTap = _emptyFunction,
     this.dismissible,
     this.onDismiss,
@@ -29,11 +29,10 @@ class CustomListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Trip transport = this.transport;
 
-    final departure = transport.departures != null
-        && transport.departures!.isNotEmpty
-        ? transport.departures![0] : null;
+    final departure = trip.departures != null
+        && trip.departures!.isNotEmpty
+        ? trip.departures![0] : null;
     DateTime? estimated;
     DepartureStatus? status;
     String? minutesString;
@@ -51,7 +50,7 @@ class CustomListTile extends StatelessWidget {
 
   // Enables the Widget to be Deleted/Dismissed by Swiping
   return Dismissible(
-    key: Key(transport.toString()),
+    key: Key(trip.toString()),
     direction: dismissible == true
         ? DismissDirection.endToStart
         : DismissDirection.none,    // Dismissible if true
@@ -76,27 +75,27 @@ class CustomListTile extends StatelessWidget {
             children: [
               // LocationWidget above the vertical line
               LocationWidget(
-                  textField: transport.stop!.name,
+                  textField: trip.stop!.name,
                   textSize: 16,
                   scrollable: false),
               SizedBox(height: 2),
               Row(children: [
                 Expanded(
                   child: NewRouteWidget(
-                    route: transport.route!,
-                    direction: transport.direction,
+                    route: trip.route!,
+                    direction: trip.direction,
                     scrollable: false,),
                 ),
               ]),
 
 
-              if (transport.departures != null)
+              if (trip.departures != null)
                 ListTile(
                   visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.access_time_filled),
-                  title: DeparturesStringWidget(departures: transport.departures),
+                  title: DeparturesStringWidget(departures: trip.departures),
                   trailing: departure != null
                       && status!.hasDeparted == false
                       && status.isWithinAnHour == true

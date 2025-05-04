@@ -238,7 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 6.0),
                         elevation: 4,
                         child: CustomListTile(
-                          transport: _tripList[index],
+                          trip: _tripList[index],
                           dismissible: true,
                           onDismiss: () async {
                             await ptvService.deleteTrip(_tripList[index].uniqueID!);

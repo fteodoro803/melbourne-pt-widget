@@ -84,8 +84,6 @@ class SheetController extends GetxController {
     }
     currentSheet.value = Sheet(name: newSheet, state: newState);
     navigationStack.add(currentSheet.value);
-    print(navigationStack);
-    // _animateToSavedPosition(newSheet);
   }
 
   void popSheet() {

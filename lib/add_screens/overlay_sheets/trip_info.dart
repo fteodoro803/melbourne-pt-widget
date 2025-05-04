@@ -280,8 +280,8 @@ class TripInfoSheetState extends State<TripInfoSheet> {
                         ? Text(routeName, style: TextStyle(fontSize: 14, height: 1.1))
                         : null,
                     onTap: () async {
-                      await navigationService.navigateToStop(stop, route);
                       Navigator.pop(context);
+                      await navigationService.navigateToStop(stop, route);
                     }
                   );
                 },

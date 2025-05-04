@@ -66,12 +66,13 @@ class RouteHeaderWidget extends StatelessWidget {
                     ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(height: 3),
                     Row(
                       children: [
                         if (disruptions.isNotEmpty)...[
                           GestureDetector(
-                            child: Icon(Icons.error, size: 22,
-                                color: Color(0xFFFF8D66)),
+                            child: Icon(Icons.error, size: 20,
+                                color: Color(0xFFFF7308)),
                             onTap: () async {
                               await showModalBottomSheet(
                                   constraints: const BoxConstraints(maxHeight: 500),
@@ -86,7 +87,7 @@ class RouteHeaderWidget extends StatelessWidget {
                               );
                             },
                           ),
-                          SizedBox(width: 2),
+                          SizedBox(width: 3),
                         ],
                         // Expanded to ensure text doesn't overflow
                         Expanded(
@@ -102,7 +103,7 @@ class RouteHeaderWidget extends StatelessWidget {
                       ],
                     ),
 
-                    SizedBox(height: 8),
+                    SizedBox(height: 5),
                     // Improved RouteAndButtonsRow
                     RouteAndButtonsRow(
                         route: route,
@@ -159,19 +160,22 @@ class RouteAndButtonsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        RouteTypeImage(routeType: route.type.name, size: 26),
-        SizedBox(width: 8),
-        Flexible(child: RouteLabelContainer(route: route, textSize: 15)),
-        Spacer(),
-        Spacer(),
-        Spacer(),
-        Spacer(),
-        Row(
+    return Stack(children: [
+      Padding(
+        padding: const EdgeInsets.only(right: 20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RouteTypeImage(routeType: route.type.name, size: 28),
+            SizedBox(width: 8),
+            Flexible(child: RouteLabelContainer(route: route, textSize: 16)),
+          ],
+        ),
+      ),
+      Positioned(
+        right: 2,
+        child: Row(
           mainAxisSize: MainAxisSize.min, // Take only needed space
-
           children: [
             GestureDetector(
               child: Icon(Icons.info, color: Color(0xFF4F82FF), size: 27),
@@ -195,17 +199,17 @@ class RouteAndButtonsRow extends StatelessWidget {
               onTap: () async {
                 if (trips.length > 1) {
                   await showModalBottomSheet(
-                      constraints: BoxConstraints(maxHeight: 320),
-                      context: context,
-                      builder: (BuildContext context) {
-                        return SaveTripSheet(
-                          savedList: savedList,
-                          route: route,
-                          stop: stop,
-                          tripList: trips,
-                          onConfirmPressed: handleSave,
-                        );
-                      }
+                    constraints: BoxConstraints(maxHeight: 320),
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SaveTripSheet(
+                        savedList: savedList,
+                        route: route,
+                        stop: stop,
+                        tripList: trips,
+                        onConfirmPressed: handleSave,
+                      );
+                    }
                   );
                 } else {
                   handleSave([!savedList[0]]);
@@ -215,7 +219,7 @@ class RouteAndButtonsRow extends StatelessWidget {
             ),
           ],
         ),
-      ],
-    );
+      ),
+    ]);
   }
 }

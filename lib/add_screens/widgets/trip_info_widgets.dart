@@ -64,7 +64,7 @@ class RouteLabelContainer extends StatelessWidget {
     Color routeTextColour = ColourUtils.hexToColour(route.textColour!);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: route.colour != null
             ? routeColour
@@ -105,10 +105,10 @@ class NewRouteWidget extends StatelessWidget {
 
     return Row(
       children: [
-        RouteTypeImage(routeType: routeType, size: 27),
+        RouteTypeImage(routeType: routeType, size: 30),
         SizedBox(width: 8),
-        RouteLabelContainer(route: route, textSize: 14.5),
-        SizedBox(width: 10),
+        RouteLabelContainer(route: route, textSize: 16.5),
+        SizedBox(width: 8),
 
         if (routeType != "train" && routeType != "vLine" && direction != null)
           Flexible(

@@ -140,7 +140,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
               Obx(() {
-                if (sheetController.currentSheet.value == 'Nearby Stops') {
+                if (sheetController.currentSheet.value.name == 'Nearby Stops') {
                   return NearbyStopsButton(
                     isNearbyStopsButtonToggled:
                       mapController.isNearbyStopsButtonToggled.value,

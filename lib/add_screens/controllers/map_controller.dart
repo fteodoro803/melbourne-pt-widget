@@ -12,6 +12,7 @@ import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/add_screens/utility/map_utils.dart';
 import 'package:flutter_project/add_screens/utility/trip_path.dart';
 
+import '../../services/gtfs_service.dart';
 import 'navigation_service.dart';
 import 'nearby_stops_controller.dart';
 
@@ -26,6 +27,7 @@ class MapController extends GetxController {
 
   final MapUtils mapUtils = MapUtils();
   final PtvService ptvService = PtvService();
+  final GtfsService gtfsService = GtfsService();
 
   late Circle radiusCircle;
   LatLng? markerPos;
@@ -181,7 +183,9 @@ class MapController extends GetxController {
 
   /// Initializes trip path for a new route
   Future<void> setTripPath(pt_route.Route route, {Stop? stop}) async {
-    List<LatLng> geoPath = await ptvService.fetchGeoPath(route);
+    // List<LatLng> geoPath = await ptvService.fetchGeoPath(route);
+    List<LatLng> geoPath = await gtfsService.fetchGeoPath(route.id);
+    print(geoPath);
     setGeoPath(geoPath);
 
     tripPath = TripPath(
