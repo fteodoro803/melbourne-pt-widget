@@ -135,7 +135,7 @@ class GtfsService {
   }
 
   /// Fetches the general GeoPath of a Route
-  Future<List<LatLng>> fetchGeoPath(int ptvRouteId) async {
+  Future<List<LatLng>> fetchGeoPath(int ptvRouteId, {String? direction}) async {
     // 1. Convert PTV Route ID to GTFS Route ID
     String? gtfsRouteId = await database.convertToGtfsRouteId(ptvRouteId);
 
@@ -144,7 +144,7 @@ class GtfsService {
     }
 
     // 2. Get GeoPath Data
-    List<db.GeoPathsTableData> geoPathData = await database.getGeoPath(gtfsRouteId);
+    List<db.GeoPathsTableData> geoPathData = await database.getGeoPath(gtfsRouteId, direction: direction);
 
     // 3. Convert Data to LatLng
     List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
