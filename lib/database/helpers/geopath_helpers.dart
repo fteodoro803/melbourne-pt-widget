@@ -17,10 +17,17 @@ extension GeoPathHelpers on AppDatabase {
   }
 
   /// Gets general GeoPath of a Route
-  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId) async {
+  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId, {String? direction}) async {
     // 1. Find Trips with a matching Route ID
-    final tripsQuery = select(gtfsTripsTable)
-      ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    var tripsQuery;
+    if (direction != null && direction.isNotEmpty) {
+      tripsQuery = select(gtfsTripsTable)
+        ..where((tbl) => tbl.routeId.equals(gtfsRouteId) & tbl.tripHeadsign.equals(direction));
+    }
+    else {
+      tripsQuery = select(gtfsTripsTable)
+        ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    }
     final List<GtfsTripsTableData> trips = await tripsQuery.get();
 
     if (trips.isEmpty) {
