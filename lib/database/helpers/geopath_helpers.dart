@@ -44,7 +44,7 @@ extension GeoPathHelpers on AppDatabase {
       }
     });
 
-    // 2. Get GeoPaths
+    // 3. Get GeoPaths
     final geoPathQuery = select(geoPathsTable)
       ..where((tbl) => tbl.id.equals(shapeId))
       ..orderBy([(t) => drift.OrderingTerm.asc(t.sequence)]);
@@ -54,4 +54,15 @@ extension GeoPathHelpers on AppDatabase {
   }
 
   // todo: fetch geopath specified to a trip
+  Future<List<GeoPathsTableData>> getGeoPathShapeId(String gtfsShapeId) async {
+    // 1. Get GeoPath
+    final geoPathQuery = select(geoPathsTable)
+      ..where((tbl) => tbl.id.equals(gtfsShapeId))
+      ..orderBy([(t) => drift.OrderingTerm.asc(t.sequence)]);
+    final geoPath = await geoPathQuery.get();
+
+    return geoPath;
+  }
+
+  // todo: experiment, get geopaths (list of geopaths) for a route
 }
