@@ -124,7 +124,7 @@ class PtvApiService {
   }
 
   // Get Departures from a Stop
-  Future<ApiData> departures(String routeType, String stopId, {String? routeId, String? directionId, String? maxResults, String? expand}) async {
+  Future<ApiData> departures(String routeType, String stopId, {String? routeId, String? directionId, String? maxResults, bool? gtfs, String? expand}) async {
     String request;
     if (routeId == null || routeId.isEmpty) {
       request = "/v3/departures/route_type/$routeType/stop/$stopId";
@@ -135,7 +135,7 @@ class PtvApiService {
 
     // Parameter Handling
     Map<String, Object> parameters = {};
-    parameters = handleParameters(directionId: directionId, maxResults: maxResults, expand: expand);
+    parameters = handleParameters(directionId: directionId, maxResults: maxResults, gtfs: gtfs, expand: expand);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
@@ -182,7 +182,7 @@ class PtvApiService {
   /// Handles parameters
   // todo: test if this messes with getURLs signature
   Map<String, Object> handleParameters({String? routeTypes, String? maxResults,
-      String? maxDistance, String? directionId, bool? geoPath, String? expand}) {
+      String? maxDistance, String? directionId, bool? geoPath, bool? gtfs, String? expand}) {
 
     Map<String, Object> parameters = {};
 
@@ -206,6 +206,10 @@ class PtvApiService {
 
     if (geoPath!= null && geoPath == true) {
       parameters['include_geopath'] = "true";
+    }
+
+    if (gtfs != null && gtfs == true) {
+      parameters['gtfs'] = "true";
     }
 
     // Assumes expands is of the form "All" or "Stops,Routes,...", Comma Separated String
