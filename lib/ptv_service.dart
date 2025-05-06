@@ -414,10 +414,11 @@ class PtvService {
     return stopList;
   }
 
-  /// Fetch Stops along a Route and saves them to the database.
+  /// Fetch Stops along a Route and saves them to the database, with a filter to remove old/unused stops.
   /// Also saves the link between the route and its stops.
   // todo: fetch data from database first, preferring database
-  Future<List<Stop>> fetchStopsRoute(Route route, {Direction? direction}) async {
+  // todo: filter stops using gtfs, to match gtfs
+  Future<List<Stop>> fetchStopsRoute(Route route, {Direction? direction, bool? filter}) async {
     List<Stop> stopList = [];
 
     // Fetches stops data via PTV API
@@ -458,6 +459,11 @@ class PtvService {
       double longitude = stop["stop_longitude"];
       String suburb = stop["stop_suburb"];
       int stopSequence = stop["stop_sequence"];
+
+      // If filter is on, skip
+      if (filter == true && (stopSequence == 0)) {
+        continue;
+      }
 
       Stop newStop = Stop(
           id: id,
