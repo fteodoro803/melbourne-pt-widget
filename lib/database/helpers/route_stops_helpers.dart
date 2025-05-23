@@ -3,9 +3,9 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension RouteStopHelpers on AppDatabase {
-  Future<RouteStopsTableCompanion> createRouteStopCompanion({required int routeId, required int stopId})
+  Future<LinkRouteStopsTableCompanion> createRouteStopCompanion({required int routeId, required int stopId})
   async {
-    return RouteStopsTableCompanion(
+    return LinkRouteStopsTableCompanion(
       routeId: drift.Value(routeId),
       stopId: drift.Value(stopId),
       lastUpdated: drift.Value(DateTime.now()),
@@ -13,7 +13,7 @@ extension RouteStopHelpers on AppDatabase {
   }
 
   Future<void> addRouteStop(int routeId, int stopId) async {
-    RouteStopsTableCompanion routeStop = await createRouteStopCompanion(routeId: routeId, stopId: stopId);
+    LinkRouteStopsTableCompanion routeStop = await createRouteStopCompanion(routeId: routeId, stopId: stopId);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertRouteStopLink(routeStop);
   }
@@ -22,11 +22,11 @@ extension RouteStopHelpers on AppDatabase {
     // Join routes to routeStops, where their route ids are equal
     final query = select(routesTable).join([
       drift.innerJoin(
-        routeStopsTable,
-        routeStopsTable.routeId.equalsExp(routesTable.id),
+        linkRouteStopsTable,
+        linkRouteStopsTable.routeId.equalsExp(routesTable.id),
       )
     ])
-      ..where(routeStopsTable.stopId.equals(stopId));  // filter results where stop id matches
+      ..where(linkRouteStopsTable.stopId.equals(stopId));  // filter results where stop id matches
 
     // Convert the joined results to Route objects
     final rows = await query.get();
@@ -42,15 +42,15 @@ extension RouteStopHelpers on AppDatabase {
     // Join stops to routes via routeStops junction table
     final query = select(stopsTable).join([
       drift.innerJoin(
-          routeStopsTable,
-          routeStopsTable.stopId.equalsExp(stopsTable.id),
+          linkRouteStopsTable,
+          linkRouteStopsTable.stopId.equalsExp(stopsTable.id),
       ),
       drift.innerJoin(
           routesTable,
-          routeStopsTable.routeId.equalsExp(routesTable.id),
+          linkRouteStopsTable.routeId.equalsExp(routesTable.id),
       ),
     ])
-        ..where(routeStopsTable.routeId.equals(routeId))
+        ..where(linkRouteStopsTable.routeId.equals(routeId))
         ..orderBy([drift.OrderingTerm.asc(stopsTable.sequence)])   // Order by sequence
     ;
 
