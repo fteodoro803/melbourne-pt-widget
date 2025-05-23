@@ -118,7 +118,7 @@ class TripsTable extends Table {
 // Linking Tables
 /// Represents the many-to-many relationship between Stops and Routes.
 /// One stop can serve multiple routes, and one route can have multiple stops.
-class RouteStopsTable extends Table {
+class LinkRouteStopsTable extends Table {
   IntColumn get routeId => integer().references(RoutesTable, #id)();
   IntColumn get stopId => integer().references(StopsTable, #id)();
   // BoolColumn get isTemporary => boolean()();
@@ -130,7 +130,7 @@ class RouteStopsTable extends Table {
 
 /// Represents the many-to-many relationship between Stops and Route Types.
 /// One stop can serve trams and buses, and one route type can go to multiple stops.
-class StopRouteTypesTable extends Table {
+class LinkStopRouteTypesTable extends Table {
   IntColumn get stopId => integer().references(StopsTable, #id)();
   IntColumn get routeTypeId => integer().references(RouteTypesTable, #id)();
   // BoolColumn get isTemporary => boolean()();
@@ -182,7 +182,7 @@ class RouteMapTable extends Table {
 }
 
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -277,28 +277,28 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // RouteStops Functions
-  Future<void> insertRouteStopLink(RouteStopsTableCompanion routeStop) async {
-    final exists = await (select(routeStopsTable)
+  Future<void> insertRouteStopLink(LinkRouteStopsTableCompanion routeStop) async {
+    final exists = await (select(linkRouteStopsTable)
       ..where((l) =>
       l.routeId.equals(routeStop.routeId.value) &
       l.stopId.equals(routeStop.stopId.value))
     ).getSingleOrNull();
 
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(routeStopsTable).insertOnConflictUpdate(routeStop);
+      await into(linkRouteStopsTable).insertOnConflictUpdate(routeStop);
     }
   }
 
   // StopRouteTypes Functions
-  Future<void> insertStopRouteTypeLink(StopRouteTypesTableCompanion stopRouteType) async {
-    final exists = await (select(stopRouteTypesTable)
+  Future<void> insertStopRouteTypeLink(LinkStopRouteTypesTableCompanion stopRouteType) async {
+    final exists = await (select(linkStopRouteTypesTable)
       ..where((l) =>
       l.stopId.equals(stopRouteType.stopId.value) &
       l.routeTypeId.equals(stopRouteType.routeTypeId.value))
     ).getSingleOrNull();
 
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(stopRouteTypesTable).insertOnConflictUpdate(stopRouteType);
+      await into(linkStopRouteTypesTable).insertOnConflictUpdate(stopRouteType);
     }
   }
 
