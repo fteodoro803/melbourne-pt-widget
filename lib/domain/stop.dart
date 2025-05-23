@@ -1,7 +1,9 @@
+import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/database/database.dart' as db;
+import 'package:get/get.dart';
 
 part 'stop.g.dart';
 
@@ -21,9 +23,10 @@ class Stop {
   double? longitude;
   double? distance;     // todo: change this to a getDistance function
   String? suburb;
+  String? landmark;
 
-  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence});   // todo: probably make these constructors more distinct
-  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.stopSequence});
+  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence, this.landmark});   // todo: probably make these constructors more distinct
+  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.stopSequence, this.landmark, this.suburb});
 
   @override
   String toString() {
@@ -36,7 +39,8 @@ class Stop {
         "\tRoutes: $routes\n"
         "\tRouteType: $routeType\n"
         "\tStopSequence: $stopSequence\n"
-        "\tSuburb: $suburb\n";
+        "\tSuburb: $suburb\n"
+        "\tLandmark: $landmark";
   }
 
   @override
@@ -57,6 +61,7 @@ class Stop {
       distance: json["stop_distance"],
       suburb: json["stop_suburb"],
       stopSequence: json["stop_sequence"],
+      landmark: json["stop_landmark"],
     );
   }
 
@@ -69,7 +74,15 @@ class Stop {
         latitude: dbStop.latitude,
         longitude: dbStop.longitude,
         stopSequence: dbStop.sequence,
+        landmark: dbStop.landmark,
+        suburb: dbStop.suburb,
     );
+  }
+
+  /// Constructor from database, by ID
+  static Future<Stop?> fromId(int id) async {
+    db.StopsTableData? dbStop = await Get.find<db.AppDatabase>().getStopById(id);
+    return dbStop != null ? Stop.fromDb(dbStop) : null;
   }
 
   // Methods for JSON Serialization

@@ -89,6 +89,8 @@ class StopsTable extends Table {
   // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine
   // todo: zone, and inFreeTramZone (in stops along route) -- stops["stop_ticket"]["zone"] | stops["stop_ticket"]["is_free_fare_zone"]
   TextColumn get zone => text().nullable()();     // only obtainable if using stopsAlongRoutes, but not stopsNearLocation
+  TextColumn get landmark => text().nullable()();
+  TextColumn get suburb => text().nullable()();   // todo: might not be nullable
   BoolColumn get isFreeFareZone => boolean().nullable()();
 
   // BoolColumn get isTemporary => boolean()();
