@@ -47,7 +47,6 @@ class DirectionsTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get description => text()();
-  IntColumn get routeId => integer().references(RoutesTable, #id)();
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 
@@ -182,7 +181,7 @@ class RouteMapTable extends Table {
 }
 
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, LinkRouteDirectionsTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -276,7 +275,21 @@ class AppDatabase extends _$AppDatabase {
     await mergeUpdate(tripsTable, transport, (t) => t.uniqueId.equals(transport.uniqueId.value));
   }
 
-  // RouteStops Functions
+  // LinkRouteDirections Functions
+  // todo: maybe make the LinkTable inserts use mergeUpdate
+  Future<void> insertRouteDirectionLink(LinkRouteDirectionsTableCompanion routeDirection) async {
+    final exists = await (select(linkRouteDirectionsTable)
+      ..where((l) =>
+      l.routeId.equals(routeDirection.routeId.value) &
+      l.directionId.equals(routeDirection.directionId.value))
+    ).getSingleOrNull();
+
+    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+      await into(linkRouteDirectionsTable).insertOnConflictUpdate(routeDirection);
+    }
+  }
+
+  // LinkRouteStops Functions
   Future<void> insertRouteStopLink(LinkRouteStopsTableCompanion routeStop) async {
     final exists = await (select(linkRouteStopsTable)
       ..where((l) =>
@@ -289,7 +302,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  // StopRouteTypes Functions
+  // LinkStopRouteTypes Functions
   Future<void> insertStopRouteTypeLink(LinkStopRouteTypesTableCompanion stopRouteType) async {
     final exists = await (select(linkStopRouteTypesTable)
       ..where((l) =>
