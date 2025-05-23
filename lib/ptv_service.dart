@@ -2,11 +2,12 @@
 
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/helpers/direction_helpers.dart';
+import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
-import 'package:flutter_project/database/helpers/route_stops_helpers.dart';
+import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
 import 'package:flutter_project/database/helpers/route_type_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
-import 'package:flutter_project/database/helpers/stop_route_types_helpers.dart';
+import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/trip_helpers.dart';
 import 'package:flutter_project/domain/disruption.dart';
 import 'package:flutter_project/geopath.dart';
@@ -98,8 +99,8 @@ class PtvService {
 
         // Adding to database
         await Get.find<db.AppDatabase>().addDirection(
-            newDirection.id, newDirection.name, newDirection.description,
-            routeId);
+            newDirection.id, newDirection.name, newDirection.description);
+        await Get.find<db.AppDatabase>().addRouteDirection(routeId: routeId, directionId: newDirection.id);
       }
     }
 
