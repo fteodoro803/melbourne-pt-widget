@@ -295,6 +295,16 @@ class PtvService {
     return domainRouteList;
   }
 
+  /// Fetches routes from database, by id.
+  Future<Route?> getRouteById({required int id, bool withDetails = false}) async {
+    final dbRoute = await Get.find<db.AppDatabase>().getRouteById(id);
+    Route? route = dbRoute != null ? Route.fromDb(dbRoute) : null;
+
+    if (withDetails == true && route != null) await route.loadDetails();
+
+    return route;
+  }
+
   /// Fetches routes according to a stop, from the database.
   /// Maps the databases' routes to domain's route
   // todo: consider change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
