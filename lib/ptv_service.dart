@@ -9,6 +9,7 @@ import 'package:flutter_project/database/helpers/route_type_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/trip_helpers.dart';
+import 'package:flutter_project/domain/directed_stop.dart';
 import 'package:flutter_project/domain/disruption.dart';
 import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/domain/departure.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_project/services/utility/list_extensions.dart';
 
 import 'database/database.dart' as db;
 import 'package:get/get.dart';
@@ -28,6 +30,19 @@ class StopRouteLists {
   List<Route> routes;
 
   StopRouteLists(this.stops, this.routes);
+}
+
+class RouteStops {
+  Route route;
+  List<Stop> stops;
+  // todo: note landmarks somewhere
+
+  RouteStops({required this.route, required this.stops});
+
+  @override
+  String toString() {
+    return "\n${route.number} - ${route.name}\n\t${stops.map((s) => s.id).toList()}";
+  }
 }
 
 /// Handles calling the PTV API, converting to domain models, and storing to database
@@ -301,7 +316,7 @@ class PtvService {
   // todo: consider change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
   // todo: but also, in our functions, we use fetch, but most of them also check the database first. So maybe for consistency, keep it?
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
-    final dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
+    final List<db.RoutesTableData> dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
 
     // Convert Route's database model to domain model
     List<Route> routeList = dbRoutes.map(Route.fromDb).toList();
@@ -382,7 +397,7 @@ class PtvService {
     for (var stop in jsonResponse!["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(Get.find<db.AppDatabase>().addStop(newStop.id, newStop.name, newStop.latitude!, newStop.longitude!));
+      futures.add(Get.find<db.AppDatabase>().addStop(newStop.id, newStop.name, newStop.latitude!, newStop.longitude!, landmark: newStop.landmark));
 
       // Adds route-stop relationship to database
       int selectedRouteType = stop["route_type"];
@@ -417,8 +432,7 @@ class PtvService {
     if (direction != null) {
       data = await PtvApiService().stopsRoute(
           route.id.toString(), route.type.id.toString(),
-          directionId: direction.id.toString(),
-          geoPath: true);
+          directionId: direction.id.toString());
     }
     else {
       // Auto-select a direction to get stop sequence data
@@ -426,10 +440,10 @@ class PtvService {
       List<Direction> directions = await fetchDirections(route.id);
 
       if (directions.isNotEmpty) {
-        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString(), geoPath: true);
+        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString());
       }
       else {
-        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString(), geoPath: true);
+        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString());
       }
     }
 
@@ -444,31 +458,16 @@ class PtvService {
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
     for (var stop in jsonResponse["stops"]) {
-      int id = stop["stop_id"];
-      String name = stop["stop_name"];
-      double latitude = stop["stop_latitude"];
-      double longitude = stop["stop_longitude"];
-      String suburb = stop["stop_suburb"];
-      int stopSequence = stop["stop_sequence"];
+      Stop newStop = Stop.fromApi(stop);
 
-      // If filter is on, skip
-      if (filter == true && (stopSequence == 0)) {
-        continue;
-      }
+      // Filter skips stops that don't exist anymore
+      if (filter == true && (newStop.stopSequence == 0)) { continue; }
 
-      Stop newStop = Stop(
-          id: id,
-          name: name,
-          latitude: latitude,
-          longitude: longitude,
-          suburb: suburb,
-          stopSequence: stopSequence,
-      );
       stopList.add(newStop);
 
       // Add to database
-      Get.find<db.AppDatabase>().addStop(id, name, latitude, longitude, sequence: stopSequence);
-      Get.find<db.AppDatabase>().addRouteStop(route.id, id);
+      Get.find<db.AppDatabase>().addStop(newStop.id, newStop.name, newStop.latitude!, newStop.longitude!, sequence: newStop.stopSequence, landmark: newStop.landmark, suburb: newStop.suburb);
+      Get.find<db.AppDatabase>().addRouteStop(route.id, newStop.id);
 
     }
 
@@ -486,6 +485,43 @@ class PtvService {
 
     return stopList;
   }
+
+  /// Splits a ptv Stop by direction of travel
+  // todo: rename this, and use gtfs (maybe in fetchStopsRoute)
+  // todo: maybe change this to stop instead of stopId? I'm using stopId because what if Stop isn't initialised/in database yet? It gets fetched from fetchStopsRoute
+  Future<List<DirectedStop>?> splitStop(List<Route> routes, int stopId) async {
+    List<DirectedStop> directedStops = [];
+    DirectedStop directedStop1;
+    DirectedStop directedStop2;
+    List<RouteStops> routesStops = [];
+    print("0. ( ptv_service -> commonStops ) -- Stops from: ${stopId}");
+
+    // 1. Get stops along each route, and add to routesStops list
+    for (var route in routes) {
+      List<Stop> stops = await fetchStopsRoute(route, filter: true);
+      routesStops.add(RouteStops(route: route, stops: stops));
+    }
+    print("1. ( ptv_service.dart -> commonStops ) -- Routes and Stops:\n$routesStops");
+
+    // 2. Get the index of the RouteStop, where its Stop's id is equal to stopId
+    int stopIndex = routesStops.first.stops.indexWhere((s) => s.id == stopId);
+    Stop routeStop = routesStops.first.stops[stopIndex];
+    print("2. ( ptv_service.dart -> commonStops ) -- routesStops.first.stops[$stopIndex] = ${routeStop.id}");
+
+    // 3. Get common contiguous stops from a stop
+    // todo: probably also do a common suburbs and landmarks
+    List<Stop> initialStopList = routesStops.first.stops;
+    List<Stop> sharedStops = routesStops.fold(initialStopList, (accumulator, nextRouteStop) => accumulator.sharedSublist(nextRouteStop.stops, routeStop));
+    print("3. ( ptv_service.dart -> commonStops ) -- shared contiguous stops from stop $stopId: ${sharedStops.map((s) => s.id)}");
+
+
+
+    // todo: what if they only share one stop
+    // todo: what if the stop is on the end of the shared stop
+
+    return null;
+  }
+  
 
   Future<StopRouteLists> fetchStopRoutePairs(LatLng location, {String routeTypes = "all", int maxResults = 3, int maxDistance = 300}) async {
     List<Stop> stops = [];
