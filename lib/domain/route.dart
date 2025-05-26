@@ -1,6 +1,7 @@
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
+import 'package:flutter_project/ptv_service.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 import 'package:flutter_project/database/database.dart' as db;
@@ -30,6 +31,26 @@ class Route {
       required this.number,
       required this.type, required this.gtfsId, required this.status}) {
     setRouteColour(type.name);
+  }
+
+  /// Factory method to initialise a Route with async [directions] and [stopsAlongRoute]
+  static Future<Route> withDetails({required int id, required String name, required String number, required RouteType type, required String gtfsId, required String status}) async {
+    PtvService ptvService = PtvService();
+
+    Route route = Route(id: id, name: name, number: number, type: type, gtfsId: gtfsId, status: status);
+    route.stopsAlongRoute = await ptvService.fetchStopsRoute(route);
+    route.directions = await ptvService.fetchDirections(route.id);
+
+    return route;
+  }
+
+  /// Lazy-loading directions and stopAlongRoute
+  Future<void> loadDetails() async {
+    if (directions == null || stopsAlongRoute == null) {
+      PtvService ptvService = PtvService();
+      directions = await ptvService.fetchDirections(id);
+      stopsAlongRoute = await ptvService.fetchStopsRoute(this);
+    }
   }
 
   // Override == operator to compare routes based on the routeNumber.
@@ -117,8 +138,12 @@ class Route {
     //   str += direction.toString();
     // }
 
-    if (directions != null) {
-      str += directions.toString();
+    if (directions != null && directions!.isNotEmpty) {
+      str += "\t     Directions: ${directions!.map((direction) => direction.id).toList()}\n";
+    }
+
+    if (stopsAlongRoute != null && stopsAlongRoute!.isNotEmpty) {
+      str += "\t     Stops along Route: ${stopsAlongRoute!.map((stop) => stop.id).toList()}";
     }
 
     return str;
