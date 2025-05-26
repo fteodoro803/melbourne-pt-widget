@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
+import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
@@ -82,15 +83,7 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     // 2. Fold routes
-    var group = ptvService.commonStops(routes, stopId);
-  }
-
-  void listTest() {
-    List<int> list1 = [0,1,2,3,4,5,6,7,8,9];
-    List<int> list2 = [7,8,9,10];
-
-    List<int> shared = list1.sharedSublist(list2, 9);
-    print(shared);
+    var group = ptvService.splitStop(routes, stopId);
   }
 
   @override
@@ -136,13 +129,8 @@ class _TestScreenState extends State<TestScreen> {
             decoration: InputDecoration(labelText: "Ptv Stop Id"),
           ),
 
-          Divider(),
-
           ElevatedButton(onPressed: () => stopGroups(routeId1: int.tryParse(ptvRouteId1.text), routeId2: int.tryParse(ptvRouteId2.text), stopId: int.tryParse(ptvStopId.text)), child: Text("Stop Groups")),
 
-          Divider(),
-
-          ElevatedButton(onPressed: listTest, child: Text("ListTest")),
         ],
       ),
     );
