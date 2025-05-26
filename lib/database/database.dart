@@ -11,6 +11,8 @@ part 'database.g.dart';
 
 // todo: think about whether columns here should be nullable, because all the swagger api shows is that they are
 // todo: find a way to have them delete/be replaced some time after their departure time
+
+// Domain Tables
 class DeparturesTable extends Table {
   // IntColumn get id => integer().autoIncrement()();
 
@@ -99,6 +101,8 @@ class StopsTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+// User-Saved Tables
+
 class TripsTable extends Table {
   TextColumn get uniqueId => text()();
   IntColumn get routeTypeId => integer()();
@@ -114,7 +118,22 @@ class TripsTable extends Table {
   Set<Column> get primaryKey => {uniqueId};
 }
 
-// Linking Tables
+// // todo: user-saved stops (one stop can have multiple trips, with different routes, but all going in the same direction)
+// class UserStopsTable extends Table {
+//   IntColumn get id => integer().references(StopsTable, #id)();
+//   // IntColumn get direction => integer()();         // gtfs direction (0 - outbound, 1 - inbound)
+// }
+
+// Junction Tables
+class LinkRouteDirectionsTable extends Table {
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
+  IntColumn get directionId => integer().references(DirectionsTable, #id)();
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {routeId, directionId};
+}
+
 /// Represents the many-to-many relationship between Stops and Routes.
 /// One stop can serve multiple routes, and one route can have multiple stops.
 class LinkRouteStopsTable extends Table {
