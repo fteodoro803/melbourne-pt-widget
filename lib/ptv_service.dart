@@ -122,6 +122,21 @@ class PtvService {
     return directionList;
   }
 
+  /// Get a route's opposite direction.
+  /// Assumes that there at most 2 directions to a route.
+  // todo: maybe this can be implemented in a domain class (trip?)
+  Future<Direction?> getReverseDirection(Route route, Direction direction) async {
+    // 1. Fetch directions
+    List<Direction> directions = await fetchDirections(route.id);
+
+    // 2. Get the other direction (if it exists)
+    if (directions.length == 2) {
+      return directions.firstWhereOrNull((d) => d.id != direction.id);
+    }
+
+    return null;
+  }
+
 // Disruption Functions
   /// Fetches disruptions for a given route.
   Future<List<Disruption>> fetchDisruptions(Route route) async {
