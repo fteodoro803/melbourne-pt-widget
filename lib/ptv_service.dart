@@ -48,6 +48,7 @@ class RouteStops {
 /// Handles calling the PTV API, converting to domain models, and storing to database
 
 class PtvService {
+  db.AppDatabase database = Get.find<db.AppDatabase>();
 
 // Departure Functions
   // todo: convert to int for ids
@@ -91,7 +92,7 @@ class PtvService {
 
     // Check if directions data exists in database
     // If it does, set directionList to the retrieved data. If not, fetch data from the API
-    final dbDirectionsList = await Get.find<db.AppDatabase>().getDirectionsByRoute(routeId);
+    final dbDirectionsList = await database.getDirectionsByRoute(routeId);
     if (dbDirectionsList.isNotEmpty) {
       directionList = dbDirectionsList.map(Direction.fromDb).toList();
     }
@@ -120,6 +121,21 @@ class PtvService {
     }
 
     return directionList;
+  }
+
+  /// Get a route's opposite direction.
+  /// Assumes that there at most 2 directions to a route.
+  // todo: maybe this can be implemented in a domain class (trip?)
+  Future<Direction?> getReverseDirection(Route route, Direction direction) async {
+    // 1. Fetch directions
+    List<Direction> directions = await fetchDirections(route.id);
+
+    // 2. Get the other direction (if it exists)
+    if (directions.length == 2) {
+      return directions.firstWhereOrNull((d) => d.id != direction.id);
+    }
+
+    return null;
   }
 
 // Disruption Functions
