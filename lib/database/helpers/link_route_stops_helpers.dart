@@ -37,32 +37,29 @@ extension RouteStopHelpers on AppDatabase {
     return results;
   }
 
-  /// Returns a list of stops, in order of sequence.
-  Future<List<StopsTableData>> getStopsOnRoute(int routeId) async {
-    // Join stops to routes via routeStops junction table
-    final query = select(stopsTable).join([
-      drift.innerJoin(
-          linkRouteStopsTable,
-          linkRouteStopsTable.stopId.equalsExp(stopsTable.id),
-      ),
-      drift.innerJoin(
-          routesTable,
-          linkRouteStopsTable.routeId.equalsExp(routesTable.id),
-      ),
-    ])
-        ..where(linkRouteStopsTable.routeId.equals(routeId))
-        ..orderBy([drift.OrderingTerm.asc(stopsTable.sequence)])   // Order by sequence
-    ;
-
-    // Convert the joined results to Stop objects
-    final rows = await query.get();
-    final results = rows.map((row) {
-      return row.readTable(stopsTable);
-    }).toList();
-
-    return results;
-  }
-
-
-  // todo: get stops for a route
+  // /// Returns a list of stops, in order of sequence.
+  // Future<List<StopsTableData>> getStopsOnRoute(int routeId) async {
+  //   // Join stops to routes via routeStops junction table
+  //   final query = select(stopsTable).join([
+  //     drift.innerJoin(
+  //         linkRouteStopsTable,
+  //         linkRouteStopsTable.stopId.equalsExp(stopsTable.id),
+  //     ),
+  //     drift.innerJoin(
+  //         routesTable,
+  //         linkRouteStopsTable.routeId.equalsExp(routesTable.id),
+  //     ),
+  //   ])
+  //       ..where(linkRouteStopsTable.routeId.equals(routeId))
+  //       // ..orderBy([drift.OrderingTerm.asc(stopsTable.sequence)])   // todo: Order by sequence
+  //   ;
+  //
+  //   // Convert the joined results to Stop objects
+  //   final rows = await query.get();
+  //   final results = rows.map((row) {
+  //     return row.readTable(stopsTable);
+  //   }).toList();
+  //
+  //   return results;
+  // }
 }
