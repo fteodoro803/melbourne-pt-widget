@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 extension ListUtils<E> on List<E> {
 
   /// Checks if this list shared elements with [otherList].
@@ -68,5 +70,22 @@ extension ListUtils<E> on List<E> {
     // print("( list_extensions.dart -> sharedSublist ) -- Sublist($minIndex, $maxIndex) of $this:\n\t$sublist");
 
     return sublist;
+  }
+
+  /// Returns true if the current List contains the [otherList], in the exact order.
+  bool containsSublist(List<E> otherList) {
+    if (otherList.isEmpty || otherList.length > this.length) {
+      return false;
+    }
+
+    // Sliding window
+    for (int i = 0; i <= this.length - otherList.length; i++) {
+      var subList = sublist(i, i+otherList.length);
+      if (listEquals(subList, otherList)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
