@@ -17,10 +17,17 @@ extension GeoPathHelpers on AppDatabase {
   }
 
   /// Gets general GeoPath of a Route
-  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId) async {
+  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId, {String? direction}) async {
     // 1. Find Trips with a matching Route ID
-    final tripsQuery = select(gtfsTripsTable)
-      ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    var tripsQuery;
+    if (direction != null && direction.isNotEmpty) {
+      tripsQuery = select(gtfsTripsTable)
+        ..where((tbl) => tbl.routeId.equals(gtfsRouteId) & tbl.tripHeadsign.equals(direction));
+    }
+    else {
+      tripsQuery = select(gtfsTripsTable)
+        ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    }
     final List<GtfsTripsTableData> trips = await tripsQuery.get();
 
     if (trips.isEmpty) {
@@ -44,7 +51,7 @@ extension GeoPathHelpers on AppDatabase {
       }
     });
 
-    // 2. Get GeoPaths
+    // 3. Get GeoPaths
     final geoPathQuery = select(geoPathsTable)
       ..where((tbl) => tbl.id.equals(shapeId))
       ..orderBy([(t) => drift.OrderingTerm.asc(t.sequence)]);
@@ -54,4 +61,15 @@ extension GeoPathHelpers on AppDatabase {
   }
 
   // todo: fetch geopath specified to a trip
+  Future<List<GeoPathsTableData>> getGeoPathShapeId(String gtfsShapeId) async {
+    // 1. Get GeoPath
+    final geoPathQuery = select(geoPathsTable)
+      ..where((tbl) => tbl.id.equals(gtfsShapeId))
+      ..orderBy([(t) => drift.OrderingTerm.asc(t.sequence)]);
+    final geoPath = await geoPathQuery.get();
+
+    return geoPath;
+  }
+
+  // todo: experiment, get geopaths (list of geopaths) for a route
 }

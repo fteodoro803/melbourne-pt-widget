@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/database/database.dart';
+import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/services/gtfs_service.dart';
 import 'package:get/get.dart';
+import 'package:flutter_project/domain/route.dart' as pt_route;
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -14,23 +17,39 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
+  PtvApiService ptvApiService = PtvApiService();
   PtvService ptvService = PtvService();
   GtfsApiService gtfsApiService = GtfsApiService();
   GtfsService gtfsService = GtfsService();
   var database = Get.find<AppDatabase>();
-  final TextEditingController gtfsRouteId = TextEditingController();
+
+  // // Testing Routes and GTFS
+  // final TextEditingController ptvRouteId = TextEditingController();
+  // final TextEditingController ptvStopId = TextEditingController();
+  // final TextEditingController gtfsStopId = TextEditingController();
+  // final TextEditingController gtfsRouteId = TextEditingController();
+  // final TextEditingController gtfsTripId = TextEditingController();
+  // final TextEditingController ptvRouteIdTrips = TextEditingController();
+
+  // Testing RouteStops fold
+  List<TextEditingController> ptvRouteControllers = [];
+  final TextEditingController ptvStopId = TextEditingController();
+
   List<Trip> transportList = [];
 
   @override
   void initState() {
     super.initState();
     _initialisePTVData();
-    _loadTransports();
+
+    ptvRouteControllers = List.generate(1, (_) => TextEditingController());
   }
 
   @override
   void dispose() {
-    gtfsRouteId.dispose();
+    for (var controller in ptvRouteControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -41,19 +60,30 @@ class _TestScreenState extends State<TestScreen> {
     await Future.delayed(Duration(milliseconds: 100));
   }
 
-  Future<void> _loadTransports() async {
-    transportList = await ptvService.loadTrips();
+  Future<void> stopGroups({List<int>? routeIds, int? stopId}) async {
+    print("( test_screen.dart -> stopGroups ) -- Stop ID: $stopId\tRoute IDs: $routeIds");
+    if (routeIds == null || routeIds.isEmpty || stopId == null) {
+      return;
+    }
 
-    setState(() {});
-  }
+    // 1. Get Routes
+    List<pt_route.Route> routes = [];
+    for (final routeId in routeIds) {
+      var data = await database.getRouteById(routeId);
+      if (data != null) {
+        var route = pt_route.Route.fromDb(data);
+        routes.add(route);
+      }
+    }
 
-  Future<void> gtfsTest(int id) async {
-    var gtfsResponse = await gtfsService.fetchGeoPath(id);
-    // print(gtfsResponse);
-  }
+    if (routes.isEmpty) {
+      print("Not enough valid routes");
+      return;
+    }
 
-  Future<void> initialiseGtfsService() async {
-    gtfsService.initialise();
+    // 2. Fold routes
+    var group = await ptvService.splitStop(routes, stopId);
+    print(group);
   }
 
   @override
@@ -62,19 +92,45 @@ class _TestScreenState extends State<TestScreen> {
       appBar: AppBar(title: const Text("Test Screen")),
       body: Column(
         children: [
-          ElevatedButton(onPressed: initialiseGtfsService, child: Text("Initialise GTFS Service")),
-          Divider(),
           TextField(
-            controller: gtfsRouteId,
+            controller: ptvStopId,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Gtfs Route Id"),
+            decoration: InputDecoration(labelText: "Ptv Stop Id"),
           ),
-          ElevatedButton(onPressed: () {
-            gtfsTest(int.parse(gtfsRouteId.text));
-          }, child: Text("Gtfs Test")),
+          ...ptvRouteControllers.asMap().entries.map((entry) {
+            final index = entry.key;
+            final controller = entry.value;
+            return TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: "Ptv Route Id ${index + 1}"),
+            );
+          }).toList(),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                ptvRouteControllers.add(TextEditingController());
+              });
+            },
+            child: Text("Add Route Field"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              List<int> routeIds = ptvRouteControllers
+                  .map((c) => int.tryParse(c.text))
+                  .whereType<int>()
+                  .toList();
+              int? stopId = int.tryParse(ptvStopId.text);
+              if (routeIds.isNotEmpty && stopId != null) {
+                stopGroups(routeIds: routeIds, stopId: stopId);
+              } else {
+                print("Need at least 1 valid route ID and a stop ID");
+              }
+            },
+            child: Text("Stop Groups"),
+          ),
         ],
-      ),
+      )
     );
   }
 }
-

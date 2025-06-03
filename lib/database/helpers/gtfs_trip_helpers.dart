@@ -28,4 +28,20 @@ extension GtfsTripHelpers on AppDatabase {
 
     return result;
   }
+
+  // todo: experimental
+  Future<Map<String, String>> getShapeIdsHeadsign(String gtfsRouteId) async {
+    Map<String, String> routeShapeMap = {};
+
+    // 1. Filter by route ID
+    var query = select(gtfsTripsTable)..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    var result = await query.get();
+
+    // 2. Get unique shape IDs
+    for (var row in result) {
+      routeShapeMap[row.shapeId] = row.tripHeadsign;
+    }
+
+    return routeShapeMap;
+  }
 }

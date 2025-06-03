@@ -1,7 +1,9 @@
+import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/database/database.dart' as db;
+import 'package:get/get.dart';
 
 part 'stop.g.dart';
 
@@ -21,22 +23,24 @@ class Stop {
   double? longitude;
   double? distance;     // todo: change this to a getDistance function
   String? suburb;
+  String? landmark;
 
-  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence});   // todo: probably make these constructors more distinct
-  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.stopSequence});
+  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence, this.landmark});   // todo: probably make these constructors more distinct
+  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.stopSequence, this.landmark, this.suburb});
 
   @override
   String toString() {
     return "Stop:\n"
         "\tID: $id\t"
         "\tName: $name\n"
-        "\tLatitude: $latitude\n"
-        "\tLongitude: $longitude\n"
+        "\tLatitude: $latitude\t"
+        "\tLongitude: $longitude\t"
         "\tDistance: $distance\n"
-        "\tRoutes: $routes\n"
-        "\tRouteType: $routeType\n"
+        "\tRoutes: $routes\t"
+        "\tRouteType: $routeType\t"
         "\tStopSequence: $stopSequence\n"
-        "\tSuburb: $suburb\n";
+        "\tSuburb: $suburb\t"
+        "\tLandmark: $landmark\n";
   }
 
   @override
@@ -57,19 +61,30 @@ class Stop {
       distance: json["stop_distance"],
       suburb: json["stop_suburb"],
       stopSequence: json["stop_sequence"],
+      landmark: json["stop_landmark"],
     );
   }
 
   // Methods for Database
   /// Factory constructor from database
-  factory Stop.fromDb(db.StopsTableData dbStop) {
+  // todo: get sequence data
+  factory Stop.fromDb({required db.StopsTableData dbStop, int? sequence}) {
     return Stop.withSequence(
         id: dbStop.id,
         name: dbStop.name,
         latitude: dbStop.latitude,
         longitude: dbStop.longitude,
-        stopSequence: dbStop.sequence,
+        // stopSequence: dbStop.sequence,
+        stopSequence: sequence,
+        landmark: dbStop.landmark,
+        suburb: dbStop.suburb,
     );
+  }
+
+  /// Constructor from database, by ID
+  static Future<Stop?> fromId(int id) async {
+    db.StopsTableData? dbStop = await Get.find<db.AppDatabase>().getStopById(id);
+    return dbStop != null ? Stop.fromDb(dbStop: dbStop) : null;       // todo: maybe get sequence? or maybe better to keep without sequence, since it doesn't have context
   }
 
   // Methods for JSON Serialization

@@ -11,6 +11,8 @@ part 'database.g.dart';
 
 // todo: think about whether columns here should be nullable, because all the swagger api shows is that they are
 // todo: find a way to have them delete/be replaced some time after their departure time
+
+// Domain Tables
 class DeparturesTable extends Table {
   // IntColumn get id => integer().autoIncrement()();
 
@@ -47,7 +49,6 @@ class DirectionsTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get description => text()();
-  IntColumn get routeId => integer().references(RoutesTable, #id)();
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
 
@@ -85,10 +86,11 @@ class StopsTable extends Table {
   TextColumn get name => text()();
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
-  IntColumn get sequence => integer().nullable()();
   // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine
   // todo: zone, and inFreeTramZone (in stops along route) -- stops["stop_ticket"]["zone"] | stops["stop_ticket"]["is_free_fare_zone"]
   TextColumn get zone => text().nullable()();     // only obtainable if using stopsAlongRoutes, but not stopsNearLocation
+  TextColumn get landmark => text().nullable()();
+  TextColumn get suburb => text().nullable()();   // todo: might not be nullable
   BoolColumn get isFreeFareZone => boolean().nullable()();
 
   // BoolColumn get isTemporary => boolean()();
@@ -97,6 +99,8 @@ class StopsTable extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+// User-Saved Tables
 
 class TripsTable extends Table {
   TextColumn get uniqueId => text()();
@@ -113,10 +117,25 @@ class TripsTable extends Table {
   Set<Column> get primaryKey => {uniqueId};
 }
 
-// Linking Tables
+// // todo: user-saved stops (one stop can have multiple trips, with different routes, but all going in the same direction)
+// class UserStopsTable extends Table {
+//   IntColumn get id => integer().references(StopsTable, #id)();
+//   // IntColumn get direction => integer()();         // gtfs direction (0 - outbound, 1 - inbound)
+// }
+
+// Junction Tables
+class LinkRouteDirectionsTable extends Table {
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
+  IntColumn get directionId => integer().references(DirectionsTable, #id)();
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {routeId, directionId};
+}
+
 /// Represents the many-to-many relationship between Stops and Routes.
 /// One stop can serve multiple routes, and one route can have multiple stops.
-class RouteStopsTable extends Table {
+class LinkRouteStopsTable extends Table {
   IntColumn get routeId => integer().references(RoutesTable, #id)();
   IntColumn get stopId => integer().references(StopsTable, #id)();
   // BoolColumn get isTemporary => boolean()();
@@ -126,9 +145,23 @@ class RouteStopsTable extends Table {
   Set<Column> get primaryKey => {routeId, stopId};
 }
 
+/// Represents the 3-way many-to-many relationship between [Stops], [Route], and [Directions].
+/// A route goes through many stops, and each stop has a sequence.
+/// A route can have multiple directions. This sequence is ordered by direction.
+class LinkStopRouteDirectionsTable extends Table {
+  IntColumn get stopId => integer().references(StopsTable, #id)();
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
+  IntColumn get directionId => integer().references(DirectionsTable, #id)();
+  IntColumn get sequence => integer().nullable()();
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {stopId, routeId, directionId};
+}
+
 /// Represents the many-to-many relationship between Stops and Route Types.
 /// One stop can serve trams and buses, and one route type can go to multiple stops.
-class StopRouteTypesTable extends Table {
+class LinkStopRouteTypesTable extends Table {
   IntColumn get stopId => integer().references(StopsTable, #id)();
   IntColumn get routeTypeId => integer().references(RouteTypesTable, #id)();
   // BoolColumn get isTemporary => boolean()();
@@ -180,7 +213,7 @@ class RouteMapTable extends Table {
 }
 
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, RouteStopsTable, StopRouteTypesTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, LinkRouteDirectionsTable, LinkStopRouteDirectionsTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -274,29 +307,57 @@ class AppDatabase extends _$AppDatabase {
     await mergeUpdate(tripsTable, transport, (t) => t.uniqueId.equals(transport.uniqueId.value));
   }
 
-  // RouteStops Functions
-  Future<void> insertRouteStopLink(RouteStopsTableCompanion routeStop) async {
-    final exists = await (select(routeStopsTable)
+  // LinkRouteDirections Functions
+  // todo: maybe make the LinkTable inserts use mergeUpdate
+  Future<void> insertRouteDirectionLink(LinkRouteDirectionsTableCompanion routeDirection) async {
+    final exists = await (select(linkRouteDirectionsTable)
+      ..where((l) =>
+      l.routeId.equals(routeDirection.routeId.value) &
+      l.directionId.equals(routeDirection.directionId.value))
+    ).getSingleOrNull();
+
+    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+      await into(linkRouteDirectionsTable).insertOnConflictUpdate(routeDirection);
+    }
+  }
+
+  // LinkRouteStops Functions
+  Future<void> insertRouteStopLink(LinkRouteStopsTableCompanion routeStop) async {
+    final exists = await (select(linkRouteStopsTable)
       ..where((l) =>
       l.routeId.equals(routeStop.routeId.value) &
       l.stopId.equals(routeStop.stopId.value))
     ).getSingleOrNull();
 
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(routeStopsTable).insertOnConflictUpdate(routeStop);
+      await into(linkRouteStopsTable).insertOnConflictUpdate(routeStop);
     }
   }
 
-  // StopRouteTypes Functions
-  Future<void> insertStopRouteTypeLink(StopRouteTypesTableCompanion stopRouteType) async {
-    final exists = await (select(stopRouteTypesTable)
+  // LinkStopRouteTypes Functions
+  Future<void> insertStopRouteTypeLink(LinkStopRouteTypesTableCompanion stopRouteType) async {
+    final exists = await (select(linkStopRouteTypesTable)
       ..where((l) =>
       l.stopId.equals(stopRouteType.stopId.value) &
       l.routeTypeId.equals(stopRouteType.routeTypeId.value))
     ).getSingleOrNull();
 
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(stopRouteTypesTable).insertOnConflictUpdate(stopRouteType);
+      await into(linkStopRouteTypesTable).insertOnConflictUpdate(stopRouteType);
+    }
+  }
+
+  // Link StopDirections Functions
+  Future<void> insertStopRouteDirectionsLink(LinkStopRouteDirectionsTableCompanion stopDirection) async {
+    final exists = await (select(linkStopRouteDirectionsTable)
+      ..where((l) =>
+      l.stopId.equals(stopDirection.stopId.value) &
+      l.routeId.equals(stopDirection.routeId.value) &
+      l.directionId.equals(stopDirection.directionId.value))
+    ).getSingleOrNull();
+
+    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+      await into(linkStopRouteDirectionsTable).insertOnConflictUpdate(stopDirection);
     }
   }
 

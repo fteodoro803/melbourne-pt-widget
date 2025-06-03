@@ -124,26 +124,22 @@ class Route {
   @override
   String toString() {
     String str = "Route:\n"
-        "\t         ID: $id\t"
-        "\t     Number: $number\t"
-        "\t       Name: $name\n"
-        "\t       Type: ${type.name}\t"
-        "\t     Colour: $colour\t"
+        "\t ID: $id\t"
+        "\t Type: ${type.name}\t"
+        "\t Number: $number\t"
+        "\t Name: $name\n"
+        "\t Colour: $colour\t"
         "\t TextColour: $textColour\n"
-        "\t     GtfsId: $gtfsId\t"
-        "\t     Status: $status\n"
+        "\t GtfsId: $gtfsId\t"
+        "\t Status: $status\n"
     ;
 
-    // if (direction != null) {
-    //   str += direction.toString();
-    // }
-
     if (directions != null && directions!.isNotEmpty) {
-      str += "\t     Directions: ${directions!.map((direction) => direction.id).toList()}\n";
+      str += "\t Directions: ${directions!.map((direction) => direction.id).toList()}\n";
     }
 
     if (stopsAlongRoute != null && stopsAlongRoute!.isNotEmpty) {
-      str += "\t     Stops along Route: ${stopsAlongRoute!.map((stop) => stop.id).toList()}";
+      str += "\t Stops along Route: ${stopsAlongRoute!.map((stop) => stop.id).toList()}\n";
     }
 
     return str;

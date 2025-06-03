@@ -135,7 +135,7 @@ class GtfsService {
   }
 
   /// Fetches the general GeoPath of a Route
-  Future<List<LatLng>> fetchGeoPath(int ptvRouteId) async {
+  Future<List<LatLng>> fetchGeoPath(int ptvRouteId, {String? direction}) async {
     // 1. Convert PTV Route ID to GTFS Route ID
     String? gtfsRouteId = await database.convertToGtfsRouteId(ptvRouteId);
 
@@ -144,7 +144,7 @@ class GtfsService {
     }
 
     // 2. Get GeoPath Data
-    List<db.GeoPathsTableData> geoPathData = await database.getGeoPath(gtfsRouteId);
+    List<db.GeoPathsTableData> geoPathData = await database.getGeoPath(gtfsRouteId, direction: direction);
 
     // 3. Convert Data to LatLng
     List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
@@ -213,5 +213,31 @@ class GtfsService {
     for (var entity in feedMessage.entity) {
       print(entity);
     }
+  }
+
+  // fixme: experimental, get unique geopath/shape ids for a trip
+  // DROPDOWN!!!
+  Future<Map<String, String>> getShapes(int ptvRouteId) async {
+    // 1. Convert PTV Route ID to GTFS Route ID
+    String? gtfsRouteId = await database.convertToGtfsRouteId(ptvRouteId);
+
+    if (gtfsRouteId == null || gtfsRouteId.isEmpty) {
+      return {};
+    }
+
+    // 2. Get Shapes
+    Map<String, String> uniqueShapes = await database.getShapeIdsHeadsign(gtfsRouteId);
+    return uniqueShapes;
+  }
+
+  // fixme: test, Geopath of a GTFS Trip
+  // GEOPATHS!!!
+  Future<List<LatLng>> fetchGeoPathShape(String shapeId) async {
+    // 1. Get GeoPath Data
+    List<db.GeoPathsTableData> geoPathData = await database.getGeoPathShapeId(shapeId);
+
+    // 2. Convert Data to LatLng
+    List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
+    return geoPath;
   }
 }

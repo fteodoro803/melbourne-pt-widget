@@ -90,7 +90,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    Get.find<db.AppDatabase>().addStop(stopId, stopName, latitude!, longitude!);
+    Get.find<db.AppDatabase>().addStop(id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
 
   }
 

@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
 extension StopHelpers on AppDatabase {
-  Future<StopsTableCompanion> createStopCompanion({required int id, required String name, required double latitude, required double longitude, int? sequence})
+  Future<StopsTableCompanion> createStopCompanion({required int id, required String name, required double latitude, required double longitude, String? landmark, String? suburb})
   async {
     return StopsTableCompanion(
       id: drift.Value(id),
@@ -10,14 +10,15 @@ extension StopHelpers on AppDatabase {
       // routeTypeId: drift.Value(routeTypeId),
       latitude: drift.Value(latitude),
       longitude: drift.Value(longitude),
-      sequence: sequence != null ? drift.Value(sequence) : drift.Value.absent(),
+      landmark: landmark != null ? drift.Value(landmark) : drift.Value.absent(),
+      suburb: suburb != null ? drift.Value(suburb) : drift.Value.absent(),
       lastUpdated: drift.Value(DateTime.now()),
     );
   }
 
   /// Adds a stop to the database.
-  Future<void> addStop(int id, String name, double latitude, double longitude, {int? sequence}) async {
-    StopsTableCompanion stop = await createStopCompanion(id: id, name: name, latitude: latitude, longitude: longitude, sequence: sequence);
+  Future<void> addStop({required int id, required String name, required double latitude, required double longitude, String? landmark, String? suburb}) async {
+    StopsTableCompanion stop = await createStopCompanion(id: id, name: name, latitude: latitude, longitude: longitude, landmark: landmark, suburb: suburb);
     insertStop(stop);
   }
 
