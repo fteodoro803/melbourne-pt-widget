@@ -33,14 +33,14 @@ class Stop {
     return "Stop:\n"
         "\tID: $id\t"
         "\tName: $name\n"
-        "\tLatitude: $latitude\n"
-        "\tLongitude: $longitude\n"
+        "\tLatitude: $latitude\t"
+        "\tLongitude: $longitude\t"
         "\tDistance: $distance\n"
-        "\tRoutes: $routes\n"
-        "\tRouteType: $routeType\n"
+        "\tRoutes: $routes\t"
+        "\tRouteType: $routeType\t"
         "\tStopSequence: $stopSequence\n"
-        "\tSuburb: $suburb\n"
-        "\tLandmark: $landmark";
+        "\tSuburb: $suburb\t"
+        "\tLandmark: $landmark\n";
   }
 
   @override
