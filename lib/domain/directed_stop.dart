@@ -10,9 +10,8 @@ class DirectedStop {
 
   @override
   String toString() {
-    String str = "Routes [${trips.map((t) => t.route?.id).toList()}] at Stop ${stop.id} towards $direction\n";
-
-    str += "\tTest trips[0] = \n${trips.first}";
+    String str = "";
+    str += "Directed Stop: Routes [${trips.map((t) => t.route?.id).toList()}] at Stop ${stop.id} towards $direction";
     return str;
   }
 }
