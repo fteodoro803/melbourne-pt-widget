@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
-import 'package:flutter_project/domain/route_type.dart';
-import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/services/gtfs_service.dart';
-import 'package:flutter_project/services/utility/list_extensions.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_project/domain/route.dart' as pt_route;
-import 'package:flutter_project/database/database.dart' as db;
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -37,8 +32,7 @@ class _TestScreenState extends State<TestScreen> {
   // final TextEditingController ptvRouteIdTrips = TextEditingController();
 
   // Testing RouteStops fold
-  final TextEditingController ptvRouteId1 = TextEditingController();
-  final TextEditingController ptvRouteId2 = TextEditingController();
+  List<TextEditingController> ptvRouteControllers = [];
   final TextEditingController ptvStopId = TextEditingController();
 
   List<Trip> transportList = [];
@@ -47,13 +41,15 @@ class _TestScreenState extends State<TestScreen> {
   void initState() {
     super.initState();
     _initialisePTVData();
+
+    ptvRouteControllers = List.generate(1, (_) => TextEditingController());
   }
 
   @override
   void dispose() {
-    ptvRouteId1.dispose();
-    ptvRouteId2.dispose();
-    ptvStopId.dispose();
+    for (var controller in ptvRouteControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -64,22 +60,25 @@ class _TestScreenState extends State<TestScreen> {
     await Future.delayed(Duration(milliseconds: 100));
   }
 
-  Future<void> stopGroups({int? routeId1, int? routeId2, int? stopId}) async {
-    print("( test_screen.dart -> stopGroups ) -- Stop ID: $stopId\nRoute IDs: $routeId1, $routeId2");
-    if (routeId1 == null || routeId2 == null || stopId == null) {
+  Future<void> stopGroups({List<int>? routeIds, int? stopId}) async {
+    print("( test_screen.dart -> stopGroups ) -- Stop ID: $stopId\tRoute IDs: $routeIds");
+    if (routeIds == null || routeIds.isEmpty || stopId == null) {
       return;
     }
 
     // 1. Get Routes
     List<pt_route.Route> routes = [];
-    var route1Data = await database.getRouteById(routeId1);
-    pt_route.Route? route1 = route1Data != null ? pt_route.Route.fromDb(route1Data) : null;
-    var route2Data = await database.getRouteById(routeId2);
-    pt_route.Route? route2 = route2Data != null ? pt_route.Route.fromDb(route2Data) : null;
+    for (final routeId in routeIds) {
+      var data = await database.getRouteById(routeId);
+      if (data != null) {
+        var route = pt_route.Route.fromDb(data);
+        routes.add(route);
+      }
+    }
 
-    if (route1 != null && route2 != null) {
-      routes.add(route1);
-      routes.add(route2);
+    if (routes.isEmpty) {
+      print("Not enough valid routes");
+      return;
     }
 
     // 2. Fold routes
@@ -93,47 +92,45 @@ class _TestScreenState extends State<TestScreen> {
       appBar: AppBar(title: const Text("Test Screen")),
       body: Column(
         children: [
-          // TextField(
-          //   controller: ptvRouteId,
-          //   keyboardType: TextInputType.number,
-          //   decoration: InputDecoration(labelText: "Ptv Route Id"),
-          // ),
-          // TextField(
-          //   controller: ptvStopId,
-          //   keyboardType: TextInputType.number,
-          //   decoration: InputDecoration(labelText: "Ptv Stop Id"),
-          // ),
-          // TextField(
-          //   controller: gtfsRouteId,
-          //   keyboardType: TextInputType.number,
-          //   decoration: InputDecoration(labelText: "Gtfs Route Id"),
-          // ),
-          // TextField(
-          //   controller: gtfsStopId,
-          //   keyboardType: TextInputType.number,
-          //   decoration: InputDecoration(labelText: "Gtfs Stop Id"),
-          // ),
-
-          TextField(
-            controller: ptvRouteId1,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Ptv Route Id 1"),
-          ),
-          TextField(
-            controller: ptvRouteId2,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Ptv Route Id 2"),
-          ),
           TextField(
             controller: ptvStopId,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(labelText: "Ptv Stop Id"),
           ),
-
-          ElevatedButton(onPressed: () => stopGroups(routeId1: int.tryParse(ptvRouteId1.text), routeId2: int.tryParse(ptvRouteId2.text), stopId: int.tryParse(ptvStopId.text)), child: Text("Stop Groups")),
-
+          ...ptvRouteControllers.asMap().entries.map((entry) {
+            final index = entry.key;
+            final controller = entry.value;
+            return TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: "Ptv Route Id ${index + 1}"),
+            );
+          }).toList(),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                ptvRouteControllers.add(TextEditingController());
+              });
+            },
+            child: Text("Add Route Field"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              List<int> routeIds = ptvRouteControllers
+                  .map((c) => int.tryParse(c.text))
+                  .whereType<int>()
+                  .toList();
+              int? stopId = int.tryParse(ptvStopId.text);
+              if (routeIds.isNotEmpty && stopId != null) {
+                stopGroups(routeIds: routeIds, stopId: stopId);
+              } else {
+                print("Need at least 1 valid route ID and a stop ID");
+              }
+            },
+            child: Text("Stop Groups"),
+          ),
         ],
-      ),
+      )
     );
   }
 }

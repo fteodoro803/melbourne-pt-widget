@@ -501,6 +501,7 @@ class PtvService {
   // todo: rename this, and use gtfs (maybe in fetchStopsRoute)
   // todo: maybe change this to stop instead of stopId? I'm using stopId because what if Stop isn't initialised/in database yet? It gets fetched from fetchStopsRoute
   // todo: add cases for 0 and 1 routes
+  // todo: minimise api calls
   Future<List<DirectedStop>?> splitStop(List<Route> routes, int stopId) async {
     List<DirectedStop> directedStops = [];
     List<RouteStops> routesStops = [];
