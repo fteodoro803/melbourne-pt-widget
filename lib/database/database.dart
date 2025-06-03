@@ -86,7 +86,6 @@ class StopsTable extends Table {
   TextColumn get name => text()();
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
-  IntColumn get sequence => integer().nullable()();
   // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine
   // todo: zone, and inFreeTramZone (in stops along route) -- stops["stop_ticket"]["zone"] | stops["stop_ticket"]["is_free_fare_zone"]
   TextColumn get zone => text().nullable()();     // only obtainable if using stopsAlongRoutes, but not stopsNearLocation
@@ -146,6 +145,20 @@ class LinkRouteStopsTable extends Table {
   Set<Column> get primaryKey => {routeId, stopId};
 }
 
+/// Represents the 3-way many-to-many relationship between [Stops], [Route], and [Directions].
+/// A route goes through many stops, and each stop has a sequence.
+/// A route can have multiple directions. This sequence is ordered by direction.
+class LinkStopRouteDirectionsTable extends Table {
+  IntColumn get stopId => integer().references(StopsTable, #id)();
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
+  IntColumn get directionId => integer().references(DirectionsTable, #id)();
+  IntColumn get sequence => integer().nullable()();
+  DateTimeColumn get lastUpdated => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {stopId, routeId, directionId};
+}
+
 /// Represents the many-to-many relationship between Stops and Route Types.
 /// One stop can serve trams and buses, and one route type can go to multiple stops.
 class LinkStopRouteTypesTable extends Table {
@@ -200,7 +213,7 @@ class RouteMapTable extends Table {
 }
 
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, LinkRouteDirectionsTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, LinkRouteDirectionsTable, LinkStopRouteDirectionsTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -331,6 +344,20 @@ class AppDatabase extends _$AppDatabase {
 
     if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
       await into(linkStopRouteTypesTable).insertOnConflictUpdate(stopRouteType);
+    }
+  }
+
+  // Link StopDirections Functions
+  Future<void> insertStopRouteDirectionsLink(LinkStopRouteDirectionsTableCompanion stopDirection) async {
+    final exists = await (select(linkStopRouteDirectionsTable)
+      ..where((l) =>
+      l.stopId.equals(stopDirection.stopId.value) &
+      l.routeId.equals(stopDirection.routeId.value) &
+      l.directionId.equals(stopDirection.directionId.value))
+    ).getSingleOrNull();
+
+    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
+      await into(linkStopRouteDirectionsTable).insertOnConflictUpdate(stopDirection);
     }
   }
 

@@ -67,13 +67,15 @@ class Stop {
 
   // Methods for Database
   /// Factory constructor from database
-  factory Stop.fromDb(db.StopsTableData dbStop) {
+  // todo: get sequence data
+  factory Stop.fromDb({required db.StopsTableData dbStop, int? sequence}) {
     return Stop.withSequence(
         id: dbStop.id,
         name: dbStop.name,
         latitude: dbStop.latitude,
         longitude: dbStop.longitude,
-        stopSequence: dbStop.sequence,
+        // stopSequence: dbStop.sequence,
+        stopSequence: sequence,
         landmark: dbStop.landmark,
         suburb: dbStop.suburb,
     );
@@ -82,7 +84,7 @@ class Stop {
   /// Constructor from database, by ID
   static Future<Stop?> fromId(int id) async {
     db.StopsTableData? dbStop = await Get.find<db.AppDatabase>().getStopById(id);
-    return dbStop != null ? Stop.fromDb(dbStop) : null;
+    return dbStop != null ? Stop.fromDb(dbStop: dbStop) : null;       // todo: maybe get sequence? or maybe better to keep without sequence, since it doesn't have context
   }
 
   // Methods for JSON Serialization

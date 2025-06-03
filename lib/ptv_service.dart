@@ -3,6 +3,7 @@
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/helpers/direction_helpers.dart';
 import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
+import 'package:flutter_project/database/helpers/link_stop_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
 import 'package:flutter_project/database/helpers/route_type_helpers.dart';
@@ -423,7 +424,7 @@ class PtvService {
     for (var stop in jsonResponse!["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(Get.find<db.AppDatabase>().addStop(newStop.id, newStop.name, newStop.latitude!, newStop.longitude!, landmark: newStop.landmark));
+      futures.add(database.addStop(id: newStop.id, name: newStop.name, latitude: newStop.latitude!, longitude: newStop.longitude!, landmark: newStop.landmark));
 
       // Adds route-stop relationship to database
       int selectedRouteType = stop["route_type"];
@@ -453,26 +454,21 @@ class PtvService {
   Future<List<Stop>> fetchStopsRoute(Route route, {Direction? direction, bool? filter}) async {
     List<Stop> stopList = [];
 
-    // Fetches stops data via PTV API
-    ApiData data;
-    if (direction != null) {
-      data = await PtvApiService().stopsRoute(
-          route.id.toString(), route.type.id.toString(),
-          directionId: direction.id.toString());
-    }
-    else {
-      // Auto-select a direction to get stop sequence data
-      // Stop sequence is only available from the api if a direction is given, but the direction doesn't seem to make a difference
-      List<Direction> directions = await fetchDirections(route.id);
-
-      if (directions.isNotEmpty) {
-        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString(), directionId: directions[0].id.toString());
-      }
-      else {
-        data = await PtvApiService().stopsRoute(route.id.toString(), route.type.id.toString());
-      }
+    // Determine which direction to use
+    // If no direction is specified, sequence will not be available
+    List<Direction> directions = await fetchDirections(route.id);
+    int directionId;
+    if (direction != null && directions.contains(direction)) {
+        directionId = direction.id;
+    } else {
+      directionId = directions[0].id;
     }
 
+    ApiData data = await PtvApiService().stopsRoute(
+      route.id.toString(),
+      route.type.id.toString(),
+      directionId: directionId.toString(), // null if no direction available
+    );
     Map<String, dynamic>? jsonResponse = data.response;
 
     // Empty JSON Response
@@ -492,22 +488,11 @@ class PtvService {
       stopList.add(newStop);
 
       // Add to database
-      Get.find<db.AppDatabase>().addStop(newStop.id, newStop.name, newStop.latitude!, newStop.longitude!, sequence: newStop.stopSequence, landmark: newStop.landmark, suburb: newStop.suburb);
-      Get.find<db.AppDatabase>().addRouteStop(route.id, newStop.id);
-
+      await database.addStop(id: newStop.id, name: newStop.name, latitude: newStop.latitude!, longitude: newStop.longitude!, landmark: newStop.landmark, suburb: newStop.suburb);
+      await database.addRouteStop(route.id, newStop.id);
+      await database.addStopRouteDirection(stopId: newStop.id, routeId: route.id, directionId: directionId, sequence: newStop.stopSequence);
     }
-
-    // todo: convert this entire function into the following:
-    // 1. make api call, if data doesn't exist in database
-    // 2. convert api response to domain models, via factory constructor
-    // 3. convert domain model to companions? - think about making a toCompanion first
-    // 4. use helper for single/batch inserts
-
-    // // Convert domain models to companion
-    // final stopCompanions = stopList.map((stop) => stop.toCompanion()).toList();
-
-    // // Use helper to batch insert
-    // await Get.find<db.AppDatabase>().batchInsertStops(stopCompanions: stopCompanions, routeId: route.id);
+    // todo: add to database, generate flipped stopDirections
 
     return stopList;
   }
@@ -667,7 +652,8 @@ class PtvService {
       route = dbRoute != null ? Route.fromDb(dbRoute) : null;
 
       var dbStop = await database.getStopById(dbTrip.stopId);
-      stop = dbStop != null ? Stop.fromDb(dbStop) : null;
+      stop = dbStop != null ? Stop.fromDb(dbStop: dbStop) : null;
+      // todo: get sequence to stop
 
       var dbDirection = await database.getDirectionById(dbTrip.directionId);
       direction = dbDirection != null ? Direction.fromDb(dbDirection) : null;
