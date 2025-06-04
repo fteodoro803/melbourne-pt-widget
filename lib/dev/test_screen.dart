@@ -82,7 +82,7 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     // 2. Fold routes
-    var group = await ptvService.splitStop(routes, stopId);
+    var group = await ptvService.stops.splitStop(routes, stopId);
     print(group);
   }
 

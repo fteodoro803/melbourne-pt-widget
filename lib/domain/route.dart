@@ -38,7 +38,7 @@ class Route {
     PtvService ptvService = PtvService();
 
     Route route = Route(id: id, name: name, number: number, type: type, gtfsId: gtfsId, status: status);
-    route.stopsAlongRoute = await ptvService.fetchStopsRoute(route);
+    route.stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route);
     route.directions = await ptvService.directions.fetchDirections(route.id);
 
     return route;
@@ -49,7 +49,7 @@ class Route {
     if (directions == null || stopsAlongRoute == null) {
       PtvService ptvService = PtvService();
       directions = await ptvService.directions.fetchDirections(id);
-      stopsAlongRoute = await ptvService.fetchStopsRoute(this);
+      stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(this);
     }
   }
 
