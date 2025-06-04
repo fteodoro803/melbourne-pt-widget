@@ -17,11 +17,21 @@ class PtvTripService extends PtvBaseService {
     int? directionId = trip.direction?.id;
     int? index = trip.index;
 
-    if (uniqueId != null && routeTypeId != null && routeId != null && stopId != null && directionId != null) {
-      await database.addTrip(uniqueId: uniqueId, routeTypeId: routeTypeId, routeId: routeId, stopId: stopId, directionId: directionId, index: index);
-    }
-    else {
-      print(" ( ptv_service.dart -> saveTrip ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
+    if (uniqueId != null &&
+        routeTypeId != null &&
+        routeId != null &&
+        stopId != null &&
+        directionId != null) {
+      await database.addTrip(
+          uniqueId: uniqueId,
+          routeTypeId: routeTypeId,
+          routeId: routeId,
+          stopId: stopId,
+          directionId: directionId,
+          index: index);
+    } else {
+      print(
+          " ( ptv_service.dart -> saveTrip ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");
     }
   }
 
@@ -29,8 +39,7 @@ class PtvTripService extends PtvBaseService {
   Future<bool> isTripSaved(Trip trip) async {
     if (trip.uniqueID != null) {
       return await database.isTripInDatabase(trip.uniqueID!);
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -45,10 +54,8 @@ class PtvTripService extends PtvBaseService {
     Direction? direction;
     int? index;
 
-
     // Convert database trip to domain trip
     for (var dbTrip in dbTrips) {
-
       var dbRoute = await database.getRouteById(dbTrip.routeId);
       route = dbRoute != null ? Route.fromDb(dbRoute) : null;
 
