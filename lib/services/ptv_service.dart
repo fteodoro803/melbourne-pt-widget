@@ -19,6 +19,7 @@ import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/domain/trip.dart';
+import 'package:flutter_project/services/ptv/ptv_departure_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_project/services/utility/list_extensions.dart';
 
@@ -51,42 +52,8 @@ class RouteStops {
 
 class PtvService {
   db.AppDatabase database = Get.find<db.AppDatabase>();
+  final PtvDepartureService departures = PtvDepartureService();
   final PtvDirectionService directions = PtvDirectionService();
-
-
-// Departure Functions
-  // todo: convert to int for ids
-  // todo: change definition to fetchDepartures(Route route, Stop stop, {...})
-  Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
-    List<Departure> departures = [];
-
-    // Fetches departure data via PTV API
-    ApiData data = await PtvApiService().departures(
-        routeType, stopId,
-        directionId: directionId,
-        routeId: routeId,
-        maxResults: maxResults,
-        expand: expands);
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // print(" ( ptv_service.dart -> fetchDepartures() ) -- fetched departures response for routeType=$routeType, directionId=$directionId, routeId=$routeId: ${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
-
-    // Empty JSON Response
-    if (jsonResponse == null) {
-      print(
-          "( ptv_service.dart -> fetchDepartures ) -- Null data response");
-      return departures;
-    }
-
-    // Converts departure time response to DateTime object, if it's not null, and adds to departure list
-    Map<String, dynamic>? runData = jsonResponse["runs"];
-    for (var departure in jsonResponse["departures"]) {
-      Departure newDeparture = Departure.fromAPI(departure, runData);
-      departures.add(newDeparture);
-    }
-
-    return departures;
-  }
 
 // Disruption Functions
   /// Fetches disruptions for a given route.
