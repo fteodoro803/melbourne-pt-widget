@@ -2,7 +2,6 @@
 
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/helpers/direction_helpers.dart';
-import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
@@ -25,6 +24,8 @@ import 'package:flutter_project/services/utility/list_extensions.dart';
 
 import '../database/database.dart' as db;
 import 'package:get/get.dart';
+
+import 'ptv/ptv_direction_service.dart';
 
 class StopRouteLists {
   List<Stop> stops;
@@ -50,6 +51,8 @@ class RouteStops {
 
 class PtvService {
   db.AppDatabase database = Get.find<db.AppDatabase>();
+  final PtvDirectionService directions = PtvDirectionService();
+
 
 // Departure Functions
   // todo: convert to int for ids
@@ -83,60 +86,6 @@ class PtvService {
     }
 
     return departures;
-  }
-
-// Direction Functions
-  /// Fetches directions for a given route.
-  /// Uses data from either the database or PTV API, preferring the database.
-  Future<List<Direction>> fetchDirections(int routeId) async {
-    List<Direction> directionList = [];
-
-    // Check if directions data exists in database
-    // If it does, set directionList to the retrieved data. If not, fetch data from the API
-    final dbDirectionsList = await database.getDirectionsByRoute(routeId);
-    if (dbDirectionsList.isNotEmpty) {
-      directionList = dbDirectionsList.map(Direction.fromDb).toList();
-    }
-
-    else {
-      ApiData data = await PtvApiService().directions(routeId.toString());
-      Map<String, dynamic>? jsonResponse = data.response;
-
-      // Early Exit
-      if (data.response == null) {
-        print("( ptv_service.dart -> fetchDirections ) -- Null response");
-        return [];
-      }
-
-      // Populating Stops List
-      for (var direction in jsonResponse!["directions"]) {
-        int routeId = direction["route_id"];
-        Direction newDirection = Direction.fromApi(direction);
-        directionList.add(newDirection);
-
-        // Adding to database
-        await Get.find<db.AppDatabase>().addDirection(
-            newDirection.id, newDirection.name, newDirection.description);
-        await Get.find<db.AppDatabase>().addRouteDirection(routeId: routeId, directionId: newDirection.id);
-      }
-    }
-
-    return directionList;
-  }
-
-  /// Get a route's opposite direction.
-  /// Assumes that there at most 2 directions to a route.
-  // todo: maybe this can be implemented in a domain class (trip?)
-  Future<Direction?> getReverseDirection(Route route, Direction direction) async {
-    // 1. Fetch directions
-    List<Direction> directions = await fetchDirections(route.id);
-
-    // 2. Get the other direction (if it exists)
-    if (directions.length == 2) {
-      return directions.firstWhereOrNull((d) => d.id != direction.id);
-    }
-
-    return null;
   }
 
 // Disruption Functions
@@ -456,7 +405,7 @@ class PtvService {
 
     // Determine which direction to use
     // If no direction is specified, sequence will not be available
-    List<Direction> directions = await fetchDirections(route.id);
+    List<Direction> directions = await this.directions.fetchDirections(route.id);
     int directionId;
     if (direction != null && directions.contains(direction)) {
         directionId = direction.id;
@@ -561,7 +510,7 @@ class PtvService {
       // todo: case, if there is only 1 shared stop, both forward and reverse match will be true. How to deal with this?
 
       if (forwardMatch || reverseMatch) {
-        Direction? reversedDirection = await getReverseDirection(rs.route, direction);
+        Direction? reversedDirection = await directions.getReverse(rs.route, direction);
 
         // 4a.
         if (forwardMatch) {

@@ -220,7 +220,7 @@ class SearchUtils {
 
   /// Finds the stops along a route and the directions for a route
   Future<pt_route.Route> initializeRoute(pt_route.Route route) async {
-    List<Direction> directions = await ptvService.fetchDirections(route.id);
+    List<Direction> directions = await ptvService.directions.fetchDirections(route.id);
     List<Stop> stopsAlongRoute = await getStopsAlongRoute(directions, route);
     pt_route.Route newRoute = route;
     newRoute.directions = directions;
