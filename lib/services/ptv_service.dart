@@ -2,7 +2,6 @@
 
 import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/domain/disruption.dart';
-import 'package:flutter_project/geopath.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -68,37 +67,6 @@ class PtvService {
     }
 
     return disruptions;
-  }
-
-// GeoPath Functions
-  // todo: add to database
-  Future<List<LatLng>> fetchGeoPath(Route route) async {
-    List<LatLng> pathList = [];
-
-    // Fetches stops data via PTV API
-    ApiData data = await PtvApiService().stopsRoute(
-        route.id.toString(), route.type.id.toString(), geoPath: true);
-    Map<String, dynamic>? jsonResponse = data.response;
-
-    // print(" (ptv_service.dart -> fetchGeoPath) -- fetched Geopath for route ${route.id}:\n${JsonEncoder.withIndent('  ').convert(jsonResponse)} ");
-
-    // Empty JSON Response
-    if (jsonResponse == null) {
-      print(
-          "(ptv_service.dart -> fetchGeoPath) -- Null data response, Improper Location Data");
-      return pathList;
-    }
-
-    // Adding GeoPath to List if GeoPath isn't empty
-    List<dynamic> geopath = jsonResponse["geopath"];
-    if (geopath.isNotEmpty) {
-      var paths = jsonResponse["geopath"][0]["paths"];
-      pathList = convertPolylineToLatLng(paths);
-    }
-
-    // convertPolylineToCsv(paths);     // test save to CSV, for rendering on https://kepler.gl/demo
-
-    return pathList;
   }
 
 // Pattern Functions

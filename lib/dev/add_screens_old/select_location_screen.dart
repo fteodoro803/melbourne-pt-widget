@@ -35,20 +35,20 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     });
   }
 
-  String? _style;
-  // Loads Google Map Style from JSON
-  Future<String?> _loadMapStyle() async {
-    try {
-      String loadString = await rootBundle.loadString('assets/mapStyles/darkModeStyle.json');
-      return loadString;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  void _setStyle() async {
-    _style = await _loadMapStyle();
-  }
+  // String? _style;
+  // // Loads Google Map Style from JSON
+  // Future<String?> _loadMapStyle() async {
+  //   try {
+  //     String loadString = await rootBundle.loadString('assets/mapStyles/darkModeStyle.json');
+  //     return loadString;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
+  //
+  // void _setStyle() async {
+  //   _style = await _loadMapStyle();
+  // }
 
   // Adds one marker on the map
   void setMarker(LatLng position) {
@@ -66,7 +66,7 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
     tools.printScreenState(_screenName, widget.arguments);
 
     // Loading in Style
-    _setStyle();
+    // _setStyle();
     setState(() {});
   }
 
