@@ -26,10 +26,13 @@ class PtvDirectionService extends PtvBaseService {
       Map<String, dynamic>? jsonResponse = data.response;
 
       // Early Exit
-      handleNullResponse("fetchDirections");
+      if (jsonResponse == null) {
+        handleNullResponse("fetchDirections");
+        return [];
+      }
 
       // 3. Populate direction list
-      for (var direction in jsonResponse!["directions"]) {
+      for (var direction in jsonResponse["directions"]) {
         int routeId = direction["route_id"];
         Direction newDirection = Direction.fromApi(direction);
         directionList.add(newDirection);
