@@ -5,7 +5,7 @@ import 'package:flutter_project/database/database.dart' as db;
 
 abstract class PtvBaseService {
   db.AppDatabase database = Get.find<db.AppDatabase>();
-  var apiService = PtvApiService();
+  PtvApiService apiService = PtvApiService();
 
   // Common error handling
   void handleNullResponse(String functionName) {
