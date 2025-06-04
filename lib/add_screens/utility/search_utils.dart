@@ -200,11 +200,11 @@ class SearchUtils {
 
   /// Handles adding/remove transport from favourites
   Future<void> handleSave(Trip transport) async {
-    bool isSaved = await ptvService.isTripSaved(transport);
+    bool isSaved = await ptvService.trips.isTripSaved(transport);
     if (!isSaved) {
-      await ptvService.saveTrip(transport);  // Add transport to saved list
+      await ptvService.trips.saveTrip(transport);  // Add transport to saved list
     } else {
-      await ptvService.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
+      await ptvService.trips.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
     }
   }
 

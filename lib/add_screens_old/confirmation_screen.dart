@@ -72,7 +72,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   }
 
   Future<void> _saveTransportToDb(Trip transport) async {
-    await ptvService.saveTrip(transport);
+    await ptvService.trips.saveTrip(transport);
   }
 
   // Generate

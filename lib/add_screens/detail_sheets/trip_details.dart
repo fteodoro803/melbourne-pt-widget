@@ -144,7 +144,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   }
 
   Future<void> _checkSaved() async {
-    bool isSaved = await ptvService.isTripSaved(_initialState.trip);
+    bool isSaved = await ptvService.trips.isTripSaved(_initialState.trip);
     setState(() {
       _isSaved = isSaved;
       _isSavedInitialized = true;
