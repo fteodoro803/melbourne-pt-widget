@@ -15,11 +15,8 @@ import 'package:flutter_project/services/ptv/ptv_route_type_service.dart';
 import 'package:flutter_project/services/ptv/ptv_stop_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../database/database.dart' as db;
-import 'package:get/get.dart';
-
-import 'ptv/ptv_direction_service.dart';
-import 'ptv/ptv_trip_service.dart';
+import 'package:flutter_project/services/ptv/ptv_direction_service.dart';
+import 'package:flutter_project/services/ptv/ptv_trip_service.dart';
 
 class StopRouteLists {
   List<Stop> stops;
@@ -31,7 +28,6 @@ class StopRouteLists {
 /// Handles calling the PTV API, converting to domain models, and storing to database
 
 class PtvService {
-  db.AppDatabase database = Get.find<db.AppDatabase>();
   final PtvDepartureService departures = PtvDepartureService();
   final PtvDirectionService directions = PtvDirectionService();
   final PtvRouteService routes = PtvRouteService();
