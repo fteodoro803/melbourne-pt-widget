@@ -5,7 +5,6 @@ import 'package:flutter_project/database/helpers/direction_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
-import 'package:flutter_project/database/helpers/route_type_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/trip_helpers.dart';
@@ -21,6 +20,7 @@ import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/services/ptv/ptv_departure_service.dart';
 import 'package:flutter_project/services/ptv/ptv_route_service.dart';
+import 'package:flutter_project/services/ptv/ptv_route_type_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_project/services/utility/list_extensions.dart';
 
@@ -56,6 +56,7 @@ class PtvService {
   final PtvDepartureService departures = PtvDepartureService();
   final PtvDirectionService directions = PtvDirectionService();
   final PtvRouteService routes = PtvRouteService();
+  final PtvRouteTypeService routeTypes = PtvRouteTypeService();
 
 // Disruption Functions
   /// Fetches disruptions for a given route.
@@ -197,44 +198,6 @@ class PtvService {
     // String prettyJson = JsonEncoder.withIndent('  ').convert(jsonResponse);
     // print("(ptv_service.dart -> fetchPattern) -- Fetched Pattern:\n$prettyJson");
     return departures;
-  }
-
-// RouteType Functions
-  /// Fetches all route types offered by PTV from the database.
-  /// If no route type data is in database, it fetches from the PTV API and stores it to database.  // todo: get from database first, preferring database
-  Future<List<String>> fetchRouteTypes() async {
-    List<String> routeTypes = [];
-
-    // If data exists in database, adds that data to routeTypes list
-    final dbRouteTypesList = await Get.find<db.AppDatabase>().getRouteTypes();
-    if (dbRouteTypesList.isNotEmpty) {
-      routeTypes = dbRouteTypesList.map((rt) => rt.name).toList();
-    }
-
-    // If data doesn't exist in database, fetches from API and adds it to database
-    else {
-      ApiData data = await PtvApiService().routeTypes();
-      Map<String, dynamic>? jsonResponse = data.response;
-
-      // Early exit: Empty response
-      if (data.response == null) {
-        print("( ptv_service.dart -> fetchRouteTypes ) -- Null response");
-        return [];
-      }
-
-      // Populating RouteTypes list
-      for (var entry in jsonResponse!["route_types"]) {
-        int id = entry["route_type"];
-        RouteType newRouteType = RouteType.fromId(id);
-        routeTypes.add(newRouteType.name);
-
-        // Add to database
-        Get.find<db.AppDatabase>().addRouteType(
-            newRouteType.id, newRouteType.name);
-      }
-    }
-
-    return routeTypes;
   }
 
 // Runs Functions

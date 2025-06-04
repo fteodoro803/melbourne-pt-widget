@@ -35,7 +35,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
 
   // Fetches Routes and generates Map/Dictionary of PT Options
   Future<void> fetchRouteTypes() async {
-    List<String> routeTypes = await ptvService.fetchRouteTypes();
+    List<String> routeTypes = await ptvService.routeTypes.fetchRouteTypes();
 
     // Populating RouteTypes List
     for (var name in routeTypes) {
