@@ -16,7 +16,6 @@ import "package:flutter_speed_dial/flutter_speed_dial.dart";
 
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_project/domain/trip.dart';
-import 'package:flutter_project/file_service.dart';
 
 import 'package:flutter_project/dev/test_screen.dart';
 import "add_screens/search_binding.dart";
@@ -201,9 +200,6 @@ class _MyHomePageState extends State<MyHomePage> {
       final Trip item = _tripList.removeAt(oldIndex);
       _tripList.insert(newIndex, item);
     });
-
-    // Save the updated list after reordering
-    save(_tripList);
 
     // Save indices to database
     for (int i=0; i<_tripList.length; i++) {
