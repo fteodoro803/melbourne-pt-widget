@@ -23,7 +23,7 @@ import "add_screens/search_binding.dart";
 import "add_screens/find_routes_screen.dart";
 
 import "add_screens/search_screen.dart";
-import "home_widget_service.dart";
+import 'package:flutter_project/services/home_widget_service.dart';
 
 import 'package:get/get.dart';
 import 'package:timezone/data/latest.dart' as tzdata;

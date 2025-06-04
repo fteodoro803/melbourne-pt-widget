@@ -1,10 +1,9 @@
 // Home Widget
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_project/add_screens/utility/trip_utils.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:home_widget/home_widget.dart';
-
-import 'add_screens/utility/trip_utils.dart';
 
 class HomeWidgetService {
   late bool isMobile;    // Android or iOS
