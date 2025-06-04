@@ -3,7 +3,7 @@ import 'package:flutter_project/add_screens/search_screen.dart';
 import 'package:flutter_project/add_screens/widgets/trip_info_widgets.dart';
 import 'package:get/get.dart';
 import '../domain/route.dart' as pt_route;
-import '../ptv_service.dart';
+import '../services/ptv_service.dart';
 import 'search_binding.dart';
 import 'widgets/bottom_navigation_bar.dart';
 import 'widgets/buttons.dart' as ScreenWidgets;

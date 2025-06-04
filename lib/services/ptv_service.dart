@@ -23,7 +23,7 @@ import 'package:flutter_project/domain/trip.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_project/services/utility/list_extensions.dart';
 
-import 'database/database.dart' as db;
+import '../database/database.dart' as db;
 import 'package:get/get.dart';
 
 class StopRouteLists {
@@ -506,7 +506,7 @@ class PtvService {
     List<DirectedStop> directedStops = [];
     List<RouteStops> routesStops = [];
 
-    print("0. ( ptv_service -> commonStops ) -- Stops from: ${stopId}");
+    // print("0. ( ptv_service -> commonStops ) -- Stops from: ${stopId}");
 
     // 1. Get stops along each route, and add to routesStops list
     for (var route in routes) {
@@ -521,7 +521,7 @@ class PtvService {
       List<Stop> stops = await fetchStopsRoute(route, direction: directions.first, filter: true);
       routesStops.add(RouteStops(route: route, stops: stops));
     }
-    print("1. ( ptv_service.dart -> commonStops ) -- Routes and Stops:\n$routesStops");
+    // print("1. ( ptv_service.dart -> commonStops ) -- Routes and Stops:\n$routesStops");
 
     // 2. Get the index of the RouteStop, where it's Stop's id is equal to stopId
     int stopIndex = routesStops.first.stops.indexWhere((s) => s.id == stopId);
@@ -533,13 +533,13 @@ class PtvService {
     }
 
     Stop selectedStop = routesStops.first.stops[stopIndex];
-    print("2. ( ptv_service.dart -> commonStops ) -- routesStops.first.stops[$stopIndex] = ${selectedStop.id}");
+    // print("2. ( ptv_service.dart -> commonStops ) -- routesStops.first.stops[$stopIndex] = ${selectedStop.id}");
 
     // 3. Get common contiguous stops from a stop
     // todo: probably also do a common suburbs and landmarks
     List<Stop> initialStopList = routesStops.first.stops;
     List<Stop> sharedStops = routesStops.fold(initialStopList, (accumulator, nextRouteStop) => accumulator.sharedSublist(nextRouteStop.stops, selectedStop));
-    print("3. ( ptv_service.dart -> commonStops ) -- shared contiguous stops from stop $stopId: ${sharedStops.map((s) => s.id)}");
+    // print("3. ( ptv_service.dart -> commonStops ) -- shared contiguous stops from stop $stopId: ${sharedStops.map((s) => s.id)}");
 
     if (sharedStops.isEmpty) {
       return null;
@@ -554,7 +554,7 @@ class PtvService {
       List<Stop> stopOrder = rs.stops;
       List<Stop> reversedStopOrder = stopOrder.reversed.toList();
       Direction direction = rs.route.directions!.first;
-      print("4. ( ptv_service.dart -> commonStops ) -- stops in sharedStops = ${stopOrder.containsSublist(sharedStops)}");
+      // print("4. ( ptv_service.dart -> commonStops ) -- stops in sharedStops = ${stopOrder.containsSublist(sharedStops)}");
 
       bool forwardMatch = stopOrder.containsSublist(sharedStops);
       bool reverseMatch = reversedStopOrder.containsSublist(sharedStops);
@@ -592,8 +592,8 @@ class PtvService {
       }
     }
 
-    print("4. ( ptv_service.dart -> commonStops ) -- Forward Trips (${trips.map((t) => (t.route!.number, t.direction!.name)).toList()})");
-    print("4. ( ptv_service.dart -> commonStops ) -- Reverse Trips (${tripsReversed.map((t) => (t.route!.number, t.direction!.name)).toList()})");
+    // print("4. ( ptv_service.dart -> commonStops ) -- Forward Trips (${trips.map((t) => (t.route!.number, t.direction!.name)).toList()})");
+    // print("4. ( ptv_service.dart -> commonStops ) -- Reverse Trips (${tripsReversed.map((t) => (t.route!.number, t.direction!.name)).toList()})");
 
 
     // 5. Create directed stops
@@ -605,8 +605,8 @@ class PtvService {
     directedStops.add(forwardStop);
     directedStops.add(reverseStop);
 
-    print("5. ( ptv_service.dart -> commonStops ) -- Forward Stop: $forwardStop");
-    print("5. ( ptv_service.dart -> commonStops ) -- Reverse Stop: $reverseStop");
+    // print("5. ( ptv_service.dart -> commonStops ) -- Forward Stop: $forwardStop");
+    // print("5. ( ptv_service.dart -> commonStops ) -- Reverse Stop: $reverseStop");
 
     // todo: what if they only share one stop
     // todo: what if the stop is on the end of the shared stop

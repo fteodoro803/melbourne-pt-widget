@@ -6,7 +6,7 @@ import '../../domain/disruption.dart';
 import '../../domain/route.dart' as pt;
 import '../../domain/stop.dart';
 import '../../domain/trip.dart';
-import '../../ptv_service.dart';
+import '../../services/ptv_service.dart';
 import '../controllers/navigation_service.dart';
 import '../controllers/sheet_controller.dart';
 import '../utility/search_utils.dart';

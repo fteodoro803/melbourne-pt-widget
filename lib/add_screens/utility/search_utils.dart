@@ -9,7 +9,7 @@ import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart' as pt_route;
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
-import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 
 class UniqueStop {

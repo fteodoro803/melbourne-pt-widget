@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_project/domain/route.dart' as pt_route;
 import 'package:flutter_project/domain/stop.dart';
-import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/add_screens/utility/map_utils.dart';
 import 'package:flutter_project/add_screens/utility/trip_path.dart';
 

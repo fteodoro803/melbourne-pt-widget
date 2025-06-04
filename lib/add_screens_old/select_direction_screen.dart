@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/domain/direction.dart';
-import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 
 import 'package:flutter_project/database/database.dart' as db;

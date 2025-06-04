@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
-import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/services/gtfs_service.dart';

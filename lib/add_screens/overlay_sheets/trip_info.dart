@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../domain/disruption.dart';
 import '../../domain/stop.dart';
 import '../../domain/route.dart' as pt_route;
-import '../../ptv_service.dart';
+import '../../services/ptv_service.dart';
 import '../controllers/navigation_service.dart';
 import '../utility/search_utils.dart';
 import '../utility/time_utils.dart';
