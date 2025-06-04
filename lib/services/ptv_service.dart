@@ -20,6 +20,7 @@ import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/services/ptv/ptv_departure_service.dart';
+import 'package:flutter_project/services/ptv/ptv_route_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_project/services/utility/list_extensions.dart';
 
@@ -54,6 +55,7 @@ class PtvService {
   db.AppDatabase database = Get.find<db.AppDatabase>();
   final PtvDepartureService departures = PtvDepartureService();
   final PtvDirectionService directions = PtvDirectionService();
+  final PtvRouteService routes = PtvRouteService();
 
 // Disruption Functions
   /// Fetches disruptions for a given route.
@@ -195,76 +197,6 @@ class PtvService {
     // String prettyJson = JsonEncoder.withIndent('  ').convert(jsonResponse);
     // print("(ptv_service.dart -> fetchPattern) -- Fetched Pattern:\n$prettyJson");
     return departures;
-  }
-
-// Route Functions
-  /// Fetches all routes offered by PTV from the database.
-  /// If no route data is in database, it fetches from the PTV API and stores it to database.
-  Future<List<Route>> fetchRoutes({String? routeTypes}) async {
-    List<Route> routeList = [];
-
-    // Checks if data exists in database, and sets routeList if it exists
-    int? routeType = routeTypes != null ? int.tryParse(routeTypes) : null;
-    final dbRouteList = await Get.find<db.AppDatabase>().getRoutes(routeType);
-    if (dbRouteList.isNotEmpty) {
-      routeList = dbRouteList.map(Route.fromDb).toList();
-    }
-
-    // Fetches data from API and adds to database, if route data doesn't exist in database
-    else {
-      // Fetches stop data via PTV API
-      ApiData data = await PtvApiService().routes(routeTypes: routeTypes);
-      Map<String, dynamic>? jsonResponse = data.response;
-
-      // Empty JSON Response
-      if (jsonResponse == null) {
-        print("(ptv_service.dart -> fetchRoutes) -- Null data response");
-        return [];
-      }
-
-      // Creates new routes, and adds them to return list and database
-      for (var route in jsonResponse["routes"]) {
-        Route newRoute = Route.fromApi(route);
-        routeList.add(newRoute);
-
-        // Add to Database
-        await Get.find<db.AppDatabase>().addRoute(
-            newRoute.id, newRoute.name, newRoute.number, newRoute.type.id,
-            newRoute.gtfsId, newRoute.status);
-      }
-    }
-
-    return routeList;
-  }
-
-  /// Fetches routes from database, by search name.
-  Future<List<Route>> searchRoutes({String? query, RouteType? routeType}) async {
-    final dbRouteList = await Get.find<db.AppDatabase>().getRoutesByName(search: query, routeType: routeType?.id);
-    List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
-    return domainRouteList;
-  }
-
-  /// Fetches routes from database, by id.
-  Future<Route?> getRouteById({required int id, bool withDetails = false}) async {
-    final dbRoute = await Get.find<db.AppDatabase>().getRouteById(id);
-    Route? route = dbRoute != null ? Route.fromDb(dbRoute) : null;
-
-    if (withDetails == true && route != null) await route.loadDetails();
-
-    return route;
-  }
-
-  /// Fetches routes according to a stop, from the database.
-  /// Maps the databases' routes to domain's route
-  // todo: consider change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
-  // todo: but also, in our functions, we use fetch, but most of them also check the database first. So maybe for consistency, keep it?
-  Future<List<Route>> fetchRoutesFromStop(int stopId) async {
-    final List<db.RoutesTableData> dbRoutes = await Get.find<db.AppDatabase>().getRoutesFromStop(stopId);
-
-    // Convert Route's database model to domain model
-    List<Route> routeList = dbRoutes.map(Route.fromDb).toList();
-
-    return routeList;
   }
 
 // RouteType Functions

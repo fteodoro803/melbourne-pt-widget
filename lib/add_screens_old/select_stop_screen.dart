@@ -52,7 +52,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     for (var stop in stopList) {
 
       // Add the future operation to list instead of awaiting it immediately
-      routeFetchOperations.add(ptvService.fetchRoutesFromStop(stop.id).then((routeList) {
+      routeFetchOperations.add(ptvService.routes.fetchRoutesFromStop(stop.id).then((routeList) {
         for (var route in routeList) {
           if (route.type.id != routeType) {
             continue;

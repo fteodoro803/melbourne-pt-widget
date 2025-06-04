@@ -56,7 +56,7 @@ class _TestScreenState extends State<TestScreen> {
   Future<void> _initialisePTVData() async {
     // todo: add logic to skip this, if it's already been done
     await ptvService.fetchRouteTypes();
-    await ptvService.fetchRoutes();
+    await ptvService.routes.fetchRoutes();
     await Future.delayed(Duration(milliseconds: 100));
   }
 

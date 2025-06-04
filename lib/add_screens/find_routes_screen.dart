@@ -97,7 +97,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
   }
 
   Future<void> getRoutes() async {
-    List<pt_route.Route> routes = await ptvService.searchRoutes();
+    List<pt_route.Route> routes = await ptvService.routes.searchRoutes();
 
     // Sort the list
     routes.sort((a, b) {

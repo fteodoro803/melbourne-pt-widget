@@ -160,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _initialisePTVData() async {
     // todo: add logic to skip this, if it's already been done
     await ptvService.fetchRouteTypes();
-    await ptvService.fetchRoutes();
+    await ptvService.routes.fetchRoutes();
   }
 
   // Reads the saved trip data from database and updates departures
