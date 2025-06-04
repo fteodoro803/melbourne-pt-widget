@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../domain/departure.dart';
 import '../../domain/trip.dart';
-import '../../ptv_service.dart';
+import '../../services/ptv_service.dart';
 import '../controllers/navigation_service.dart';
 import '../controllers/sheet_controller.dart';
 import '../utility/trip_utils.dart';

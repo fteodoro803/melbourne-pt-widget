@@ -6,7 +6,7 @@ import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/services/ptv_service.dart';
 
 import 'package:flutter_project/database/helpers/departure_helpers.dart';
 import 'package:flutter_project/database/database.dart' as db;

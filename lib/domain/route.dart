@@ -1,7 +1,7 @@
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
-import 'package:flutter_project/ptv_service.dart';
+import 'package:flutter_project/services/ptv_service.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 import 'package:flutter_project/database/database.dart' as db;
