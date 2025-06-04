@@ -38,8 +38,8 @@ class Route {
     PtvService ptvService = PtvService();
 
     Route route = Route(id: id, name: name, number: number, type: type, gtfsId: gtfsId, status: status);
-    route.stopsAlongRoute = await ptvService.fetchStopsRoute(route);
-    route.directions = await ptvService.fetchDirections(route.id);
+    route.stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route);
+    route.directions = await ptvService.directions.fetchDirections(route.id);
 
     return route;
   }
@@ -48,8 +48,8 @@ class Route {
   Future<void> loadDetails() async {
     if (directions == null || stopsAlongRoute == null) {
       PtvService ptvService = PtvService();
-      directions = await ptvService.fetchDirections(id);
-      stopsAlongRoute = await ptvService.fetchStopsRoute(this);
+      directions = await ptvService.directions.fetchDirections(id);
+      stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(this);
     }
   }
 

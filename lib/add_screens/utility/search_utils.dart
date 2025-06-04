@@ -152,11 +152,11 @@ class SearchUtils {
   Future<List<Stop>> getStopsAlongRoute(List<Direction> directions, pt_route.Route route) async {
     List<Stop> stops = [];
     if (directions.isNotEmpty) {
-      stops = await ptvService.fetchStopsRoute(route, direction: directions[0]);
+      stops = await ptvService.stops.fetchStopsByRoute(route, direction: directions[0]);
       stops = stops.where((s) => s.stopSequence != 0).toList();
     }
     else {
-      stops = await ptvService.fetchStopsRoute(route);
+      stops = await ptvService.stops.fetchStopsByRoute(route);
     }
 
     return stops;
@@ -200,11 +200,11 @@ class SearchUtils {
 
   /// Handles adding/remove transport from favourites
   Future<void> handleSave(Trip transport) async {
-    bool isSaved = await ptvService.isTripSaved(transport);
+    bool isSaved = await ptvService.trips.isTripSaved(transport);
     if (!isSaved) {
-      await ptvService.saveTrip(transport);  // Add transport to saved list
+      await ptvService.trips.saveTrip(transport);  // Add transport to saved list
     } else {
-      await ptvService.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
+      await ptvService.trips.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
     }
   }
 
@@ -220,7 +220,7 @@ class SearchUtils {
 
   /// Finds the stops along a route and the directions for a route
   Future<pt_route.Route> initializeRoute(pt_route.Route route) async {
-    List<Direction> directions = await ptvService.fetchDirections(route.id);
+    List<Direction> directions = await ptvService.directions.fetchDirections(route.id);
     List<Stop> stopsAlongRoute = await getStopsAlongRoute(directions, route);
     pt_route.Route newRoute = route;
     newRoute.directions = directions;

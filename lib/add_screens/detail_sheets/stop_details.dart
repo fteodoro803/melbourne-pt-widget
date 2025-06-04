@@ -138,7 +138,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
     List<bool> newSavedList = [];
 
     for (var trip in _trips) {
-      bool isSaved = await ptvService.isTripSaved(trip);
+      bool isSaved = await ptvService.trips.isTripSaved(trip);
       newSavedList.add(isSaved);
     }
 

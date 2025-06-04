@@ -55,8 +55,8 @@ class _TestScreenState extends State<TestScreen> {
 
   Future<void> _initialisePTVData() async {
     // todo: add logic to skip this, if it's already been done
-    await ptvService.fetchRouteTypes();
-    await ptvService.fetchRoutes();
+    await ptvService.routeTypes.fetchRouteTypes();
+    await ptvService.routes.fetchRoutes();
     await Future.delayed(Duration(milliseconds: 100));
   }
 
@@ -82,7 +82,7 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     // 2. Fold routes
-    var group = await ptvService.splitStop(routes, stopId);
+    var group = await ptvService.stops.splitStop(routes, stopId);
     print(group);
   }
 

@@ -67,7 +67,7 @@ class Trip {
     // Gets Departures and saves to instance
     PtvService ptvService = PtvService();
     departureCount = departureCount ?? defaultDepartureCount;
-    departures = await ptvService.fetchDepartures(
+    departures = await ptvService.departures.fetchDepartures(
         routeType, stopId, routeId, directionId: directionId, maxResults: departureCount.toString());
 
     // Saves Departures to Database

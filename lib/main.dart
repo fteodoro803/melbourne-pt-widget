@@ -159,15 +159,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _initialisePTVData() async {
     // todo: add logic to skip this, if it's already been done
-    await ptvService.fetchRouteTypes();
-    await ptvService.fetchRoutes();
+    await ptvService.routeTypes.fetchRouteTypes();
+    await ptvService.routes.fetchRoutes();
   }
 
   // Reads the saved trip data from database and updates departures
   Future<void> _updateMainPage() async {
     print("Updating main page");
 
-    List<Trip> tripList = await ptvService.loadTrips();
+    List<Trip> tripList = await ptvService.trips.loadTrips();
 
     // Updates all Departures
     for (var trip in tripList) {
@@ -208,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // Save indices to database
     for (int i=0; i<_tripList.length; i++) {
       _tripList[i].setIndex(i);
-      await ptvService.saveTrip(_tripList[i]);
+      await ptvService.trips.saveTrip(_tripList[i]);
     }
   }
 
@@ -241,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           trip: _tripList[index],
                           dismissible: true,
                           onDismiss: () async {
-                            await ptvService.deleteTrip(_tripList[index].uniqueID!);
+                            await ptvService.trips.deleteTrip(_tripList[index].uniqueID!);
                             await _updateMainPage();
                           },
                           onTap: () =>

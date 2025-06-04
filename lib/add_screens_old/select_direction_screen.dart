@@ -37,7 +37,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
 
   void getDirections() async {
     int? routeId = widget.arguments.trip!.route?.id;
-    List<Direction> directions = await ptvService.fetchDirections(routeId!);
+    List<Direction> directions = await ptvService.directions.fetchDirections(routeId!);
     _directions = directions;
     setState(() {});
   }
