@@ -1,4 +1,3 @@
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/helpers/route_type_helpers.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/services/ptv/ptv_base_service.dart';
@@ -18,17 +17,16 @@ class PtvRouteTypeService extends PtvBaseService {
 
     // 1b. If data doesn't exist in database, fetches from API and adds it to database
     else {
-      ApiData data = await apiService.routeTypes();
-      Map<String, dynamic>? jsonResponse = data.response;
+      var data = await apiService.routeTypes();
 
       // Early exit: Empty response
-      if (data.response == null) {
+      if (data == null) {
         handleNullResponse("fetchRouteTypes");
         return [];
       }
 
       // 2. Populating RouteTypes list
-      for (var entry in jsonResponse!["route_types"]) {
+      for (var entry in data["route_types"]) {
         int id = entry["route_type"];
         RouteType newRouteType = RouteType.fromId(id);
         routeTypes.add(newRouteType.name);

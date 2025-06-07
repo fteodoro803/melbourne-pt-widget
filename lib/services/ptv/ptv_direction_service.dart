@@ -1,4 +1,3 @@
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/helpers/direction_helpers.dart';
 import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
@@ -22,17 +21,16 @@ class PtvDirectionService extends PtvBaseService {
 
     // 2b. Fetch data from the API
     else {
-      ApiData data = await apiService.directions(routeId.toString());
-      Map<String, dynamic>? jsonResponse = data.response;
+      var data = await apiService.directions(routeId.toString());
 
       // Early Exit
-      if (jsonResponse == null) {
+      if (data == null) {
         handleNullResponse("fetchDirections");
         return [];
       }
 
       // 3. Populate direction list
-      for (var direction in jsonResponse["directions"]) {
+      for (var direction in data["directions"]) {
         int routeId = direction["route_id"];
         Direction newDirection = Direction.fromApi(direction);
         directionList.add(newDirection);
