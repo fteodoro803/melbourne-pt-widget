@@ -1,4 +1,3 @@
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/google_api_service.dart';
 
 class GoogleService {
@@ -7,17 +6,16 @@ class GoogleService {
   Future<List<String>> fetchSuggestions(String input) async {
     List<String> suggestions = [];
 
-    ApiData data = await googleApi.getPlaceAutocomplete(input);
-    Map<String, dynamic>? jsonResponse = data.response;
+    var data = await googleApi.getPlaceAutocomplete(input);
 
     // Empty JSON Response
-    if (jsonResponse == null) {
+    if (data == null) {
       print("(google_service.dart -> fetchSuggestions) -- Null data response");
       return suggestions;
     }
 
     // Adds suggestions to list
-    for (var suggestion in jsonResponse["suggestions"]) {
+    for (var suggestion in data["suggestions"]) {
       String place = suggestion["placePrediction"]["text"]["text"];
 
       // Contains suggestions to Victoria

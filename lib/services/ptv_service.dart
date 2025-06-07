@@ -1,6 +1,5 @@
 // Handles business logic for Departures, between the UI and HTTP Requests
 
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/domain/disruption.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -40,11 +39,10 @@ class PtvService {
     List<Disruption> disruptions = [];
 
     // Fetches disruption data via PTV API
-    ApiData data = await PtvApiService().disruptions(route.id.toString());
-    Map<String, dynamic>? jsonResponse = data.response;
+    var data = await PtvApiService().disruptions(route.id.toString());
 
     // Empty JSON Response
-    if (jsonResponse == null) {
+    if (data == null) {
       print("( ptv_service.dart -> fetchDisruptions ) -- Null data response");
       return [];
     }
@@ -61,7 +59,7 @@ class PtvService {
     }
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
-    for (var disruption in jsonResponse["disruptions"][routeType]) {
+    for (var disruption in data["disruptions"][routeType]) {
       Disruption newDisruption = Disruption.fromApi(data: disruption);
       disruptions.add(newDisruption);
     }
@@ -82,19 +80,18 @@ class PtvService {
     String expands = "Stop";
     String? runRef = departure.runRef;
     RouteType? routeType = trip.route?.type;
-    ApiData data = await PtvApiService().patterns(
+    var data = await PtvApiService().patterns(
         runRef!, routeType!.name, expand: expands);
-    Map<String, dynamic>? jsonResponse = data.response;
 
     // Empty JSON Response
-    if (jsonResponse == null) {
+    if (data == null) {
       print(
           "( ptv_service.dart -> fetchDepartures ) -- Null data response, Improper Location Data");
       return departures;
     }
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
-    for (var departure in jsonResponse["departures"]) {
+    for (var departure in data["departures"]) {
       DateTime? scheduledDepartureUTC = departure["scheduled_departure_utc"] !=
           null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
       DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
@@ -102,7 +99,7 @@ class PtvService {
       String? runRef = departure["run_ref"]?.toString();
       int? stopId = departure["stop_id"];
       String? platformNumber = departure["platform_number"];
-      var vehicleDescriptors = jsonResponse["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
+      var vehicleDescriptors = data["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
       bool? hasLowFloor;
       bool? hasAirConditioning;
       if (vehicleDescriptors != null && vehicleDescriptors
@@ -123,7 +120,7 @@ class PtvService {
       );
 
       // Get Stop Name per Departure
-      String? stopName = jsonResponse["stops"]?[stopId
+      String? stopName = data["stops"]?[stopId
           .toString()]?["stop_name"]; // makes stopName null if data for "runs" and/or "runRef" doesn't exist
       if (stopName != null && stopName
           .toString()
@@ -150,11 +147,10 @@ class PtvService {
     String expands = "All";
     String? runRef = trip.departures?[0].runRef;
     RouteType? routeType = trip.route?.type;
-    ApiData data = await PtvApiService().runs(
+    var data = await PtvApiService().runs(
         runRef!, routeType!.name, expand: expands);
-    Map<String, dynamic>? jsonResponse = data.response;
 
-    print("(ptv_service.dart -> fetchRuns) -- Fetched Runs:\n$jsonResponse");
+    print("(ptv_service.dart -> fetchRuns) -- Fetched Runs:\n$data");
   }
 
   Future<StopRouteLists> fetchStopRoutePairs(LatLng location, {String routeTypes = "all", int maxResults = 3, int maxDistance = 300}) async {
@@ -173,23 +169,22 @@ class PtvService {
     }
 
     // Fetches stop data via PTV API
-    ApiData data = await PtvApiService().stopsLocation(
+    var data = await PtvApiService().stopsLocation(
       locationString,
       maxResults: maxResults.toString(),
       maxDistance: maxDistance.toString(),
       routeTypes: routeTypeString,
     );
-    Map<String, dynamic>? jsonResponse = data.response;
 
     // Empty JSON Response
-    if (jsonResponse == null) {
+    if (data == null) {
       print(
           "( ptv_service.dart -> fetchDepartures ) -- Null data response, Improper Location Data");
       return StopRouteLists([], []);
     }
 
     // Populating Stops List
-    for (var stop in jsonResponse["stops"]) {
+    for (var stop in data["stops"]) {
       for (var route in stop["routes"]) {
         // // Selecting based on RouteType
         // if (route["route_type"].toString() != routeTypes) {

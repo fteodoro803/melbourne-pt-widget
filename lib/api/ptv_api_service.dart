@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter_project/api_data.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
@@ -64,16 +63,16 @@ class PtvApiService {
   }
 
   // Get Route Types
-  Future<ApiData> routeTypes() async {
+  Future<Map<String, dynamic>?> routeTypes() async {
     String request = "/v3/route_types";
     Uri url = getURL(request);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> routeTypes): response: $response");  // *test
-    return ApiData(url, response);
+    return response;
   }
 
   // Get Routes
-  Future<ApiData> routes({String? routeTypes}) async {
+  Future<Map<String, dynamic>?> routes({String? routeTypes}) async {
     String request = "/v3/routes";
 
     // Parameter handling
@@ -83,20 +82,20 @@ class PtvApiService {
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> routes): response: $response");  // *test
-    return ApiData(url, response);
+    return response;
   }
 
   // Get Route Directions
-  Future<ApiData> directions(String routeId) async {
+  Future<Map<String, dynamic>?> directions(String routeId) async {
     String request = "/v3/directions/route/$routeId";
     Uri url = getURL(request);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> routeDirections): response: $response"); //*test
-    return ApiData(url, response);
+    return response;
   }
 
   // Get Stops around a Location
-  Future<ApiData> stopsLocation(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
+  Future<Map<String, dynamic>?> stopsLocation(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
     String request = "/v3/stops/location/$location";
 
     // Parameter handling
@@ -106,11 +105,11 @@ class PtvApiService {
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> stops) -- response: $response"); //*test
-    return ApiData(url, response);
+    return response;
   }
 
   /// Get Stops along a Route
-  Future<ApiData> stopsRoute(String routeId, String routeType, {String? directionId, bool? geoPath}) async {
+  Future<Map<String, dynamic>?> stopsRoute(String routeId, String routeType, {String? directionId, bool? geoPath}) async {
     String request = "/v3/stops/route/$routeId/route_type/$routeType";
 
     // Parameter handling
@@ -120,11 +119,11 @@ class PtvApiService {
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> stopsAlongRoute) -- stops along route: \n$response");
-    return ApiData(url, response);
+    return response;
   }
 
   // Get Departures from a Stop
-  Future<ApiData> departures(String routeType, String stopId, {String? routeId, String? directionId, String? maxResults, bool? gtfs, String? expand}) async {
+  Future<Map<String, dynamic>?> departures(String routeType, String stopId, {String? routeId, String? directionId, String? maxResults, bool? gtfs, String? expand}) async {
     String request;
     if (routeId == null || routeId.isEmpty) {
       request = "/v3/departures/route_type/$routeType/stop/$stopId";
@@ -140,11 +139,11 @@ class PtvApiService {
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> departures): response: $response"); //*test
-    return ApiData(url, response);
+    return response;
   }
 
   // Runs
-  Future<ApiData> runs(String runRef, String routeType, {String? expand}) async {
+  Future<Map<String, dynamic>?> runs(String runRef, String routeType, {String? expand}) async {
     String request = "/v3/runs/$runRef/route_type/$routeType";
 
     // Parameter Handling
@@ -154,11 +153,11 @@ class PtvApiService {
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> runs): response: $response"); //*test
-    return ApiData(url, response);
+    return response;
   }
 
   // Patterns
-  Future<ApiData> patterns(String runRef, String routeType, {String? expand}) async {
+  Future<Map<String, dynamic>?> patterns(String runRef, String routeType, {String? expand}) async {
     String request = "/v3/pattern/run/$runRef/route_type/$routeType";
 
     // Parameter Handling
@@ -168,15 +167,15 @@ class PtvApiService {
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
     // print("(ptv_api_service -> patterns): response: $response"); //*test
-    return ApiData(url, response);
+    return response;
   }
 
   // Disruptions
-  Future<ApiData> disruptions(String routeId) async {
+  Future<Map<String, dynamic>?> disruptions(String routeId) async {
     String request = "/v3/disruptions/route/$routeId";
     Uri url = getURL(request);
     Map<String, dynamic>? response = await getResponse(url);
-    return ApiData(url, response);
+    return response;
   }
 
   /// Handles parameters

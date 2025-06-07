@@ -1,4 +1,3 @@
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
@@ -23,17 +22,16 @@ class PtvRouteService extends PtvBaseService {
     // 1b. Fetches data from API and adds to database, if route data doesn't exist in database
     else {
       // Fetches stop data via PTV API
-      ApiData data = await apiService.routes(routeTypes: routeTypes);
-      Map<String, dynamic>? jsonResponse = data.response;
+      var data = await apiService.routes(routeTypes: routeTypes);
 
       // Empty JSON Response
-      if (jsonResponse == null) {
+      if (data == null) {
         handleNullResponse("fetchRoutes");
         return [];
       }
 
       // 2. Creates new routes, and adds them to return list and database
-      for (var route in jsonResponse["routes"]) {
+      for (var route in data["routes"]) {
         Route newRoute = Route.fromApi(route);
         routeList.add(newRoute);
 

@@ -1,4 +1,3 @@
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
@@ -37,18 +36,17 @@ class PtvStopService extends PtvBaseService {
     List<Future> futures = [];    // holds all Futures for database async operations
 
     // 1. Fetching data
-    ApiData data = await apiService.stopsLocation(
+    var data = await apiService.stopsLocation(
         location, routeTypes: routeType?.toString(), maxDistance: maxDistance?.toString());
-    Map<String, dynamic>? jsonResponse = data.response;
 
     // Early Exit
-    if (data.response == null) {
+    if (data == null) {
       handleNullResponse("fetchStopsLocation");
       return [];
     }
 
     // 2. Populate stops list
-    for (var stop in jsonResponse!["stops"]) {
+    for (var stop in data["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
       futures.add(database.addStop(id: newStop.id, name: newStop.name, latitude: newStop.latitude!, longitude: newStop.longitude!, landmark: newStop.landmark));
@@ -91,21 +89,20 @@ class PtvStopService extends PtvBaseService {
       directionId = directions[0].id;
     }
 
-    ApiData data = await apiService.stopsRoute(
+    var data = await apiService.stopsRoute(
       route.id.toString(),
       route.type.id.toString(),
       directionId: directionId.toString(), // null if no direction available
     );
-    Map<String, dynamic>? jsonResponse = data.response;
 
     // Empty JSON Response
-    if (jsonResponse == null) {
+    if (data == null) {
       handleNullResponse("fetchStopsRoute");
       return stopList;
     }
 
     // 2. Convert departure time response to DateTime object
-    for (var stop in jsonResponse["stops"]) {
+    for (var stop in data["stops"]) {
       Stop newStop = Stop.fromApi(stop);
 
       // 2a. Filter skips stops that don't exist anymore
