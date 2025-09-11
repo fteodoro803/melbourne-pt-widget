@@ -85,6 +85,11 @@ class _TestScreenState extends State<TestScreen> {
     var group = await ptvService.stops.splitStop(routes, stopId);
     print(group);
   }
+  
+  Future<void> gtfsTest() async {
+    var output = await gtfsApiService.tramServiceAlerts();
+    print(output);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +134,8 @@ class _TestScreenState extends State<TestScreen> {
             },
             child: Text("Stop Groups"),
           ),
+          
+          ElevatedButton(onPressed: gtfsTest, child: Text("Gtfs"),),
         ],
       )
     );
