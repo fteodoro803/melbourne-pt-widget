@@ -161,7 +161,7 @@ class GtfsService {
     // 2. Configure CSV options for cross-platform support
     final csvConverter = CsvToListConverter(
         fieldDelimiter: ',',
-        eol: '\n'
+        eol: '\r\n'
     );
 
     // 3. Convert content to Rows

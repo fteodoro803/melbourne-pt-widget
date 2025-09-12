@@ -41,6 +41,7 @@ class _TestScreenState extends State<TestScreen> {
   void initState() {
     super.initState();
     _initialisePTVData();
+    _initialiseGTFSData();
 
     ptvRouteControllers = List.generate(1, (_) => TextEditingController());
   }
@@ -57,6 +58,11 @@ class _TestScreenState extends State<TestScreen> {
     // todo: add logic to skip this, if it's already been done
     await ptvService.routeTypes.fetchRouteTypes();
     await ptvService.routes.fetchRoutes();
+    await Future.delayed(Duration(milliseconds: 100));
+  }
+
+  Future<void> _initialiseGTFSData() async {
+    await gtfsService.initialise();
     await Future.delayed(Duration(milliseconds: 100));
   }
 
@@ -86,9 +92,9 @@ class _TestScreenState extends State<TestScreen> {
     print(group);
   }
   
-  Future<void> gtfsTest() async {
-    var output = await gtfsApiService.tramServiceAlerts();
-    print(output);
+  Future<void> gtfsTest(int routeId) async {
+    var positions = await gtfsService.getTramPositions(routeId);
+    // print(positions);
   }
 
   @override
@@ -134,8 +140,9 @@ class _TestScreenState extends State<TestScreen> {
             },
             child: Text("Stop Groups"),
           ),
-          
-          ElevatedButton(onPressed: gtfsTest, child: Text("Gtfs"),),
+          ElevatedButton(onPressed: () {_initialiseGTFSData();}, child: Text("Initialise"),),
+
+          ElevatedButton(onPressed: () {gtfsTest(int.parse(ptvRouteControllers[0].text)); }, child: Text("Gtfs"),),
         ],
       )
     );
