@@ -35,9 +35,10 @@ class GtfsService {
   // String busRoutesFile = "lib/dev/gtfs/metro_bus/routes.txt";
   // String busTripsFile = "lib/dev/gtfs/metro_bus/trips.txt";
   db.AppDatabase database = Get.find<db.AppDatabase>();
+  bool tramAssetsExist = false;
 
   /// Adds GTFS Schedule data to database
-  // todo: add functionality to skip initialisation if the data is up to date
+  // todo: add functionality to skip initialisation if the data is up to date, or files aren't there
   Future<void> initialise() async {
     DateTime startTime = DateTime.now();
 
@@ -45,10 +46,15 @@ class GtfsService {
     // await _initialiseRoutes(trainRoutesFile);
     // await _initialiseTrips(trainTripsFile);
 
-    // Metro trams
+    // Metro trams    todo: skip initialisation if already in database, and isn't outdated
+    await _checkIfAssetsExist();
+    if (tramAssetsExist == false) {
+      print("( gtfs_service.dart --> initialise ) -- Tram GTFS assets don't exist");
+      return;
+    }
     await _initialiseRoutes(tramRoutesFile);
     await _initialiseTrips(tramTripsFile);
-    await _initialiseGeoPaths();
+    await _initialiseGeoPaths(tempShapesFilePath);
 
     // // Metro buses
     // await _initialiseRoutes(busRoutesFile);
@@ -109,13 +115,13 @@ class GtfsService {
 
   /// Add gtfs shapes to database.
   // fixme: this probably shouldn't be here. Maybe create an API endpoint that collects shapes for a specific route
-  Future<void> _initialiseGeoPaths() async {
+  Future<void> _initialiseGeoPaths(String shapesFilePath) async {
 
     try {
       List<db.GeoPathsTableCompanion> geoPaths = [];
 
       // 1. Collect shapes from gtfsShapesMap
-      final gtfsShapesMap = await csvToMapList(tempShapesFilePath);
+      final gtfsShapesMap = await csvToMapList(shapesFilePath);
       for (var geopath in gtfsShapesMap) {
         String id = geopath["shape_id"];
         int sequence = int.tryParse(geopath["shape_pt_sequence"]) ?? -1;
@@ -131,6 +137,23 @@ class GtfsService {
     }
     catch (e) {
       print("Error $e");
+    }
+  }
+
+  /// Checks if the gtfs data files exist
+  Future<void> _checkIfAssetsExist() async {
+    try {
+      // Trams
+      final tramRouteData = await rootBundle.load(tramRoutesFile);
+      final tramTripsData = await rootBundle.load(tramTripsFile);
+      final tramShapesData = await rootBundle.load(tempShapesFilePath);
+
+      // todo: do for other transport types
+
+      tramAssetsExist = true;
+    }
+    catch (e) {
+      tramAssetsExist = false;
     }
   }
 
