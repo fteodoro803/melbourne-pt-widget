@@ -7,6 +7,7 @@ import "package:flutter_project/dev/add_screens_old/select_direction_screen.dart
 import "package:flutter_project/dev/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_stop_screen.dart";
 import "package:flutter_project/database/database.dart";
+import "package:flutter_project/services/gtfs_service.dart";
 import "package:flutter_project/services/ptv_service.dart";
 import "package:flutter_project/add_screens/widgets/bottom_navigation_bar.dart";
 import "package:flutter_project/add_screens/widgets/custom_list_tile.dart";
@@ -130,6 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   HomeWidgetService homeWidgetService = HomeWidgetService();
   PtvService ptvService = PtvService();
+  GtfsService gtfsService = GtfsService();
   late Timer _timer;
 
   @override
@@ -138,6 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Get all Routes and RouteTypes, and add to Database
     _initialisePTVData();
+    _initialiseGTFSData();
 
     // Initialise home widgets
     //_initializeHomeWidgetAsync();
@@ -160,6 +163,10 @@ class _MyHomePageState extends State<MyHomePage> {
     // todo: add logic to skip this, if it's already been done
     await ptvService.routeTypes.fetchRouteTypes();
     await ptvService.routes.fetchRoutes();
+  }
+
+  Future<void> _initialiseGTFSData() async {
+    await gtfsService.initialise();
   }
 
   // Reads the saved trip data from database and updates departures
