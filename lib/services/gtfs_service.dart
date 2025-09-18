@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/database/helpers/geopath_helpers.dart';
+import 'package:flutter_project/database/helpers/gtfs_assets_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
 import 'package:flutter_project/database/helpers/route_map_helpers.dart';
@@ -68,20 +70,42 @@ class GtfsService {
   /// Add gtfs routes to database.
   // todo: Map GTFS route IDs to PTV route IDs
   Future<void> _initialiseRoutes(String routeFilePath) async {
+    String assetName = "routes.txt";
+
     try {
-      // 1. Collect routes and relevant information from the gtfsRoutesMap
+      final file = File(routeFilePath);
+      DateTime newAssetDate = await file.lastModified();
+      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
+
+      // Early exit if new data is equal to or older than previous data
+      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseRoutes ) -- current data is up-to-date, skipping initialisation");
+        return;
+      }
+
+      // 1. If previous data exists, clear previous data in GtfsRoute
+      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseRoutes ) -- clearing GTFS Route Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+        await database.clearGtfsRouteTable();
+      }
+
+      // 2. Collect routes and relevant information from the gtfsRoutesMap
       final gtfsRoutesMap = await csvToMapList(routeFilePath);
       for (var route in gtfsRoutesMap) {
         String routeId = route["route_id"];
         String shortName = route["route_short_name"];
         String longName = route["route_long_name"];
 
-        // 2. Insert each trip to the database
+        // 3. Insert each trip to the database
         await database.addGtfsRoute(id: routeId, shortName: shortName, longName: longName);
-
-        // 3. Map GTFS and PTV route IDs
-        await database.syncRouteMap();
       }
+
+      // 4. Map GTFS and PTV route IDs
+      await database.syncRouteMap();
+
+      // 5. Add routes asset file info to database
+      await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);   // todo: placeholder
+
     } catch (e) {
       print("Error $e");
     }
@@ -89,10 +113,27 @@ class GtfsService {
 
   /// Add gtfs trips to database.
   Future<void> _initialiseTrips(String tripFilePath) async {
-    try {
-      List<db.GtfsTripsTableCompanion> gtfsTripList = [];
+    String assetName = "trips.txt";
 
-      // 1. Collect trips and relevant information from the gtfsTripsMap
+    try {
+      final file = File(tripFilePath);
+      DateTime newAssetDate = await file.lastModified();
+      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
+
+      // Early exit if new data is equal to or older than previous data
+      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseTrips ) -- current data is up-to-date, skipping initialisation");
+        return;
+      }
+
+      // 1. If previous data exists, clear previous data in GTFS Trip Table
+      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseTrips ) -- clearing GTFS Trips Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+        await database.clearGtfsTripsTable();
+      }
+
+      // 2. Collect trips and relevant information from the GTFS Trips Map
+      List<db.GtfsTripsTableCompanion> gtfsTripList = [];
       final gtfsTripsMap = await csvToMapList(tripFilePath);
       for (var trip in gtfsTripsMap) {
         String tripId = trip["trip_id"];
@@ -105,8 +146,11 @@ class GtfsService {
         gtfsTripList.add(newGtfsTrip);
       }
 
-      // 2. Batch insert trips to the database
+      // 3. Batch insert trips to the database
       await database.addGtfsTrips(trips: gtfsTripList);
+
+      // 4. Add trips asset file into database
+      await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);
     }
     catch (e) {
       print("Error $e");
@@ -116,11 +160,27 @@ class GtfsService {
   /// Add gtfs shapes to database.
   // fixme: this probably shouldn't be here. Maybe create an API endpoint that collects shapes for a specific route
   Future<void> _initialiseGeoPaths(String shapesFilePath) async {
+    String assetName = "shapes.txt";
 
     try {
-      List<db.GeoPathsTableCompanion> geoPaths = [];
+      final file = File(shapesFilePath);
+      DateTime newAssetDate = await file.lastModified();
+      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
 
-      // 1. Collect shapes from gtfsShapesMap
+      // Early exit if new data is equal to or older than previous data
+      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseGeoPaths ) -- current data is up-to-date, skipping initialisation");
+        return;
+      }
+
+      // 1. If previous data exists, clear previous data in GtfsRoute
+      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseGeoPaths ) -- clearing GeoPath Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+        await database.clearGeoPathsTable();
+      }
+
+      // 2. Collect shapes from gtfsShapesMap
+      List<db.GeoPathsTableCompanion> geoPaths = [];
       final gtfsShapesMap = await csvToMapList(shapesFilePath);
       for (var geopath in gtfsShapesMap) {
         String id = geopath["shape_id"];
@@ -132,8 +192,11 @@ class GtfsService {
         geoPaths.add(newGeoPath);
       }
 
-      // 2. Batch insert geoPaths to the database
+      // 3. Batch insert geoPaths to the database
       await database.addGeoPaths(geoPath: geoPaths);
+
+      // 4. Add routes asset file info to database
+      await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);
     }
     catch (e) {
       print("Error $e");
@@ -141,6 +204,7 @@ class GtfsService {
   }
 
   /// Checks if the gtfs data files exist
+  // todo: Check if assets exist
   Future<void> _checkIfAssetsExist() async {
     try {
       // Trams

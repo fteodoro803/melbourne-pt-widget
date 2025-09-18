@@ -71,5 +71,9 @@ extension GeoPathHelpers on AppDatabase {
     return geoPath;
   }
 
+  Future<void> clearGeoPathsTable() async {
+    await delete(geoPathsTable).go();
+  }
+
   // todo: experiment, get geopaths (list of geopaths) for a route
 }
