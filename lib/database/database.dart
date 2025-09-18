@@ -181,7 +181,7 @@ class GeoPathsTable extends Table {
   Set<Column> get primaryKey => {id, sequence};
 }
 
-// Static GTFS Tables   // this is a test
+// Static GTFS Tables
 class GtfsTripsTable extends Table {
   TextColumn get id => text()();
   TextColumn get routeId => text().references(GtfsRoutesTable, #id)();
@@ -203,6 +203,17 @@ class GtfsRoutesTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Represents the GTFS Schedule Data used in the App, and when each file was created.
+/// Used to keep track of the assets, for the app's initialisation and asset updates.
+class GtfsAssetsTable extends Table {
+  TextColumn get id => text()();
+  DateTimeColumn get dateModified => dateTime()();
+  TextColumn get dateModifiedReadable => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 // GTFS to PTV Route ID Mapping
 class RouteMapTable extends Table {
   IntColumn get ptvId => integer().references(RoutesTable, #id)();
@@ -213,7 +224,7 @@ class RouteMapTable extends Table {
 }
 
 
-@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, LinkRouteDirectionsTable, LinkStopRouteDirectionsTable, GtfsTripsTable, GtfsRoutesTable, RouteMapTable])
+@DriftDatabase(tables: [DeparturesTable, DirectionsTable, GeoPathsTable, RouteTypesTable, RoutesTable, StopsTable, TripsTable, LinkRouteStopsTable, LinkStopRouteTypesTable, LinkRouteDirectionsTable, LinkStopRouteDirectionsTable, GtfsTripsTable, GtfsRoutesTable, GtfsAssetsTable, RouteMapTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -369,6 +380,11 @@ class AppDatabase extends _$AppDatabase {
   // GTFS Trip Functions
   Future<void> insertGtfsTrip(GtfsTripsTableCompanion trip) async {
     await mergeUpdate(gtfsTripsTable, trip, (t) => t.id.equals(trip.id.value));
+  }
+
+  // GTFS Asset Functions
+  Future<void> insertGtfsAsset(GtfsAssetsTableCompanion asset) async {
+    await mergeUpdate(gtfsAssetsTable, asset, (a) => a.id.equals(asset.id.value));
   }
 
   // Route Map Functions
