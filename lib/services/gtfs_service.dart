@@ -160,11 +160,27 @@ class GtfsService {
   /// Add gtfs shapes to database.
   // fixme: this probably shouldn't be here. Maybe create an API endpoint that collects shapes for a specific route
   Future<void> _initialiseGeoPaths(String shapesFilePath) async {
+    String assetName = "shapes.txt";
 
     try {
-      List<db.GeoPathsTableCompanion> geoPaths = [];
+      final file = File(shapesFilePath);
+      DateTime newAssetDate = await file.lastModified();
+      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
 
-      // 1. Collect shapes from gtfsShapesMap
+      // Early exit if new data is equal to or older than previous data
+      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseGeoPaths ) -- current data is up-to-date, skipping initialisation");
+        return;
+      }
+
+      // 1. If previous data exists, clear previous data in GtfsRoute
+      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseGeoPaths ) -- clearing GeoPath Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+        await database.clearGeoPathsTable();
+      }
+
+      // 2. Collect shapes from gtfsShapesMap
+      List<db.GeoPathsTableCompanion> geoPaths = [];
       final gtfsShapesMap = await csvToMapList(shapesFilePath);
       for (var geopath in gtfsShapesMap) {
         String id = geopath["shape_id"];
@@ -176,8 +192,11 @@ class GtfsService {
         geoPaths.add(newGeoPath);
       }
 
-      // 2. Batch insert geoPaths to the database
+      // 3. Batch insert geoPaths to the database
       await database.addGeoPaths(geoPath: geoPaths);
+
+      // 4. Add routes asset file info to database
+      await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);
     }
     catch (e) {
       print("Error $e");
@@ -185,6 +204,7 @@ class GtfsService {
   }
 
   /// Checks if the gtfs data files exist
+  // todo: Check if assets exist
   Future<void> _checkIfAssetsExist() async {
     try {
       // Trams
