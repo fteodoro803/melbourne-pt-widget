@@ -44,4 +44,8 @@ extension GtfsTripHelpers on AppDatabase {
 
     return routeShapeMap;
   }
+
+  Future<void> clearGtfsTripsTable() async {
+    await delete(gtfsTripsTable).go();
+  }
 }

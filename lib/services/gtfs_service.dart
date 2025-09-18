@@ -70,12 +70,12 @@ class GtfsService {
   /// Add gtfs routes to database.
   // todo: Map GTFS route IDs to PTV route IDs
   Future<void> _initialiseRoutes(String routeFilePath) async {
-    String routesAssetName = "routes.txt";
+    String assetName = "routes.txt";
 
     try {
       final file = File(routeFilePath);
       DateTime newAssetDate = await file.lastModified();
-      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: routesAssetName);
+      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
 
       // Early exit if new data is equal to or older than previous data
       if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
@@ -104,7 +104,7 @@ class GtfsService {
       await database.syncRouteMap();
 
       // 5. Add routes asset file info to database
-      await database.addGtfsAsset(id: routesAssetName, dateModified: newAssetDate);   // todo: placeholder
+      await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);   // todo: placeholder
 
     } catch (e) {
       print("Error $e");
@@ -113,10 +113,27 @@ class GtfsService {
 
   /// Add gtfs trips to database.
   Future<void> _initialiseTrips(String tripFilePath) async {
-    try {
-      List<db.GtfsTripsTableCompanion> gtfsTripList = [];
+    String assetName = "trips.txt";
 
-      // 1. Collect trips and relevant information from the gtfsTripsMap
+    try {
+      final file = File(tripFilePath);
+      DateTime newAssetDate = await file.lastModified();
+      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
+
+      // Early exit if new data is equal to or older than previous data
+      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseTrips ) -- current data is up-to-date, skipping initialisation");
+        return;
+      }
+
+      // 1. If previous data exists, clear previous data in GTFS Trip Table
+      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
+        print("( gtfs_service.dart -> _initialiseTrips ) -- clearing GTFS Trips Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+        await database.clearGtfsTripsTable();
+      }
+
+      // 2. Collect trips and relevant information from the GTFS Trips Map
+      List<db.GtfsTripsTableCompanion> gtfsTripList = [];
       final gtfsTripsMap = await csvToMapList(tripFilePath);
       for (var trip in gtfsTripsMap) {
         String tripId = trip["trip_id"];
@@ -129,8 +146,11 @@ class GtfsService {
         gtfsTripList.add(newGtfsTrip);
       }
 
-      // 2. Batch insert trips to the database
+      // 3. Batch insert trips to the database
       await database.addGtfsTrips(trips: gtfsTripList);
+
+      // 4. Add trips asset file into database
+      await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);
     }
     catch (e) {
       print("Error $e");
