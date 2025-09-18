@@ -16,4 +16,8 @@ extension GtfsRouteHelpers on AppDatabase {
     await insertGtfsRoute(route);
   }
 
+  Future<void> clearGtfsRouteTable() async {
+    await delete(gtfsRoutesTable).go();
+  }
+
 }
