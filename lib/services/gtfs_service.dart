@@ -100,10 +100,7 @@ class GtfsService {
         await database.addGtfsRoute(id: routeId, shortName: shortName, longName: longName);
       }
 
-      // 4. Map GTFS and PTV route IDs
-      await database.syncRouteMap();
-
-      // 5. Add routes asset file info to database
+      // 4. Add routes asset file info to database
       await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);   // todo: placeholder
 
     } catch (e) {

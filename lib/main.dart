@@ -1,12 +1,13 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter_project/database/helpers/route_map_helpers.dart";
 import "package:flutter_project/dev/add_screens_old/confirmation_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_location_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_direction_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_stop_screen.dart";
-import "package:flutter_project/database/database.dart";
+import "package:flutter_project/database/database.dart" as db;
 import "package:flutter_project/services/gtfs_service.dart";
 import "package:flutter_project/services/ptv_service.dart";
 import "package:flutter_project/add_screens/widgets/bottom_navigation_bar.dart";
@@ -33,7 +34,7 @@ void main() async {
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
 
-  Get.put(AppDatabase());
+  Get.put(db.AppDatabase());
 
   // todo: maybe call fetchRoutes here?
 
@@ -132,15 +133,15 @@ class _MyHomePageState extends State<MyHomePage> {
   HomeWidgetService homeWidgetService = HomeWidgetService();
   PtvService ptvService = PtvService();
   GtfsService gtfsService = GtfsService();
+  db.AppDatabase database = Get.find<db.AppDatabase>();
   late Timer _timer;
 
   @override
   void initState() {
     super.initState();
 
-    // Get all Routes and RouteTypes, and add to Database
-    _initialisePTVData();
-    _initialiseGTFSData();
+    // Initialise PTV and GTFS Data
+    _initialiseData();
 
     // Initialise home widgets
     //_initializeHomeWidgetAsync();
@@ -159,14 +160,10 @@ class _MyHomePageState extends State<MyHomePage> {
   //   await homeWidgetService.initialiseHomeWidget();
   // }
 
-  Future<void> _initialisePTVData() async {
-    // todo: add logic to skip this, if it's already been done
-    await ptvService.routeTypes.fetchRouteTypes();
-    await ptvService.routes.fetchRoutes();
-  }
-
-  Future<void> _initialiseGTFSData() async {
+  Future<void> _initialiseData() async {
+    await ptvService.initialise();
     await gtfsService.initialise();
+    await database.syncRouteMap();    // Maps PTV and GTFS route ids
   }
 
   // Reads the saved trip data from database and updates departures
