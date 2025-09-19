@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter_project/api_data.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
 
 class GoogleApiService {
   String apiKey = GlobalConfiguration().get("googleApiKey");
 
-  Future<ApiData> getPlaceAutocomplete(String input) async {
+  Future<Map<String, dynamic>?> getPlaceAutocomplete(String input) async {
     const String url = "https://places.googleapis.com/v1/places:autocomplete";
 
     final Map<String, dynamic> requestBody = {
@@ -42,12 +41,12 @@ class GoogleApiService {
       print(
           '(google_api_service.dart -> getPlaceAutoComplete) -- Response: ${response
               .body}');
-      return ApiData(uri, jsonResponse);
+      return jsonResponse;
     } else {
       print(
           '(google_api_service.dart -> getPlaceAutoComplete) -- Error: ${response
               .statusCode} - ${response.body}');
-      return ApiData(uri, null);
+      return jsonResponse;
     }
   }
 }

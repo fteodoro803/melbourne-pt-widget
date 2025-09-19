@@ -1,4 +1,3 @@
-import 'package:flutter_project/api_data.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/domain/direction.dart';
@@ -118,17 +117,16 @@ class Trip {
     List<Direction> directions = [];
 
     // Fetching Data and converting to JSON
-    ApiData data = await PtvApiService().directions(routeId!);
-    Map<String, dynamic>? jsonResponse = data.response;
+    var data = await PtvApiService().directions(routeId!);
 
     // Early Exit
-    if (data.response == null) {
+    if (data == null) {
       print("( trip.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
       return [];
     }
 
     // Populating Stops List
-    for (var direction in jsonResponse!["directions"]) {
+    for (var direction in data["directions"]) {
       int id = direction["direction_id"];
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
