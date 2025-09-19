@@ -33,6 +33,12 @@ class PtvService {
   final PtvStopService stops = PtvStopService();
   final PtvTripService trips = PtvTripService();
 
+  /// Adds PTV Route and RouteType data to database
+  Future<void> initialise() async {
+    await routeTypes.fetchRouteTypes();
+    await routes.fetchRoutes();
+  }
+
 // Disruption Functions
   /// Fetches disruptions for a given route.
   Future<List<Disruption>> fetchDisruptions(Route route) async {
