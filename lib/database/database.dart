@@ -23,14 +23,14 @@ class DeparturesTable extends Table {
   TextColumn get estimatedDeparture => text().nullable()();
 
   // Vehicle Descriptors
-  TextColumn get runRef => text().nullable()();
   BoolColumn get hasLowFloor => boolean().nullable()();
   BoolColumn get hasAirConditioning => boolean().nullable()();
 
   // Stop, Route, and Direction Identifiers
-  IntColumn get stopId => integer().references(StopsTable, #id).nullable()();
-  IntColumn get routeId => integer().references(RoutesTable, #id).nullable()();
-  IntColumn get directionId => integer().references(DirectionsTable, #id).nullable()();
+  IntColumn get stopId => integer().references(StopsTable, #id)();
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
+  IntColumn get directionId => integer().references(DirectionsTable, #id)();
+  TextColumn get runRef => text()();
 
   // todo: Column for Transport mapping? Because each Departure is mapped to a Transport
   // todo: Add Column for Platform Number
@@ -65,7 +65,6 @@ class RoutesTable extends Table {
   IntColumn get routeTypeId => integer().references(RouteTypesTable, #id)();
   TextColumn get gtfsId => text()();
   TextColumn get status => text()();
-  // todo: add geopaths here
   DateTimeColumn get lastUpdated => dateTime()();
 
   @override
@@ -247,63 +246,39 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // todo: move these functions to their respective helpers maybe?
-  // todo: rethink about how insertOnConflictUpdate works, because it completely overwrites previous data with new ones
-      // if the previous data was Stop(1, tram, null), and the new one is Stop(1, null, something), the result will be (1, null something) rather than Stop(1, tram, something)
-      // Maybe think of where merging data could be useful? Departures? Stops? etc
-      // Maybe if the data is past a long expiry, it can completely overwrite (bc maybe stops would have changed its location, but not id)
-      // But within a short expiry, that's unlikely, so just update the incomplete fields?
 
   // Departure Functions
   /// Adds a departure to the database, if it doesn't already exist,
   /// or if it has passed the "expiry" time
+
   Future<void> insertDeparture(DeparturesTableCompanion departure) async {
-    // final exists = await (select(departures)
-    //   ..where((d) => d.id.equals(departure.id.value))).getSingleOrNull();
-    // if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-    //   await into(departures).insertOnConflictUpdate(departure);
-    // }
-    await into(departuresTable).insertOnConflictUpdate(departure);
-    // await into(departures).insert(departure);
+    await mergeUpdate(departuresTable, departure, (d) =>
+      d.runRef.equals(departure.runRef.value) &
+      d.stopId.equals(departure.stopId.value) &
+      d.routeId.equals(departure.routeId.value) &
+      d.directionId.equals(departure.directionId.value),
+    );
   }
 
   // Direction Functions
   /// Adds a direction to the database, if it doesn't already exist,
   /// or if it has passed the "expiry" time
   Future<void> insertDirection(DirectionsTableCompanion direction) async {
-    final exists = await (select(directionsTable)
-      ..where((d) => d.id.equals(direction.id.value))).getSingleOrNull();
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(directionsTable).insertOnConflictUpdate(direction);
-    }
+    await mergeUpdate(directionsTable, direction, (d) => d.id.equals(direction.id.value));
   }
 
   // RouteType Functions
   /// Adds a route type to the database, if it doesn't already exist,
   /// or if it has passed the "expiry" time
   Future<void> insertRouteType(RouteTypesTableCompanion routeType) async {
-    final exists = await (select(routeTypesTable)
-      ..where((d) => d.id.equals(routeType.id.value))).getSingleOrNull();
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(routeTypesTable).insertOnConflictUpdate(routeType);
-    }
-  }
-
-  Future<String?> getRouteTypeNameFromRouteTypeId(int id) async {
-    final result = await (select(routeTypesTable)
-      ..where((routeType) => routeType.id.equals(id)))
-        .getSingleOrNull();
-
-    return result?.name;
+    await mergeUpdate(routeTypesTable, routeType, (r) => r.id.equals(routeType.id.value));
   }
 
   // Route Functions
   /// Adds a route to the database, if it doesn't already exist,
   /// or if it has passed the "expiry" time
   Future<void> insertRoute(RoutesTableCompanion route) async {
-    final exists = await (select(routesTable)..where((d) => d.id.equals(route.id.value))).getSingleOrNull();
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(routesTable).insertOnConflictUpdate(route);
-    }
+    await mergeUpdate(routesTable, route, (r) => r.id.equals(route.id.value));
   }
 
   // Stop Functions
@@ -319,57 +294,36 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // LinkRouteDirections Functions
-  // todo: maybe make the LinkTable inserts use mergeUpdate
   Future<void> insertRouteDirectionLink(LinkRouteDirectionsTableCompanion routeDirection) async {
-    final exists = await (select(linkRouteDirectionsTable)
-      ..where((l) =>
-      l.routeId.equals(routeDirection.routeId.value) &
-      l.directionId.equals(routeDirection.directionId.value))
-    ).getSingleOrNull();
-
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(linkRouteDirectionsTable).insertOnConflictUpdate(routeDirection);
-    }
+    await mergeUpdate(linkRouteDirectionsTable, routeDirection, (r) =>
+        r.routeId.equals(routeDirection.routeId.value) &
+        r.directionId.equals(routeDirection.directionId.value)
+    );
   }
 
   // LinkRouteStops Functions
   Future<void> insertRouteStopLink(LinkRouteStopsTableCompanion routeStop) async {
-    final exists = await (select(linkRouteStopsTable)
-      ..where((l) =>
-      l.routeId.equals(routeStop.routeId.value) &
-      l.stopId.equals(routeStop.stopId.value))
-    ).getSingleOrNull();
-
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(linkRouteStopsTable).insertOnConflictUpdate(routeStop);
-    }
+    await mergeUpdate(linkRouteStopsTable, routeStop, (r) =>
+        r.routeId.equals(routeStop.routeId.value) &
+        r.stopId.equals(routeStop.stopId.value)
+    );
   }
 
   // LinkStopRouteTypes Functions
   Future<void> insertStopRouteTypeLink(LinkStopRouteTypesTableCompanion stopRouteType) async {
-    final exists = await (select(linkStopRouteTypesTable)
-      ..where((l) =>
-      l.stopId.equals(stopRouteType.stopId.value) &
-      l.routeTypeId.equals(stopRouteType.routeTypeId.value))
-    ).getSingleOrNull();
-
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(linkStopRouteTypesTable).insertOnConflictUpdate(stopRouteType);
-    }
+    await mergeUpdate(linkStopRouteTypesTable, stopRouteType, (s) =>
+      s.stopId.equals(stopRouteType.stopId.value) &
+      s.routeTypeId.equals(stopRouteType.routeTypeId.value)
+    );
   }
 
   // Link StopDirections Functions
   Future<void> insertStopRouteDirectionsLink(LinkStopRouteDirectionsTableCompanion stopDirection) async {
-    final exists = await (select(linkStopRouteDirectionsTable)
-      ..where((l) =>
-      l.stopId.equals(stopDirection.stopId.value) &
-      l.routeId.equals(stopDirection.routeId.value) &
-      l.directionId.equals(stopDirection.directionId.value))
-    ).getSingleOrNull();
-
-    if (exists == null || DateTime.now().difference(exists.lastUpdated) > expiry) {
-      await into(linkStopRouteDirectionsTable).insertOnConflictUpdate(stopDirection);
-    }
+    await mergeUpdate(linkStopRouteDirectionsTable, stopDirection, (s) =>
+        s.stopId.equals(stopDirection.stopId.value) &
+        s.routeId.equals(stopDirection.routeId.value) &
+        s.directionId.equals(stopDirection.directionId.value)
+    );
   }
 
   // GTFS Route Functions
@@ -399,6 +353,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Generic method to merge and update records.
   /// Only updates fields that are present in the new data.
+  // todo: lots of tests on this one, and the cases where it inserts new row, updates a field, does nothing, etc
   Future<void> mergeUpdate<T extends Table, D>(
       TableInfo<T, D> table,
       Insertable<D> newData,
