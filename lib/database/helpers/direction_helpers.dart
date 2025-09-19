@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 
 
 extension DirectionHelpers on AppDatabase {
-  Future<DirectionsTableCompanion> createDirectionCompanion({required int id, required String name, required String description})
-  async {
+  DirectionsTableCompanion createDirectionCompanion({required int id, required String name, required String description})
+  {
     return DirectionsTableCompanion(
       id: drift.Value(id),
       name: drift.Value(name),
@@ -15,9 +15,9 @@ extension DirectionHelpers on AppDatabase {
   }
 
   Future<void> addDirection(int id, String name, String description) async {
-    DirectionsTableCompanion direction = await createDirectionCompanion(id: id, name: name, description: description);
+    DirectionsTableCompanion direction = createDirectionCompanion(id: id, name: name, description: description);
     AppDatabase db = Get.find<AppDatabase>();
-    db.insertDirection(direction);
+    await db.insertDirection(direction);
   }
 
   Future<DirectionsTableData?> getDirectionById(int id) async {
