@@ -3,8 +3,8 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension DepartureHelpers on AppDatabase {
-  Future<DeparturesTableCompanion> createDepartureCompanion({required DateTime? scheduledDepartureUTC, required DateTime? estimatedDepartureUTC, required String? runRef, required int? stopId, required int? routeId, required int? directionId, required bool? hasLowFloor, required bool? hasAirConditioning})
-  async {
+  DeparturesTableCompanion createDepartureCompanion({required DateTime? scheduledDepartureUTC, required DateTime? estimatedDepartureUTC, required String? runRef, required int? stopId, required int? routeId, required int? directionId, required bool? hasLowFloor, required bool? hasAirConditioning})
+  {
     String? scheduledDeparture = getTime(scheduledDepartureUTC);
     String? estimatedDeparture = getTime(estimatedDepartureUTC);
 
@@ -25,11 +25,11 @@ extension DepartureHelpers on AppDatabase {
 
   // todo: maybe i can just make this take a Departure instance, bc there are so many arguments. Check how to make a departure table a class.
   Future<void> addDeparture(DateTime? scheduledDepartureUTC, DateTime? estimatedDepartureUTC, String? runRef, int? stopId, int? routeId, int? directionId, bool? hasLowFloor, bool? hasAirConditioning) async {
-    DeparturesTableCompanion departure = await createDepartureCompanion(scheduledDepartureUTC: scheduledDepartureUTC,
+    DeparturesTableCompanion departure = createDepartureCompanion(scheduledDepartureUTC: scheduledDepartureUTC,
         estimatedDepartureUTC: estimatedDepartureUTC, runRef: runRef, stopId: stopId, directionId: directionId, routeId: routeId,
         hasAirConditioning: hasAirConditioning, hasLowFloor: hasLowFloor);
     AppDatabase db = Get.find<AppDatabase>();
-    db.insertDeparture(departure);
+    await db.insertDeparture(departure);
   }
 
   /// Returns a more readable time string from a UTC DateTime object,

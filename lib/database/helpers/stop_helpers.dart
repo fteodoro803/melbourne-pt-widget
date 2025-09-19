@@ -2,8 +2,8 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
 extension StopHelpers on AppDatabase {
-  Future<StopsTableCompanion> createStopCompanion({required int id, required String name, required double latitude, required double longitude, String? landmark, String? suburb})
-  async {
+  StopsTableCompanion createStopCompanion({required int id, required String name, required double latitude, required double longitude, String? landmark, String? suburb})
+  {
     return StopsTableCompanion(
       id: drift.Value(id),
       name: drift.Value(name),
@@ -18,8 +18,8 @@ extension StopHelpers on AppDatabase {
 
   /// Adds a stop to the database.
   Future<void> addStop({required int id, required String name, required double latitude, required double longitude, String? landmark, String? suburb}) async {
-    StopsTableCompanion stop = await createStopCompanion(id: id, name: name, latitude: latitude, longitude: longitude, landmark: landmark, suburb: suburb);
-    insertStop(stop);
+    StopsTableCompanion stop = createStopCompanion(id: id, name: name, latitude: latitude, longitude: longitude, landmark: landmark, suburb: suburb);
+    await insertStop(stop);
   }
 
   Future<StopsTableData?> getStopById(int id) async {
