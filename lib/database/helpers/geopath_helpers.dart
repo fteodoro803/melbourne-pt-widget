@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
+import 'package:flutter_project/database/helpers/database_helpers.dart';
 
 extension GeoPathHelpers on AppDatabase {
   GeoPathsTableCompanion createGeoPathCompanion({required String id, required double latitude, required double longitude, required int sequence})

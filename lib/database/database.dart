@@ -1,6 +1,6 @@
-import 'dart:math';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter_project/database/helpers/database_helpers.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -21,14 +21,14 @@ class DeparturesTable extends Table {
   TextColumn get runRef => text()();
 
   // Departure Times (UTC and formatted Melbourne times)
-  DateTimeColumn get scheduledDepartureUtc => dateTime().nullable()();
-  DateTimeColumn get estimatedDepartureUtc => dateTime().nullable()();
-  TextColumn get scheduledDeparture => text().nullable()();       // ie. 12:30pm
-  TextColumn get estimatedDeparture => text().nullable()();
+  DateTimeColumn get scheduledDepartureUtc => dateTime().nullable()();    // overwrite
+  DateTimeColumn get estimatedDepartureUtc => dateTime().nullable()();    // overwrite
+  TextColumn get scheduledDeparture => text().nullable()();     // overwrite, ie. 12:30pm
+  TextColumn get estimatedDeparture => text().nullable()();     // overwrite
 
   // Vehicle Descriptors
-  BoolColumn get hasLowFloor => boolean().nullable()();
-  BoolColumn get hasAirConditioning => boolean().nullable()();
+  BoolColumn get hasLowFloor => boolean().nullable()();     // updatable
+  BoolColumn get hasAirConditioning => boolean().nullable()();      // updatable
 
   // todo: Column for Transport mapping? Because each Departure is mapped to a Transport
   // todo: Add Column for Platform Number
@@ -85,10 +85,10 @@ class StopsTable extends Table {
   RealColumn get longitude => real()();
   // todo: hasShelter, hasHighPlatform    -- > currently only available for train/vLine
   // todo: zone, and inFreeTramZone (in stops along route) -- stops["stop_ticket"]["zone"] | stops["stop_ticket"]["is_free_fare_zone"]
-  TextColumn get zone => text().nullable()();     // only obtainable if using stopsAlongRoutes, but not stopsNearLocation
-  TextColumn get landmark => text().nullable()();
-  TextColumn get suburb => text().nullable()();   // todo: might not be nullable
-  BoolColumn get isFreeFareZone => boolean().nullable()();
+  TextColumn get zone => text().nullable()();      // updatable only obtainable if using stopsAlongRoutes, but not stopsNearLocation
+  TextColumn get landmark => text().nullable()();      // updatable
+  TextColumn get suburb => text().nullable()();   // todo: might not be nullable      // updatable
+  BoolColumn get isFreeFareZone => boolean().nullable()();      // updatable
 
   // BoolColumn get isTemporary => boolean()();
   DateTimeColumn get lastUpdated => dateTime()();
@@ -105,10 +105,10 @@ class TripsTable extends Table {
   IntColumn get routeId => integer()();
   IntColumn get stopId => integer()();
   IntColumn get directionId => integer()();
-  IntColumn get index => integer().nullable()();
+  IntColumn get index => integer().nullable()();      // idk what this is
 
   // GTFS
-  TextColumn get gtfsTripId => text().nullable()();
+  TextColumn get gtfsTripId => text().nullable()();      // overwrite
 
   @override
   Set<Column> get primaryKey => {uniqueId};
@@ -149,7 +149,7 @@ class LinkStopRouteDirectionsTable extends Table {
   IntColumn get stopId => integer().references(StopsTable, #id)();
   IntColumn get routeId => integer().references(RoutesTable, #id)();
   IntColumn get directionId => integer().references(DirectionsTable, #id)();
-  IntColumn get sequence => integer().nullable()();
+  IntColumn get sequence => integer().nullable()();      // updatable
   DateTimeColumn get lastUpdated => dateTime()();
 
   @override
@@ -349,43 +349,4 @@ class AppDatabase extends _$AppDatabase {
   //     await delete(departures).go();
   //   }
 
-  /// Generic method to merge and update records.
-  /// Only updates fields that are present in the new data.
-  // todo: lots of tests on this one, and the cases where it inserts new row, updates a field, does nothing, etc
-  Future<void> mergeUpdate<T extends Table, D>(
-      TableInfo<T, D> table,
-      Insertable<D> newData,
-      Expression<bool> Function(T) whereClause,
-      ) async {
-    final query = select(table)..where(whereClause);
-    final existing = await query.getSingleOrNull();
-
-    if (existing == null) {
-      await into(table).insertOnConflictUpdate(newData);
-    }
-    else {
-      await (update(table)..where(whereClause)).write(newData);
-    }
-  }
-
-  /// Generic method to batch insert a list of entries to a table.
-  // todo: find a way to add mergeUpdate here
-  Future<void> batchInsert<T extends Table, D extends DataClass>(
-      TableInfo<T, D> table,
-      List<Insertable<D>> entries,
-      {int batchSize = 150}
-    ) async {
-
-    // Process batches in chunks
-    for (int i=0; i < entries.length; i+=batchSize) {
-
-      // If current index plus batchSize is less than total entries, the final/end index for this current batch is the current largest
-      int end = min((i+batchSize), entries.length);
-      var currBatch = entries.sublist(i, end);
-
-      await batch((b) {
-        b.insertAllOnConflictUpdate(table, currBatch);
-      });
-    }
-  }
 }
