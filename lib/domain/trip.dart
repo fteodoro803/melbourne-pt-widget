@@ -83,7 +83,7 @@ class Trip {
 
         // Can only add to database with valid ids
         if (stopId != null && routeId != null && directionId != null && runRef != null) {
-          await Get.find<db.AppDatabase>().addDeparture(scheduledUTC, estimatedUTC, runRef, stopId, routeId, directionId, hasLowFloor, hasAirConditioning);
+          await Get.find<db.AppDatabase>().addDeparture(runRef: runRef, stopId: stopId, routeId: routeId, directionId: directionId, scheduledDepartureUTC: scheduledUTC, estimatedDepartureUTC: estimatedUTC, hasAirConditioning: hasAirConditioning, hasLowFloor: hasLowFloor);
         }
       }
     }
