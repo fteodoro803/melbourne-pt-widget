@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
+import 'package:flutter_project/database/helpers/database_helpers.dart';
 
 extension GtfsTripHelpers on AppDatabase {
   GtfsTripsTableCompanion createGtfsTripCompanion({required String tripId, required String routeId, required String shapeId, required String tripHeadsign, required int wheelchairAccessible}) {
