@@ -9,16 +9,28 @@ extension DepartureHelpers on AppDatabase {
     String? estimatedDeparture = getTime(estimatedDepartureUTC);
 
     return DeparturesTableCompanion(
-      scheduledDepartureUtc: drift.Value(scheduledDepartureUTC),
-      estimatedDepartureUtc: drift.Value(estimatedDepartureUTC),
-      scheduledDeparture: drift.Value(scheduledDeparture),
-      estimatedDeparture: drift.Value(estimatedDeparture),
       runRef: drift.Value(runRef),
       stopId: drift.Value(stopId),
       routeId: drift.Value(routeId),
       directionId: drift.Value(directionId),
-      hasLowFloor: drift.Value(hasLowFloor),
-      hasAirConditioning: drift.Value(hasAirConditioning),
+      scheduledDepartureUtc: scheduledDepartureUTC != null
+          ? drift.Value(scheduledDepartureUTC)
+          : drift.Value.absent(),
+      estimatedDepartureUtc: estimatedDepartureUTC != null
+          ? drift.Value(estimatedDepartureUTC)
+          : drift.Value.absent(),
+      scheduledDeparture: scheduledDepartureUTC != null
+          ? drift.Value(scheduledDeparture)
+          : drift.Value.absent(),
+      estimatedDeparture: estimatedDepartureUTC != null
+          ? drift.Value(estimatedDeparture)
+          : drift.Value.absent(),
+      hasLowFloor: hasLowFloor != null
+          ? drift.Value(hasLowFloor)
+          : drift.Value.absent(),
+      hasAirConditioning: hasAirConditioning != null
+          ? drift.Value(hasAirConditioning)
+          : drift.Value.absent(),
       lastUpdated: drift.Value(DateTime.now()),
     );
   }

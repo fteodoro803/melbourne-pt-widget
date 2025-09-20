@@ -14,7 +14,11 @@ part 'database.g.dart';
 
 // Domain Tables
 class DeparturesTable extends Table {
-  // IntColumn get id => integer().autoIncrement()();
+  // Stop, Route, and Direction Identifiers
+  IntColumn get stopId => integer().references(StopsTable, #id)();
+  IntColumn get routeId => integer().references(RoutesTable, #id)();
+  IntColumn get directionId => integer().references(DirectionsTable, #id)();
+  TextColumn get runRef => text()();
 
   // Departure Times (UTC and formatted Melbourne times)
   DateTimeColumn get scheduledDepartureUtc => dateTime().nullable()();
@@ -25,12 +29,6 @@ class DeparturesTable extends Table {
   // Vehicle Descriptors
   BoolColumn get hasLowFloor => boolean().nullable()();
   BoolColumn get hasAirConditioning => boolean().nullable()();
-
-  // Stop, Route, and Direction Identifiers
-  IntColumn get stopId => integer().references(StopsTable, #id)();
-  IntColumn get routeId => integer().references(RoutesTable, #id)();
-  IntColumn get directionId => integer().references(DirectionsTable, #id)();
-  TextColumn get runRef => text()();
 
   // todo: Column for Transport mapping? Because each Departure is mapped to a Transport
   // todo: Add Column for Platform Number
