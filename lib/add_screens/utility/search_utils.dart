@@ -150,11 +150,11 @@ class SearchUtils {
   Future<List<Stop>> getStopsAlongRoute(List<Direction> directions, pt_route.Route route) async {
     List<Stop> stops = [];
     if (directions.isNotEmpty) {
-      stops = await ptvService.stops.fetchStopsByRoute(route, direction: directions[0]);
+      stops = await ptvService.stops.fetchStopsByRoute(route: route, direction: directions[0]);
       stops = stops.where((s) => s.stopSequence != 0).toList();
     }
     else {
-      stops = await ptvService.stops.fetchStopsByRoute(route);
+      stops = await ptvService.stops.fetchStopsByRoute(route: route);
     }
 
     return stops;

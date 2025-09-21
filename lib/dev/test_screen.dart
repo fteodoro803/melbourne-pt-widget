@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/database/database.dart';
-import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
@@ -89,7 +88,7 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     // 2. Fold routes
-    var group = await ptvService.stops.splitStop(routes, stopId);
+    var group = await ptvService.stops.splitStop(routes: routes, stopId: stopId);
     print(group);
   }
   
