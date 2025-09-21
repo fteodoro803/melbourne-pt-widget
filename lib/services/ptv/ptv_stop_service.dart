@@ -31,7 +31,7 @@ class PtvStopService extends PtvBaseService {
   /// Fetch Stops near a Location and saves them to the database.
   /// This function also creates a link between the stop and route it's on.
   // todo: think about if getting from the database is even needed here. Since it's impossible to save every stop around a location. And if you were to retrieve it from database, it would be incomplete, so you'd have to call the api anyway. Might as well just keep it to doing the api call
-  Future<List<Stop>> fetchStopsByLocation(String location, {int? routeType, int? maxDistance}) async {
+  Future<List<Stop>> fetchStopsByLocation({required String location, int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
     List<Future> futures = [];    // holds all Futures for database async operations
 
@@ -76,7 +76,7 @@ class PtvStopService extends PtvBaseService {
   /// Also saves the link between the route and its stops.
   // todo: fetch data from database first, preferring database
   // todo: filter stops using gtfs, to match gtfs
-  Future<List<Stop>> fetchStopsByRoute(Route route, {Direction? direction, bool? filter}) async {
+  Future<List<Stop>> fetchStopsByRoute({required Route route, Direction? direction, bool? filter}) async {
     List<Stop> stopList = [];
 
     // 1. Determine which direction to use
@@ -125,7 +125,7 @@ class PtvStopService extends PtvBaseService {
   // todo: maybe change this to stop instead of stopId? I'm using stopId because what if Stop isn't initialised/in database yet? It gets fetched from fetchStopsRoute
   // todo: add cases for 0 and 1 routes
   // todo: minimise api calls
-  Future<List<DirectedStop>?> splitStop(List<Route> routes, int stopId) async {
+  Future<List<DirectedStop>?> splitStop({required List<Route> routes, required int stopId}) async {
     List<DirectedStop> directedStops = [];
     List<RouteStops> routesStops = [];
 
@@ -141,7 +141,7 @@ class PtvStopService extends PtvBaseService {
         return [];
       }
 
-      List<Stop> stops = await fetchStopsByRoute(route, direction: directions.first, filter: true);
+      List<Stop> stops = await fetchStopsByRoute(route: route, direction: directions.first, filter: true);
       routesStops.add(RouteStops(route: route, stops: stops));
     }
     // print("1. ( ptv_service.dart -> commonStops ) -- Routes and Stops:\n$routesStops");
@@ -184,7 +184,7 @@ class PtvStopService extends PtvBaseService {
       // todo: case, if there is only 1 shared stop, both forward and reverse match will be true. How to deal with this?
 
       if (forwardMatch || reverseMatch) {
-        Direction? reversedDirection = await directionService.getReverse(rs.route, direction);
+        Direction? reversedDirection = await directionService.getReverse(route: rs.route, direction: direction);
 
         // 4a.
         if (forwardMatch) {

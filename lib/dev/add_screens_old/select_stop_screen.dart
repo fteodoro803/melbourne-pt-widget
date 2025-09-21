@@ -46,7 +46,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     // Create temporary lists to hold the new data
     List<Stop> newStops = [];
     List<PTRoute.Route> newRoutes = [];
-    List<Stop> stopList = await ptvService.stops.fetchStopsByLocation(location!, routeType: routeType!, maxDistance: maxDistance);
+    List<Stop> stopList = await ptvService.stops.fetchStopsByLocation(location: location!, routeType: routeType!, maxDistance: maxDistance);
     List<Future<void>> routeFetchOperations = [];      // holds all route fetch operations
 
     for (var stop in stopList) {
