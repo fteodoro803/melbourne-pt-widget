@@ -184,7 +184,7 @@ class PtvStopService extends PtvBaseService {
       // todo: case, if there is only 1 shared stop, both forward and reverse match will be true. How to deal with this?
 
       if (forwardMatch || reverseMatch) {
-        Direction? reversedDirection = await directionService.getReverse(rs.route, direction);
+        Direction? reversedDirection = await directionService.getReverse(route: rs.route, direction: direction);
 
         // 4a.
         if (forwardMatch) {

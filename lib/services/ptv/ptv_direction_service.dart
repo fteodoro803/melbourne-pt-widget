@@ -49,8 +49,7 @@ class PtvDirectionService extends PtvBaseService {
   /// Get a route's opposite direction.
   /// Assumes that there at most 2 directions to a route.
   // todo: maybe this can be implemented in a domain class (trip?)
-  Future<Direction?> getReverse(
-      Route route, Direction direction) async {
+  Future<Direction?> getReverse({required Route route, required Direction direction}) async {
     // 1. Fetch directions
     List<Direction> directions = await fetchDirections(route.id);
 
