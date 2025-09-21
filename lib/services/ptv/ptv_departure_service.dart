@@ -4,7 +4,7 @@ import 'package:flutter_project/services/ptv/ptv_base_service.dart';
 class PtvDepartureService extends PtvBaseService {
   // todo: convert to int for ids
   // todo: change definition to fetchDepartures(Route route, Stop stop, {...})
-  Future<List<Departure>> fetchDepartures(String routeType, String stopId, String routeId, {String? directionId, String? maxResults = "3", String? expands = "All"}) async {
+  Future<List<Departure>> fetchDepartures({required String routeType, required String stopId, required String routeId, String? directionId, String? maxResults = "3", String? expands = "All"}) async {
     List<Departure> departures = [];
 
     // 1. Fetches departure data via PTV API
