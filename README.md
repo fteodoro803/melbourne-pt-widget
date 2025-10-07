@@ -26,6 +26,7 @@ Copy-paste these commands to
 ### Notes
 - Changes to config.ini / secrets.properties / AppDelegate.swift __*must*__ not be pushed
 - [LucidChart](https://lucid.app/lucidchart/82b010cd-4cd5-42c0-8c19-f3066488b55a/edit?viewport_loc=-1937%2C-126%2C4157%2C2105%2C0_0&invitationId=inv_6c5333c9-7546-45d1-8473-e3fdb2c4135c)
+- GTFS Schedule data is going to be retrieved from [this server](https://github.com/fteodoro803/melbourne-pt-widget-data)
 
 ### To-Do
 - [PTV Colour Palette](https://www.righttoknow.org.au/request/5149/response/13973/attach/4/PTVH2977%20MSG%202018%202.4%20Colour%20v10%20PA%20v2.pdf)
