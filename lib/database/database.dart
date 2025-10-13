@@ -61,7 +61,7 @@ class RoutesTable extends Table {
   TextColumn get name => text()();
   TextColumn get number => text()();                    // todo: convert this to int?
   IntColumn get routeTypeId => integer().references(RouteTypesTable, #id)();
-  TextColumn get gtfsId => text()();
+  // TextColumn get gtfsId => text()();     // use route map gtfs id
   TextColumn get status => text()();
   DateTimeColumn get lastUpdated => dateTime()();
 
