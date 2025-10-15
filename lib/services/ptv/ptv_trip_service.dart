@@ -57,7 +57,7 @@ class PtvTripService extends PtvBaseService {
     // Convert database trip to domain trip
     for (var dbTrip in dbTrips) {
       var dbRoute = await database.getRouteById(dbTrip.routeId);
-      route = dbRoute != null ? Route.fromDb(dbRoute) : null;
+      route = dbRoute != null ? await Route.fromDbAsync(dbRoute) : null;
 
       var dbStop = await database.getStopById(dbTrip.stopId);
       stop = dbStop != null ? Stop.fromDb(dbStop: dbStop) : null;

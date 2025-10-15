@@ -169,6 +169,7 @@ class Route {
   //     id: dbRoute.id,
   //     name: dbRoute.name,
   //     number: dbRoute.number,
+  //     gtfsId: "PLACEHOLDER",
   //     type: RouteType.fromId(dbRoute.routeTypeId),
   //     status: dbRoute.status,
   //   );

@@ -16,7 +16,14 @@ class PtvRouteService extends PtvBaseService {
     int? routeType = routeTypes != null ? int.tryParse(routeTypes) : null;
     final dbRouteList = await database.getRoutes(routeType);
     if (dbRouteList.isNotEmpty) {
-      routeList = dbRouteList.map(Route.fromDb).toList();
+      // routeList = dbRouteList.map(Route.fromDb).toList();
+
+      for (int i=0; i<dbRouteList.length; i++) {
+        Route? newRoute = await Route.fromDbAsync(dbRouteList[i]);
+        if (newRoute != null) {
+          routeList.add(newRoute);
+        }
+      }
     }
 
     // 1b. Fetches data from API and adds to database, if route data doesn't exist in database
@@ -37,8 +44,8 @@ class PtvRouteService extends PtvBaseService {
 
         // 3. Add to Database
         await database.addRoute(
-            newRoute.id, newRoute.name, newRoute.number, newRoute.type.id,
-            newRoute.gtfsId, newRoute.status);
+            id: newRoute.id, name: newRoute.name, number: newRoute.number, routeTypeId: newRoute.type.id,
+            status: newRoute.status);
       }
     }
 
@@ -48,7 +55,14 @@ class PtvRouteService extends PtvBaseService {
   /// Fetches routes from database, by search name.
   Future<List<Route>> searchRoutes({String? query, RouteType? routeType}) async {
     final dbRouteList = await database.getRoutesByName(search: query, routeType: routeType?.id);
-    List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
+    // List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
+
+    List<Route> domainRouteList = [];
+    for (int i=0; i<dbRouteList.length; i++) {
+      Route? newRoute = await Route.fromDbAsync(dbRouteList[i]);
+      if (newRoute != null) domainRouteList.add(newRoute);
+    }
+
     return domainRouteList;
   }
 
@@ -56,7 +70,7 @@ class PtvRouteService extends PtvBaseService {
   Future<Route?> getRouteById({required int id, bool withDetails = false}) async {
     // 1. Get route from database
     final dbRoute = await database.getRouteById(id);
-    Route? route = dbRoute != null ? Route.fromDb(dbRoute) : null;
+    Route? route = dbRoute != null ? await Route.fromDbAsync(dbRoute) : null;
 
     // 2. Lazy load route details
     if (withDetails == true && route != null) await route.loadDetails();
@@ -72,7 +86,13 @@ class PtvRouteService extends PtvBaseService {
     final List<db.RoutesTableData> dbRoutes = await database.getRoutesFromStop(stopId);
 
     // Convert Route's database model to domain model
-    List<Route> routeList = dbRoutes.map(Route.fromDb).toList();
+    // List<Route> routeList = dbRoutes.map(Route.fromDb).toList();
+
+    List<Route> routeList = [];
+    for (int i=0; i<dbRoutes.length; i++) {
+      Route? newRoute = await Route.fromDbAsync(dbRoutes[i]);
+      if (newRoute != null) routeList.add(newRoute);
+    }
 
     return routeList;
   }
