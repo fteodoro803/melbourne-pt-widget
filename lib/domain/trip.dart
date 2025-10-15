@@ -103,51 +103,6 @@ class Trip {
     }
   }
 
-  // DELETE LATER ITS BEING USED IN OLD SCREENS
-  Future<List<Trip>> splitByDirection() async {
-    // Get the two directions a route can go, and set each new transport to one of them
-    List<Direction> directions = await fetchRouteDirections();
-    Trip newTransport1 =
-        Trip(stop: stop, route: route, direction: directions[0]);
-    Trip newTransport2 =
-        Trip(stop: stop, route: route, direction: directions[1]);
-
-    List<Trip> newTransportList = [newTransport1, newTransport2];
-
-    // print("( trip.dart -> getRouteDirections() ) -- newTransportList: \n$newTransportList");
-    return newTransportList;
-  }
-
-  // todo: use the ptv service version of this
-  Future<List<Direction>> fetchRouteDirections() async {
-    String? routeId = route?.id.toString();
-    List<Direction> directions = [];
-
-    // Fetching Data and converting to JSON
-    var data = await PtvApiService().directions(routeId!);
-
-    // Early Exit
-    if (data == null) {
-      print(
-          "( trip.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
-      return [];
-    }
-
-    // Populating Stops List
-    for (var direction in data["directions"]) {
-      int id = direction["direction_id"];
-      String name = direction["direction_name"];
-      String description = direction["route_direction_description"];
-      Direction newDirection =
-          Direction(id: id, name: name, description: description);
-
-      directions.add(newDirection);
-    }
-
-    // print("( trip.dart -> fetchRouteDirections ) -- Directions: $directions");
-    return directions;
-  }
-
   void setIndex(int index) {
     this.index = index;
   }

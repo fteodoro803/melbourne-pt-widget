@@ -61,10 +61,6 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     if (widget.arguments.trip!.direction != null) {
       final transport = widget.arguments.trip;
       transportList.add(transport!);
-    } else {
-      // print("( confirmation_screen.dart -> _setTransportList() ) -- splitting transport by direction");
-      transportList = await widget.arguments.trip!.splitByDirection();
-      // print("( confirmation_screen.dart -> _setTransportList() ) -- done splitting transport by direction: $transportList");
     }
 
     // setState(() {});
