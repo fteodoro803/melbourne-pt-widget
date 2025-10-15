@@ -25,8 +25,7 @@ class Stop {
   String? suburb;
   String? landmark;
 
-  Stop({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, this.suburb, this.stopSequence, this.landmark});   // todo: probably make these constructors more distinct
-  Stop.withSequence({required this.id, required this.name, required this.latitude, required this.longitude, this.distance, required this.stopSequence, this.landmark, this.suburb});
+  Stop({required this.id, required this.name, this.latitude, this.longitude, this.distance, this.suburb, this.stopSequence, this.landmark});
 
   @override
   String toString() {
@@ -69,7 +68,7 @@ class Stop {
   /// Factory constructor from database
   // todo: get sequence data
   factory Stop.fromDb({required db.StopsTableData dbStop, int? sequence}) {
-    return Stop.withSequence(
+    return Stop(
         id: dbStop.id,
         name: dbStop.name,
         latitude: dbStop.latitude,

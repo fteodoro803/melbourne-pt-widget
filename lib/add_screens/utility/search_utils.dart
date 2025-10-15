@@ -71,7 +71,7 @@ class SearchUtils {
     }
 
     for (var direction in directions) {
-      Trip newTransport = Trip.withStopRoute(stop, route, direction);
+      Trip newTransport = Trip(stop: stop, route: route, direction: direction);
       // newTransport.routeType = RouteType.fromId(route.type.id);     // no need for this, routeType is already set when a route is made
       await newTransport.updateDepartures(departureCount: 2);
       await Future.delayed(Duration(milliseconds: 100));

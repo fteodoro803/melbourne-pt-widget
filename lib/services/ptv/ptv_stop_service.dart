@@ -189,12 +189,12 @@ class PtvStopService extends PtvBaseService {
         // 4a.
         if (forwardMatch) {
           // add current to forward triplist
-          Trip trip = Trip.withStopRoute(selectedStop, rs.route, direction);
+          Trip trip = Trip(stop: selectedStop, route: rs.route, direction: direction);
           trips.add(trip);
 
           // add reversed to reverse triplist
           if (reversedDirection != null) {
-            Trip reversedTrip = Trip.withStopRoute(selectedStop, rs.route, reversedDirection);
+            Trip reversedTrip = Trip(stop: selectedStop, route: rs.route, direction: reversedDirection);
             tripsReversed.add(reversedTrip);
           }
         }
@@ -203,12 +203,12 @@ class PtvStopService extends PtvBaseService {
         // todo: can i use an else if here instead
         if (reverseMatch) {
           // add current to reverse triplist
-          Trip trip = Trip.withStopRoute(selectedStop, rs.route, direction);
+          Trip trip = Trip(stop: selectedStop, route: rs.route, direction: direction);
           tripsReversed.add(trip);
 
           // add reversed to forward triplist
           if (reversedDirection != null) {
-            Trip reversedTrip = Trip.withStopRoute(selectedStop, rs.route, reversedDirection);
+            Trip reversedTrip = Trip(stop: selectedStop, route: rs.route, direction: reversedDirection);
             trips.add(reversedTrip);
           }
         }
