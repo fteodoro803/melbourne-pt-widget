@@ -6,8 +6,9 @@
 name: Flutter CI
 
 on:
-  push:
-    branches: [ "main" ]
+# Uncomment this when deploying
+#  push:
+#    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
