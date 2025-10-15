@@ -68,7 +68,7 @@ class PtvTripService extends PtvBaseService {
 
       index = dbTrip.index ?? 999;
 
-      Trip newTrip = Trip.withAttributes(stop, route, direction);
+      Trip newTrip = Trip(stop: stop, route: route, direction: direction);
       newTrip.setIndex(index);
       tripList.add(newTrip);
     }

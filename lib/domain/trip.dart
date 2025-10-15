@@ -15,28 +15,16 @@ part 'trip.g.dart';
 
 @JsonSerializable()
 class Trip {
-  String? uniqueID; // unique ID for the widget timeline
   Stop? stop;
   Route? route;
   Direction? direction;
+
+  String? uniqueID; // unique ID for the widget timeline
   int? index;
   // todo: add GeoPath as an attribute
 
   // Constructor
-  Trip();    // Empty Transport    // todo: delete this
-
-  Trip.withStopRoute(Stop stop, Route route, Direction direction) {
-    this.stop = stop;
-    this.route = route;
-    this.direction = direction;
-  }
-
-  Trip.withAttributes(Stop? stop, Route? route, Direction? direction) {
-    // this.location = location;
-    this.stop = stop;
-    this.route = route;
-    this.direction = direction;
-
+  Trip({this.stop, this.route, this.direction}) {
     generateUniqueID();
   }
 
@@ -57,7 +45,6 @@ class Trip {
     String? routeId = route?.id.toString();
 
     // Early exit if any of the prerequisites are null
-    // if (routeType == null || stopId == null || directionId == null || routeId == null) {
     if (routeType == null || stopId == null || routeId == null) {
       print("( trip.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
       return;
@@ -107,8 +94,8 @@ class Trip {
 
     // Get the two directions a route can go, and set each new transport to one of them
     List<Direction> directions = await fetchRouteDirections();
-    Trip newTransport1 = Trip.withAttributes(stop, route, directions[0]);
-    Trip newTransport2 = Trip.withAttributes(stop, route, directions[1]);
+    Trip newTransport1 = Trip(stop: stop, route: route, direction: directions[0]);
+    Trip newTransport2 = Trip(stop: stop, route: route, direction: directions[1]);
 
     List<Trip> newTransportList = [newTransport1, newTransport2];
 
