@@ -1,7 +1,9 @@
+import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/services/ptv_service.dart';
+import 'package:get/get.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 import 'package:flutter_project/database/database.dart' as db;
@@ -161,14 +163,30 @@ class Route {
     );
   }
 
-  /// Factory constructor to create a Route from a database RoutesData object.
-  factory Route.fromDb(db.RoutesTableData dbRoute) {
+  // /// Factory constructor to create a Route from a database RoutesData object.
+  // factory Route.fromDb(db.RoutesTableData dbRoute) {
+  //   return Route(
+  //     id: dbRoute.id,
+  //     name: dbRoute.name,
+  //     number: dbRoute.number,
+  //     gtfsId: "PLACEHOLDER",
+  //     type: RouteType.fromId(dbRoute.routeTypeId),
+  //     status: dbRoute.status,
+  //   );
+  // }
+
+  /// Async Factory constructor to create a Route from the Database.
+  static Future<Route?> fromDbAsync(db.RoutesTableData dbRoute) async {
+    db.AppDatabase database = Get.find<db.AppDatabase>();
+    String? gtfsId = await database.convertToGtfsRouteId(dbRoute.id);
+    if (gtfsId == null) return null;
+
     return Route(
       id: dbRoute.id,
       name: dbRoute.name,
       number: dbRoute.number,
       type: RouteType.fromId(dbRoute.routeTypeId),
-      gtfsId: dbRoute.gtfsId,
+      gtfsId: gtfsId,
       status: dbRoute.status,
     );
   }

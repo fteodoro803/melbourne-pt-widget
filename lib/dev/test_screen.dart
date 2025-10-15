@@ -77,8 +77,13 @@ class _TestScreenState extends State<TestScreen> {
     for (final routeId in routeIds) {
       var data = await database.getRouteById(routeId);
       if (data != null) {
-        var route = pt_route.Route.fromDb(data);
-        routes.add(route);
+        // var route = pt_route.Route.fromDb(data);
+        var route = await pt_route.Route.fromDbAsync(data);
+
+        if (route != null) {
+          pt_route.Route nonNullRoute = route;
+          routes.add(nonNullRoute);
+        }
       }
     }
 

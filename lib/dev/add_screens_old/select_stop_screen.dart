@@ -82,9 +82,9 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeName = _routes[index].name;
     int routeTypeId = _routes[index].type.id;
     String routeNumber = _routes[index].number;
-    String gtfsId = _routes[index].gtfsId;
+    // String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
-    Get.find<db.AppDatabase>().addRoute(routeId, routeName,routeNumber , routeTypeId, gtfsId, status);
+    Get.find<db.AppDatabase>().addRoute(id: routeId, name: routeName, number: routeNumber , routeTypeId: routeTypeId, status: status);
 
     int stopId = _stops[index].id;
     String stopName = _stops[index].name;
