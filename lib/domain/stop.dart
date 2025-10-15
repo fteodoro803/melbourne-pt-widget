@@ -10,22 +10,30 @@ part 'stop.g.dart';
 /// Represents a Stop a transport can pass through.
 @JsonSerializable()
 class Stop {
-  int id;      // convert this to integer ~note
-  String name;      //~note what happens if in an api call, these are null?
-  List<Route>? routes;      // todo: turn this into a method: get Routes from a Stop
-  RouteType? routeType;      // todo, turn this to a list
+  int id; // convert this to integer ~note
+  String name; //~note what happens if in an api call, these are null?
+  List<Route>? routes; // todo: turn this into a method: get Routes from a Stop
+  RouteType? routeType; // todo, turn this to a list
   int? number;
   bool? isExpanded = false;
-  int? stopSequence;        // todo: rename this to sequence
+  int? stopSequence; // todo: rename this to sequence
 
   // todo: maybe use the Location class; im not sure if these should be here
-  double? latitude;     // todo: make these not nullable
+  double? latitude; // todo: make these not nullable
   double? longitude;
-  double? distance;     // todo: change this to a getDistance function
+  double? distance; // todo: change this to a getDistance function
   String? suburb;
   String? landmark;
 
-  Stop({required this.id, required this.name, this.latitude, this.longitude, this.distance, this.suburb, this.stopSequence, this.landmark});
+  Stop(
+      {required this.id,
+      required this.name,
+      this.latitude,
+      this.longitude,
+      this.distance,
+      this.suburb,
+      this.stopSequence,
+      this.landmark});
 
   @override
   String toString() {
@@ -45,7 +53,7 @@ class Stop {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Stop && runtimeType == other.runtimeType && id == other.id;
+      other is Stop && runtimeType == other.runtimeType && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
@@ -69,21 +77,24 @@ class Stop {
   // todo: get sequence data
   factory Stop.fromDb({required db.StopsTableData dbStop, int? sequence}) {
     return Stop(
-        id: dbStop.id,
-        name: dbStop.name,
-        latitude: dbStop.latitude,
-        longitude: dbStop.longitude,
-        // stopSequence: dbStop.sequence,
-        stopSequence: sequence,
-        landmark: dbStop.landmark,
-        suburb: dbStop.suburb,
+      id: dbStop.id,
+      name: dbStop.name,
+      latitude: dbStop.latitude,
+      longitude: dbStop.longitude,
+      // stopSequence: dbStop.sequence,
+      stopSequence: sequence,
+      landmark: dbStop.landmark,
+      suburb: dbStop.suburb,
     );
   }
 
   /// Constructor from database, by ID
   static Future<Stop?> fromId(int id) async {
-    db.StopsTableData? dbStop = await Get.find<db.AppDatabase>().getStopById(id);
-    return dbStop != null ? Stop.fromDb(dbStop: dbStop) : null;       // todo: maybe get sequence? or maybe better to keep without sequence, since it doesn't have context
+    db.StopsTableData? dbStop =
+        await Get.find<db.AppDatabase>().getStopById(id);
+    return dbStop != null
+        ? Stop.fromDb(dbStop: dbStop)
+        : null; // todo: maybe get sequence? or maybe better to keep without sequence, since it doesn't have context
   }
 
   // Methods for JSON Serialization

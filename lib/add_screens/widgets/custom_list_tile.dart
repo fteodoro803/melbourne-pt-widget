@@ -18,9 +18,11 @@ class CustomListTile extends StatelessWidget {
     this.onTap = _emptyFunction,
     this.dismissible,
     this.onDismiss,
-  }) : assert(dismissible == false || dismissible == null
-      || (dismissible == true && onDismiss != null),
-      "onDismiss must be provided if dismissible is true");
+  }) : assert(
+            dismissible == false ||
+                dismissible == null ||
+                (dismissible == true && onDismiss != null),
+            "onDismiss must be provided if dismissible is true");
 
   // Empty function for default OnTap
   static void _emptyFunction() {}
@@ -29,16 +31,15 @@ class CustomListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final departure = trip.departures != null
-        && trip.departures!.isNotEmpty
-        ? trip.departures![0] : null;
+    final departure = trip.departures != null && trip.departures!.isNotEmpty
+        ? trip.departures![0]
+        : null;
     DateTime? estimated;
     DepartureStatus? status;
     String? minutesString;
     if (departure != null) {
-      estimated = departure.estimatedDepartureUTC
-        ?? departure.scheduledDepartureUTC;
+      estimated =
+          departure.estimatedDepartureUTC ?? departure.scheduledDepartureUTC;
       status = TimeUtils.getDepartureStatus(
         departure.scheduledDepartureUTC,
         departure.estimatedDepartureUTC,
@@ -48,46 +49,44 @@ class CustomListTile extends StatelessWidget {
           TimeUtils.minutesString(estimated, departure.scheduledDepartureUTC!);
     }
 
-  // Enables the Widget to be Deleted/Dismissed by Swiping
-  return Dismissible(
-    key: Key(trip.toString()),
-    direction: dismissible == true
-        ? DismissDirection.endToStart
-        : DismissDirection.none,    // Dismissible if true
-    background: Container(
-      color: Colors.red,
-      alignment: Alignment.centerRight,
-      padding: EdgeInsets.only(right: 30),
-      child: Icon(Icons.delete),
-    ),
-    onDismissed: (_) {
-      onDismiss!();
-    },
+    // Enables the Widget to be Deleted/Dismissed by Swiping
+    return Dismissible(
+      key: Key(trip.toString()),
+      direction: dismissible == true
+          ? DismissDirection.endToStart
+          : DismissDirection.none, // Dismissible if true
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.only(right: 30),
+        child: Icon(Icons.delete),
+      ),
+      onDismissed: (_) {
+        onDismiss!();
+      },
 
-    // Information Tile
-    child: Stack(
-      children: [
+      // Information Tile
+      child: Stack(children: [
         ListTile(
-          contentPadding: EdgeInsets.only(left: 12, right: 30, top: 4, bottom: 0),
+          contentPadding:
+              EdgeInsets.only(left: 12, right: 30, top: 4, bottom: 0),
           title: Column(
             spacing: 2,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // LocationWidget above the vertical line
               LocationWidget(
-                  textField: trip.stop!.name,
-                  textSize: 16,
-                  scrollable: false),
+                  textField: trip.stop!.name, textSize: 16, scrollable: false),
               SizedBox(height: 2),
               Row(children: [
                 Expanded(
                   child: NewRouteWidget(
                     route: trip.route!,
                     direction: trip.direction,
-                    scrollable: false,),
+                    scrollable: false,
+                  ),
                 ),
               ]),
-
 
               if (trip.departures != null)
                 ListTile(
@@ -96,23 +95,23 @@ class CustomListTile extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.access_time_filled),
                   title: DeparturesStringWidget(departures: trip.departures),
-                  trailing: departure != null
-                      && status!.hasDeparted == false
-                      && status.isWithinAnHour == true
+                  trailing: departure != null &&
+                          status!.hasDeparted == false &&
+                          status.isWithinAnHour == true
                       ? Container(
-                      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                      decoration: BoxDecoration(
-                          color: ColourUtils.hexToColour(status.getColorString),
-                          borderRadius: BorderRadius.circular(12)
-                      ),
-                      child: Text(
-                        minutesString!,
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15
-                        ),
-                      ))
+                          padding:
+                              EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                          decoration: BoxDecoration(
+                              color: ColourUtils.hexToColour(
+                                  status.getColorString),
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Text(
+                            minutesString!,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                          ))
                       : null,
                 ),
             ],
@@ -144,4 +143,3 @@ class CustomListTile extends StatelessWidget {
     );
   }
 }
-

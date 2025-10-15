@@ -38,7 +38,6 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-
   final sheetController = Get.put(SheetController());
   final mapController = Get.put(MapController());
   final nearbyStopsController = Get.put(NearbyStopsController());
@@ -93,73 +92,78 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      body: Obx (() => Stack(
-        children: [
-          Positioned.fill(
-            child: GoogleMap(
-              onMapCreated: (controller) {
-                mapController.setController(controller);
-              },
-              onLongPress: widget.enableSearch ? mapController.onLocationSelected : null,
-              onCameraMove: mapController.onCameraMove,
-              initialCameraPosition: CameraPosition(
-                  target: mapController.currentPosition.value,
-                  zoom: mapController.currentZoom.value),
-              markers: mapController.markers.value,
-              polylines: mapController.polylines.value,
-              circles: mapController.circles.value,
-            ),
-          ),
-          CustomInfoWindow(
-            controller: mapController.infoWindowController,
-            height: 36,
-            width: 360,
-            offset: 15,
-          ),
-          Column(
+      body: Obx(() => Stack(
             children: [
-              SizedBox(height: 60),
-              Row(
+              Positioned.fill(
+                child: GoogleMap(
+                  onMapCreated: (controller) {
+                    mapController.setController(controller);
+                  },
+                  onLongPress: widget.enableSearch
+                      ? mapController.onLocationSelected
+                      : null,
+                  onCameraMove: mapController.onCameraMove,
+                  initialCameraPosition: CameraPosition(
+                      target: mapController.currentPosition.value,
+                      zoom: mapController.currentZoom.value),
+                  markers: mapController.markers.value,
+                  polylines: mapController.polylines.value,
+                  circles: mapController.circles.value,
+                ),
+              ),
+              CustomInfoWindow(
+                controller: mapController.infoWindowController,
+                height: 36,
+                width: 360,
+                offset: 15,
+              ),
+              Column(
                 children: [
-                  SizedBox(width: 18),
-                  GestureDetector(
-                    onTap: navigationService.handleBackNavigation,
-                    child: BackButtonWidget(),
-                  ),
-                  SizedBox(width: 10),
-                  if (widget.enableSearch == true)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
+                  SizedBox(height: 60),
+                  Row(
+                    children: [
+                      SizedBox(width: 18),
+                      GestureDetector(
+                        onTap: navigationService.handleBackNavigation,
+                        child: BackButtonWidget(),
                       ),
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      child: SuggestionsSearch(onLocationSelected: mapController.onLocationSelected),
-                    ),
+                      SizedBox(width: 10),
+                      if (widget.enableSearch == true)
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: SuggestionsSearch(
+                              onLocationSelected:
+                                  mapController.onLocationSelected),
+                        ),
+                    ],
+                  ),
+                  Obx(() {
+                    if (sheetController.currentSheet.value.name ==
+                        'Nearby Stops') {
+                      return NearbyStopsButton(
+                          isNearbyStopsButtonToggled:
+                              mapController.isNearbyStopsButtonToggled.value,
+                          onPressed: () async {
+                            if (mapController
+                                .isNearbyStopsButtonToggled.value) {
+                              mapController.hideNearbyStopMarkers();
+                            } else {
+                              mapController.showNearbyStopMarkers();
+                            }
+                          });
+                    } else {
+                      return SizedBox.shrink(); // Hide the button
+                    }
+                  }),
                 ],
               ),
-              Obx(() {
-                if (sheetController.currentSheet.value.name == 'Nearby Stops') {
-                  return NearbyStopsButton(
-                    isNearbyStopsButtonToggled:
-                      mapController.isNearbyStopsButtonToggled.value,
-                    onPressed: () async {
-                      if (mapController.isNearbyStopsButtonToggled.value) {
-                        mapController.hideNearbyStopMarkers();
-                      } else {
-                        mapController.showNearbyStopMarkers();
-                      }
-                    });
-                } else {
-                  return SizedBox.shrink(); // Hide the button
-                }
-              }),
+              if (sheetController.showSheet.value) _buildSheets(),
             ],
-          ),
-          if (sheetController.showSheet.value) _buildSheets(),
-        ],
-      )),
+          )),
       bottomNavigationBar: BottomNavigation(
         currentIndex: widget.enableSearch ? 1 : 0,
         updateMainPage: null,
@@ -173,22 +177,21 @@ class _SearchScreenState extends State<SearchScreen> {
       controller: sheetController,
       sheets: {
         'Nearby Stops': (ctx, scroll) => NearbyStopsSheet(
-          scrollController: scroll,
-        ),
+              scrollController: scroll,
+            ),
         'Route Details': (ctx, scroll) => RouteDetailsSheet(
-          scrollController: scroll,
-        ),
+              scrollController: scroll,
+            ),
         'Stop Details': (ctx, scroll) => StopDetailsSheet(
-          scrollController: scroll,
-        ),
+              scrollController: scroll,
+            ),
         'Trip Details': (ctx, scroll) => TripDetailsSheet(
-          scrollController: scroll,
-        ),
+              scrollController: scroll,
+            ),
         'Departure Details': (ctx, scroll) => DepartureDetailsSheet(
-          scrollController: scroll,
-        ),
+              scrollController: scroll,
+            ),
       },
     );
   }
 }
-

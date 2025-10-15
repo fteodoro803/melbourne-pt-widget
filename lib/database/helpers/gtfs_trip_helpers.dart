@@ -3,7 +3,12 @@ import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
 
 extension GtfsTripHelpers on AppDatabase {
-  GtfsTripsTableCompanion createGtfsTripCompanion({required String tripId, required String routeId, required String shapeId, required String tripHeadsign, required int wheelchairAccessible}) {
+  GtfsTripsTableCompanion createGtfsTripCompanion(
+      {required String tripId,
+      required String routeId,
+      required String shapeId,
+      required String tripHeadsign,
+      required int wheelchairAccessible}) {
     return GtfsTripsTableCompanion(
       id: drift.Value(tripId),
       routeId: drift.Value(routeId),
@@ -13,18 +18,31 @@ extension GtfsTripHelpers on AppDatabase {
     );
   }
 
-  Future<void> addGtfsTrip({required String tripId, required String routeId, required String tripHeadsign, required String shapeId, required int wheelchairAccessible}) async {
-    GtfsTripsTableCompanion trip = createGtfsTripCompanion(tripId: tripId, routeId: routeId, shapeId: shapeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
+  Future<void> addGtfsTrip(
+      {required String tripId,
+      required String routeId,
+      required String tripHeadsign,
+      required String shapeId,
+      required int wheelchairAccessible}) async {
+    GtfsTripsTableCompanion trip = createGtfsTripCompanion(
+        tripId: tripId,
+        routeId: routeId,
+        shapeId: shapeId,
+        tripHeadsign: tripHeadsign,
+        wheelchairAccessible: wheelchairAccessible);
     await insertGtfsTrip(trip);
   }
 
-  Future<void> addGtfsTrips({required List<GtfsTripsTableCompanion> trips}) async {
+  Future<void> addGtfsTrips(
+      {required List<GtfsTripsTableCompanion> trips}) async {
     await batchInsert(gtfsTripsTable, trips);
   }
 
-  Future<List<GtfsTripsTableData>> getGtfsTripsByRouteId(String gtfsRouteId) async {
+  Future<List<GtfsTripsTableData>> getGtfsTripsByRouteId(
+      String gtfsRouteId) async {
     drift.SimpleSelectStatement<$GtfsTripsTableTable, GtfsTripsTableData> query;
-    query = select(gtfsTripsTable)..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    query = select(gtfsTripsTable)
+      ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
     var result = await query.get();
 
     return result;
@@ -35,7 +53,8 @@ extension GtfsTripHelpers on AppDatabase {
     Map<String, String> routeShapeMap = {};
 
     // 1. Filter by route ID
-    var query = select(gtfsTripsTable)..where((tbl) => tbl.routeId.equals(gtfsRouteId));
+    var query = select(gtfsTripsTable)
+      ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
     var result = await query.get();
 
     // 2. Get unique shape IDs

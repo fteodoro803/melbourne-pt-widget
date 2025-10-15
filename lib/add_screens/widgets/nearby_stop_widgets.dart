@@ -30,8 +30,8 @@ class ExpandedStopWidget extends StatelessWidget {
             Expanded(
               child: Text(
                 stopName,
-                style: TextStyle(fontSize: 16, height: 1.1, fontWeight: FontWeight.w700),
-
+                style: TextStyle(
+                    fontSize: 16, height: 1.1, fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -44,7 +44,8 @@ class ExpandedStopWidget extends StatelessWidget {
             Text("${distance?.round()}m", style: TextStyle(fontSize: 16)),
           ],
         )
-      ],);
+      ],
+    );
   }
 }
 
@@ -73,7 +74,6 @@ class UnexpandedStopWidget extends StatelessWidget {
             child: Row(
               spacing: 6,
               children: routes.map((route) {
-
                 String? routeLabel = TripUtils.getLabel(route, routeType);
 
                 return Container(
@@ -99,7 +99,8 @@ class UnexpandedStopWidget extends StatelessWidget {
             ),
           ),
         ),
-      ],);
+      ],
+    );
   }
 }
 
@@ -125,7 +126,6 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
         padding: EdgeInsets.zero,
         itemCount: routes.length,
         itemBuilder: (context, routeIndex) {
-
           final route = routes[routeIndex];
           String? routeLabel = TripUtils.getLabel(route, routeType);
           String? routeName = TripUtils.getName(route, routeType);
@@ -143,7 +143,8 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
               ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: 280, // Limit the width to a maximum, or you can adjust the value
+                  maxWidth:
+                      280, // Limit the width to a maximum, or you can adjust the value
                 ),
                 child: Text(
                   routeLabel!,
@@ -161,23 +162,23 @@ class ExpandedStopRoutesWidget extends StatelessWidget {
             ),
             title: routeName != null
                 ? Text(
-                  routeName,
-                  style: TextStyle(height: 1.2),
-                )
+                    routeName,
+                    style: TextStyle(height: 1.2),
+                  )
                 : null,
-            onTap: ()  {
+            onTap: () {
               onStopTapped(stop, route);
             },
           );
-        }
-    );
+        });
   }
 }
 
 class RouteTypeButtons extends StatelessWidget {
   const RouteTypeButtons({super.key});
 
-  NearbyStopsController get nearbyController => Get.find<NearbyStopsController>();
+  NearbyStopsController get nearbyController =>
+      Get.find<NearbyStopsController>();
 
   @override
   Widget build(BuildContext context) {
@@ -185,14 +186,14 @@ class RouteTypeButtons extends StatelessWidget {
       spacing: 8,
       mainAxisAlignment: MainAxisAlignment.start,
       children: nearbyController.routeTypeFilters.keys.map((routeType) {
-        final isSelected = nearbyController.routeTypeFilters[routeType] ?? false;
+        final isSelected =
+            nearbyController.routeTypeFilters[routeType] ?? false;
         return screen_widgets.RouteTypeToggleButton(
             isSelected: isSelected,
             routeType: routeType,
             handleRouteTypeToggle: (routeType) {
               nearbyController.toggleRouteType(routeType);
-            }
-        );
+            });
       }).toList(),
     );
   }
@@ -201,14 +202,14 @@ class RouteTypeButtons extends StatelessWidget {
 class ToggleFilterChips extends StatelessWidget {
   const ToggleFilterChips({super.key});
 
-  NearbyStopsController get nearbyController => Get.find<NearbyStopsController>();
+  NearbyStopsController get nearbyController =>
+      Get.find<NearbyStopsController>();
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 5.0,
-      children:
-      ToggleableFilter.values.map((ToggleableFilter result) {
+      children: ToggleableFilter.values.map((ToggleableFilter result) {
         return FilterChip(
             label: Text(result.name),
             selected: nearbyController.filters.contains(result),
@@ -218,8 +219,7 @@ class ToggleFilterChips extends StatelessWidget {
               } else {
                 nearbyController.filters.remove(result);
               }
-            }
-        );
+            });
       }).toList(),
     );
   }
@@ -228,13 +228,15 @@ class ToggleFilterChips extends StatelessWidget {
 class DistanceFilterChip extends StatelessWidget {
   const DistanceFilterChip({super.key});
 
-  NearbyStopsController get nearbyController => Get.find<NearbyStopsController>();
+  NearbyStopsController get nearbyController =>
+      Get.find<NearbyStopsController>();
 
   @override
   Widget build(BuildContext context) {
     return ActionChip(
       avatar: Icon(Icons.keyboard_arrow_down_sharp),
-      label: Text('Within ${nearbyController.selectedDistance.value}${nearbyController.selectedUnit.value}'),
+      label: Text(
+          'Within ${nearbyController.selectedDistance.value}${nearbyController.selectedUnit.value}'),
       onPressed: () async {
         await showModalBottomSheet(
             constraints: BoxConstraints(maxHeight: 500),
@@ -245,8 +247,7 @@ class DistanceFilterChip extends StatelessWidget {
                   selectedUnit: nearbyController.selectedUnit.value,
                   onConfirmPressed: (distance, unit) {
                     nearbyController.updateDistance(distance, unit);
-                  }
-              );
+                  });
             });
       },
     );

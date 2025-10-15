@@ -19,16 +19,15 @@ class RouteHeaderWidget extends StatelessWidget {
   final List<bool> savedList;
   final Function(List<bool>) handleSave;
 
-  const RouteHeaderWidget({
-    super.key,
-    required this.showDirection,
-    required this.stop,
-    required this.route,
-    required this.trips,
-    required this.disruptions,
-    required this.savedList,
-    required this.handleSave
-  });
+  const RouteHeaderWidget(
+      {super.key,
+      required this.showDirection,
+      required this.stop,
+      required this.route,
+      required this.trips,
+      required this.disruptions,
+      required this.savedList,
+      required this.handleSave});
 
   @override
   Widget build(BuildContext context) {
@@ -42,95 +41,84 @@ class RouteHeaderWidget extends StatelessWidget {
           SizedBox(
             width: screenWidth - 36,
             child: LocationWidget(
-              textField: stop.name,
-              textSize: 17,
-              scrollable: true
-            ),
+                textField: stop.name, textSize: 17, scrollable: true),
           ),
           SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(width: 8),
-              Container(
-                width: 4,
-                height: showDirection ? 61 : 38,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(2),
-                  color: Color(0xFF717171),
-                ),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SizedBox(width: 8),
+            Container(
+              width: 4,
+              height: showDirection ? 61 : 38,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(2),
+                color: Color(0xFF717171),
               ),
-              SizedBox(width: 10),
-              Expanded(
-                child: showDirection
-                    ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 3),
-                    Row(
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: showDirection
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (disruptions.isNotEmpty)...[
-                          GestureDetector(
-                            child: Icon(Icons.error, size: 20,
-                                color: Color(0xFFFF7308)),
-                            onTap: () async {
-                              await showModalBottomSheet(
-                                  constraints: const BoxConstraints(maxHeight: 500),
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return TripInfoSheet(
-                                      route: route,
-                                      stop: stop,
-                                      disruptions: disruptions,
-                                    );
-                                  }
-                              );
-                            },
-                          ),
-                          SizedBox(width: 3),
-                        ],
-                        // Expanded to ensure text doesn't overflow
-                        Expanded(
-                          child: Text(
-                            "To ${trips[0].direction!.name}",
-                            style: TextStyle(
-                                fontSize: 16,
-                                height: 1.4
+                        SizedBox(height: 3),
+                        Row(
+                          children: [
+                            if (disruptions.isNotEmpty) ...[
+                              GestureDetector(
+                                child: Icon(Icons.error,
+                                    size: 20, color: Color(0xFFFF7308)),
+                                onTap: () async {
+                                  await showModalBottomSheet(
+                                      constraints:
+                                          const BoxConstraints(maxHeight: 500),
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return TripInfoSheet(
+                                          route: route,
+                                          stop: stop,
+                                          disruptions: disruptions,
+                                        );
+                                      });
+                                },
+                              ),
+                              SizedBox(width: 3),
+                            ],
+                            // Expanded to ensure text doesn't overflow
+                            Expanded(
+                              child: Text(
+                                "To ${trips[0].direction!.name}",
+                                style: TextStyle(fontSize: 16, height: 1.4),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          ],
                         ),
+
+                        SizedBox(height: 5),
+                        // Improved RouteAndButtonsRow
+                        RouteAndButtonsRow(
+                            route: route,
+                            stop: stop,
+                            disruptions: disruptions,
+                            savedList: savedList,
+                            trips: trips,
+                            handleSave: handleSave),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        SizedBox(height: 6),
+                        RouteAndButtonsRow(
+                            route: route,
+                            stop: stop,
+                            disruptions: disruptions,
+                            savedList: savedList,
+                            trips: trips,
+                            handleSave: handleSave),
                       ],
                     ),
-
-                    SizedBox(height: 5),
-                    // Improved RouteAndButtonsRow
-                    RouteAndButtonsRow(
-                        route: route,
-                        stop: stop,
-                        disruptions: disruptions,
-                        savedList: savedList,
-                        trips: trips,
-                        handleSave: handleSave
-                    ),
-                  ],
-                )
-                  : Column(
-                    children: [
-                      SizedBox(height: 6),
-                      RouteAndButtonsRow(
-                        route: route,
-                        stop: stop,
-                        disruptions: disruptions,
-                        savedList: savedList,
-                        trips: trips,
-                        handleSave: handleSave
-                      ),
-                    ],
-                  ),
-              ),
-            ]
-          ),
+            ),
+          ]),
           SizedBox(height: 2),
           Divider(),
         ],
@@ -159,7 +147,6 @@ class RouteAndButtonsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Stack(children: [
       Padding(
         padding: const EdgeInsets.only(right: 20),
@@ -189,8 +176,7 @@ class RouteAndButtonsRow extends StatelessWidget {
                         stop: stop,
                         disruptions: disruptions,
                       );
-                    }
-                );
+                    });
               },
             ),
             SizedBox(width: 4),
@@ -199,18 +185,17 @@ class RouteAndButtonsRow extends StatelessWidget {
               onTap: () async {
                 if (trips.length > 1) {
                   await showModalBottomSheet(
-                    constraints: BoxConstraints(maxHeight: 320),
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SaveTripSheet(
-                        savedList: savedList,
-                        route: route,
-                        stop: stop,
-                        tripList: trips,
-                        onConfirmPressed: handleSave,
-                      );
-                    }
-                  );
+                      constraints: BoxConstraints(maxHeight: 320),
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SaveTripSheet(
+                          savedList: savedList,
+                          route: route,
+                          stop: stop,
+                          tripList: trips,
+                          onConfirmPressed: handleSave,
+                        );
+                      });
                 } else {
                   handleSave([!savedList[0]]);
                   SearchUtils.renderSnackBar(context, !savedList[0]);

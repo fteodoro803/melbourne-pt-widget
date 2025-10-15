@@ -16,9 +16,11 @@ part 'route.g.dart';
 class Route {
   int id;
   String name;
-  String number;        // todo: should this be an int? Maybe nullable, since train doesnt have a number
-  String? colour;       // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
-  String? textColour;   // Hex colour code for text
+  String
+      number; // todo: should this be an int? Maybe nullable, since train doesnt have a number
+  String?
+      colour; // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
+  String? textColour; // Hex colour code for text
   RouteType type;
   String gtfsId;
   String status;
@@ -31,16 +33,31 @@ class Route {
       {required this.id,
       required this.name,
       required this.number,
-      required this.type, required this.gtfsId, required this.status}) {
+      required this.type,
+      required this.gtfsId,
+      required this.status}) {
     setRouteColour(type.name);
   }
 
   /// Factory method to initialise a Route with async [directions] and [stopsAlongRoute]
-  static Future<Route> withDetails({required int id, required String name, required String number, required RouteType type, required String gtfsId, required String status}) async {
+  static Future<Route> withDetails(
+      {required int id,
+      required String name,
+      required String number,
+      required RouteType type,
+      required String gtfsId,
+      required String status}) async {
     PtvService ptvService = PtvService();
 
-    Route route = Route(id: id, name: name, number: number, type: type, gtfsId: gtfsId, status: status);
-    route.stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: route);
+    Route route = Route(
+        id: id,
+        name: name,
+        number: number,
+        type: type,
+        gtfsId: gtfsId,
+        status: status);
+    route.stopsAlongRoute =
+        await ptvService.stops.fetchStopsByRoute(route: route);
     route.directions = await ptvService.directions.fetchDirections(route.id);
 
     return route;
@@ -116,7 +133,7 @@ class Route {
       colour = VLine.routeDefault.colour;
       textColour = VLine.routeDefault.textColour.colour;
 
-    // Unknown route type: use fallback colours
+      // Unknown route type: use fallback colours
     } else {
       colour = FallbackColour.routeDefault.colour;
       textColour = FallbackColour.routeDefault.textColour.colour;
@@ -133,15 +150,16 @@ class Route {
         "\t Colour: $colour\t"
         "\t TextColour: $textColour\n"
         "\t GtfsId: $gtfsId\t"
-        "\t Status: $status\n"
-    ;
+        "\t Status: $status\n";
 
     if (directions != null && directions!.isNotEmpty) {
-      str += "\t Directions: ${directions!.map((direction) => direction.id).toList()}\n";
+      str +=
+          "\t Directions: ${directions!.map((direction) => direction.id).toList()}\n";
     }
 
     if (stopsAlongRoute != null && stopsAlongRoute!.isNotEmpty) {
-      str += "\t Stops along Route: ${stopsAlongRoute!.map((stop) => stop.id).toList()}\n";
+      str +=
+          "\t Stops along Route: ${stopsAlongRoute!.map((stop) => stop.id).toList()}\n";
     }
 
     return str;
@@ -154,12 +172,12 @@ class Route {
   /// Factory constructor to create a Route from the PTV API response
   factory Route.fromApi(Map<String, dynamic> json) {
     return Route(
-        id: json["route_id"],
-        name: json["route_name"],
-        number: json["route_number"],
-        type: RouteType.fromId(json["route_type"]),
-        gtfsId: json["route_gtfs_id"],
-        status: json["route_service_status"]["description"],
+      id: json["route_id"],
+      name: json["route_name"],
+      number: json["route_number"],
+      type: RouteType.fromId(json["route_type"]),
+      gtfsId: json["route_gtfs_id"],
+      status: json["route_service_status"]["description"],
     );
   }
 

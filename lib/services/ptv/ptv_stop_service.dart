@@ -31,13 +31,16 @@ class PtvStopService extends PtvBaseService {
   /// Fetch Stops near a Location and saves them to the database.
   /// This function also creates a link between the stop and route it's on.
   // todo: think about if getting from the database is even needed here. Since it's impossible to save every stop around a location. And if you were to retrieve it from database, it would be incomplete, so you'd have to call the api anyway. Might as well just keep it to doing the api call
-  Future<List<Stop>> fetchStopsByLocation({required String location, int? routeType, int? maxDistance}) async {
+  Future<List<Stop>> fetchStopsByLocation(
+      {required String location, int? routeType, int? maxDistance}) async {
     List<Stop> stopList = [];
-    List<Future> futures = [];    // holds all Futures for database async operations
+    List<Future> futures =
+        []; // holds all Futures for database async operations
 
     // 1. Fetching data
-    var data = await apiService.stopsLocation(
-        location, routeTypes: routeType?.toString(), maxDistance: maxDistance?.toString());
+    var data = await apiService.stopsLocation(location,
+        routeTypes: routeType?.toString(),
+        maxDistance: maxDistance?.toString());
 
     // Early Exit
     if (data == null) {
@@ -49,7 +52,12 @@ class PtvStopService extends PtvBaseService {
     for (var stop in data["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(database.addStop(id: newStop.id, name: newStop.name, latitude: newStop.latitude!, longitude: newStop.longitude!, landmark: newStop.landmark));
+      futures.add(database.addStop(
+          id: newStop.id,
+          name: newStop.name,
+          latitude: newStop.latitude!,
+          longitude: newStop.longitude!,
+          landmark: newStop.landmark));
 
       // 3. Add route-stop relationship to database
       int selectedRouteType = stop["route_type"];
@@ -76,12 +84,14 @@ class PtvStopService extends PtvBaseService {
   /// Also saves the link between the route and its stops.
   // todo: fetch data from database first, preferring database
   // todo: filter stops using gtfs, to match gtfs
-  Future<List<Stop>> fetchStopsByRoute({required Route route, Direction? direction, bool? filter}) async {
+  Future<List<Stop>> fetchStopsByRoute(
+      {required Route route, Direction? direction, bool? filter}) async {
     List<Stop> stopList = [];
 
     // 1. Determine which direction to use
     // If no direction is specified, sequence will not be available
-    List<Direction> directions = await directionService.fetchDirections(route.id);
+    List<Direction> directions =
+        await directionService.fetchDirections(route.id);
     int directionId;
     if (direction != null && directions.contains(direction)) {
       directionId = direction.id;
@@ -106,14 +116,26 @@ class PtvStopService extends PtvBaseService {
       Stop newStop = Stop.fromApi(stop);
 
       // 2a. Filter skips stops that don't exist anymore
-      if (filter == true && (newStop.stopSequence == 0)) { continue; }
+      if (filter == true && (newStop.stopSequence == 0)) {
+        continue;
+      }
 
       stopList.add(newStop);
 
       // 3. Add to database
-      await database.addStop(id: newStop.id, name: newStop.name, latitude: newStop.latitude!, longitude: newStop.longitude!, landmark: newStop.landmark, suburb: newStop.suburb);
+      await database.addStop(
+          id: newStop.id,
+          name: newStop.name,
+          latitude: newStop.latitude!,
+          longitude: newStop.longitude!,
+          landmark: newStop.landmark,
+          suburb: newStop.suburb);
       await database.addRouteStop(route.id, newStop.id);
-      await database.addStopRouteDirection(stopId: newStop.id, routeId: route.id, directionId: directionId, sequence: newStop.stopSequence);
+      await database.addStopRouteDirection(
+          stopId: newStop.id,
+          routeId: route.id,
+          directionId: directionId,
+          sequence: newStop.stopSequence);
     }
     // todo: add to database, generate flipped stopDirections
 
@@ -125,7 +147,8 @@ class PtvStopService extends PtvBaseService {
   // todo: maybe change this to stop instead of stopId? I'm using stopId because what if Stop isn't initialised/in database yet? It gets fetched from fetchStopsRoute
   // todo: add cases for 0 and 1 routes
   // todo: minimise api calls
-  Future<List<DirectedStop>?> splitStop({required List<Route> routes, required int stopId}) async {
+  Future<List<DirectedStop>?> splitStop(
+      {required List<Route> routes, required int stopId}) async {
     List<DirectedStop> directedStops = [];
     List<RouteStops> routesStops = [];
 
@@ -133,7 +156,7 @@ class PtvStopService extends PtvBaseService {
 
     // 1. Get stops along each route, and add to routesStops list
     for (var route in routes) {
-      await route.loadDetails();    // ensure directions is loaded
+      await route.loadDetails(); // ensure directions is loaded
       List<Direction>? directions = route.directions;
 
       // No directions for route (error)
@@ -141,7 +164,8 @@ class PtvStopService extends PtvBaseService {
         return [];
       }
 
-      List<Stop> stops = await fetchStopsByRoute(route: route, direction: directions.first, filter: true);
+      List<Stop> stops = await fetchStopsByRoute(
+          route: route, direction: directions.first, filter: true);
       routesStops.add(RouteStops(route: route, stops: stops));
     }
     // print("1. ( ptv_service.dart -> commonStops ) -- Routes and Stops:\n$routesStops");
@@ -161,7 +185,10 @@ class PtvStopService extends PtvBaseService {
     // 3. Get common contiguous stops from a stop
     // todo: probably also do a common suburbs and landmarks
     List<Stop> initialStopList = routesStops.first.stops;
-    List<Stop> sharedStops = routesStops.fold(initialStopList, (accumulator, nextRouteStop) => accumulator.sharedSublist(nextRouteStop.stops, selectedStop));
+    List<Stop> sharedStops = routesStops.fold(
+        initialStopList,
+        (accumulator, nextRouteStop) =>
+            accumulator.sharedSublist(nextRouteStop.stops, selectedStop));
     // print("3. ( ptv_service.dart -> commonStops ) -- shared contiguous stops from stop $stopId: ${sharedStops.map((s) => s.id)}");
 
     if (sharedStops.isEmpty) {
@@ -184,17 +211,22 @@ class PtvStopService extends PtvBaseService {
       // todo: case, if there is only 1 shared stop, both forward and reverse match will be true. How to deal with this?
 
       if (forwardMatch || reverseMatch) {
-        Direction? reversedDirection = await directionService.getReverse(route: rs.route, direction: direction);
+        Direction? reversedDirection = await directionService.getReverse(
+            route: rs.route, direction: direction);
 
         // 4a.
         if (forwardMatch) {
           // add current to forward triplist
-          Trip trip = Trip(stop: selectedStop, route: rs.route, direction: direction);
+          Trip trip =
+              Trip(stop: selectedStop, route: rs.route, direction: direction);
           trips.add(trip);
 
           // add reversed to reverse triplist
           if (reversedDirection != null) {
-            Trip reversedTrip = Trip(stop: selectedStop, route: rs.route, direction: reversedDirection);
+            Trip reversedTrip = Trip(
+                stop: selectedStop,
+                route: rs.route,
+                direction: reversedDirection);
             tripsReversed.add(reversedTrip);
           }
         }
@@ -203,12 +235,16 @@ class PtvStopService extends PtvBaseService {
         // todo: can i use an else if here instead
         if (reverseMatch) {
           // add current to reverse triplist
-          Trip trip = Trip(stop: selectedStop, route: rs.route, direction: direction);
+          Trip trip =
+              Trip(stop: selectedStop, route: rs.route, direction: direction);
           tripsReversed.add(trip);
 
           // add reversed to forward triplist
           if (reversedDirection != null) {
-            Trip reversedTrip = Trip(stop: selectedStop, route: rs.route, direction: reversedDirection);
+            Trip reversedTrip = Trip(
+                stop: selectedStop,
+                route: rs.route,
+                direction: reversedDirection);
             trips.add(reversedTrip);
           }
         }
@@ -218,13 +254,14 @@ class PtvStopService extends PtvBaseService {
     // print("4. ( ptv_service.dart -> commonStops ) -- Forward Trips (${trips.map((t) => (t.route!.number, t.direction!.name)).toList()})");
     // print("4. ( ptv_service.dart -> commonStops ) -- Reverse Trips (${tripsReversed.map((t) => (t.route!.number, t.direction!.name)).toList()})");
 
-
     // 5. Create directed stops
     String? forwardDirection = sharedStops.last.id.toString();
     String? reverseDirection = sharedStops.first.id.toString();
 
-    DirectedStop forwardStop = DirectedStop(trips: trips, stop: selectedStop, direction: forwardDirection);
-    DirectedStop reverseStop = DirectedStop(trips: tripsReversed, stop: selectedStop, direction: reverseDirection);
+    DirectedStop forwardStop = DirectedStop(
+        trips: trips, stop: selectedStop, direction: forwardDirection);
+    DirectedStop reverseStop = DirectedStop(
+        trips: tripsReversed, stop: selectedStop, direction: reverseDirection);
     directedStops.add(forwardStop);
     directedStops.add(reverseStop);
 

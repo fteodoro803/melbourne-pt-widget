@@ -46,7 +46,8 @@ class Trip {
 
     // Early exit if any of the prerequisites are null
     if (routeType == null || stopId == null || routeId == null) {
-      print("( trip.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
+      print(
+          "( trip.dart -> updatedDepartures() ) -- Early Exit for routeType, stopId, directionId, routeId = $routeType, $stopId, $directionId, $routeId");
       return;
     }
 
@@ -54,9 +55,11 @@ class Trip {
     PtvService ptvService = PtvService();
     departureCount = departureCount ?? defaultDepartureCount;
     departures = await ptvService.departures.fetchDepartures(
-        routeType: routeType, stopId: stopId, routeId: routeId,
-        directionId: directionId, maxResults: departureCount.toString()
-    );
+        routeType: routeType,
+        stopId: stopId,
+        routeId: routeId,
+        directionId: directionId,
+        maxResults: departureCount.toString());
 
     // Saves Departures to Database
     if (departures != null && departures!.isNotEmpty) {
@@ -71,8 +74,19 @@ class Trip {
         bool? hasAirConditioning = departure.hasAirConditioning;
 
         // Can only add to database with valid ids
-        if (stopId != null && routeId != null && directionId != null && runRef != null) {
-          await Get.find<db.AppDatabase>().addDeparture(runRef: runRef, stopId: stopId, routeId: routeId, directionId: directionId, scheduledDepartureUTC: scheduledUTC, estimatedDepartureUTC: estimatedUTC, hasAirConditioning: hasAirConditioning, hasLowFloor: hasLowFloor);
+        if (stopId != null &&
+            routeId != null &&
+            directionId != null &&
+            runRef != null) {
+          await Get.find<db.AppDatabase>().addDeparture(
+              runRef: runRef,
+              stopId: stopId,
+              routeId: routeId,
+              directionId: directionId,
+              scheduledDepartureUTC: scheduledUTC,
+              estimatedDepartureUTC: estimatedUTC,
+              hasAirConditioning: hasAirConditioning,
+              hasLowFloor: hasLowFloor);
         }
       }
     }
@@ -91,11 +105,12 @@ class Trip {
 
   // DELETE LATER ITS BEING USED IN OLD SCREENS
   Future<List<Trip>> splitByDirection() async {
-
     // Get the two directions a route can go, and set each new transport to one of them
     List<Direction> directions = await fetchRouteDirections();
-    Trip newTransport1 = Trip(stop: stop, route: route, direction: directions[0]);
-    Trip newTransport2 = Trip(stop: stop, route: route, direction: directions[1]);
+    Trip newTransport1 =
+        Trip(stop: stop, route: route, direction: directions[0]);
+    Trip newTransport2 =
+        Trip(stop: stop, route: route, direction: directions[1]);
 
     List<Trip> newTransportList = [newTransport1, newTransport2];
 
@@ -113,7 +128,8 @@ class Trip {
 
     // Early Exit
     if (data == null) {
-      print("( trip.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
+      print(
+          "( trip.dart -> fetchRouteDirections ) -- Null Data response Improper Location Data");
       return [];
     }
 
@@ -123,7 +139,7 @@ class Trip {
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
       Direction newDirection =
-      Direction(id: id, name: name, description: description);
+          Direction(id: id, name: name, description: description);
 
       directions.add(newDirection);
     }
@@ -141,10 +157,18 @@ class Trip {
   String toString() {
     String str = "";
 
-    if (stop != null) {str += stop.toString();}
-    if (route != null) {str += route.toString();}
-    if (direction != null) {str += direction.toString();}
-    if (departures != null) {str += departures.toString();}
+    if (stop != null) {
+      str += stop.toString();
+    }
+    if (route != null) {
+      str += route.toString();
+    }
+    if (direction != null) {
+      str += direction.toString();
+    }
+    if (departures != null) {
+      str += departures.toString();
+    }
 
     return str;
   }

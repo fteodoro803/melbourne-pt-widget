@@ -17,12 +17,13 @@ import 'navigation_service.dart';
 import 'nearby_stops_controller.dart';
 
 class MapController extends GetxController {
-  final CustomInfoWindowController infoWindowController
-    = CustomInfoWindowController();
+  final CustomInfoWindowController infoWindowController =
+      CustomInfoWindowController();
   late GoogleMapController mapController;
 
   NavigationService get navigationService => Get.find<NavigationService>();
-  NearbyStopsController get nearbyStopsController => Get.find<NearbyStopsController>();
+  NearbyStopsController get nearbyStopsController =>
+      Get.find<NearbyStopsController>();
   SheetController get sheetController => Get.find<SheetController>();
 
   final MapUtils mapUtils = MapUtils();
@@ -43,8 +44,8 @@ class MapController extends GetxController {
   Marker? locationMarker;
 
   RxDouble currentZoom = 15.0.obs;
-  Rx<LatLng> currentPosition = LatLng(-37.813812122509205,
-      144.96358311072478).obs;
+  Rx<LatLng> currentPosition =
+      LatLng(-37.813812122509205, 144.96358311072478).obs;
 
   RxBool isNearbyStopsButtonToggled = false.obs;
   bool areNearbyStopMarkersInitialized = false;
@@ -66,17 +67,14 @@ class MapController extends GetxController {
     resetMarkers();
 
     String address = await mapUtils.getAddressFromCoordinates(
-      location.latitude,
-      location.longitude
-    );
+        location.latitude, location.longitude);
 
     await navigationService.navigateToNearbyStops(markerPos!, address);
 
     await mapUtils.moveCameraToFitRadiusWithVerticalOffset(
-      controller: mapController,
-      center: location,
-      radiusInMeters: nearbyStopsController.distanceInMeters
-    );
+        controller: mapController,
+        center: location,
+        radiusInMeters: nearbyStopsController.distanceInMeters);
   }
 
   /// Initializes nearby stop markers (on pin drop/filter change)
@@ -86,17 +84,17 @@ class MapController extends GetxController {
     List<Stop> stops = nearbyStopsController.filteredStops;
 
     radiusCircle = Circle(
-      circleId: CircleId("circle"),
-      center: markerPos!,
-      fillColor: Colors.blue.withValues(alpha: 0.2),
-      strokeWidth: 0,
-      radius: nearbyStopsController.distanceInMeters
-    );
+        circleId: CircleId("circle"),
+        center: markerPos!,
+        fillColor: Colors.blue.withValues(alpha: 0.2),
+        strokeWidth: 0,
+        radius: nearbyStopsController.distanceInMeters);
 
     if (stops.isEmpty) {
       nearbyStopMarkers.clear();
     } else {
-      Set<Marker> newNearbyStopMarkers = await mapUtils.generateNearbyStopMarkers(
+      Set<Marker> newNearbyStopMarkers =
+          await mapUtils.generateNearbyStopMarkers(
         stops: stops,
         getIcon: (stop) => mapUtils.getResizedImage(
           "assets/icons/PTV ${stop.routeType!.name} Logo.png",
@@ -159,8 +157,8 @@ class MapController extends GetxController {
       markers.add(tappedStopMarker!);
     }
 
-    tappedStopMarker = markers.firstWhere(
-            (m) => m.markerId == MarkerId(stop.id.toString()));
+    tappedStopMarker =
+        markers.firstWhere((m) => m.markerId == MarkerId(stop.id.toString()));
     markers.removeWhere((m) => m.markerId == MarkerId(stop.name));
 
     tappedStopId = stop.id.toString();
@@ -189,12 +187,7 @@ class MapController extends GetxController {
     setGeoPath(geoPath);
 
     tripPath = TripPath(
-        geoPath,
-        route.stopsAlongRoute,
-        stop,
-        route.colour!,
-        markerPos
-    );
+        geoPath, route.stopsAlongRoute, stop, route.colour!, markerPos);
     await tripPath!.initializeFullPath();
   }
 
@@ -210,9 +203,7 @@ class MapController extends GetxController {
     tripPath?.onZoomChange(currentZoom.value);
 
     if (locationMarker != null) {
-      markers.assignAll({
-        locationMarker!,
-        ...tripPath!.markers});
+      markers.assignAll({locationMarker!, ...tripPath!.markers});
     } else {
       markers = {...tripPath!.markers}.obs;
     }
@@ -232,24 +223,21 @@ class MapController extends GetxController {
 
   /// Handles zoom and camera move events
   void onCameraMove(CameraPosition position) {
-    if (sheetController.currentSheet.value != "Nearby Stops"
-        && currentZoom.value != position.zoom
-        && shouldRenderMarkers) {
+    if (sheetController.currentSheet.value != "Nearby Stops" &&
+        currentZoom.value != position.zoom &&
+        shouldRenderMarkers) {
       if (mapUtils.didZoomChange(currentZoom.value, position.zoom)) {
         tripPath?.onZoomChange(position.zoom);
 
         if (locationMarker != null) {
-          markers.assignAll({
-            locationMarker!,
-            ...tripPath?.markers ?? {}});
+          markers.assignAll({locationMarker!, ...tripPath?.markers ?? {}});
         } else {
           markers = {...tripPath?.markers ?? {}}.obs;
         }
 
         currentZoom.value = position.zoom;
       }
-    }
-    else {
+    } else {
       currentZoom.value = position.zoom;
       infoWindowController.onCameraMove!();
     }
@@ -275,8 +263,7 @@ class MapController extends GetxController {
   void resetMarkers() {
     if (locationMarker != null) {
       markers = {locationMarker!}.obs;
-    }
-    else {
+    } else {
       markers.clear();
     }
   }
@@ -284,5 +271,3 @@ class MapController extends GetxController {
   void clearTripPath() => tripPath = null;
   void setGeoPath(List<LatLng> newGeoPath) => geoPath = newGeoPath;
 }
-
-

@@ -65,7 +65,8 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   /// Retrieves list of suburbs and stops the route passes through
   Future<void> _getSuburbStops() async {
     List<Stop> stopsAlongRoute = _route.stopsAlongRoute!;
-    List<SuburbStops> newSuburbStops = await searchUtils.getSuburbStops(stopsAlongRoute, _route);
+    List<SuburbStops> newSuburbStops =
+        await searchUtils.getSuburbStops(stopsAlongRoute, _route);
 
     setState(() {
       _suburbStops = newSuburbStops;
@@ -91,7 +92,6 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-
     if (_suburbStops.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -119,7 +119,8 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                       duration: Duration(milliseconds: 250),
                       transitionBuilder: (child, animation) => SlideTransition(
                         position: Tween<Offset>(
-                          begin: Offset(0.2, 0), end: Offset(0, 0),
+                          begin: Offset(0.2, 0),
+                          end: Offset(0, 0),
                         ).animate(animation),
                         child: FadeTransition(opacity: animation, child: child),
                       ),
@@ -141,7 +142,6 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
                       _changeDirection();
                     },
                   ),
-
                 ],
               ),
             ),
@@ -151,7 +151,6 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
 
         // List of stops (and suburbs)
         ..._suburbStops.map((suburb) {
-
           // Suburb sticky header
           return SliverStickyHeader(
             header: Container(
@@ -169,34 +168,39 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
 
             // Stops in a given suburb
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final stop = suburb.stops[index];
-                return Column(
-                  children: [
-                    ListTile(
-                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                      dense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 5),
-                      title: Text(stop.name, style: TextStyle(fontSize: 15)),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () async {
-                        navigationService.navigateToStop(stop, _route);
-                      },
-                    ),
-
-                    // Show divider for every stop except the last
-                    if (index < suburb.stops.length - 1)
-                      Divider(
-                        height: 1,
-                        thickness: 0.7,
-                        indent: 16,
-                        endIndent: 16,
-                        color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final stop = suburb.stops[index];
+                  return Column(
+                    children: [
+                      ListTile(
+                        visualDensity:
+                            VisualDensity(horizontal: -4, vertical: -4),
+                        dense: true,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 24, vertical: 5),
+                        title: Text(stop.name, style: TextStyle(fontSize: 15)),
+                        trailing: Icon(Icons.keyboard_arrow_right),
+                        onTap: () async {
+                          navigationService.navigateToStop(stop, _route);
+                        },
                       ),
-                  ],
-                );
-              },
-              childCount: suburb.stops.length,
+
+                      // Show divider for every stop except the last
+                      if (index < suburb.stops.length - 1)
+                        Divider(
+                          height: 1,
+                          thickness: 0.7,
+                          indent: 16,
+                          endIndent: 16,
+                          color: Theme.of(context)
+                              .dividerColor
+                              .withValues(alpha: 0.5),
+                        ),
+                    ],
+                  );
+                },
+                childCount: suburb.stops.length,
               ),
             ),
           );

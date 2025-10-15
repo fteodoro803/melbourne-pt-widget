@@ -54,13 +54,12 @@ class PtvService {
     }
 
     String routeType = "";
-    if (route.type == RouteType.train) {    // todo: add the other route types (vLine, nightBus)
+    if (route.type == RouteType.train) {
+      // todo: add the other route types (vLine, nightBus)
       routeType = "metro_train";
-    }
-    else if (route.type == RouteType.tram) {
+    } else if (route.type == RouteType.tram) {
       routeType = "metro_tram";
-    }
-    else if (route.type == RouteType.bus) {
+    } else if (route.type == RouteType.bus) {
       routeType = "metro_bus";
     }
 
@@ -86,8 +85,8 @@ class PtvService {
     String expands = "Stop";
     String? runRef = departure.runRef;
     RouteType? routeType = trip.route?.type;
-    var data = await PtvApiService().patterns(
-        runRef!, routeType!.name, expand: expands);
+    var data = await PtvApiService()
+        .patterns(runRef!, routeType!.name, expand: expands);
 
     // Empty JSON Response
     if (data == null) {
@@ -98,19 +97,23 @@ class PtvService {
 
     // Converts departure time response to DateTime object, if it's not null, and adds to departure list
     for (var departure in data["departures"]) {
-      DateTime? scheduledDepartureUTC = departure["scheduled_departure_utc"] !=
-          null ? DateTime.parse(departure["scheduled_departure_utc"]) : null;
-      DateTime? estimatedDepartureUTC = departure["estimated_departure_utc"] !=
-          null ? DateTime.parse(departure["estimated_departure_utc"]) : null;
+      DateTime? scheduledDepartureUTC =
+          departure["scheduled_departure_utc"] != null
+              ? DateTime.parse(departure["scheduled_departure_utc"])
+              : null;
+      DateTime? estimatedDepartureUTC =
+          departure["estimated_departure_utc"] != null
+              ? DateTime.parse(departure["estimated_departure_utc"])
+              : null;
       String? runRef = departure["run_ref"]?.toString();
       int? stopId = departure["stop_id"];
       String? platformNumber = departure["platform_number"];
-      var vehicleDescriptors = data["runs"]?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
+      var vehicleDescriptors = data["runs"]?[runRef]?[
+          "vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
       bool? hasLowFloor;
       bool? hasAirConditioning;
-      if (vehicleDescriptors != null && vehicleDescriptors
-          .toString()
-          .isNotEmpty) {
+      if (vehicleDescriptors != null &&
+          vehicleDescriptors.toString().isNotEmpty) {
         hasLowFloor = vehicleDescriptors["low_floor"];
         hasAirConditioning = vehicleDescriptors["air_conditioned"];
       }
@@ -122,20 +125,16 @@ class PtvService {
           stopId: stopId,
           hasLowFloor: hasLowFloor,
           hasAirConditioning: hasAirConditioning,
-          platformNumber: platformNumber
-      );
+          platformNumber: platformNumber);
 
       // Get Stop Name per Departure
-      String? stopName = data["stops"]?[stopId
-          .toString()]?["stop_name"]; // makes stopName null if data for "runs" and/or "runRef" doesn't exist
-      if (stopName != null && stopName
-          .toString()
-          .isNotEmpty) {
+      String? stopName = data["stops"]?[stopId.toString()]?[
+          "stop_name"]; // makes stopName null if data for "runs" and/or "runRef" doesn't exist
+      if (stopName != null && stopName.toString().isNotEmpty) {
         // print("( ptv_service.dart -> fetchDepartures ) -- descriptors for $runRef exists: \n ${jsonResponse["runs"][runRef]["vehicle_descriptor"]}");
 
         newDeparture.stopName = stopName;
-      }
-      else {
+      } else {
         print(
             "( ptv_service.dart -> fetchPattern() ) -- patterns for runRef $runRef is empty )");
       }
@@ -153,13 +152,16 @@ class PtvService {
     String expands = "All";
     String? runRef = trip.departures?[0].runRef;
     RouteType? routeType = trip.route?.type;
-    var data = await PtvApiService().runs(
-        runRef!, routeType!.name, expand: expands);
+    var data =
+        await PtvApiService().runs(runRef!, routeType!.name, expand: expands);
 
     print("(ptv_service.dart -> fetchRuns) -- Fetched Runs:\n$data");
   }
 
-  Future<StopRouteLists> fetchStopRoutePairs(LatLng location, {String routeTypes = "all", int maxResults = 3, int maxDistance = 300}) async {
+  Future<StopRouteLists> fetchStopRoutePairs(LatLng location,
+      {String routeTypes = "all",
+      int maxResults = 3,
+      int maxDistance = 300}) async {
     List<Stop> stops = [];
     List<Route> routes = [];
 
@@ -169,8 +171,7 @@ class PtvService {
     String routeTypeString = "";
     if (routeTypes == "all") {
       routeTypeString = "";
-    }
-    else {
+    } else {
       routeTypeString = routeTypes;
     }
 
@@ -202,7 +203,8 @@ class PtvService {
         double latitude = stop["stop_latitude"];
         double longitude = stop["stop_longitude"];
         double? distance = stop["stop_distance"];
-        Stop newStop = Stop(id: stopId,
+        Stop newStop = Stop(
+            id: stopId,
             name: stopName,
             latitude: latitude,
             longitude: longitude,
@@ -214,7 +216,8 @@ class PtvService {
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.fromId(routeTypeId);
         String gtfsId = "TEMPORARY"; // todo: fix this
-        String status = "TEMPORARY"; // todo: fix this, or the logic of the class
+        String status =
+            "TEMPORARY"; // todo: fix this, or the logic of the class
 
         Route newRoute = Route(
             name: routeName,
@@ -231,5 +234,4 @@ class PtvService {
 
     return StopRouteLists(stops, routes);
   }
-
 }

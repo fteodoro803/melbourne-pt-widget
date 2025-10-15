@@ -19,7 +19,6 @@ class LocationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     var textLine = Text(
       textField,
       style: TextStyle(fontSize: textSize),
@@ -31,16 +30,16 @@ class LocationWidget extends StatelessWidget {
       children: [
         Icon(Icons.location_pin, size: textSize + 2),
         SizedBox(width: 4),
-        scrollable ?
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: textLine,
-          ),
-        )
+        scrollable
+            ? Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: textLine,
+                ),
+              )
             : Flexible(
-          child: textLine,
-        ),
+                child: textLine,
+              ),
       ],
     );
   }
@@ -66,9 +65,7 @@ class RouteLabelContainer extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: route.colour != null
-            ? routeColour
-            : Colors.grey,
+        color: route.colour != null ? routeColour : Colors.grey,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -76,9 +73,7 @@ class RouteLabelContainer extends StatelessWidget {
         style: TextStyle(
           fontSize: textSize,
           fontWeight: FontWeight.bold,
-          color: route.textColour != null
-              ? routeTextColour
-              : Colors.black,
+          color: route.textColour != null ? routeTextColour : Colors.black,
         ),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
@@ -109,7 +104,6 @@ class NewRouteWidget extends StatelessWidget {
         SizedBox(width: 8),
         RouteLabelContainer(route: route, textSize: 16.5),
         SizedBox(width: 8),
-
         if (routeType != "train" && routeType != "vLine" && direction != null)
           Flexible(
             child: Text(
@@ -171,7 +165,6 @@ class RouteWidget extends StatelessWidget {
           height: 30,
         ),
         SizedBox(width: 8),
-
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
@@ -194,31 +187,28 @@ class RouteWidget extends StatelessWidget {
           ),
         ),
         SizedBox(width: 10),
-
         if (routeType != "train" && routeType != "vLine" && direction != null)
-          scrollable ?
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Text(
-                direction?.name ?? "No Data",
-                style: TextStyle(
-                  fontSize: 18,
+          scrollable
+              ? Expanded(
+                  child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Text(
+                    direction?.name ?? "No Data",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                ))
+              : Flexible(
+                  child: Text(
+                    direction?.name ?? "No Data",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
                 ),
-
-              ),
-            )
-          )
-          : Flexible(
-            child: Text(
-              direction?.name ?? "No Data",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-          ),
       ],
     );
   }
@@ -243,50 +233,51 @@ class DeparturesStringWidget extends StatelessWidget {
             style: TextStyle(height: 1.1, fontSize: 15),
           )
         else
-          ...List.generate(
-              departures!.length > 2 ? 2 : departures!.length,
-                  (index) {
-                final departure = departures![index];
-                final bool hasLowFloor = departure.hasLowFloor ?? false;
-                final DateTime? estimatedTime = departure.estimatedDepartureUTC ??
-                    departure.scheduledDepartureUTC;
-                final String timeString = TimeUtils.trimTime(estimatedTime!, false); // todo: if more than a day away, show month!
+          ...List.generate(departures!.length > 2 ? 2 : departures!.length,
+              (index) {
+            final departure = departures![index];
+            final bool hasLowFloor = departure.hasLowFloor ?? false;
+            final DateTime? estimatedTime = departure.estimatedDepartureUTC ??
+                departure.scheduledDepartureUTC;
+            final String timeString = TimeUtils.trimTime(estimatedTime!,
+                false); // todo: if more than a day away, show month!
 
-                return Row(
-                  children: [
-                    if (index == 0)
-                      Text(
-                        "At ",
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
-                    Text(
-                      timeString,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
+            return Row(
+              children: [
+                if (index == 0)
+                  Text(
+                    "At ",
+                    style: TextStyle(
+                      fontSize: 15,
                     ),
-                    if (hasLowFloor) ...[
-                      SizedBox(width: 3),
-                      Icon(Icons.accessible, size: 18)
-                    ],
-                    SizedBox(width: 4),
-                    if (index < ((departures!.length > 2 ? 2 : departures!.length) - 1)) ...[
-                      Text(
-                        // "•",
-                        "and",
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
-                      SizedBox(width: 4),
-                    ],
-                  ],
-                );
-              }
-          ),
+                  ),
+                Text(
+                  timeString,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (hasLowFloor) ...[
+                  SizedBox(width: 3),
+                  Icon(Icons.accessible, size: 18)
+                ],
+                SizedBox(width: 4),
+                if (index <
+                    ((departures!.length > 2 ? 2 : departures!.length) -
+                        1)) ...[
+                  Text(
+                    // "•",
+                    "and",
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                ],
+              ],
+            );
+          }),
       ],
     );
   }

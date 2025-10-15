@@ -3,8 +3,8 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension RouteStopHelpers on AppDatabase {
-  LinkRouteStopsTableCompanion createRouteStopCompanion({required int routeId, required int stopId})
-  {
+  LinkRouteStopsTableCompanion createRouteStopCompanion(
+      {required int routeId, required int stopId}) {
     return LinkRouteStopsTableCompanion(
       routeId: drift.Value(routeId),
       stopId: drift.Value(stopId),
@@ -13,7 +13,8 @@ extension RouteStopHelpers on AppDatabase {
   }
 
   Future<void> addRouteStop(int routeId, int stopId) async {
-    LinkRouteStopsTableCompanion routeStop = createRouteStopCompanion(routeId: routeId, stopId: stopId);
+    LinkRouteStopsTableCompanion routeStop =
+        createRouteStopCompanion(routeId: routeId, stopId: stopId);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertRouteStopLink(routeStop);
   }
@@ -26,7 +27,8 @@ extension RouteStopHelpers on AppDatabase {
         linkRouteStopsTable.routeId.equalsExp(routesTable.id),
       )
     ])
-      ..where(linkRouteStopsTable.stopId.equals(stopId));  // filter results where stop id matches
+      ..where(linkRouteStopsTable.stopId
+          .equals(stopId)); // filter results where stop id matches
 
     // Convert the joined results to Route objects
     final rows = await query.get();

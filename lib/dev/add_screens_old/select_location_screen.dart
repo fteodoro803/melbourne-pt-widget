@@ -100,18 +100,18 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
         // Google Map
         Positioned.fill(
           child: GoogleMap(
-            // style: _style,      // Dark mode/Light mode
-            // Updates the center marker based on camera's position
-            onCameraMove: (position) {
-              setState(() {
-                currentPosition = position.target;
-                setMarker(position.target);
-              });
-            },
-            onMapCreated: _onMapCreated,
-            initialCameraPosition:
-                CameraPosition(target: _initialPosition, zoom: 15),
-            markers: markers),
+              // style: _style,      // Dark mode/Light mode
+              // Updates the center marker based on camera's position
+              onCameraMove: (position) {
+                setState(() {
+                  currentPosition = position.target;
+                  setMarker(position.target);
+                });
+              },
+              onMapCreated: _onMapCreated,
+              initialCameraPosition:
+                  CameraPosition(target: _initialPosition, zoom: 15),
+              markers: markers),
         ),
 
         // Manual Location (~test)
@@ -138,7 +138,9 @@ class _SelectLocationScreenState extends State<SelectLocationScreen> {
           right: 100,
           child: ElevatedButton(
               onPressed: () {
-                _locationController.text.isNotEmpty? setLocation() : setMapLocation(); // ~test, for when manual location is on
+                _locationController.text.isNotEmpty
+                    ? setLocation()
+                    : setMapLocation(); // ~test, for when manual location is on
 
                 // setMapLocation();
                 Navigator.pushNamed(context, '/selectStopScreen',

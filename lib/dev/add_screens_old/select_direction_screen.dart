@@ -37,7 +37,8 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
 
   void getDirections() async {
     int? routeId = widget.arguments.trip!.route?.id;
-    List<Direction> directions = await ptvService.directions.fetchDirections(routeId!);
+    List<Direction> directions =
+        await ptvService.directions.fetchDirections(routeId!);
     _directions = directions;
     setState(() {});
   }
@@ -52,9 +53,9 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       int? routeId = widget.arguments.trip?.route?.id;
 
       Get.find<db.AppDatabase>().addDirection(id, name, description);
-      Get.find<db.AppDatabase>().addRouteDirection(routeId: routeId!, directionId: id);
-    }
-    else {
+      Get.find<db.AppDatabase>()
+          .addRouteDirection(routeId: routeId!, directionId: id);
+    } else {
       widget.arguments.trip!.direction = null;
     }
   }
@@ -76,10 +77,8 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
                 // old
                 itemCount: _directions.length,
                 itemBuilder: (context, index) {
-                  final directionName =
-                      _directions[index].name;
-                  final directionId =
-                      _directions[index].id;
+                  final directionName = _directions[index].name;
+                  final directionId = _directions[index].id;
 
                   return ListTile(
                     title: Text("$directionName ($directionId)"),
@@ -94,10 +93,10 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
             ),
             ElevatedButton(
                 onPressed: () => {
-                  setDirection(null),
-                  Navigator.pushNamed(context, '/confirmationScreen',
+                      setDirection(null),
+                      Navigator.pushNamed(context, '/confirmationScreen',
                           arguments: widget.arguments),
-                },
+                    },
                 child: Text("Skip"))
           ],
         ),

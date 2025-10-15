@@ -11,8 +11,12 @@ class Colours {
 }
 
 extension RouteHelpers on AppDatabase {
-  RoutesTableCompanion createRouteCompanion({required int id, required String name, required String number, required int routeTypeId, required String status})
-  {
+  RoutesTableCompanion createRouteCompanion(
+      {required int id,
+      required String name,
+      required String number,
+      required int routeTypeId,
+      required String status}) {
     // AppDatabase db = Get.find<AppDatabase>();
     // String? routeType = await db.getRouteTypeNameFromRouteTypeId(routeTypeId);
 
@@ -26,8 +30,18 @@ extension RouteHelpers on AppDatabase {
     );
   }
 
-  Future<void> addRoute({required int id, required String name, required String number, required int routeTypeId, required String status}) async {
-    RoutesTableCompanion route = createRouteCompanion(id: id, name: name, number: number, routeTypeId: routeTypeId, status: status);
+  Future<void> addRoute(
+      {required int id,
+      required String name,
+      required String number,
+      required int routeTypeId,
+      required String status}) async {
+    RoutesTableCompanion route = createRouteCompanion(
+        id: id,
+        name: name,
+        number: number,
+        routeTypeId: routeTypeId,
+        status: status);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertRoute(route);
   }
@@ -39,8 +53,7 @@ extension RouteHelpers on AppDatabase {
     if (routeType != null) {
       query = select(routesTable)
         ..where((tbl) => tbl.routeTypeId.equals(routeType));
-    }
-    else {
+    } else {
       query = select(routesTable);
     }
 
@@ -51,31 +64,29 @@ extension RouteHelpers on AppDatabase {
   /// Gets route according to id.
   Future<RoutesTableData?> getRouteById(int id) async {
     drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
-    query = select(routesTable)
-      ..where((tbl) => tbl.id.equals(id));
+    query = select(routesTable)..where((tbl) => tbl.id.equals(id));
 
     final result = await query.getSingleOrNull();
     return result;
   }
 
   /// Gets routes according to name.
-  Future<List<RoutesTableData>> getRoutesByName({String? search, int? routeType}) async {
+  Future<List<RoutesTableData>> getRoutesByName(
+      {String? search, int? routeType}) async {
     AppDatabase db = Get.find<AppDatabase>();
 
     drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
     if (search != null && search.isNotEmpty && routeType != null) {
       query = db.select(db.routesTable)
-      ..where((tbl) => tbl.name.contains(search) & tbl.routeTypeId.equals(routeType));
-    }
-    else if (routeType != null) {
+        ..where((tbl) =>
+            tbl.name.contains(search) & tbl.routeTypeId.equals(routeType));
+    } else if (routeType != null) {
       query = db.select(db.routesTable)
         ..where((tbl) => tbl.routeTypeId.equals(routeType));
-    }
-    else if (search != null && search.isNotEmpty) {
+    } else if (search != null && search.isNotEmpty) {
       query = db.select(db.routesTable)
         ..where((tbl) => tbl.name.contains(search));
-    }
-    else {
+    } else {
       query = db.select(db.routesTable);
     }
 

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
 import '../../domain/stop.dart';
 
-
 class GeoPathAndStops {
   final List<LatLng> geoPathWithStop;
   final LatLng? stopPositionAlongGeoPath;
@@ -30,12 +29,13 @@ class StopInfoWindow extends StatelessWidget {
       children: [
         SizedBox(width: 205),
         SizedBox(
-          width: 360-205,
+          width: 360 - 205,
           height: 36,
           // padding: const EdgeInsets.only(left: 150.0),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text(stop.name,
+            child: Text(
+              stop.name,
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w500,
@@ -61,7 +61,6 @@ class StopInfoWindow extends StatelessWidget {
 }
 
 class MapUtils {
-
   double zoomThresholdLarge = 12.8; // Zoom level threshold to hide the marker
   double zoomThresholdSmall = 13.4;
 
@@ -78,12 +77,14 @@ class MapUtils {
   }
 
   /// Helper method to calculate a position that will place our marker at the specified height ratio
-  Future<LatLng> calculateOffsetPosition(LatLng center, double verticalFraction, GoogleMapController controller) async {
+  Future<LatLng> calculateOffsetPosition(LatLng center, double verticalFraction,
+      GoogleMapController controller) async {
     // Get the current visible region
     LatLngBounds visibleRegion = await controller.getVisibleRegion();
 
     // Calculate the latitude span of the visible region
-    double latSpan = visibleRegion.northeast.latitude - visibleRegion.southwest.latitude;
+    double latSpan =
+        visibleRegion.northeast.latitude - visibleRegion.southwest.latitude;
 
     // Calculate the offset needed to move the center to the desired vertical position
     // 0.5 is the center of the screen, so we calculate relative to that
@@ -94,7 +95,8 @@ class MapUtils {
   }
 
   /// Function to calculate the bounds that include all points within a given distance from _chosenPosition
-  Future<LatLngBounds> calculateBoundsForMarkers(double distanceInMeters, LatLng markerPosition) async {
+  Future<LatLngBounds> calculateBoundsForMarkers(
+      double distanceInMeters, LatLng markerPosition) async {
     List<LatLng> allPoints = [];
     LatLng chosenPosition = markerPosition;
 
@@ -118,8 +120,10 @@ class MapUtils {
     }
 
     // Adjusting bounds to cover the given distance
-    double latDistance = distanceInMeters / 111000; // 111000 meters = 1 degree of latitude
-    double lonDistance = distanceInMeters / (111000 * cos(chosenPosition.latitude * pi / 180));
+    double latDistance =
+        distanceInMeters / 111000; // 111000 meters = 1 degree of latitude
+    double lonDistance =
+        distanceInMeters / (111000 * cos(chosenPosition.latitude * pi / 180));
 
     latMin -= latDistance;
     latMax += latDistance;
@@ -134,10 +138,11 @@ class MapUtils {
   }
 
   /// Retrieves address from coordinates of dropped pin
-  Future<String> getAddressFromCoordinates(double latitude, double longitude) async {
+  Future<String> getAddressFromCoordinates(
+      double latitude, double longitude) async {
     try {
       List<geocoding.Placemark> placemarks =
-      await geocoding.placemarkFromCoordinates(latitude, longitude);
+          await geocoding.placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
         geocoding.Placemark place = placemarks[0];
         // Return a string with the address (you can adjust what part of the address you want)
@@ -151,34 +156,29 @@ class MapUtils {
 
   /// Checks if polyline marker visibility should change
   bool didZoomChange(double oldZoom, double newZoom) {
-
     bool wasSmallHidden;
     bool wasLargeHidden;
     bool hideSmall;
     bool hideLarge;
 
-    if (oldZoom < zoomThresholdSmall && oldZoom >= zoomThresholdLarge ) {
+    if (oldZoom < zoomThresholdSmall && oldZoom >= zoomThresholdLarge) {
       wasSmallHidden = true;
       wasLargeHidden = false;
-    }
-    else if (oldZoom < zoomThresholdLarge ) {
+    } else if (oldZoom < zoomThresholdLarge) {
       wasSmallHidden = true;
       wasLargeHidden = true;
-    }
-    else {
+    } else {
       wasSmallHidden = false;
       wasLargeHidden = false;
     }
 
-    if (newZoom < zoomThresholdSmall && newZoom >= zoomThresholdLarge ) {
+    if (newZoom < zoomThresholdSmall && newZoom >= zoomThresholdLarge) {
       hideSmall = true;
       hideLarge = false;
-    }
-    else if (newZoom < zoomThresholdLarge ) {
+    } else if (newZoom < zoomThresholdLarge) {
       hideSmall = true;
       hideLarge = true;
-    }
-    else {
+    } else {
       hideSmall = false;
       hideLarge = false;
     }
@@ -292,7 +292,11 @@ class MapUtils {
   }
 
   ///
-  Future<void> centerMapOnPolyLine(List<LatLng> polyLine, GoogleMapController mapController, BuildContext context, bool enableSearch) async {
+  Future<void> centerMapOnPolyLine(
+      List<LatLng> polyLine,
+      GoogleMapController mapController,
+      BuildContext context,
+      bool enableSearch) async {
     LatLngBounds bounds = MapUtils.calculatePolylineBounds(polyLine);
 
     // Calculate padding based on screen size
@@ -301,12 +305,17 @@ class MapUtils {
 
     // Calculate padding as percentage of screen dimensions
     // You can adjust these percentages based on your needs
-    final horizontalPadding = enableSearch ? screenWidth * 0.35 : screenWidth * 0.25; // 15% of screen width
-    final verticalPadding = enableSearch ? screenHeight * 0.35 : screenHeight * 0.25;  // 15% of screen height
+    final horizontalPadding = enableSearch
+        ? screenWidth * 0.35
+        : screenWidth * 0.25; // 15% of screen width
+    final verticalPadding = enableSearch
+        ? screenHeight * 0.35
+        : screenHeight * 0.25; // 15% of screen height
 
     // Use the smaller value to ensure consistent padding
-    final padding = horizontalPadding < verticalPadding ?
-    horizontalPadding : verticalPadding;
+    final padding = horizontalPadding < verticalPadding
+        ? horizontalPadding
+        : verticalPadding;
 
     // Apply a minimum padding to ensure there's always some space
     final adaptivePadding = padding < 20 ? 20 : padding;
@@ -330,8 +339,7 @@ class MapUtils {
     LatLng adjustedCenter = await calculateOffsetPosition(
         center,
         0.5, // Position in the middle of your 0.3-0.6 window
-        mapController
-    );
+        mapController);
 
     // Animate to the new adjusted position
     await mapController.animateCamera(
@@ -345,7 +353,8 @@ class MapUtils {
   }
 
   /// Creates a custom marker from an image
-  Future<BitmapDescriptor> getResizedImage(String assetPath, double width, double height) async {
+  Future<BitmapDescriptor> getResizedImage(
+      String assetPath, double width, double height) async {
     // Load the image from assets
     final ByteData data = await rootBundle.load(assetPath);
     final List<int> bytes = data.buffer.asUint8List();
@@ -355,17 +364,25 @@ class MapUtils {
 
     // Resize the image using a canvas
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder, Rect.fromPoints(Offset(0.0, 0.0), Offset(width, height)));
+    final Canvas canvas = Canvas(pictureRecorder,
+        Rect.fromPoints(Offset(0.0, 0.0), Offset(width, height)));
     final Paint paint = Paint();
 
     // Scale the image on the canvas
-    canvas.drawImageRect(image, Rect.fromLTRB(0, 0, image.width.toDouble(), image.height.toDouble()), Rect.fromLTRB(0, 0, width, height), paint);
+    canvas.drawImageRect(
+        image,
+        Rect.fromLTRB(0, 0, image.width.toDouble(), image.height.toDouble()),
+        Rect.fromLTRB(0, 0, width, height),
+        paint);
 
     // Convert to an image
-    final ui.Image resizedImage = await pictureRecorder.endRecording().toImage(width.toInt(), height.toInt());
+    final ui.Image resizedImage = await pictureRecorder
+        .endRecording()
+        .toImage(width.toInt(), height.toInt());
 
     // Convert to byte data
-    final ByteData? byteData = await resizedImage.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData =
+        await resizedImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List resizedBytes = byteData!.buffer.asUint8List();
 
     // Return the resized BitmapDescriptor
@@ -374,7 +391,6 @@ class MapUtils {
 }
 
 class GeoPathUtils {
-
   /// Helper function to find the point in a geoPath that is closest to a given point
   static LatLng findClosestPointOnLine(LatLng center, LatLng p1, LatLng p2) {
     // Calculate the vector from p1 to p2
@@ -382,7 +398,8 @@ class GeoPathUtils {
     double dy = p2.latitude - p1.latitude;
 
     // Calculate the vector from p1 to center
-    double t = ((center.longitude - p1.longitude) * dx + (center.latitude - p1.latitude) * dy) /
+    double t = ((center.longitude - p1.longitude) * dx +
+            (center.latitude - p1.latitude) * dy) /
         (dx * dx + dy * dy);
 
     // Clip t to be between 0 and 1 to ensure it falls within the line segment
@@ -402,7 +419,8 @@ class GeoPathUtils {
 
     for (int i = 0; i < path.length - 1; i++) {
       // Get the closest point on the line segment between path[i] and path[i + 1]
-      LatLng projectedPoint = findClosestPointOnLine(center, path[i], path[i + 1]);
+      LatLng projectedPoint =
+          findClosestPointOnLine(center, path[i], path[i + 1]);
 
       // Calculate the distance from the center to the projected point
       double distance = calculateDistance(center, projectedPoint);
@@ -448,7 +466,7 @@ class GeoPathUtils {
     LatLng lastGeoPathPoint = geopath[geopath.length - 1];
     Stop lastStop = stops[stops.length - 1];
     LatLng lastStopLocation = LatLng(lastStop.latitude!, lastStop.longitude!);
-    return calculateDistance(lastStopLocation, firstGeoPathPoint)
-        < calculateDistance(lastStopLocation, lastGeoPathPoint);
+    return calculateDistance(lastStopLocation, firstGeoPathPoint) <
+        calculateDistance(lastStopLocation, lastGeoPathPoint);
   }
 }

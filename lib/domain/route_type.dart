@@ -16,7 +16,7 @@ enum RouteType {
   vLine(3, "vLine"),
 
   @JsonValue(4)
-  nightBus(4, "nightBus");      // todo: re-enable night bus later, or merge with bus
+  nightBus(4, "nightBus"); // todo: re-enable night bus later, or merge with bus
 
   final int id;
   final String name;
@@ -26,18 +26,18 @@ enum RouteType {
 
   /// Factory constructor for a route type via id (ie. 0, 1).
   static RouteType fromId(int id) {
-    return RouteType.values.firstWhere(
-            (routeType) => routeType.id == id,
-        orElse: () => throw ArgumentError('No RouteType found for id: $id')
-    );
+    return RouteType.values.firstWhere((routeType) => routeType.id == id,
+        orElse: () => throw ArgumentError('No RouteType found for id: $id'));
   }
 
   /// Factory constructor for a route type via name (ie. "tram", "bus").
   static RouteType fromName(String name) {
     return RouteType.values.firstWhere(
-            (routeType) => RouteType._normaliseName(routeType.name) == RouteType._normaliseName(name),
-        orElse: () => throw ArgumentError('( route_type.dart -> RouteType.withName() ) -- No RouteTypeEnum found for name: $name')
-    );
+        (routeType) =>
+            RouteType._normaliseName(routeType.name) ==
+            RouteType._normaliseName(name),
+        orElse: () => throw ArgumentError(
+            '( route_type.dart -> RouteType.withName() ) -- No RouteTypeEnum found for name: $name'));
   }
 
   /// Helper method to normalize name for comparison

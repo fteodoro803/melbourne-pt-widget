@@ -10,21 +10,24 @@ class PtvApiService {
   final http.Client client;
 
   /// Creates a PtvApiService object, with an optional GlobalConfiguration
-  PtvApiService({GlobalConfiguration? config, http.Client? client}) :
-        userId = (config ?? GlobalConfiguration()).get("ptvUserId"),
+  PtvApiService({GlobalConfiguration? config, http.Client? client})
+      : userId = (config ?? GlobalConfiguration()).get("ptvUserId"),
         apiKey = (config ?? GlobalConfiguration()).get("ptvApiKey"),
         client = client ?? http.Client();
 
   // Generate URL for API Calls
   Uri getURL(String request, {Map<String, Object>? parameters}) {
     // Signature
-    parameters ??= {};    // initialises if parameters is null
-    if (parameters.isEmpty) { parameters = {}; }    // initialises if parameters is empty
+    parameters ??= {}; // initialises if parameters is null
+    if (parameters.isEmpty) {
+      parameters = {};
+    } // initialises if parameters is empty
     parameters['devid'] = userId;
 
     // Encode the api_key and message to bytes
     final List<int> keyBytes = utf8.encode(apiKey);
-    final String signatureValueParameters = Uri(queryParameters: parameters).query;
+    final String signatureValueParameters =
+        Uri(queryParameters: parameters).query;
     final String signatureValue = "$request?$signatureValueParameters";
     final List<int> messageBytes = utf8.encode(signatureValue);
 
@@ -53,7 +56,8 @@ class PtvApiService {
         final jsonResponse = json.decode(response.body);
         return jsonResponse;
       } else {
-        print("Response Error (ptv_api_service): ${response.statusCode}: ${response.reasonPhrase}");
+        print(
+            "Response Error (ptv_api_service): ${response.statusCode}: ${response.reasonPhrase}");
         return null;
       }
     } catch (e) {
@@ -95,12 +99,16 @@ class PtvApiService {
   }
 
   // Get Stops around a Location
-  Future<Map<String, dynamic>?> stopsLocation(String location, {String? routeTypes, String? maxResults, String? maxDistance}) async {
+  Future<Map<String, dynamic>?> stopsLocation(String location,
+      {String? routeTypes, String? maxResults, String? maxDistance}) async {
     String request = "/v3/stops/location/$location";
 
     // Parameter handling
     Map<String, Object> parameters = {};
-    parameters = handleParameters(routeTypes: routeTypes, maxResults: maxResults, maxDistance: maxDistance);
+    parameters = handleParameters(
+        routeTypes: routeTypes,
+        maxResults: maxResults,
+        maxDistance: maxDistance);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
@@ -109,7 +117,8 @@ class PtvApiService {
   }
 
   /// Get Stops along a Route
-  Future<Map<String, dynamic>?> stopsRoute(String routeId, String routeType, {String? directionId, bool? geoPath}) async {
+  Future<Map<String, dynamic>?> stopsRoute(String routeId, String routeType,
+      {String? directionId, bool? geoPath}) async {
     String request = "/v3/stops/route/$routeId/route_type/$routeType";
 
     // Parameter handling
@@ -123,18 +132,27 @@ class PtvApiService {
   }
 
   // Get Departures from a Stop
-  Future<Map<String, dynamic>?> departures(String routeType, String stopId, {String? routeId, String? directionId, String? maxResults, bool? gtfs, String? expand}) async {
+  Future<Map<String, dynamic>?> departures(String routeType, String stopId,
+      {String? routeId,
+      String? directionId,
+      String? maxResults,
+      bool? gtfs,
+      String? expand}) async {
     String request;
     if (routeId == null || routeId.isEmpty) {
       request = "/v3/departures/route_type/$routeType/stop/$stopId";
-    }
-    else {
-      request = "/v3/departures/route_type/$routeType/stop/$stopId/route/$routeId";
+    } else {
+      request =
+          "/v3/departures/route_type/$routeType/stop/$stopId/route/$routeId";
     }
 
     // Parameter Handling
     Map<String, Object> parameters = {};
-    parameters = handleParameters(directionId: directionId, maxResults: maxResults, gtfs: gtfs, expand: expand);
+    parameters = handleParameters(
+        directionId: directionId,
+        maxResults: maxResults,
+        gtfs: gtfs,
+        expand: expand);
 
     Uri url = getURL(request, parameters: parameters);
     Map<String, dynamic>? response = await getResponse(url);
@@ -143,7 +161,8 @@ class PtvApiService {
   }
 
   // Runs
-  Future<Map<String, dynamic>?> runs(String runRef, String routeType, {String? expand}) async {
+  Future<Map<String, dynamic>?> runs(String runRef, String routeType,
+      {String? expand}) async {
     String request = "/v3/runs/$runRef/route_type/$routeType";
 
     // Parameter Handling
@@ -157,7 +176,8 @@ class PtvApiService {
   }
 
   // Patterns
-  Future<Map<String, dynamic>?> patterns(String runRef, String routeType, {String? expand}) async {
+  Future<Map<String, dynamic>?> patterns(String runRef, String routeType,
+      {String? expand}) async {
     String request = "/v3/pattern/run/$runRef/route_type/$routeType";
 
     // Parameter Handling
@@ -180,9 +200,14 @@ class PtvApiService {
 
   /// Handles parameters
   // todo: test if this messes with getURLs signature
-  Map<String, Object> handleParameters({String? routeTypes, String? maxResults,
-      String? maxDistance, String? directionId, bool? geoPath, bool? gtfs, String? expand}) {
-
+  Map<String, Object> handleParameters(
+      {String? routeTypes,
+      String? maxResults,
+      String? maxDistance,
+      String? directionId,
+      bool? geoPath,
+      bool? gtfs,
+      String? expand}) {
     Map<String, Object> parameters = {};
 
     // Assumes routeTypes is of the form: "1,2,3,.."
@@ -203,7 +228,7 @@ class PtvApiService {
       parameters['direction_id'] = directionId;
     }
 
-    if (geoPath!= null && geoPath == true) {
+    if (geoPath != null && geoPath == true) {
       parameters['include_geopath'] = "true";
     }
 

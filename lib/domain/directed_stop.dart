@@ -7,12 +7,14 @@ class DirectedStop {
   Stop stop;
   String direction;
 
-  DirectedStop({required this.trips, required this.stop, required this.direction});
+  DirectedStop(
+      {required this.trips, required this.stop, required this.direction});
 
   @override
   String toString() {
     String str = "";
-    str += "Directed Stop: Routes [${trips.map((t) => t.route?.id).toList()}] at Stop ${stop.id} towards $direction";
+    str +=
+        "Directed Stop: Routes [${trips.map((t) => t.route?.id).toList()}] at Stop ${stop.id} towards $direction";
     // str += "Trips towards ${trips.map((t) => t.direction?.name).toList()}";
     return str;
   }

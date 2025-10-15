@@ -17,7 +17,8 @@ enum ToggleableFilter {
 
 class NearbyStopsController extends GetxController {
   final ItemScrollController itemScrollController = ItemScrollController();
-  final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
 
   final RxString selectedDistance = "300".obs;
   final RxString selectedUnit = "m".obs;
@@ -68,7 +69,8 @@ class NearbyStopsController extends GetxController {
 
   /// Sets new stops list & initializes expansion states
   Future<void> setStops(String routeType, int distance) async {
-    List<Stop> uniqueStops = await searchUtils.getUniqueStops(Get.find<MapController>().markerPos!, routeType, distance);
+    List<Stop> uniqueStops = await searchUtils.getUniqueStops(
+        Get.find<MapController>().markerPos!, routeType, distance);
 
     stops.value = uniqueStops.obs;
 
@@ -99,8 +101,7 @@ class NearbyStopsController extends GetxController {
             index: stopIndex,
             duration: Duration(milliseconds: 100),
             curve: Curves.easeInOut,
-            alignment: 0
-        );
+            alignment: 0);
       }
     });
   }
@@ -110,8 +111,7 @@ class NearbyStopsController extends GetxController {
     selectedDistance.value = distance;
     selectedUnit.value = unit;
     await setStops(selectedRouteType.value,
-        unit == "m" ? int.parse(distance) : int.parse(distance * 1000)
-    );
+        unit == "m" ? int.parse(distance) : int.parse(distance * 1000));
     if (Get.find<MapController>().isNearbyStopsButtonToggled.value) {
       Get.find<MapController>().initialiseNearbyStopMarkers();
       Get.find<MapController>().showNearbyStopMarkers();
