@@ -91,13 +91,6 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
                 },
               ),
             ),
-            ElevatedButton(
-                onPressed: () => {
-                      setDirection(null),
-                      Navigator.pushNamed(context, '/confirmationScreen',
-                          arguments: widget.arguments),
-                    },
-                child: Text("Skip"))
           ],
         ),
       ),
