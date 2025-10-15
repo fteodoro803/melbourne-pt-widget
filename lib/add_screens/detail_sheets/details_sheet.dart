@@ -18,7 +18,6 @@ class SheetNavigatorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return DraggableScrollableSheet(
       controller: controller.scrollableController,
       initialChildSize: controller.initialSheetSize,
@@ -41,38 +40,41 @@ class SheetNavigatorWidget extends StatelessWidget {
             ],
           ),
           child: Obx(() => controller.isSheetExpanded.value
-            ? Column(
-              children: [
-                const SizedBox(height: 50),
-                Row(
+              ? Column(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new),
-                      onPressed: navigationService.handleBackNavigation,
+                    const SizedBox(height: 50),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new),
+                          onPressed: navigationService.handleBackNavigation,
+                        ),
+                        Expanded(
+                          child: Text(
+                            controller.currentSheet.value.name!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.location_pin),
+                          onPressed: () =>
+                              controller.scrollableController.jumpTo(0.6),
+                        ),
+                      ],
                     ),
+                    const Divider(),
                     Expanded(
-                      child: Text(
-                        controller.currentSheet.value.name!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.location_pin),
-                      onPressed: () => controller.scrollableController.jumpTo(0.6),
-                    ),
+                        child: sheets[controller.currentSheet.value.name]!(
+                            context, scrollController)),
                   ],
-                ),
-                const Divider(),
-                Expanded(child: sheets[controller.currentSheet.value.name]!(context, scrollController)),
-              ],
-            )
-            : Column(
-              children: [
-                HandleWidget(),
-                Expanded(child: sheets[controller.currentSheet.value.name]!(context, scrollController))
-              ]
-          )),
+                )
+              : Column(children: [
+                  HandleWidget(),
+                  Expanded(
+                      child: sheets[controller.currentSheet.value.name]!(
+                          context, scrollController))
+                ])),
         );
       },
     );

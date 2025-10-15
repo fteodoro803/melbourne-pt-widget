@@ -3,7 +3,8 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension RouteDirectionHelpers on AppDatabase {
-  LinkRouteDirectionsTableCompanion createRouteDirectionsTypeCompanion({required int routeId, required int directionId}) {
+  LinkRouteDirectionsTableCompanion createRouteDirectionsTypeCompanion(
+      {required int routeId, required int directionId}) {
     return LinkRouteDirectionsTableCompanion(
       routeId: drift.Value(routeId),
       directionId: drift.Value(directionId),
@@ -11,8 +12,11 @@ extension RouteDirectionHelpers on AppDatabase {
     );
   }
 
-  Future<void> addRouteDirection({required int routeId, required int directionId}) async {
-    LinkRouteDirectionsTableCompanion routeDirection = createRouteDirectionsTypeCompanion(routeId: routeId, directionId: directionId);
+  Future<void> addRouteDirection(
+      {required int routeId, required int directionId}) async {
+    LinkRouteDirectionsTableCompanion routeDirection =
+        createRouteDirectionsTypeCompanion(
+            routeId: routeId, directionId: directionId);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertRouteDirectionLink(routeDirection);
   }
@@ -21,11 +25,11 @@ extension RouteDirectionHelpers on AppDatabase {
     // 1. Join directions and routeDirections table
     final query = select(directionsTable).join([
       drift.innerJoin(
-          linkRouteDirectionsTable,
-          linkRouteDirectionsTable.directionId.equalsExp(directionsTable.id),
+        linkRouteDirectionsTable,
+        linkRouteDirectionsTable.directionId.equalsExp(directionsTable.id),
       )
     ])
-    ..where(linkRouteDirectionsTable.routeId.equals(routeId));
+      ..where(linkRouteDirectionsTable.routeId.equals(routeId));
 
     // 2. Convert the joined results to list of Direction objects
     final rows = await query.get();

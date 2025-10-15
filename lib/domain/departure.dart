@@ -19,7 +19,7 @@ class Departure {
   String? estimatedDepartureTime;
 
   // Vehicle Descriptions
-  String? runRef;     // id
+  String? runRef; // id
   bool? hasLowFloor;
   bool? hasAirConditioning;
   String? platformNumber;
@@ -100,24 +100,30 @@ class Departure {
   }
 
   /// Factory constructor to create a Departure from the PTV API response
-  factory Departure.fromAPI(Map<String, dynamic> departureData, Map<String, dynamic>? runData) {
-    DateTime? scheduledDepartureUTC = departureData["scheduled_departure_utc"] !=
-        null ? DateTime.parse(departureData["scheduled_departure_utc"]) : null;
-    DateTime? estimatedDepartureUTC = departureData["estimated_departure_utc"] !=
-        null ? DateTime.parse(departureData["estimated_departure_utc"]) : null;
+  factory Departure.fromAPI(
+      Map<String, dynamic> departureData, Map<String, dynamic>? runData) {
+    DateTime? scheduledDepartureUTC =
+        departureData["scheduled_departure_utc"] != null
+            ? DateTime.parse(departureData["scheduled_departure_utc"])
+            : null;
+    DateTime? estimatedDepartureUTC =
+        departureData["estimated_departure_utc"] != null
+            ? DateTime.parse(departureData["estimated_departure_utc"])
+            : null;
     String? runRef = departureData["run_ref"]?.toString();
     int? stopId = departureData["stop_id"];
     String? platformNumber = departureData["platform_number"];
 
     // Get Vehicle descriptors per Departure
-    var vehicleDescriptors = runData?[runRef]?["vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
+    var vehicleDescriptors = runData?[runRef]?[
+        "vehicle_descriptor"]; // makes vehicleDescriptors null if data for "runs" and/or "runRef" doesn't exist
     bool? hasLowFloor;
     bool? hasAirConditioning;
-    if (vehicleDescriptors != null && vehicleDescriptors.toString().isNotEmpty) {
+    if (vehicleDescriptors != null &&
+        vehicleDescriptors.toString().isNotEmpty) {
       hasLowFloor = vehicleDescriptors["low_floor"];
       hasAirConditioning = vehicleDescriptors["air_conditioned"];
-    }
-    else {
+    } else {
       print(
           "( departure.dart -> Departure.fromAPI ) -- runs for runRef $runRef is empty )");
     }

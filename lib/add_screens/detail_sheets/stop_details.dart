@@ -152,7 +152,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
   /// Gets list of disruptions for route
   Future<void> _getDisruptions() async {
-    List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_route);
+    List<Disruption> disruptionsList =
+        await ptvService.fetchDisruptions(_route);
 
     if (mounted) {
       setState(() {
@@ -242,7 +243,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                 GestureDetector(
                                   onTap: () async {
                                     await showModalBottomSheet(
-                                      constraints: BoxConstraints(maxHeight: 500),
+                                      constraints:
+                                          BoxConstraints(maxHeight: 500),
                                       context: context,
                                       builder: (BuildContext context) {
                                         return TripInfoSheet(
@@ -253,8 +255,8 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
                                       },
                                     );
                                   },
-                                  child: Icon(Icons.error, size: 20,
-                                      color: Color(0xFFFF7308)),
+                                  child: Icon(Icons.error,
+                                      size: 20, color: Color(0xFFFF7308)),
                                 ),
                                 const SizedBox(width: 2),
                               ],
@@ -275,41 +277,44 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
 
                         // Right section: "See all >"
                         GestureDetector(
-                          onTap: () => navigationService
-                              .navigateToTrip(trip, _disruptions),
+                          onTap: () => navigationService.navigateToTrip(
+                              trip, _disruptions),
                           child: Row(
                             children: [
                               SizedBox(width: 8),
                               Text("See all",
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme
-                                    .secondaryFixedDim.withValues(alpha: 0.8),
-                                  fontSize: 16)),
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondaryFixedDim
+                                          .withValues(alpha: 0.8),
+                                      fontSize: 16)),
                               Icon(
                                 Icons.keyboard_arrow_right,
-                                color: Theme.of(context).colorScheme
-                                  .secondaryFixedDim.withValues(alpha: 0.8),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryFixedDim
+                                    .withValues(alpha: 0.8),
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height:4),
+                    SizedBox(height: 4),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       padding: EdgeInsets.all(0.0),
-                      itemCount: departures!.length > 2
-                          ? 2 : departures.length,
+                      itemCount: departures!.length > 2 ? 2 : departures.length,
                       itemBuilder: (context, index) {
                         final departure = departures[index];
                         return DepartureCard(
                             trip: trip,
                             departure: departure,
                             onDepartureTapped: (departure) {
-                              navigationService
-                                  .navigateToDeparture(trip, departure);
+                              navigationService.navigateToDeparture(
+                                  trip, departure);
                             });
                       },
                     ),

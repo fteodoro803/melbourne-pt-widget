@@ -34,7 +34,7 @@ class BottomNavigation extends StatelessWidget {
 
         switch (index) {
           case 0: // Home
-          // If returning to home from another screen, maybe we need to update
+            // If returning to home from another screen, maybe we need to update
             if (Get.currentRoute != '/') {
               if (updateMainPage != null) {
                 // Only refresh data when returning to home
@@ -44,11 +44,12 @@ class BottomNavigation extends StatelessWidget {
             }
             break;
 
-        // In bottom_navigation_bar.dart, modify the onTap handler for the Search tab:
+          // In bottom_navigation_bar.dart, modify the onTap handler for the Search tab:
           case 1: // Search
             // print("Bottom navigation: Search tab pressed - reinitializing search screen");
 
-            if (currentIndex != 1) {} // todo: save state of search screen when navigating to home
+            if (currentIndex !=
+                1) {} // todo: save state of search screen when navigating to home
 
             // Force delete all existing controllers to ensure fresh state
             if (Get.isRegistered<SheetController>()) {
@@ -65,20 +66,16 @@ class BottomNavigation extends StatelessWidget {
             }
 
             // Briefly go to home page (invisible to user with no transition)
-            Get.offAll(
-                    () => const MyHomePage(title: "Demo Home Page"),
-                transition: Transition.noTransition,
-                duration: Duration.zero
-            );
+            Get.offAll(() => const MyHomePage(title: "Demo Home Page"),
+                transition: Transition.noTransition, duration: Duration.zero);
 
             // Then create new search screen instance
             Future.delayed(Duration(milliseconds: 50), () {
               // print("Creating new search screen instance");
               Get.to(
-                    () => SearchScreen(
+                () => SearchScreen(
                     // searchDetails: SearchDetails(),
-                    enableSearch: true
-                ),
+                    enableSearch: true),
                 preventDuplicates: false, // Allow duplicates
                 binding: SearchBinding(),
               );

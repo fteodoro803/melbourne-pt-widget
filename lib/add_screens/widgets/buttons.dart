@@ -10,8 +10,7 @@ class BackButtonWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color:
-        Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
@@ -31,12 +30,11 @@ class BackButtonWidget extends StatelessWidget {
 }
 
 class RouteTypeToggleButton extends StatelessWidget {
-  const RouteTypeToggleButton({
-    super.key,
-    required this.isSelected,
-    required this.routeType,
-    required this.handleRouteTypeToggle
-});
+  const RouteTypeToggleButton(
+      {super.key,
+      required this.isSelected,
+      required this.routeType,
+      required this.handleRouteTypeToggle});
 
   final bool isSelected;
   final String routeType;
@@ -50,25 +48,25 @@ class RouteTypeToggleButton extends StatelessWidget {
       onPressed: () => handleRouteTypeToggle(routeType),
       style: ElevatedButton.styleFrom(
         padding: isAll ? EdgeInsets.symmetric(horizontal: 14) : EdgeInsets.zero,
-        backgroundColor: isSelected ?
-        Theme.of(context).colorScheme.secondaryContainer :
-        Theme.of(context).colorScheme.secondary,
+        backgroundColor: isSelected
+            ? Theme.of(context).colorScheme.secondaryContainer
+            : Theme.of(context).colorScheme.secondary,
         minimumSize: Size(50, 50),
         shape: isAll ? null : CircleBorder(),
       ),
       child: routeType == "all"
-        ? Text(
-          "All Transport",
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black),
-        )
-      : ClipOval(
-        child: Image.asset(
-          "assets/icons/PTV $routeType Logo.png",
-          width: 30,
-          height: 30,
-          fit: BoxFit.cover,
-        ),
-      ),
+          ? Text(
+              "All Transport",
+              style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+            )
+          : ClipOval(
+              child: Image.asset(
+                "assets/icons/PTV $routeType Logo.png",
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+              ),
+            ),
     );
   }
 }
@@ -104,7 +102,6 @@ class FavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return SizedBox(
       width: 30,
       height: 30,

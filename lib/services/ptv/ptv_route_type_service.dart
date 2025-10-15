@@ -3,7 +3,6 @@ import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/services/ptv/ptv_base_service.dart';
 
 class PtvRouteTypeService extends PtvBaseService {
-
   /// Fetches all route types offered by PTV from the database.
   /// If no route type data is in database, it fetches from the PTV API and stores it to database.  // todo: get from database first, preferring database
   Future<List<String>> fetchRouteTypes() async {

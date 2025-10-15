@@ -6,7 +6,6 @@ import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/domain/route.dart' as pt_route;
 
 class TripUtils {
-
   static String? getLabel(pt_route.Route? route, String? routeType) {
     if (route == null || routeType == null) {
       return null;
@@ -15,11 +14,9 @@ class TripUtils {
     String routeLabel;
     if (routeType == "train") {
       routeLabel = route.name;
-    }
-    else if (routeType == "vLine") {
+    } else if (routeType == "vLine") {
       routeLabel = "V/Line";
-    }
-    else {
+    } else {
       routeLabel = route.number;
       String tempRouteLabel = routeLabel.toLowerCase();
       if (tempRouteLabel.contains("combined")) {
@@ -38,15 +35,15 @@ class TripUtils {
     String? routeName;
     if (routeType == "train") {
       routeName = null;
-    }
-    else {
+    } else {
       routeName = route.name;
     }
     return routeName;
   }
 
   static getStatusColor(Departure departure) {
-    DepartureStatus status = TimeUtils.getDepartureStatus(departure.scheduledDepartureUTC, departure.estimatedDepartureUTC);
+    DepartureStatus status = TimeUtils.getDepartureStatus(
+        departure.scheduledDepartureUTC, departure.estimatedDepartureUTC);
     return status.getColorString;
   }
 
@@ -55,8 +52,7 @@ class TripUtils {
         departure.estimatedDepartureUTC, departure.scheduledDepartureUTC);
     if (status.isWithinAnHour && status.hasDeparted == false) {
       return TimeUtils.minutesString(
-          departure.estimatedDepartureUTC,
-          departure.scheduledDepartureUTC!);
+          departure.estimatedDepartureUTC, departure.scheduledDepartureUTC!);
     }
   }
 }

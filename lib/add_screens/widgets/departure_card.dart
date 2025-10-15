@@ -22,7 +22,6 @@ class DepartureCard extends StatefulWidget {
 }
 
 class _DepartureCardState extends State<DepartureCard> {
-
   @override
   Widget build(BuildContext context) {
     final departure = widget.departure;
@@ -51,9 +50,7 @@ class _DepartureCardState extends State<DepartureCard> {
             if (departure.platformNumber != null)
               Text(
                 "Platform ${departure.platformNumber}",
-                style: TextStyle(
-                  fontWeight: FontWeight.w500
-                ),
+                style: TextStyle(fontWeight: FontWeight.w500),
               ),
             Row(
               children: [
@@ -73,13 +70,16 @@ class _DepartureCardState extends State<DepartureCard> {
                 ),
 
                 // Scheduled time string, e.g. "5:45 pm"
-                if (TimeUtils.showDepartureTime(scheduled))...[
+                if (TimeUtils.showDepartureTime(scheduled)) ...[
                   Text(
                     timeStringScheduled,
                     style: TextStyle(
                       color: ColourUtils.hexToColour(status.getColorString),
-                      decoration: status.timeDifference != null ? TextDecoration.lineThrough : null,
-                      decorationColor: ColourUtils.hexToColour(status.getColorString),
+                      decoration: status.timeDifference != null
+                          ? TextDecoration.lineThrough
+                          : null,
+                      decorationColor:
+                          ColourUtils.hexToColour(status.getColorString),
                     ),
                   ),
                   if (status.hasDeparted == false)
@@ -89,10 +89,9 @@ class _DepartureCardState extends State<DepartureCard> {
                         color: ColourUtils.hexToColour(status.getColorString),
                       ),
                     ),
-
                 ],
 
-                if (status.hasDeparted == false)...[
+                if (status.hasDeparted == false) ...[
                   if (hasLowFloor) ...[
                     Icon(Icons.accessible, size: 18),
                     SizedBox(width: 2)
@@ -101,8 +100,6 @@ class _DepartureCardState extends State<DepartureCard> {
                   Icon(Icons.people_outline_outlined, size: 20),
                   // Icon(Icons.people_sharp, size: 20)
                 ]
-
-
               ],
             ),
           ],
@@ -124,7 +121,6 @@ class _DepartureCardState extends State<DepartureCard> {
           }
         },
       ),
-
     );
   }
 }

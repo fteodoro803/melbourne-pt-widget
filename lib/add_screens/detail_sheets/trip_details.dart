@@ -118,9 +118,9 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
     setState(() {
       _filters[key] = !_filters[key]!;
       if (_filters[key] == true) {
-      _filteredDepartures = _allDepartures.where(
-        (departure) => departure.hasLowFloor
-        == _filters[key]).toList();
+        _filteredDepartures = _allDepartures
+            .where((departure) => departure.hasLowFloor == _filters[key])
+            .toList();
       } else {
         _filteredDepartures = _allDepartures;
       }
@@ -128,7 +128,8 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   }
 
   Future<void> _getDisruptions() async {
-    List<Disruption> disruptionsList = await ptvService.fetchDisruptions(_initialState.trip.route!);
+    List<Disruption> disruptionsList =
+        await ptvService.fetchDisruptions(_initialState.trip.route!);
     setState(() {
       sheetController.currentSheet.value.state.disruptions = disruptionsList;
       _disruptions = disruptionsList;
@@ -153,7 +154,6 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-
     if (!_areDisruptionsInitialized || !_isSavedInitialized) {
       return Center(child: CircularProgressIndicator());
     }
@@ -180,50 +180,53 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
             children: [
               Container(
                 color: Theme.of(context).colorScheme.surface,
-                padding: EdgeInsets.only(left: 18, right: 12, top: 0, bottom: 0),
+                padding:
+                    EdgeInsets.only(left: 18, right: 12, top: 0, bottom: 0),
                 alignment: Alignment.centerLeft,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
-                      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        "Upcoming Departures",
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      trailing: GestureDetector(
-                        child: SizedBox(
-                          width: 70,
-                          child: Row(
-                            children: [
-                              Text("Filters", style: TextStyle(fontSize: 14)),
-                              Icon(!_showFilters ? Icons.arrow_drop_down : Icons.arrow_drop_up)
-                            ],
+                        visualDensity:
+                            VisualDensity(horizontal: -4, vertical: -4),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          "Upcoming Departures",
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        onTap: () {
-                          setState(() {
-                            _showFilters = !_showFilters;
-                          });
-                        }
-                      )
-                    ),
+                        trailing: GestureDetector(
+                            child: SizedBox(
+                              width: 70,
+                              child: Row(
+                                children: [
+                                  Text("Filters",
+                                      style: TextStyle(fontSize: 14)),
+                                  Icon(!_showFilters
+                                      ? Icons.arrow_drop_down
+                                      : Icons.arrow_drop_up)
+                                ],
+                              ),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                _showFilters = !_showFilters;
+                              });
+                            })),
                     if (_showFilters) ...[
                       Wrap(
                         spacing: 5.0,
-                        children: _filters.entries.map((MapEntry<String,bool> filter) {
+                        children: _filters.entries
+                            .map((MapEntry<String, bool> filter) {
                           return FilterChip(
                               label: Text(filter.key),
                               selected: filter.value,
                               onSelected: (bool selected) {
                                 _setFilters(filter.key);
-                              }
-                          );
+                              });
                         }).toList(),
                       ),
                       SizedBox(height: 4)
@@ -234,17 +237,17 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
             ],
           ),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
+              delegate: SliverChildBuilderDelegate(
+            (context, index) {
               final departure = _filteredDepartures[index];
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 child: DepartureCard(
-                  trip: _trip,
-                  departure: departure,
-                  onDepartureTapped: (departure) {
-                    navigationService
-                        .navigateToDeparture(_trip, departure);
-                }),
+                    trip: _trip,
+                    departure: departure,
+                    onDepartureTapped: (departure) {
+                      navigationService.navigateToDeparture(_trip, departure);
+                    }),
               );
             },
             childCount: _filteredDepartures.length,

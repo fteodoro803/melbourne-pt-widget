@@ -7,7 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 const Duration DEBOUNCE_DURATION = Duration(milliseconds: 500);
 
 class SuggestionsSearch extends StatefulWidget {
-  final Function(LatLng) onLocationSelected;      // Callback function when Location is Selected
+  final Function(LatLng)
+      onLocationSelected; // Callback function when Location is Selected
 
   const SuggestionsSearch({super.key, required this.onLocationSelected});
 
@@ -17,7 +18,7 @@ class SuggestionsSearch extends StatefulWidget {
 
 class _SuggestionsSearchState extends State<SuggestionsSearch> {
   GoogleService googleService = GoogleService();
-  String? _currentQuery;    // Query currently being searched for
+  String? _currentQuery; // Query currently being searched for
 
   // The most recent options retrieved from Google Autocomplete API
   late Iterable<String> _lastOptions = <String>[];
@@ -28,11 +29,16 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
     _currentQuery = query;
 
     // Early exit of current query is null or empty
-    if (_currentQuery == null || _currentQuery!.isEmpty) { return null; }
-    final Iterable<String> options = await googleService.fetchSuggestions(_currentQuery!);
+    if (_currentQuery == null || _currentQuery!.isEmpty) {
+      return null;
+    }
+    final Iterable<String> options =
+        await googleService.fetchSuggestions(_currentQuery!);
 
     // If another search happened after this one, reset
-    if (_currentQuery != query) { return null; }
+    if (_currentQuery != query) {
+      return null;
+    }
     _currentQuery = null;
     return options;
   }
@@ -58,21 +64,22 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
-        optionsBuilder: (TextEditingValue textEditingValue) async {
-
-          final Iterable<String>? options = await _debouncedSearch(textEditingValue.text);
-          if (options == null) {
-            return _lastOptions;
-          }
-          _lastOptions = options;
-          return options;
-        },
+      optionsBuilder: (TextEditingValue textEditingValue) async {
+        final Iterable<String>? options =
+            await _debouncedSearch(textEditingValue.text);
+        if (options == null) {
+          return _lastOptions;
+        }
+        _lastOptions = options;
+        return options;
+      },
       onSelected: (String selection) async {
-          // debugPrint("(suggestion_search.dart) -- Selected $selection");
-          LatLng? selectedLocation = await getAddressLocation(selection);        // make this return to search screen
-          if (selectedLocation != null) {
-            widget.onLocationSelected(selectedLocation);
-          }
+        // debugPrint("(suggestion_search.dart) -- Selected $selection");
+        LatLng? selectedLocation = await getAddressLocation(
+            selection); // make this return to search screen
+        if (selectedLocation != null) {
+          widget.onLocationSelected(selectedLocation);
+        }
       },
 
       // Appearance of the Searchbar
@@ -81,15 +88,15 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
           controller: controller,
           focusNode: focusNode,
           decoration: InputDecoration(
-            hintText: "Search...",
-            filled: true,
-            fillColor: Colors.grey[99], // Change background color
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.black87), // Change border color
-            ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.0)
-          ),
+              hintText: "Search...",
+              filled: true,
+              fillColor: Colors.grey[99], // Change background color
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide:
+                    BorderSide(color: Colors.black87), // Change border color
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.0)),
           style: TextStyle(color: Colors.white), // Change text color
           // onSubmitted: ,
         );
@@ -123,11 +130,11 @@ class _SuggestionsSearchState extends State<SuggestionsSearch> {
   }
 }
 
-typedef _Debouncable<S,T> = Future<S?> Function(T parameter);
+typedef _Debouncable<S, T> = Future<S?> Function(T parameter);
 
 // Returns a new function that is a debounced version of the g iven function
 // Original function will only be called after no calls have been made for a given Duration
-_Debouncable<S,T> _debounce<S,T>(_Debouncable<S?,T> function) {
+_Debouncable<S, T> _debounce<S, T>(_Debouncable<S?, T> function) {
   _DebounceTimer? debounceTimer;
 
   return (T parameter) async {

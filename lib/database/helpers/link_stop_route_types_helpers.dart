@@ -3,8 +3,8 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension StopRouteTypeHelpers on AppDatabase {
-  LinkStopRouteTypesTableCompanion createStopRouteTypeCompanion({required int stopId, required int routeTypeId})
-  {
+  LinkStopRouteTypesTableCompanion createStopRouteTypeCompanion(
+      {required int stopId, required int routeTypeId}) {
     return LinkStopRouteTypesTableCompanion(
       stopId: drift.Value(stopId),
       routeTypeId: drift.Value(routeTypeId),
@@ -13,7 +13,8 @@ extension StopRouteTypeHelpers on AppDatabase {
   }
 
   Future<void> addStopRouteType(int stopId, int routeTypeId) async {
-    LinkStopRouteTypesTableCompanion stopRouteType = createStopRouteTypeCompanion(stopId: stopId, routeTypeId: routeTypeId);
+    LinkStopRouteTypesTableCompanion stopRouteType =
+        createStopRouteTypeCompanion(stopId: stopId, routeTypeId: routeTypeId);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertStopRouteTypeLink(stopRouteType);
   }

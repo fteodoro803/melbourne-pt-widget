@@ -29,12 +29,14 @@ class TripPath {
   bool showPreviousMarkers = false;
   MapUtils mapUtils = MapUtils();
 
-  TripPath(this.geoPath, this.stopsAlongRoute, this.selectedStop, this.routeColour, this.markerPosition);
+  TripPath(this.geoPath, this.stopsAlongRoute, this.selectedStop,
+      this.routeColour, this.markerPosition);
 
   Future<void> initializeFullPath() async {
     // Early exit if GeoPath is empty
-    if (geoPath.isEmpty || stopsAlongRoute == null
-        || stopsAlongRoute!.isEmpty) {
+    if (geoPath.isEmpty ||
+        stopsAlongRoute == null ||
+        stopsAlongRoute!.isEmpty) {
       return;
     }
 
@@ -49,22 +51,21 @@ class TripPath {
   }
 
   Future<void> initializeRouteMarkers(List<Stop> stopsAlongRoute) async {
-
-    BitmapDescriptor? customMarkerIcon = await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 9, 9);
+    BitmapDescriptor? customMarkerIcon =
+        await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 9, 9);
 
     for (var stop in stopsAlongRoute) {
       var pos = LatLng(stop.latitude!, stop.longitude!);
 
       Marker currentMarker = Marker(
-        markerId: MarkerId('${stop.id}'),
-        position: pos,
-        icon: customMarkerIcon,
-        anchor: const Offset(0.5, 0.5),
-        consumeTapEvents: true,
-        onTap: () {
-          print('Marker Tapped');
-        }
-      );
+          markerId: MarkerId('${stop.id}'),
+          position: pos,
+          icon: customMarkerIcon,
+          anchor: const Offset(0.5, 0.5),
+          consumeTapEvents: true,
+          onTap: () {
+            print('Marker Tapped');
+          });
 
       if (stop == stopsAlongRoute.first) {
         firstStopMarker = currentMarker;
@@ -96,7 +97,8 @@ class TripPath {
       } else if (selectedStop!.id == stopsAlongRoute!.last.id) {
         markers.add(firstStopMarker);
       } else {
-        markers.removeWhere((m) => m.markerId == MarkerId(selectedStop!.id.toString()));
+        markers.removeWhere(
+            (m) => m.markerId == MarkerId(selectedStop!.id.toString()));
         markers.add(firstStopMarker);
         markers.add(lastStopMarker);
       }
@@ -124,7 +126,8 @@ class TripPath {
     showStop = true;
     selectedStop = stop;
 
-    BitmapDescriptor? customStopMarkerIcon = await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 20, 20);
+    BitmapDescriptor? customStopMarkerIcon = await mapUtils.getResizedImage(
+        "assets/icons/Marker Filled.png", 20, 20);
     LatLng pos = LatLng(stop.latitude!, stop.longitude!);
 
     selectedStopMarker = Marker(
@@ -144,9 +147,11 @@ class TripPath {
 
   Future<void> setDirection(bool reverseDirection) async {
     showDirection = true;
-    LatLng stopPosition = LatLng(selectedStop!.latitude!, selectedStop!.longitude!);
+    LatLng stopPosition =
+        LatLng(selectedStop!.latitude!, selectedStop!.longitude!);
 
-    GeoPathAndStops geoPathAndStop = await addStopToGeoPath(geoPath, stopPosition);
+    GeoPathAndStops geoPathAndStop =
+        await addStopToGeoPath(geoPath, stopPosition);
 
     List<LatLng> newGeoPath = geoPathAndStop.geoPathWithStop;
     LatLng stopPositionOnGeoPath = geoPathAndStop.stopPositionAlongGeoPath!;
@@ -164,10 +169,11 @@ class TripPath {
   }
 
   void splitPolyLine(List<LatLng> geoPath, LatLng stopPositionAlongGeoPath) {
+    bool isReverseDirection =
+        GeoPathUtils.reverseDirection(geoPath, stopsAlongRoute!);
 
-    bool isReverseDirection = GeoPathUtils.reverseDirection(geoPath, stopsAlongRoute!);
-
-    List<LatLng> newGeoPath = isReverseDirection ? geoPath.reversed.toList() : geoPath;
+    List<LatLng> newGeoPath =
+        isReverseDirection ? geoPath.reversed.toList() : geoPath;
     List<LatLng> previousRoute = [];
     List<LatLng> futureRoute = List.from(newGeoPath);
     int? closestIndex;
@@ -194,11 +200,12 @@ class TripPath {
     );
   }
 
-  /// Sets markers 
+  /// Sets markers
   Future<void> splitMarkers(List<Stop> stops, LatLng stopPosition) async {
-
-    BitmapDescriptor customMarkerIconFuture = await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 9, 9);
-    BitmapDescriptor customMarkerIconPrevious = await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 7, 7);
+    BitmapDescriptor customMarkerIconFuture =
+        await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 9, 9);
+    BitmapDescriptor customMarkerIconPrevious =
+        await mapUtils.getResizedImage("assets/icons/Marker Filled.png", 7, 7);
     BitmapDescriptor customMarkerIcon = customMarkerIconPrevious;
 
     bool isFutureMarker = false;
@@ -231,8 +238,10 @@ class TripPath {
   }
 
   /// Adds current stop to geoPath in order to split polyline by direction
-  Future<GeoPathAndStops> addStopToGeoPath(List<LatLng> geoPath, LatLng chosenStopPosition) async {
-    LatLng? stopPositionAlongGeoPath = GeoPathUtils.generatePointOnGeoPath(chosenStopPosition, geoPath);
+  Future<GeoPathAndStops> addStopToGeoPath(
+      List<LatLng> geoPath, LatLng chosenStopPosition) async {
+    LatLng? stopPositionAlongGeoPath =
+        GeoPathUtils.generatePointOnGeoPath(chosenStopPosition, geoPath);
     List<LatLng> newGeoPath = [...geoPath];
 
     int insertionIndex = 0;
@@ -261,12 +270,10 @@ class TripPath {
     if (zoom < zoomThresholdLarge) {
       showFutureMarkers = false;
       showPreviousMarkers = false;
-
     } else if (zoom < zoomThresholdSmall && zoom >= zoomThresholdLarge) {
       showFutureMarkers = true;
       showPreviousMarkers = false;
-    }
-    else {
+    } else {
       showFutureMarkers = true;
       showPreviousMarkers = true;
     }

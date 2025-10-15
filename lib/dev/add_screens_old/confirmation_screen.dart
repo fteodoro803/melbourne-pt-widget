@@ -82,15 +82,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
-    }
-
-    else {
+    } else {
       return Scaffold(
         appBar: AppBar(
           title: Text("Confirmation"),
           centerTitle: true,
         ),
-
         body: ListView.builder(
           itemCount: transportList.length,
           itemBuilder: (context, index) {

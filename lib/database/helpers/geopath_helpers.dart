@@ -3,8 +3,11 @@ import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
 
 extension GeoPathHelpers on AppDatabase {
-  GeoPathsTableCompanion createGeoPathCompanion({required String id, required double latitude, required double longitude, required int sequence})
-  {
+  GeoPathsTableCompanion createGeoPathCompanion(
+      {required String id,
+      required double latitude,
+      required double longitude,
+      required int sequence}) {
     return GeoPathsTableCompanion(
       id: drift.Value(id),
       sequence: drift.Value(sequence),
@@ -13,19 +16,22 @@ extension GeoPathHelpers on AppDatabase {
     );
   }
 
-  Future<void> addGeoPaths({required List<GeoPathsTableCompanion> geoPath}) async {
+  Future<void> addGeoPaths(
+      {required List<GeoPathsTableCompanion> geoPath}) async {
     await batchInsert(geoPathsTable, geoPath);
   }
 
   /// Gets general GeoPath of a Route
-  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId, {String? direction}) async {
+  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId,
+      {String? direction}) async {
     // 1. Find Trips with a matching Route ID
     var tripsQuery;
     if (direction != null && direction.isNotEmpty) {
       tripsQuery = select(gtfsTripsTable)
-        ..where((tbl) => tbl.routeId.equals(gtfsRouteId) & tbl.tripHeadsign.equals(direction));
-    }
-    else {
+        ..where((tbl) =>
+            tbl.routeId.equals(gtfsRouteId) &
+            tbl.tripHeadsign.equals(direction));
+    } else {
       tripsQuery = select(gtfsTripsTable)
         ..where((tbl) => tbl.routeId.equals(gtfsRouteId));
     }

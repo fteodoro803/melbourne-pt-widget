@@ -2,7 +2,8 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
 extension GtfsAssetsHelpers on AppDatabase {
-  GtfsAssetsTableCompanion createGtfsAssetCompanion({required String id, required DateTime dateModified}) {
+  GtfsAssetsTableCompanion createGtfsAssetCompanion(
+      {required String id, required DateTime dateModified}) {
     return GtfsAssetsTableCompanion(
       id: drift.Value(id),
       dateModified: drift.Value(dateModified),
@@ -10,8 +11,10 @@ extension GtfsAssetsHelpers on AppDatabase {
     );
   }
 
-  Future<void> addGtfsAsset({required String id, required DateTime dateModified}) async {
-    GtfsAssetsTableCompanion asset = createGtfsAssetCompanion(id: id, dateModified: dateModified);
+  Future<void> addGtfsAsset(
+      {required String id, required DateTime dateModified}) async {
+    GtfsAssetsTableCompanion asset =
+        createGtfsAssetCompanion(id: id, dateModified: dateModified);
     await insertGtfsAsset(asset);
   }
 

@@ -34,10 +34,7 @@ class SuburbStops {
   final String suburb;
   List<Stop> stops;
 
-  SuburbStops({
-    required this.suburb,
-    required this.stops
-  });
+  SuburbStops({required this.suburb, required this.stops});
 }
 
 class SearchUtils {
@@ -65,7 +62,7 @@ class SearchUtils {
       String name = direction["direction_name"];
       String description = direction["route_direction_description"];
       Direction newDirection =
-      Direction(id: id, name: name, description: description);
+          Direction(id: id, name: name, description: description);
 
       directions.add(newDirection);
     }
@@ -75,7 +72,8 @@ class SearchUtils {
       // newTransport.routeType = RouteType.fromId(route.type.id);     // no need for this, routeType is already set when a route is made
       await newTransport.updateDepartures(departureCount: 2);
       await Future.delayed(Duration(milliseconds: 100));
-      if (newTransport.departures != null && newTransport.departures!.isNotEmpty) {
+      if (newTransport.departures != null &&
+          newTransport.departures!.isNotEmpty) {
         transportList.add(newTransport);
       }
     }
@@ -85,7 +83,8 @@ class SearchUtils {
 
   /// Finds all stops and routes of a given transport type at a given distance from a position
   /// Separates stops by route type and prevents duplicates
-  Future<List<Stop>> getUniqueStops(LatLng position, String transportType, int distance) async {
+  Future<List<Stop>> getUniqueStops(
+      LatLng position, String transportType, int distance) async {
     StopRouteLists stopRouteLists;
 
     if (transportType == "all") {
@@ -104,7 +103,7 @@ class SearchUtils {
     }
 
     List<Stop> uniqueStops = [];
-    Set<UniqueStop> uniqueStopsSet= {};
+    Set<UniqueStop> uniqueStopsSet = {};
 
     List<Stop> stopList = stopRouteLists.stops;
     List<pt_route.Route> routeList = stopRouteLists.routes;
@@ -112,34 +111,37 @@ class SearchUtils {
     int stopIndex = 0;
 
     for (var stop in stopList) {
-    RouteType routeType = routeList[stopIndex].type;
+      RouteType routeType = routeList[stopIndex].type;
 
-    if (!uniqueStopsSet.contains(UniqueStop(stop.id.toString(), routeType))) {
-    // Create a new stop object to avoid reference issues
-      Stop newStop = Stop(
-        id: stop.id,
-        name: stop.name,
-        latitude: stop.latitude,
-        longitude: stop.longitude,
-        distance: stop.distance,
-      );
+      if (!uniqueStopsSet.contains(UniqueStop(stop.id.toString(), routeType))) {
+        // Create a new stop object to avoid reference issues
+        Stop newStop = Stop(
+          id: stop.id,
+          name: stop.name,
+          latitude: stop.latitude,
+          longitude: stop.longitude,
+          distance: stop.distance,
+        );
 
-      newStop.routes = <pt_route.Route>[];
-      newStop.routeType = routeList[stopIndex].type;
+        newStop.routes = <pt_route.Route>[];
+        newStop.routeType = routeList[stopIndex].type;
 
-      uniqueStops.add(newStop);
+        uniqueStops.add(newStop);
 
-      uniqueStopsSet.add(UniqueStop(stop.id.toString(), routeType));
-    }
+        uniqueStopsSet.add(UniqueStop(stop.id.toString(), routeType));
+      }
 
-    // Find the index of this stop in our uniqueStops list
-    int uniqueStopIndex = uniqueStops.indexWhere((s) => s.id == stop.id && s.routeType == routeType);
+      // Find the index of this stop in our uniqueStops list
+      int uniqueStopIndex = uniqueStops
+          .indexWhere((s) => s.id == stop.id && s.routeType == routeType);
       if (uniqueStopIndex != -1 &&
-          !uniqueStops[uniqueStopIndex].routes!.any((route) => route.id == routeList[stopIndex].id)) {
+          !uniqueStops[uniqueStopIndex]
+              .routes!
+              .any((route) => route.id == routeList[stopIndex].id)) {
         uniqueStops[uniqueStopIndex].routes!.add(routeList[stopIndex]);
       }
 
-    stopIndex++;
+      stopIndex++;
     }
 
     return uniqueStops;
@@ -147,13 +149,14 @@ class SearchUtils {
 
   /// Finds the sequence of stops along a given route
   /// Removes stops that are no longer active
-  Future<List<Stop>> getStopsAlongRoute(List<Direction> directions, pt_route.Route route) async {
+  Future<List<Stop>> getStopsAlongRoute(
+      List<Direction> directions, pt_route.Route route) async {
     List<Stop> stops = [];
     if (directions.isNotEmpty) {
-      stops = await ptvService.stops.fetchStopsByRoute(route: route, direction: directions[0]);
+      stops = await ptvService.stops
+          .fetchStopsByRoute(route: route, direction: directions[0]);
       stops = stops.where((s) => s.stopSequence != 0).toList();
-    }
-    else {
+    } else {
       stops = await ptvService.stops.fetchStopsByRoute(route: route);
     }
 
@@ -161,8 +164,8 @@ class SearchUtils {
   }
 
   /// Takes a list of stops along a route and groups them based on suburb
-  Future<List<SuburbStops>> getSuburbStops(List<Stop> stopsAlongRoute, pt_route.Route route) async {
-
+  Future<List<SuburbStops>> getSuburbStops(
+      List<Stop> stopsAlongRoute, pt_route.Route route) async {
     List<SuburbStops> suburbStopsList = [];
     String? previousSuburb;
     List<Stop> stopsInSuburb = [];
@@ -183,15 +186,16 @@ class SearchUtils {
 
       if (previousSuburb == null || currentSuburb == previousSuburb) {
         stopsInSuburb.add(newStop);
-      }
-      else {
-        suburbStopsList.add(SuburbStops(suburb: previousSuburb, stops: List<Stop>.from(stopsInSuburb)));
+      } else {
+        suburbStopsList.add(SuburbStops(
+            suburb: previousSuburb, stops: List<Stop>.from(stopsInSuburb)));
         stopsInSuburb = [newStop];
       }
 
       previousSuburb = currentSuburb;
     }
-    suburbStopsList.add(SuburbStops(suburb: previousSuburb!, stops: stopsInSuburb));
+    suburbStopsList
+        .add(SuburbStops(suburb: previousSuburb!, stops: stopsInSuburb));
 
     return suburbStopsList;
   }
@@ -200,9 +204,10 @@ class SearchUtils {
   Future<void> handleSave(Trip transport) async {
     bool isSaved = await ptvService.trips.isTripSaved(transport);
     if (!isSaved) {
-      await ptvService.trips.saveTrip(transport);  // Add transport to saved list
+      await ptvService.trips.saveTrip(transport); // Add transport to saved list
     } else {
-      await ptvService.trips.deleteTrip(transport.uniqueID!);  // Remove transport from saved list
+      await ptvService.trips
+          .deleteTrip(transport.uniqueID!); // Remove transport from saved list
     }
   }
 
@@ -218,7 +223,8 @@ class SearchUtils {
 
   /// Finds the stops along a route and the directions for a route
   Future<pt_route.Route> initializeRoute(pt_route.Route route) async {
-    List<Direction> directions = await ptvService.directions.fetchDirections(route.id);
+    List<Direction> directions =
+        await ptvService.directions.fetchDirections(route.id);
     List<Stop> stopsAlongRoute = await getStopsAlongRoute(directions, route);
     pt_route.Route newRoute = route;
     newRoute.directions = directions;

@@ -18,7 +18,7 @@ class PtvRouteService extends PtvBaseService {
     if (dbRouteList.isNotEmpty) {
       // routeList = dbRouteList.map(Route.fromDb).toList();
 
-      for (int i=0; i<dbRouteList.length; i++) {
+      for (int i = 0; i < dbRouteList.length; i++) {
         Route? newRoute = await Route.fromDbAsync(dbRouteList[i]);
         if (newRoute != null) {
           routeList.add(newRoute);
@@ -44,7 +44,10 @@ class PtvRouteService extends PtvBaseService {
 
         // 3. Add to Database
         await database.addRoute(
-            id: newRoute.id, name: newRoute.name, number: newRoute.number, routeTypeId: newRoute.type.id,
+            id: newRoute.id,
+            name: newRoute.name,
+            number: newRoute.number,
+            routeTypeId: newRoute.type.id,
             status: newRoute.status);
       }
     }
@@ -53,12 +56,14 @@ class PtvRouteService extends PtvBaseService {
   }
 
   /// Fetches routes from database, by search name.
-  Future<List<Route>> searchRoutes({String? query, RouteType? routeType}) async {
-    final dbRouteList = await database.getRoutesByName(search: query, routeType: routeType?.id);
+  Future<List<Route>> searchRoutes(
+      {String? query, RouteType? routeType}) async {
+    final dbRouteList =
+        await database.getRoutesByName(search: query, routeType: routeType?.id);
     // List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
 
     List<Route> domainRouteList = [];
-    for (int i=0; i<dbRouteList.length; i++) {
+    for (int i = 0; i < dbRouteList.length; i++) {
       Route? newRoute = await Route.fromDbAsync(dbRouteList[i]);
       if (newRoute != null) domainRouteList.add(newRoute);
     }
@@ -67,7 +72,8 @@ class PtvRouteService extends PtvBaseService {
   }
 
   /// Fetches routes from database, by id.
-  Future<Route?> getRouteById({required int id, bool withDetails = false}) async {
+  Future<Route?> getRouteById(
+      {required int id, bool withDetails = false}) async {
     // 1. Get route from database
     final dbRoute = await database.getRouteById(id);
     Route? route = dbRoute != null ? await Route.fromDbAsync(dbRoute) : null;
@@ -83,13 +89,14 @@ class PtvRouteService extends PtvBaseService {
   // todo: consider change this to getRoutesFromStop, or something like that. Fetch is reserved for functions with API calls
   // todo: but also, in our functions, we use fetch, but most of them also check the database first. So maybe for consistency, keep it?
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
-    final List<db.RoutesTableData> dbRoutes = await database.getRoutesFromStop(stopId);
+    final List<db.RoutesTableData> dbRoutes =
+        await database.getRoutesFromStop(stopId);
 
     // Convert Route's database model to domain model
     // List<Route> routeList = dbRoutes.map(Route.fromDb).toList();
 
     List<Route> routeList = [];
-    for (int i=0; i<dbRoutes.length; i++) {
+    for (int i = 0; i < dbRoutes.length; i++) {
       Route? newRoute = await Route.fromDbAsync(dbRoutes[i]);
       if (newRoute != null) routeList.add(newRoute);
     }

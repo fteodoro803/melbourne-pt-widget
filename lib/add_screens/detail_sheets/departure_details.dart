@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -72,7 +71,8 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
         _departure.scheduledDepartureUTC,
         _departure.estimatedDepartureUTC,
       );
-      _minutesString = TimeUtils.minutesString(_departure.estimatedDepartureUTC, _departure.scheduledDepartureUTC!);
+      _minutesString = TimeUtils.minutesString(
+          _departure.estimatedDepartureUTC, _departure.scheduledDepartureUTC!);
     }
 
     _moveToStopIndex();
@@ -101,7 +101,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
             _departure.scheduledDepartureUTC,
             _departure.estimatedDepartureUTC,
           );
-          _minutesString = TimeUtils.minutesString(_departure.estimatedDepartureUTC, _departure.scheduledDepartureUTC!);
+          _minutesString = TimeUtils.minutesString(
+              _departure.estimatedDepartureUTC,
+              _departure.scheduledDepartureUTC!);
         });
       }
     } catch (e) {
@@ -110,8 +112,8 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   }
 
   Future<void> _fetchPattern() async {
-    List<Departure> newPattern = await ptvService.fetchPattern(
-        _trip, _departure);
+    List<Departure> newPattern =
+        await ptvService.fetchPattern(_trip, _departure);
 
     setState(() {
       _pattern = newPattern;
@@ -122,10 +124,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
     await _fetchPattern();
 
     // Find the current stop index
-    _currentStopIndex = _pattern.indexWhere(
-      (stop) => stop.stopName?.trim().toLowerCase()
-        == _trip.stop?.name.trim().toLowerCase()
-    );
+    _currentStopIndex = _pattern.indexWhere((stop) =>
+        stop.stopName?.trim().toLowerCase() ==
+        _trip.stop?.name.trim().toLowerCase());
 
     // If the stop isn't found, default to 0
     if (_currentStopIndex == -1) {
@@ -151,15 +152,16 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-
     // Add listener to the ItemPositionsListener
     itemPositionsListener.itemPositions.addListener(() {
-      final firstVisibleItem = itemPositionsListener.itemPositions.value.isNotEmpty
-          ? itemPositionsListener.itemPositions.value.first
-          : null;
+      final firstVisibleItem =
+          itemPositionsListener.itemPositions.value.isNotEmpty
+              ? itemPositionsListener.itemPositions.value.first
+              : null;
 
       if (firstVisibleItem != null) {
-        if (firstVisibleItem.index == 0 && firstVisibleItem.itemLeadingEdge > 0) {
+        if (firstVisibleItem.index == 0 &&
+            firstVisibleItem.itemLeadingEdge > 0) {
           widget.scrollController.jumpTo(0);
         }
       }
@@ -172,11 +174,7 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(
-              left: 12.0,
-              right: 22.0,
-              bottom: 12.0,
-              top: 16.0
-            ),
+                left: 12.0, right: 22.0, bottom: 12.0, top: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -188,9 +186,9 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                       child: Column(
                         children: [
                           LocationWidget(
-                            textField: _trip.stop!.name,
-                            textSize: 18,
-                            scrollable: true),
+                              textField: _trip.stop!.name,
+                              textSize: 18,
+                              scrollable: true),
                           SizedBox(height: 4),
                           Row(
                             children: [
@@ -209,25 +207,22 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(_trip.direction!.name,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        height: 1.1),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2),
+                                        style: TextStyle(
+                                            fontSize: 16, height: 1.1),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2),
                                     SizedBox(height: 8),
-                                    RouteWidget(route: _trip.route!,
-                                        scrollable: true),
+                                    RouteWidget(
+                                        route: _trip.route!, scrollable: true),
                                     SizedBox(height: 4)
                                   ],
                                 ),
                               ),
                               SizedBox(width: 8),
-
                               DepartureTimeDetails(
-                                status: _status,
-                                minutesString: _minutesString,
-                                departure: _departure
-                              ),
+                                  status: _status,
+                                  minutesString: _minutesString,
+                                  departure: _departure),
                             ],
                           ),
                         ],
@@ -240,7 +235,6 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
             ),
           ),
         ),
-
         SliverFillRemaining(
           hasScrollBody: true,
           fillOverscroll: true,
@@ -266,26 +260,29 @@ class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
                   margin: const EdgeInsets.symmetric(vertical: 2.0),
                   elevation: 1,
                   child: ListTile(
-                    leading: SizedBox(
-                      width: 55,
-                      child: Text(timeString, style: TextStyle(fontSize: 12)),
-                    ),
-                    title: Row(
-                      children: [
-                        Container(
-                          width: 5,
-                          color:  TimeUtils.hasDeparted(timeDifference)
-                              ? Colors.grey : Colors.green,
-                          height: 60,
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(child: Text(stopName!,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,)),
-                      ],
-                    ),
-                    onTap: () {}
-                  ),
+                      leading: SizedBox(
+                        width: 55,
+                        child: Text(timeString, style: TextStyle(fontSize: 12)),
+                      ),
+                      title: Row(
+                        children: [
+                          Container(
+                            width: 5,
+                            color: TimeUtils.hasDeparted(timeDifference)
+                                ? Colors.grey
+                                : Colors.green,
+                            height: 60,
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                              child: Text(
+                            stopName!,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          )),
+                        ],
+                      ),
+                      onTap: () {}),
                 );
               },
             ),
@@ -302,7 +299,9 @@ class DepartureTimeDetails extends StatelessWidget {
     required DepartureStatus status,
     required String minutesString,
     required Departure departure,
-  }) : _status = status, _minutesString = minutesString, _departure = departure;
+  })  : _status = status,
+        _minutesString = minutesString,
+        _departure = departure;
 
   final DepartureStatus _status;
   final String _minutesString;
@@ -311,58 +310,46 @@ class DepartureTimeDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme
-        .surfaceContainerHigh,
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(height: 2),
-            Container(
-              padding: EdgeInsets.symmetric(
-                vertical: 1, horizontal: 6),
-              decoration: BoxDecoration(
-                color: ColourUtils.hexToColour(
-                  _status.getColorString),
-                borderRadius: BorderRadius.circular(8)
-              ),
-              child: Text(
-                _minutesString,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        elevation: 1,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(height: 2),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 1, horizontal: 6),
+                decoration: BoxDecoration(
+                    color: ColourUtils.hexToColour(_status.getColorString),
+                    borderRadius: BorderRadius.circular(8)),
+                child: Text(
+                  _minutesString,
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16),
                 ),
               ),
-            ),
-            SizedBox(height: 2),
-            Padding(
-              padding: const EdgeInsets.only(left: 2.0),
-              child: Text("Scheduled: "
-                "${_departure.scheduledDepartureTime}",
-                style: TextStyle(fontSize: 13)),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 2.0),
-              child: Text(
-                "Estimated: ${_departure
-                    .estimatedDepartureTime
-                    ?? 'N/A'}",
-                style: TextStyle(
-                  color: ColourUtils.hexToColour(
-                      _status.getColorString),
-                  fontSize: 13
-                )
+              SizedBox(height: 2),
+              Padding(
+                padding: const EdgeInsets.only(left: 2.0),
+                child: Text(
+                    "Scheduled: "
+                    "${_departure.scheduledDepartureTime}",
+                    style: TextStyle(fontSize: 13)),
               ),
-            ),
-          ],
-        ),
-      )
-    );
+              Padding(
+                padding: EdgeInsets.only(left: 2.0),
+                child: Text(
+                    "Estimated: ${_departure.estimatedDepartureTime ?? 'N/A'}",
+                    style: TextStyle(
+                        color: ColourUtils.hexToColour(_status.getColorString),
+                        fontSize: 13)),
+              ),
+            ],
+          ),
+        ));
   }
 }

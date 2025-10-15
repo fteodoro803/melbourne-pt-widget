@@ -14,7 +14,8 @@ class GoogleApiService {
       "languageCode": "en",
       "regionCode": "US",
       "locationRestriction": {
-        "rectangle": { // rectangle surrounding Victoria
+        "rectangle": {
+          // rectangle surrounding Victoria
           "low": {
             "latitude": -39.26633899352238,
             "longitude": 140.83244781910867
@@ -34,18 +35,17 @@ class GoogleApiService {
       'X-Goog-FieldMask': 'suggestions.placePrediction.text.text'
     };
 
-    final response = await http.post(uri, headers: headers, body: jsonEncode(requestBody));
+    final response =
+        await http.post(uri, headers: headers, body: jsonEncode(requestBody));
     Map<String, dynamic>? jsonResponse = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
       print(
-          '(google_api_service.dart -> getPlaceAutoComplete) -- Response: ${response
-              .body}');
+          '(google_api_service.dart -> getPlaceAutoComplete) -- Response: ${response.body}');
       return jsonResponse;
     } else {
       print(
-          '(google_api_service.dart -> getPlaceAutoComplete) -- Error: ${response
-              .statusCode} - ${response.body}');
+          '(google_api_service.dart -> getPlaceAutoComplete) -- Error: ${response.statusCode} - ${response.body}');
       return jsonResponse;
     }
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 extension ListUtils<E> on List<E> {
-
   /// Checks if this list shared elements with [otherList].
   bool hasSharedItems(List<E> otherList) {
     // Convert to set for efficiency
@@ -23,7 +22,9 @@ extension ListUtils<E> on List<E> {
   /// are also present in [otherList].
   List<E> sharedSublist(List<E> otherList, E item) {
     // Edge cases
-    if (isEmpty || otherList.isEmpty || this.hasSharedItems(otherList) == false) {
+    if (isEmpty ||
+        otherList.isEmpty ||
+        this.hasSharedItems(otherList) == false) {
       return [];
     }
 
@@ -44,7 +45,7 @@ extension ListUtils<E> on List<E> {
     if (index == -1) return [];
 
     // 2. Check left side
-    for (int i=index; i>=0; i--) {
+    for (int i = index; i >= 0; i--) {
       // print("${this[i]} in $otherSet: ${otherSet.contains(this[i])}");
       if (otherSet.contains(this[i])) {
         // print("minIndex = $i");
@@ -55,7 +56,7 @@ extension ListUtils<E> on List<E> {
     }
 
     // 3. Check right side
-    for (int i=index; i<length; i++) {
+    for (int i = index; i < length; i++) {
       // print("${this[i]} in $otherSet: ${otherSet.contains(this[i])}");
       if (otherSet.contains(this[i])) {
         // print("maxIndex = $i");
@@ -66,7 +67,7 @@ extension ListUtils<E> on List<E> {
     }
 
     // 4. Create a sublist of this list, from minIndex to maxIndex
-    List<E> sublist = this.sublist(minIndex, maxIndex+1);
+    List<E> sublist = this.sublist(minIndex, maxIndex + 1);
     // print("( list_extensions.dart -> sharedSublist ) -- Sublist($minIndex, $maxIndex) of $this:\n\t$sublist");
 
     return sublist;
@@ -80,7 +81,7 @@ extension ListUtils<E> on List<E> {
 
     // Sliding window
     for (int i = 0; i <= this.length - otherList.length; i++) {
-      var subList = sublist(i, i+otherList.length);
+      var subList = sublist(i, i + otherList.length);
       if (listEquals(subList, otherList)) {
         return true;
       }

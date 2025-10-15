@@ -13,18 +13,16 @@ class SaveTripSheet extends StatelessWidget {
   final List<Trip> tripList;
   final Function(List<bool>) onConfirmPressed;
 
-  const SaveTripSheet({
-    super.key,
-    required this.route,
-    required this.stop,
-    required this.tripList,
-    required this.savedList,
-    required this.onConfirmPressed
-  });
+  const SaveTripSheet(
+      {super.key,
+      required this.route,
+      required this.stop,
+      required this.tripList,
+      required this.savedList,
+      required this.onConfirmPressed});
 
   @override
   Widget build(BuildContext context) {
-
     final stopName = stop.name;
     List<bool> tempSavedList = List.from(savedList);
     bool hasListChanged = false;
@@ -34,52 +32,48 @@ class SaveTripSheet extends StatelessWidget {
         children: [
           ListTile(
             leading: Padding(
-              padding: const EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
+              padding:
+                  const EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
 
               // Cancel button
               child: GestureDetector(
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(
-                    fontSize: 16,
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                }
-              ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  }),
             ),
 
             // Confirm button
             trailing: GestureDetector(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8.0, top: 10.0, bottom: 10.0),
-                child: Text(
-                  "Confirm",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: hasListChanged ? null : Color(
-                        0xFF555555),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      right: 8.0, top: 10.0, bottom: 10.0),
+                  child: Text(
+                    "Confirm",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: hasListChanged ? null : Color(0xFF555555),
+                    ),
+                    textAlign: TextAlign.right,
                   ),
-                  textAlign: TextAlign.right,
                 ),
-              ),
-              onTap: () async {
-                if (hasListChanged) {
-                  await onConfirmPressed(tempSavedList);
-                  Navigator.pop(context);
-                }
-              }
-            ),
+                onTap: () async {
+                  if (hasListChanged) {
+                    await onConfirmPressed(tempSavedList);
+                    Navigator.pop(context);
+                  }
+                }),
 
             // Modal sheet title
             title: Text(
               "Save Trip",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -90,13 +84,15 @@ class SaveTripSheet extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 18.0),
             elevation: 1,
             child: ListTile(
-              title: LocationWidget(textField: stopName, textSize: 18, scrollable: false),
+              title: LocationWidget(
+                  textField: stopName, textSize: 18, scrollable: false),
               subtitle: RouteWidget(route: route, scrollable: false),
             ),
           ),
 
           SizedBox(height: 12),
-          Text("Choose direction:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+          Text("Choose direction:",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
           SizedBox(height: 8),
 
           // List of trips (and saved status)
@@ -105,7 +101,8 @@ class SaveTripSheet extends StatelessWidget {
               var index = tripList.indexOf(trip);
               return Card(
                 color: Colors.black,
-                margin: const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 6),
+                margin:
+                    const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 6),
                 elevation: 1,
                 child: ListTile(
                   contentPadding: const EdgeInsets.only(left: 20, right: 16),

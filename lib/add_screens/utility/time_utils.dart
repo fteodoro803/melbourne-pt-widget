@@ -15,7 +15,8 @@ class DepartureStatus {
   final bool isWithinAnHour;
   String? colorString;
 
-  DepartureStatus(this.status, this.timeDifference, this.hasDeparted, this.isWithinAnHour);
+  DepartureStatus(
+      this.status, this.timeDifference, this.hasDeparted, this.isWithinAnHour);
 
   String get getColorString {
     switch (status) {
@@ -33,11 +34,12 @@ class DepartureStatus {
 }
 
 class TimeUtils {
-
   /// Function to compare estimated and scheduled departure times for a transport departure
-  static DepartureStatus getDepartureStatus(DateTime? scheduled, DateTime? estimated) {
+  static DepartureStatus getDepartureStatus(
+      DateTime? scheduled, DateTime? estimated) {
     if (scheduled == null) {
-      return DepartureStatus("Scheduled", null, false, false); // Default to On-time if either value is null
+      return DepartureStatus("Scheduled", null, false,
+          false); // Default to On-time if either value is null
     }
 
     TimeDifference? timeMap = TimeUtils.timeDifference(estimated ?? scheduled);
@@ -48,23 +50,28 @@ class TimeUtils {
     if (estimated == null) {
       return DepartureStatus("Scheduled", null, hasDeparted, isWithinAnHour);
     }
-    TimeDifference? statusTimeMap = TimeUtils.timeDifference(estimated, scheduled);
+    TimeDifference? statusTimeMap =
+        TimeUtils.timeDifference(estimated, scheduled);
 
     try {
       int minutes = statusTimeMap!.minutes;
 
       // Compare the times
       if (minutes > 0) {
-        return DepartureStatus("Late", minutes.abs(), hasDeparted, isWithinAnHour); // Estimated departure is later than scheduled, so it's late
+        return DepartureStatus("Late", minutes.abs(), hasDeparted,
+            isWithinAnHour); // Estimated departure is later than scheduled, so it's late
       } else if (minutes < 0) {
-        return DepartureStatus("Early", minutes.abs(), hasDeparted, isWithinAnHour); // Estimated departure is earlier than scheduled, so it's early
-      } else if (minutes == 0){
-        return DepartureStatus("On time", null, hasDeparted, isWithinAnHour); // Both times are the same, so it's on-time
+        return DepartureStatus("Early", minutes.abs(), hasDeparted,
+            isWithinAnHour); // Estimated departure is earlier than scheduled, so it's early
+      } else if (minutes == 0) {
+        return DepartureStatus("On time", null, hasDeparted,
+            isWithinAnHour); // Both times are the same, so it's on-time
       } else {
         return DepartureStatus("Scheduled", null, hasDeparted, isWithinAnHour);
       }
     } catch (e) {
-      return DepartureStatus("Scheduled", null, false, false); // Default to "Scheduled" if there is any error in parsing the time
+      return DepartureStatus("Scheduled", null, false,
+          false); // Default to "Scheduled" if there is any error in parsing the time
     }
   }
 
@@ -75,7 +82,8 @@ class TimeUtils {
   ///
   /// Returns a map containing the difference in days, hours, and minutes,
   /// or null if there's an error parsing the input.
-  static TimeDifference? timeDifference(DateTime inputDate1, [DateTime? inputDate2]) {
+  static TimeDifference? timeDifference(DateTime inputDate1,
+      [DateTime? inputDate2]) {
     try {
       // Determine the reference time (either second ISO time or current time)
       DateTime referenceTime;
@@ -119,7 +127,6 @@ class TimeUtils {
   /// Returns a map with year, month, day, hour (12-hour format), minute, and period (AM/PM)
   static Map<String, dynamic> convertIsoToReadable(DateTime utcTime) {
     try {
-
       final melbourne = tz.getLocation('Australia/Melbourne');
       final melbourneTime = tz.TZDateTime.from(utcTime, melbourne);
 
@@ -132,8 +139,18 @@ class TimeUtils {
 
       // Month names
       List<String> monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
       ];
 
       // Create the readable format object
@@ -146,22 +163,17 @@ class TimeUtils {
         'minute': melbourneTime.minute,
         'period': period,
         'weekday': _getWeekdayName(melbourneTime.weekday),
-        'formatted': '${hour12.toString().padLeft(2, '0')}:${melbourneTime.minute.toString().padLeft(2, '0')} $period'
+        'formatted':
+            '${hour12.toString().padLeft(2, '0')}:${melbourneTime.minute.toString().padLeft(2, '0')} $period'
       };
     } catch (e) {
-      return {
-        'error': 'Invalid timestamp format',
-        'details': e.toString()
-      };
+      return {'error': 'Invalid timestamp format', 'details': e.toString()};
     }
   }
 
   /// Helper function to get the weekday name
   static String _getWeekdayName(int weekday) {
-    List<String> weekdays = [
-      'Mon', 'Tue', 'Wed', 'Thu',
-      'Fri', 'Sat', 'Sun'
-    ];
+    List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return weekdays[weekday - 1];
   }
 
@@ -184,9 +196,8 @@ class TimeUtils {
 
   static bool showDepartureTime(DateTime isoTime) {
     TimeDifference? timeDifference = TimeUtils.timeDifference(isoTime);
-    if (timeDifference != null
-        && (timeDifference.hours == 0
-        || timeDifference.days.abs() > 0)) {
+    if (timeDifference != null &&
+        (timeDifference.hours == 0 || timeDifference.days.abs() > 0)) {
       return true;
     } else {
       return false;
@@ -195,7 +206,8 @@ class TimeUtils {
 
   /// Helper function to determine whether transport has departed
   static bool hasDeparted(TimeDifference? timeMap) {
-    if (timeMap != null && (timeMap.days < 0 || timeMap.hours < 0 || timeMap.minutes < 0)) {
+    if (timeMap != null &&
+        (timeMap.days < 0 || timeMap.hours < 0 || timeMap.minutes < 0)) {
       return true;
     }
     return false;
@@ -205,7 +217,8 @@ class TimeUtils {
   ///
   /// If departure is within an hour from current time, returns minutes string
   /// Otherwise, return the time or date of departure in a simplified format
-  static String minutesString(DateTime? isoTimeEstimated, DateTime isoTimeScheduled) {
+  static String minutesString(
+      DateTime? isoTimeEstimated, DateTime isoTimeScheduled) {
     DateTime isoTime = isoTimeEstimated ?? isoTimeScheduled;
     TimeDifference? timeMap = timeDifference(isoTime);
 
@@ -218,8 +231,7 @@ class TimeUtils {
     if (timeMap.days == 0 && timeMap.hours == 0 && timeMap.minutes.abs() >= 0) {
       if (timeMap.minutes == 0) {
         return "Now";
-      }
-      else {
+      } else {
         String minutes = timeMap.minutes.abs().toString();
         if (hasDeparted) {
           return "$minutes min ago";
@@ -233,7 +245,8 @@ class TimeUtils {
   }
 
   static String shouldShowMonth(DateTime isoTime, [int? days]) {
-    final differenceInDays = days?.abs() ?? TimeUtils.timeDifference(isoTime)!.days.abs();
+    final differenceInDays =
+        days?.abs() ?? TimeUtils.timeDifference(isoTime)!.days.abs();
     if (differenceInDays > 0) {
       return trimTime(isoTime, true);
     } else {

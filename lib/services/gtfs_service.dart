@@ -29,7 +29,8 @@ class GtfsService {
   GtfsApiService gtfsApiService = GtfsApiService();
   String tramRoutesFile = "assets/gtfs/metro_tram/routes.txt";
   String tramTripsFile = "assets/gtfs/metro_tram/trips.txt";
-  String tempShapesFilePath = "assets/gtfs/metro_tram/shapes.txt";      // fixme: temporary, this will be moved to a server api call
+  String tempShapesFilePath =
+      "assets/gtfs/metro_tram/shapes.txt"; // fixme: temporary, this will be moved to a server api call
 
   // String trainRoutesFile = "lib/dev/gtfs/metro_train/routes.txt";
   // String trainTripsFile = "lib/dev/gtfs/metro_train/trips.txt";
@@ -51,7 +52,8 @@ class GtfsService {
     // Metro trams    todo: skip initialisation if already in database, and isn't outdated
     await _checkIfAssetsExist();
     if (tramAssetsExist == false) {
-      print("( gtfs_service.dart --> initialise ) -- Tram GTFS assets don't exist");
+      print(
+          "( gtfs_service.dart --> initialise ) -- Tram GTFS assets don't exist");
       return;
     }
     await _initialiseRoutes(tramRoutesFile);
@@ -64,7 +66,8 @@ class GtfsService {
 
     DateTime endTime = DateTime.now();
     int duration = endTime.difference(startTime).inSeconds;
-    print("( gtfs_service.dart -> initialise ) -- finished in $duration seconds");
+    print(
+        "( gtfs_service.dart -> initialise ) -- finished in $duration seconds");
   }
 
   /// Add gtfs routes to database.
@@ -75,17 +78,22 @@ class GtfsService {
     try {
       final file = File(routeFilePath);
       DateTime newAssetDate = await file.lastModified();
-      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
+      DateTime? previousAssetDate =
+          await database.getGtfsAssetDate(id: assetName);
 
       // Early exit if new data is equal to or older than previous data
-      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
-        print("( gtfs_service.dart -> _initialiseRoutes ) -- current data is up-to-date, skipping initialisation");
+      if (previousAssetDate != null &&
+          !newAssetDate.isAfter(previousAssetDate)) {
+        print(
+            "( gtfs_service.dart -> _initialiseRoutes ) -- current data is up-to-date, skipping initialisation");
         return;
       }
 
       // 1. If previous data exists, clear previous data in GtfsRoute
-      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
-        print("( gtfs_service.dart -> _initialiseRoutes ) -- clearing GTFS Route Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+      if (previousAssetDate != null &&
+          newAssetDate.isAfter(previousAssetDate)) {
+        print(
+            "( gtfs_service.dart -> _initialiseRoutes ) -- clearing GTFS Route Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
         await database.clearGtfsRouteTable();
       }
 
@@ -97,12 +105,13 @@ class GtfsService {
         String longName = route["route_long_name"];
 
         // 3. Insert each trip to the database
-        await database.addGtfsRoute(id: routeId, shortName: shortName, longName: longName);
+        await database.addGtfsRoute(
+            id: routeId, shortName: shortName, longName: longName);
       }
 
       // 4. Add routes asset file info to database
-      await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);   // todo: placeholder
-
+      await database.addGtfsAsset(
+          id: assetName, dateModified: newAssetDate); // todo: placeholder
     } catch (e) {
       print("Error $e");
     }
@@ -115,17 +124,22 @@ class GtfsService {
     try {
       final file = File(tripFilePath);
       DateTime newAssetDate = await file.lastModified();
-      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
+      DateTime? previousAssetDate =
+          await database.getGtfsAssetDate(id: assetName);
 
       // Early exit if new data is equal to or older than previous data
-      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
-        print("( gtfs_service.dart -> _initialiseTrips ) -- current data is up-to-date, skipping initialisation");
+      if (previousAssetDate != null &&
+          !newAssetDate.isAfter(previousAssetDate)) {
+        print(
+            "( gtfs_service.dart -> _initialiseTrips ) -- current data is up-to-date, skipping initialisation");
         return;
       }
 
       // 1. If previous data exists, clear previous data in GTFS Trip Table
-      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
-        print("( gtfs_service.dart -> _initialiseTrips ) -- clearing GTFS Trips Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+      if (previousAssetDate != null &&
+          newAssetDate.isAfter(previousAssetDate)) {
+        print(
+            "( gtfs_service.dart -> _initialiseTrips ) -- clearing GTFS Trips Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
         await database.clearGtfsTripsTable();
       }
 
@@ -137,9 +151,16 @@ class GtfsService {
         String routeId = trip["route_id"];
         String shapeId = trip["shape_id"];
         String tripHeadsign = trip["trip_headsign"];
-        int wheelchairAccessible = int.tryParse(trip["wheelchair_accessible"]) ?? 0;    // 0 indicates "no data"
+        int wheelchairAccessible =
+            int.tryParse(trip["wheelchair_accessible"]) ??
+                0; // 0 indicates "no data"
 
-        var newGtfsTrip = database.createGtfsTripCompanion(tripId: tripId, routeId: routeId, shapeId: shapeId, tripHeadsign: tripHeadsign, wheelchairAccessible: wheelchairAccessible);
+        var newGtfsTrip = database.createGtfsTripCompanion(
+            tripId: tripId,
+            routeId: routeId,
+            shapeId: shapeId,
+            tripHeadsign: tripHeadsign,
+            wheelchairAccessible: wheelchairAccessible);
         gtfsTripList.add(newGtfsTrip);
       }
 
@@ -148,8 +169,7 @@ class GtfsService {
 
       // 4. Add trips asset file into database
       await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);
-    }
-    catch (e) {
+    } catch (e) {
       print("Error $e");
     }
   }
@@ -162,17 +182,22 @@ class GtfsService {
     try {
       final file = File(shapesFilePath);
       DateTime newAssetDate = await file.lastModified();
-      DateTime? previousAssetDate = await database.getGtfsAssetDate(id: assetName);
+      DateTime? previousAssetDate =
+          await database.getGtfsAssetDate(id: assetName);
 
       // Early exit if new data is equal to or older than previous data
-      if (previousAssetDate != null && !newAssetDate.isAfter(previousAssetDate)) {
-        print("( gtfs_service.dart -> _initialiseGeoPaths ) -- current data is up-to-date, skipping initialisation");
+      if (previousAssetDate != null &&
+          !newAssetDate.isAfter(previousAssetDate)) {
+        print(
+            "( gtfs_service.dart -> _initialiseGeoPaths ) -- current data is up-to-date, skipping initialisation");
         return;
       }
 
       // 1. If previous data exists, clear previous data in GtfsRoute
-      if (previousAssetDate != null && newAssetDate.isAfter(previousAssetDate)) {
-        print("( gtfs_service.dart -> _initialiseGeoPaths ) -- clearing GeoPath Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
+      if (previousAssetDate != null &&
+          newAssetDate.isAfter(previousAssetDate)) {
+        print(
+            "( gtfs_service.dart -> _initialiseGeoPaths ) -- clearing GeoPath Table; prevAssetDate={$previousAssetDate}, newAssetDate={$newAssetDate}; newAssetDate.isAfter(prevAssetDate)={${newAssetDate.isAfter(previousAssetDate)}}");
         await database.clearGeoPathsTable();
       }
 
@@ -185,7 +210,11 @@ class GtfsService {
         double latitude = double.tryParse(geopath["shape_pt_lat"]) ?? -1;
         double longitude = double.tryParse(geopath["shape_pt_lon"]) ?? -1;
 
-        var newGeoPath = database.createGeoPathCompanion(id: id, sequence: sequence, latitude: latitude, longitude: longitude);
+        var newGeoPath = database.createGeoPathCompanion(
+            id: id,
+            sequence: sequence,
+            latitude: latitude,
+            longitude: longitude);
         geoPaths.add(newGeoPath);
       }
 
@@ -194,8 +223,7 @@ class GtfsService {
 
       // 4. Add routes asset file info to database
       await database.addGtfsAsset(id: assetName, dateModified: newAssetDate);
-    }
-    catch (e) {
+    } catch (e) {
       print("Error $e");
     }
   }
@@ -212,8 +240,7 @@ class GtfsService {
       // todo: do for other transport types
 
       tramAssetsExist = true;
-    }
-    catch (e) {
+    } catch (e) {
       tramAssetsExist = false;
     }
   }
@@ -228,10 +255,12 @@ class GtfsService {
     }
 
     // 2. Get GeoPath Data
-    List<db.GeoPathsTableData> geoPathData = await database.getGeoPath(gtfsRouteId, direction: direction);
+    List<db.GeoPathsTableData> geoPathData =
+        await database.getGeoPath(gtfsRouteId, direction: direction);
 
     // 3. Convert Data to LatLng
-    List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
+    List<LatLng> geoPath =
+        geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
     return geoPath;
   }
 
@@ -243,15 +272,12 @@ class GtfsService {
     final content = await rootBundle.loadString(filePath);
 
     // 2. Configure CSV options for cross-platform support
-    final csvConverter = CsvToListConverter(
-        fieldDelimiter: ',',
-        eol: '\r\n'
-    );
+    final csvConverter = CsvToListConverter(fieldDelimiter: ',', eol: '\r\n');
 
     // 3. Convert content to Rows
     List<List<dynamic>> rows = csvConverter.convert(content);
     final headers = rows.first.map((c) => c.toString()).toList();
-    final dataRows = rows.skip(1);    // skips the header row
+    final dataRows = rows.skip(1); // skips the header row
 
     // 2. Create a Map with headers as keys, and rows as values, and adds to list
     for (var row in dataRows) {
@@ -273,8 +299,11 @@ class GtfsService {
     String? gtfsRouteId = await database.convertToGtfsRouteId(routeId);
 
     // 2. Get GTFS route IDs associated with the route
-    List<db.GtfsTripsTableData>? trips = gtfsRouteId != null ? await database.getGtfsTripsByRouteId(gtfsRouteId) : null;
-    List<String>? tripIds = trips?.map((t) => t.id).toList();     // Converts trips to tripIds
+    List<db.GtfsTripsTableData>? trips = gtfsRouteId != null
+        ? await database.getGtfsTripsByRouteId(gtfsRouteId)
+        : null;
+    List<String>? tripIds =
+        trips?.map((t) => t.id).toList(); // Converts trips to tripIds
 
     // 3. Collect positions of vehicles
     if (tripIds != null) {
@@ -310,7 +339,8 @@ class GtfsService {
     }
 
     // 2. Get Shapes
-    Map<String, String> uniqueShapes = await database.getShapeIdsHeadsign(gtfsRouteId);
+    Map<String, String> uniqueShapes =
+        await database.getShapeIdsHeadsign(gtfsRouteId);
     return uniqueShapes;
   }
 
@@ -318,10 +348,12 @@ class GtfsService {
   // GEOPATHS!!!
   Future<List<LatLng>> fetchGeoPathShape(String shapeId) async {
     // 1. Get GeoPath Data
-    List<db.GeoPathsTableData> geoPathData = await database.getGeoPathShapeId(shapeId);
+    List<db.GeoPathsTableData> geoPathData =
+        await database.getGeoPathShapeId(shapeId);
 
     // 2. Convert Data to LatLng
-    List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
+    List<LatLng> geoPath =
+        geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
     return geoPath;
   }
 }

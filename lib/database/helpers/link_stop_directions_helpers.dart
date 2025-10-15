@@ -3,7 +3,11 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension StopRouteDirectionHelpers on AppDatabase {
-  LinkStopRouteDirectionsTableCompanion createStopDirectionsTypeCompanion({required int stopId, required int routeId, required int directionId, int? sequence}) {
+  LinkStopRouteDirectionsTableCompanion createStopDirectionsTypeCompanion(
+      {required int stopId,
+      required int routeId,
+      required int directionId,
+      int? sequence}) {
     return LinkStopRouteDirectionsTableCompanion(
       stopId: drift.Value(stopId),
       routeId: drift.Value(routeId),
@@ -13,8 +17,17 @@ extension StopRouteDirectionHelpers on AppDatabase {
     );
   }
 
-  Future<void> addStopRouteDirection({required int stopId, required int routeId, required int directionId, int? sequence}) async {
-    LinkStopRouteDirectionsTableCompanion stopDirection = createStopDirectionsTypeCompanion(stopId: stopId, routeId: routeId, directionId: directionId, sequence: sequence);
+  Future<void> addStopRouteDirection(
+      {required int stopId,
+      required int routeId,
+      required int directionId,
+      int? sequence}) async {
+    LinkStopRouteDirectionsTableCompanion stopDirection =
+        createStopDirectionsTypeCompanion(
+            stopId: stopId,
+            routeId: routeId,
+            directionId: directionId,
+            sequence: sequence);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertStopRouteDirectionsLink(stopDirection);
   }

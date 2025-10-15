@@ -6,7 +6,7 @@ import 'package:flutter_project/domain/trip.dart';
 import 'package:home_widget/home_widget.dart';
 
 class HomeWidgetService {
-  late bool isMobile;    // Android or iOS
+  late bool isMobile; // Android or iOS
 
   String appGroupId = "group.melbournePTWidget";
   String iosWidgetName = "MelbournePTWidget";
@@ -19,15 +19,15 @@ class HomeWidgetService {
     if (Platform.isIOS || Platform.isAndroid) {
       isMobile = true;
       await HomeWidget.setAppGroupId(appGroupId);
-    }
-    else {
+    } else {
       isMobile = false;
     }
   }
 
 // Send necessary JSON Data to Widget
   Future<void> sendWidgetData(List<Trip> transportList) async {
-    print("( home_widget_service.dart -> sendWidgetData() ) -- isMobile=$isMobile");
+    print(
+        "( home_widget_service.dart -> sendWidgetData() ) -- isMobile=$isMobile");
     if (isMobile == true) {
       try {
         final optimisedData = getOptimisedData(transportList);
@@ -47,8 +47,7 @@ class HomeWidgetService {
         print(
             "( home_widget_service.dart -> sendWidgetData() ) -- Error sending widget data");
       }
-    }
-    else {
+    } else {
       print("Not on mobile device, cannot send data. (isMobile = $isMobile)");
     }
   }
@@ -61,19 +60,23 @@ class HomeWidgetService {
         'routeType': {'name': transport.route?.type.name ?? "No routeType"},
         'stop': {'name': transport.stop?.name ?? "No stop"},
         'route': {
-          'label': TripUtils.getLabel(transport.route, transport.route?.type.name) ?? "No route",
+          'label':
+              TripUtils.getLabel(transport.route, transport.route?.type.name) ??
+                  "No route",
           'colour': transport.route?.colour ?? "No colour",
           'textColour': transport.route?.textColour ?? "No text colour",
         },
         'direction': {'name': transport.direction?.name ?? "No direction"},
-        'departures': (transport.departures?.take(3).toList())?.map((d) => {
-          'departureTime': d.estimatedDepartureTime ?? d.scheduledDepartureTime,
-          'hasLowFloor': d.hasLowFloor,
-          'platformNumber': d.platformNumber,
-          'statusColour': TripUtils.getStatusColor(d),
-          'timeString': TripUtils.getTimeString(d),
-        })
-            .toList() ??
+        'departures': (transport.departures?.take(3).toList())
+                ?.map((d) => {
+                      'departureTime':
+                          d.estimatedDepartureTime ?? d.scheduledDepartureTime,
+                      'hasLowFloor': d.hasLowFloor,
+                      'platformNumber': d.platformNumber,
+                      'statusColour': TripUtils.getStatusColor(d),
+                      'timeString': TripUtils.getTimeString(d),
+                    })
+                .toList() ??
             []
       };
     }).toList();

@@ -6,9 +6,9 @@ import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/trip.dart';
 
 class ScreenArguments {
-  Trip? trip;    // data for new Trip option
+  Trip? trip; // data for new Trip option
   RouteType? selectedRouteType;
-  VoidCallback callback;  // function to be called from child screen
+  VoidCallback callback; // function to be called from child screen
   Location? testLocation;
 
   ScreenArguments(this.callback);

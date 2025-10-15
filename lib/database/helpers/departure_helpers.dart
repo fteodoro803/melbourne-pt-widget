@@ -3,8 +3,15 @@ import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
 extension DepartureHelpers on AppDatabase {
-  DeparturesTableCompanion createDepartureCompanion({required String runRef, required int stopId, required int routeId, required int directionId, DateTime? scheduledDepartureUTC, DateTime? estimatedDepartureUTC, bool? hasLowFloor, bool? hasAirConditioning})
-  {
+  DeparturesTableCompanion createDepartureCompanion(
+      {required String runRef,
+      required int stopId,
+      required int routeId,
+      required int directionId,
+      DateTime? scheduledDepartureUTC,
+      DateTime? estimatedDepartureUTC,
+      bool? hasLowFloor,
+      bool? hasAirConditioning}) {
     String? scheduledDeparture = getTime(scheduledDepartureUTC);
     String? estimatedDeparture = getTime(estimatedDepartureUTC);
 
@@ -17,9 +24,8 @@ extension DepartureHelpers on AppDatabase {
       estimatedDepartureUtc: drift.Value(estimatedDepartureUTC),
       scheduledDeparture: drift.Value(scheduledDeparture),
       estimatedDeparture: drift.Value(estimatedDeparture),
-      hasLowFloor: hasLowFloor != null
-          ? drift.Value(hasLowFloor)
-          : drift.Value.absent(),
+      hasLowFloor:
+          hasLowFloor != null ? drift.Value(hasLowFloor) : drift.Value.absent(),
       hasAirConditioning: hasAirConditioning != null
           ? drift.Value(hasAirConditioning)
           : drift.Value.absent(),
@@ -28,10 +34,24 @@ extension DepartureHelpers on AppDatabase {
   }
 
   // todo: maybe i can just make this take a Departure instance, bc there are so many arguments. Check how to make a departure table a class.
-    Future<void> addDeparture({required String runRef, required int stopId, required int routeId, required int directionId, DateTime? scheduledDepartureUTC, DateTime? estimatedDepartureUTC, bool? hasLowFloor, bool? hasAirConditioning}) async {
-    DeparturesTableCompanion departure = createDepartureCompanion(scheduledDepartureUTC: scheduledDepartureUTC,
-        estimatedDepartureUTC: estimatedDepartureUTC, runRef: runRef, stopId: stopId, directionId: directionId, routeId: routeId,
-        hasAirConditioning: hasAirConditioning, hasLowFloor: hasLowFloor);
+  Future<void> addDeparture(
+      {required String runRef,
+      required int stopId,
+      required int routeId,
+      required int directionId,
+      DateTime? scheduledDepartureUTC,
+      DateTime? estimatedDepartureUTC,
+      bool? hasLowFloor,
+      bool? hasAirConditioning}) async {
+    DeparturesTableCompanion departure = createDepartureCompanion(
+        scheduledDepartureUTC: scheduledDepartureUTC,
+        estimatedDepartureUTC: estimatedDepartureUTC,
+        runRef: runRef,
+        stopId: stopId,
+        directionId: directionId,
+        routeId: routeId,
+        hasAirConditioning: hasAirConditioning,
+        hasLowFloor: hasLowFloor);
     AppDatabase db = Get.find<AppDatabase>();
     await db.insertDeparture(departure);
   }

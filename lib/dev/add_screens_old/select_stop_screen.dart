@@ -36,7 +36,6 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     tools.printScreenState(_screenName, widget.arguments);
   }
 
-
   // Fetch each Route that each Stop is on
   Future<void> getStopsAndRoutes() async {
     String? location = widget.arguments.testLocation?.coordinates;
@@ -46,13 +45,15 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     // Create temporary lists to hold the new data
     List<Stop> newStops = [];
     List<PTRoute.Route> newRoutes = [];
-    List<Stop> stopList = await ptvService.stops.fetchStopsByLocation(location: location!, routeType: routeType!, maxDistance: maxDistance);
-    List<Future<void>> routeFetchOperations = [];      // holds all route fetch operations
+    List<Stop> stopList = await ptvService.stops.fetchStopsByLocation(
+        location: location!, routeType: routeType!, maxDistance: maxDistance);
+    List<Future<void>> routeFetchOperations =
+        []; // holds all route fetch operations
 
     for (var stop in stopList) {
-
       // Add the future operation to list instead of awaiting it immediately
-      routeFetchOperations.add(ptvService.routes.fetchRoutesFromStop(stop.id).then((routeList) {
+      routeFetchOperations
+          .add(ptvService.routes.fetchRoutesFromStop(stop.id).then((routeList) {
         for (var route in routeList) {
           if (route.type.id != routeType) {
             continue;
@@ -84,14 +85,19 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeNumber = _routes[index].number;
     // String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
-    Get.find<db.AppDatabase>().addRoute(id: routeId, name: routeName, number: routeNumber , routeTypeId: routeTypeId, status: status);
+    Get.find<db.AppDatabase>().addRoute(
+        id: routeId,
+        name: routeName,
+        number: routeNumber,
+        routeTypeId: routeTypeId,
+        status: status);
 
     int stopId = _stops[index].id;
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    Get.find<db.AppDatabase>().addStop(id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
-
+    Get.find<db.AppDatabase>().addStop(
+        id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
   }
 
   @override

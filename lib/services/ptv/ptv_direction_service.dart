@@ -6,7 +6,6 @@ import 'package:flutter_project/services/ptv/ptv_base_service.dart';
 import 'package:get/get.dart';
 
 class PtvDirectionService extends PtvBaseService {
-
   /// Fetches directions for a given route.
   /// Uses data from either the database or PTV API, preferring the database.
   Future<List<Direction>> fetchDirections(int routeId) async {
@@ -49,7 +48,8 @@ class PtvDirectionService extends PtvBaseService {
   /// Get a route's opposite direction.
   /// Assumes that there at most 2 directions to a route.
   // todo: maybe this can be implemented in a domain class (trip?)
-  Future<Direction?> getReverse({required Route route, required Direction direction}) async {
+  Future<Direction?> getReverse(
+      {required Route route, required Direction direction}) async {
     // 1. Fetch directions
     List<Direction> directions = await fetchDirections(route.id);
 

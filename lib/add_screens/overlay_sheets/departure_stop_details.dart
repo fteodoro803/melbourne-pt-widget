@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ExtraStopDetails extends StatelessWidget {
-
   const ExtraStopDetails({
     super.key,
-
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +14,6 @@ class ExtraStopDetails extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Align(alignment: Alignment.topRight, child: CloseButton()),
-
           Text("Zone"),
           Divider(),
           Text("Connections"),

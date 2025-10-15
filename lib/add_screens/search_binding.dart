@@ -7,12 +7,10 @@ import 'controllers/nearby_stops_controller.dart';
 import 'controllers/sheet_controller.dart';
 
 class SearchBinding extends Bindings {
-
   SearchBinding();
 
   @override
   void dependencies() {
-
     // Register dependencies
     Get.lazyPut(() => SheetController());
     Get.lazyPut(() => NavigationService());

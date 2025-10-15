@@ -14,7 +14,6 @@ class Sheet {
 }
 
 class SheetController extends GetxController {
-
   final RxList<Sheet> navigationStack = <Sheet>[].obs;
   final Rx<Sheet> currentSheet = Sheet().obs;
   final RxBool showSheet = false.obs;
@@ -23,7 +22,8 @@ class SheetController extends GetxController {
   Rx<bool> isSheetExpanded = false.obs;
   double initialSheetSize = 0.4;
 
-  final DraggableScrollableController scrollableController = DraggableScrollableController();
+  final DraggableScrollableController scrollableController =
+      DraggableScrollableController();
   bool _isListenerAdded = false;
 
   @override
@@ -61,13 +61,11 @@ class SheetController extends GetxController {
       Future.delayed(Duration(milliseconds: delayMs), () {
         try {
           if (scrollableController.isAttached) {
-            scrollableController.animateTo(
-                size,
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut
-            );
+            scrollableController.animateTo(size,
+                duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
           } else {
-            print("SheetNavigationController: Controller not attached when trying to animate");
+            print(
+                "SheetNavigationController: Controller not attached when trying to animate");
           }
         } catch (e) {
           print("SheetNavigationController: Error animating sheet - $e");
@@ -77,10 +75,9 @@ class SheetController extends GetxController {
   }
 
   void pushSheet(String newSheet, dynamic newState) {
-
     if (scrollableController.isAttached) {
-      scrollPositions.value[currentSheet.value.name!] = scrollableController.size;
-
+      scrollPositions.value[currentSheet.value.name!] =
+          scrollableController.size;
     }
     currentSheet.value = Sheet(name: newSheet, state: newState);
     navigationStack.add(currentSheet.value);
@@ -90,7 +87,8 @@ class SheetController extends GetxController {
     if (navigationStack.isNotEmpty) {
       final previous = navigationStack.removeLast();
       if (scrollableController.isAttached) {
-        scrollPositions.value[currentSheet.value.name!] = scrollableController.size;
+        scrollPositions.value[currentSheet.value.name!] =
+            scrollableController.size;
       }
       if (navigationStack.isNotEmpty) {
         currentSheet.value = navigationStack.last;

@@ -9,10 +9,10 @@ part 'location.g.dart';
 /// Handles parsing of coordinates and conversion between GoogleMaps' LatLng.
 @JsonSerializable()
 class Location {
-  String coordinates;   // string representation in "latitude, longitude" format
+  String coordinates; // string representation in "latitude, longitude" format
   String? name;
-  double latitude;      // parsed latitude as a double
-  double longitude;     // parsed longitude as a double
+  double latitude; // parsed latitude as a double
+  double longitude; // parsed longitude as a double
 
   /// Creates a Location from a coordinate string.
   /// Automatically parses the string to extract latitude and longitude.
