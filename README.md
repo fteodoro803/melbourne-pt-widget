@@ -11,6 +11,8 @@ For the program to work, paste your User ID and/or API Key in the config file:
   - Base app: PTV and Google Maps credentials: assets/cfg/config.json
   - Android widget: Google Maps credentials: android/secrets.properties
   - iOS widget: Google Maps credentials: ios/Runner/AppDelegate.swift
+  - Generator .env file
+    - Run `setup_env.dart`
 
 Copy-paste these commands to 
   1. Get dependencies 
