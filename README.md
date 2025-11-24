@@ -7,23 +7,26 @@ This application gives users easy access to information on their selected routes
 </a>
 
 ### Setup
-For the program to work, paste your User ID and/or API Key in the config file:
-  - Base app: PTV and Google Maps credentials: assets/cfg/config.json
-  - Android widget: Google Maps credentials: android/secrets.properties
-  - iOS widget: Google Maps credentials: ios/Runner/AppDelegate.swift
-  - Generator .env file
-    - Run `setup_env.dart`
+For the program to work, follow these steps:
+  1. Collect the requirements for the following APIs
+     - [PTV API](https://timetableapi.ptv.vic.gov.au/swagger/ui/index) (Developer ID and Key)
+     - [GTFS Realtime API](https://opendata.transport.vic.gov.au/dataset/gtfs-realtime) (API Key)
+     - [Google Maps](https://developers.google.com/maps) (API Key)
+  2. Run `setup_env.dart` to setup your environment variables
 
 Copy-paste these commands to 
   1. Get dependencies 
      - ```flutter pub get```
-  2. Ensure developer credential files don't get tracked by Git 
-     - ```git update-index --assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
-  3. [Build JSON Serializable files](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility) (Use either of the following two)
+  2. [Build JSON Serializable files](https://docs.flutter.dev/data-and-backend/serialization/json#running-the-code-generation-utility) (Use either of the following two)
      - On initial build (once)
        - ```dart run build_runner build --delete-conflicting-outputs```
      - If modifying the domain or database files (continuous)
        - ```dart run build_runner watch --delete-conflicting-outputs```
+  3. Setup environment
+     - 
+  4. Optional: Manually ensure developer credential files don't get tracked by Git (can be done with setup_env.dart)
+     - ```git update-index --assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
+     - to undo: ```git update-index --no-assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
 
 ### Notes
 - Changes to config.ini / secrets.properties / AppDelegate.swift __*must*__ not be pushed
