@@ -9,7 +9,8 @@ Future<void> main() async {
       '1. Run full setup'
       '\n2. Add environment variables (ex. API Keys)'
       '\n3. Modify Git tracking of sensitive files (ie. where API Keys are stored)'
-      '\nEnter number of what you want to do (leave blank to exit): ');
+      '\n4. Exit'
+      '\nEnter number of what you want to do: ');
 
   final response = stdin.readLineSync()?.toLowerCase();
   stdout.write('\n');   // empty line
@@ -21,6 +22,9 @@ Future<void> main() async {
   }
   else if (response == '3') {
     trackingPrompts();
+  }
+  else if (response == '4') {
+    return;
   }
 
   return;
