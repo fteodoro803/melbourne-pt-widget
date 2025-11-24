@@ -3,8 +3,48 @@ import 'dart:io';
 Future<void> main() async {
   print('Local Development Environment Setup');
   print('Creates a .env file, and modifies secrets.properties and AppDelegate.swift');
-  print('-' * 35);
+  print('----------------------------------------------------------------------');
 
+  stdout.write(
+      '1. Run full setup'
+      '\n2. Add environment variables (ex. API Keys)'
+      '\n3. Modify Git tracking of sensitive files (ie. where API Keys are stored)'
+      '\nEnter number of what you want to do (leave blank to exit): ');
+
+  final response = stdin.readLineSync()?.toLowerCase();
+  stdout.write('\n');   // empty line
+  if (response == '1') {
+    await setup();
+  }
+  else if (response == '2') {
+    createEnvPrompts();
+  }
+  else if (response == '3') {
+    trackingPrompts();
+  }
+
+  return;
+}
+
+Future<void> setup() async {
+  createEnvPrompts();
+  stdout.write('----------------------------------------------------------------------\n');   // empty line
+  await trackingPrompts();
+}
+
+Future<void> trackingPrompts() async {
+  // 1. Prompt to ignore git tracking for local development
+  stdout.write('Ignore git tracking to files containing inputted sensitive data? (Default is yes) (y/n): ');
+  final response = stdin.readLineSync()?.toLowerCase();
+  if (response == 'n') {
+    await ignoreLocalChanges(enabled: false);
+  }
+  else {
+    await ignoreLocalChanges(enabled: true);
+  }
+}
+
+void createEnvPrompts() {
   // 1. List of variables that can be added to .env
   final envVars = {
     'PTV_USER_ID': {
@@ -73,16 +113,6 @@ Future<void> main() async {
 
   envFile.writeAsStringSync(buffer.toString());
   print('Created .env');
-
-  // 4. Prompt to ignore git tracking for local development
-  stdout.write('\nIgnore git tracking to files containing inputted sensitive data? (Default is yes) (y/n): ');
-  final response = stdin.readLineSync()?.toLowerCase();
-  if (response == 'n') {
-    await ignoreLocalChanges(enabled: false);
-  }
-  else {
-    await ignoreLocalChanges(enabled: true);
-  }
 }
 
 void addGoogleApiKey(String value) {
