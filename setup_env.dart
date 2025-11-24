@@ -1,10 +1,11 @@
 import 'dart:io';
 
-void main() {
+Future<void> main() async {
   print('Local Development Environment Setup');
   print('Creates a .env file, and modifies secrets.properties and AppDelegate.swift');
   print('-' * 35);
 
+  // 1. List of variables that can be added to .env
   final envVars = {
     'PTV_USER_ID': {
       'description': 'PTV User ID',
@@ -29,6 +30,8 @@ void main() {
   buffer.writeln('# Never commit this file to Git');
   buffer.writeln('# Created by setup_env.dart\n');
 
+  // 2. Prompt the addition of each variable
+  String googleApiKey = "";
   for (var entry in envVars.entries) {
     final name = entry.key;
     final description = entry.value['description'] as String;
@@ -46,25 +49,40 @@ void main() {
       buffer.writeln('$name=$value');
 
       if (name == "GOOGLE_API_KEY") {
-        addGoogleApiKey(value);
+        googleApiKey = value;
       }
     }
   }
 
   final envFile = File('.env');
 
+  // 3. Overwrite prompt if a previous .env file exists
   if (envFile.existsSync()) {
-    stdout.write('\n.env already exists. Overwrite? (y/N): ');
+    stdout.write('\n.env already exists. Overwrite? (Default is yes) (y/n): ');
     final response = stdin.readLineSync()?.toLowerCase();
-    if (response != 'y') {
-      print('Aborted.');
+    if (response == 'n') {
+      print('\tAborted.');
       return;
+    }
+
+    // Add Google API Key if it exists
+    if (googleApiKey.isNotEmpty) {
+      addGoogleApiKey(googleApiKey);
     }
   }
 
   envFile.writeAsStringSync(buffer.toString());
-  print('\nCreated .env');
-  print('Remember: Never commit this file to Git!');
+  print('Created .env');
+
+  // 4. Prompt to ignore git tracking for local development
+  stdout.write('\nIgnore git tracking to files containing inputted sensitive data? (Default is yes) (y/n): ');
+  final response = stdin.readLineSync()?.toLowerCase();
+  if (response == 'n') {
+    await ignoreLocalChanges(enabled: false);
+  }
+  else {
+    await ignoreLocalChanges(enabled: true);
+  }
 }
 
 void addGoogleApiKey(String value) {
@@ -100,5 +118,40 @@ void addGoogleApiKey(String value) {
   secretsFile.writeAsStringSync(secretsContent);
   appDelegatesFile.writeAsStringSync(appDelegatesContent);
 
-  print("Updated secrets.properties and AppDelegate.swift with Google API key.");
+  // print("\tUpdated secrets.properties and AppDelegate.swift with Google API key.");
+}
+
+/// Ignores git tracking of files containing details like API keys to prevent them from being committed.
+Future<void> ignoreLocalChanges({required bool enabled}) async {
+  List<String> args;
+  if (enabled == true) {
+    args = [
+      'update-index',
+      '--assume-unchanged',
+      'assets/cfg/config.json',
+      'android/secrets.properties',
+      'ios/Runner/AppDelegate.swift',
+    ];
+  }
+  else {
+    args = [
+      'update-index',
+      '--no-assume-unchanged',
+      'assets/cfg/config.json',
+      'android/secrets.properties',
+      'ios/Runner/AppDelegate.swift',
+    ];
+  }
+
+  String changed = enabled == true ? "" : "no-";
+  print('Running "git update-index --${changed}assume-unchanged" on\n'
+      '\t1. assets/cfg/config.json'
+      '\t2. android/secrets.properties'
+      '\t3. ios/Runner/AppDelegate.swift');
+
+  final result = await Process.run('git', args);
+
+  if (result.exitCode != 0) {
+    print('\tGit error: ${result.stderr}');
+  }
 }
