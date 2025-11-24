@@ -1,13 +1,9 @@
-import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GtfsApiService {
-  final String gtfsKey; // todo: store as an environment variable or something
-
-  /// Creates a GtfsApiService object, with an optional GlobalConfiguration
-  GtfsApiService({GlobalConfiguration? config})
-      : gtfsKey = (config ?? GlobalConfiguration()).get("gtfsKey");
+  final String gtfsKey = dotenv.env["GTFS_API_KEY"] ?? "emptyGtfsApiKey";
 
   Map<String, String> get _headers => {
         'KeyId':
@@ -79,7 +75,7 @@ class GtfsApiService {
         return feedMessage;
       } else {
         throw Exception(
-            "( gtfs_api_service.dart -> getTramVehiclePositions ) -- Failed to load vehicle positions: error code: ${response.statusCode}; responmse: ${response.toString()}");
+            "( gtfs_api_service.dart -> getTramVehiclePositions ) -- Failed to load vehicle positions: error code: ${response.statusCode}; response: ${response.toString()}");
       }
     } catch (e) {
       throw Exception(

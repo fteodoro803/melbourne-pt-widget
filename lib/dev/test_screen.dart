@@ -99,9 +99,8 @@ class _TestScreenState extends State<TestScreen> {
     print(group);
   }
 
-  Future<void> gtfsTest(int routeId) async {
-    var positions = await gtfsService.getTramPositions(routeId);
-    // print(positions);
+  Future<void> gtfsTest() async {
+    await gtfsService.getTramTripUpdates();
   }
 
   @override
@@ -156,7 +155,7 @@ class _TestScreenState extends State<TestScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                gtfsTest(int.parse(ptvRouteControllers[0].text));
+                gtfsTest();
               },
               child: Text("Gtfs"),
             ),
