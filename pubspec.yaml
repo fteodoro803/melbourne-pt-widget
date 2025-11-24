@@ -58,6 +58,7 @@ dependencies:
   gtfs_realtime_bindings: ^1.1.0
   csv: ^6.0.0
   url_launcher: ^6.3.1
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +90,7 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
+    - .env
     - assets/cfg/
     - assets/icons/
     - assets/mapStyles/

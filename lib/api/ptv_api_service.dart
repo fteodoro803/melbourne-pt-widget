@@ -1,19 +1,12 @@
 import 'dart:convert';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Handles fetching Data from the PTV API v3
 class PtvApiService {
-  final String userId;
-  final String apiKey;
-  final http.Client client;
-
-  /// Creates a PtvApiService object, with an optional GlobalConfiguration
-  PtvApiService({GlobalConfiguration? config, http.Client? client})
-      : userId = (config ?? GlobalConfiguration()).get("ptvUserId"),
-        apiKey = (config ?? GlobalConfiguration()).get("ptvApiKey"),
-        client = client ?? http.Client();
+  final String userId = dotenv.env["PTV_USER_ID"] ?? "emptyPtvUserId";
+  final String apiKey = dotenv.env["PTV_API_KEY"] ?? "emptyPtvApiKey";
 
   // Generate URL for API Calls
   Uri getURL(String request, {Map<String, Object>? parameters}) {

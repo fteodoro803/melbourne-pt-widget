@@ -29,17 +29,21 @@ import 'package:flutter_project/services/home_widget_service.dart';
 import 'package:get/get.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 void main() async {
+  // Load .env file
+  await dotenv.load(fileName: ".env");
+  // todo: if dotenv is empty, return (or just put an empty thing on screen saying like api keys not found, and dont run initialisation
+
   tzdata.initializeTimeZones();
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
 
   Get.put(db.AppDatabase());
 
-  // todo: maybe call fetchRoutes here?
-
   try {
-    await GlobalConfiguration().loadFromAsset("config");
+    await GlobalConfiguration().loadFromAsset("config");    // todo: remove when .env is fully used
     runApp(MyApp());
   } catch (e) {
     print("Error during initialization: $e");
