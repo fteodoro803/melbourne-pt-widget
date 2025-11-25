@@ -13,7 +13,7 @@ class DepartureDetailsController extends GetxController {
   ItemScrollController itemScrollController = ItemScrollController();
   ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
 
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
 
   RxList<Departure> pattern = <Departure>[].obs;
   RxInt currentStopIndex = 0.obs;

@@ -32,20 +32,24 @@ import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  // Load .env file
-  await dotenv.load(fileName: ".env");
-  // todo: if dotenv is empty, return (or just put an empty thing on screen saying like api keys not found, and dont run initialisation
-
   tzdata.initializeTimeZones();
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Adding to State Management
-  Get.put(db.Database());
-
-
   try {
     await GlobalConfiguration().loadFromAsset("config");    // todo: remove when .env is fully used
+
+    // Load environment variables
+    await dotenv.load(fileName: ".env");
+    // todo: if dotenv is empty, return (or just put an empty thing on screen saying like api keys not found, and dont run initialisation
+
+    // Adding to State Management
+    Get.put<db.Database>(db.Database());
+    Get.put<PtvService>(PtvService());
+    // todo: GtfsService
+    // todo: GoogleService
+    // todo maybe: HomeWidgetService
+
     runApp(MyApp());
   } catch (e) {
     print("Error during initialization: $e");
@@ -137,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Trip> _tripList = [];
 
   HomeWidgetService homeWidgetService = HomeWidgetService();
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   GtfsService gtfsService = GtfsService();
   db.Database database = Get.find<db.Database>();
   late Timer _timer;

@@ -1,6 +1,7 @@
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:flutter_project/api/ptv_api_service.dart';
@@ -38,7 +39,7 @@ class SuburbStops {
 }
 
 class SearchUtils {
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
 
   /// Returns all trips in all directions a given route travels from a stop
   Future<List<Trip>> splitDirection(Stop stop, pt_route.Route route) async {

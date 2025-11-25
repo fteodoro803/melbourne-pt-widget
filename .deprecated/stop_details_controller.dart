@@ -8,7 +8,7 @@ class StopDetailsController extends GetxController {
 
   RxList<bool> savedList = <bool>[].obs;
   final isSavedListInitialized = false.obs;
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   SearchUtils searchUtils = SearchUtils();
 
   // Function to initialize the savedList

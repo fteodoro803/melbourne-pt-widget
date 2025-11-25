@@ -35,7 +35,7 @@ class TripInfoSheetState extends State<TripInfoSheet> {
   List<Disruption> plannedDisruptions = [];
   List<Disruption> currentDisruptions = [];
   SearchUtils searchUtils = SearchUtils();
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
 
   @override
   void initState() {

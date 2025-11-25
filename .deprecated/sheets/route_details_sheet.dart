@@ -30,7 +30,7 @@ class _RouteDetailsSheetState extends State<RouteDetailsSheet> {
   List<SuburbStops>? _suburbStops;
   String? _direction;
   late List<RouteDirection> _directions;
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   SearchUtils searchUtils = SearchUtils();
 
   Future<void> getSuburbStops() async {

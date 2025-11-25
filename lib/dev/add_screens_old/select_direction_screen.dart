@@ -22,7 +22,7 @@ class SelectDirectionScreen extends StatefulWidget {
 class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   final String _screenName = "selectDirection";
   List<Direction> _directions = [];
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   DevTools tools = DevTools();
 
   // Initialising State

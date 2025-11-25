@@ -12,7 +12,7 @@ class TripDetailsController extends GetxController {
   final RxMap<String, bool> filters = <String, bool>{}.obs;
   final Rx<ScrollController> listController = ScrollController().obs;
   RxList<Departure> filteredDepartures = <Departure>[].obs;
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   final SearchUtils searchUtils = SearchUtils();
   List<Disruption> disruptions = [];
 

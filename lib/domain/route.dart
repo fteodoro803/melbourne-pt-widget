@@ -47,7 +47,7 @@ class Route {
       required RouteType type,
       required String gtfsId,
       required String status}) async {
-    PtvService ptvService = PtvService();
+    PtvService ptvService = Get.find<PtvService>();
 
     Route route = Route(
         id: id,
@@ -66,7 +66,7 @@ class Route {
   /// Lazy-loading directions and stopAlongRoute
   Future<void> loadDetails() async {
     if (directions == null || stopsAlongRoute == null) {
-      PtvService ptvService = PtvService();
+      PtvService ptvService = Get.find<PtvService>();
       directions = await ptvService.directions.fetchDirections(id);
       stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: this);
     }

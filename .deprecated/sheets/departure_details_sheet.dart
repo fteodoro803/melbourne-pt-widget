@@ -26,7 +26,7 @@ class DepartureDetailsSheet extends StatefulWidget {
 
 class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   late Transport transport;
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   late List<Departure> _pattern = [];
   late int _currentStopIndex;
 

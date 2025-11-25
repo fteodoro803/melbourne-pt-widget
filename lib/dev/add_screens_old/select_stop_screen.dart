@@ -24,7 +24,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   List<Stop> _stops = [];
   List<PTRoute.Route> _routes = [];
   DevTools tools = DevTools();
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
 
   // Initialising State
   @override

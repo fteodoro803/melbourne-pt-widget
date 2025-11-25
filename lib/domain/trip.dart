@@ -51,7 +51,7 @@ class Trip {
     }
 
     // Gets Departures and saves to instance
-    PtvService ptvService = PtvService();
+    PtvService ptvService = Get.find<PtvService>();
     departureCount = departureCount ?? defaultDepartureCount;
     departures = await ptvService.departures.fetchDepartures(
         routeType: routeType,
