@@ -5,10 +5,19 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Handles fetching Data from the PTV API v3
 class PtvApiService {
-  final String userId = dotenv.env["PTV_USER_ID"] ?? "emptyPtvUserId";
-  final String apiKey = dotenv.env["PTV_API_KEY"] ?? "emptyPtvApiKey";
+  final String userId;
+  final String apiKey;
 
-  // Generate URL for API Calls
+  // Constructor
+  PtvApiService()
+    : userId = dotenv.env["PTV_USER_ID"] ?? "",
+      apiKey = dotenv.env["PTV_API_KEY"] ?? "" {
+    if (userId.isEmpty || apiKey.isEmpty) {
+      throw Exception("Missing PTV API credentials");
+    }
+  }
+
+  /// Generate URL for API Calls
   Uri getURL(String request, {Map<String, Object>? parameters}) {
     // Signature
     parameters ??= {}; // initialises if parameters is null
@@ -39,7 +48,7 @@ class PtvApiService {
     return url;
   }
 
-  // Get JSON Response
+  /// Get JSON Response
   Future<Map<String, dynamic>?> getResponse(Uri url) async {
     try {
       final response = await http.get(url);
@@ -59,7 +68,7 @@ class PtvApiService {
     }
   }
 
-  // Get Route Types
+  /// Get Route Types
   Future<Map<String, dynamic>?> routeTypes() async {
     String request = "/v3/route_types";
     Uri url = getURL(request);
@@ -68,7 +77,7 @@ class PtvApiService {
     return response;
   }
 
-  // Get Routes
+  /// Get Routes
   Future<Map<String, dynamic>?> routes({String? routeTypes}) async {
     String request = "/v3/routes";
 
@@ -82,7 +91,7 @@ class PtvApiService {
     return response;
   }
 
-  // Get Route Directions
+  /// Get Route Directions
   Future<Map<String, dynamic>?> directions(String routeId) async {
     String request = "/v3/directions/route/$routeId";
     Uri url = getURL(request);
@@ -91,7 +100,7 @@ class PtvApiService {
     return response;
   }
 
-  // Get Stops around a Location
+  /// Get Stops around a Location
   Future<Map<String, dynamic>?> stopsLocation(String location,
       {String? routeTypes, String? maxResults, String? maxDistance}) async {
     String request = "/v3/stops/location/$location";
@@ -124,7 +133,7 @@ class PtvApiService {
     return response;
   }
 
-  // Get Departures from a Stop
+  /// Get Departures from a Stop
   Future<Map<String, dynamic>?> departures(String routeType, String stopId,
       {String? routeId,
       String? directionId,
@@ -153,7 +162,7 @@ class PtvApiService {
     return response;
   }
 
-  // Runs
+  /// Runs
   Future<Map<String, dynamic>?> runs(String runRef, String routeType,
       {String? expand}) async {
     String request = "/v3/runs/$runRef/route_type/$routeType";
@@ -168,7 +177,7 @@ class PtvApiService {
     return response;
   }
 
-  // Patterns
+  /// Patterns
   Future<Map<String, dynamic>?> patterns(String runRef, String routeType,
       {String? expand}) async {
     String request = "/v3/pattern/run/$runRef/route_type/$routeType";
@@ -183,7 +192,7 @@ class PtvApiService {
     return response;
   }
 
-  // Disruptions
+  /// Disruptions
   Future<Map<String, dynamic>?> disruptions(String routeId) async {
     String request = "/v3/disruptions/route/$routeId";
     Uri url = getURL(request);

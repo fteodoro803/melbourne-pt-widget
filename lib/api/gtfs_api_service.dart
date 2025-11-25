@@ -3,15 +3,22 @@ import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GtfsApiService {
-  final String gtfsKey = dotenv.env["GTFS_API_KEY"] ?? "emptyGtfsApiKey";
+  final String apiKey;
+
+  GtfsApiService()
+      : apiKey = dotenv.env["GTFS_API_KEY"] ?? "" {
+    if (apiKey.isEmpty) {
+      throw Exception("Missing GTFS API credentials");
+    }
+  }
 
   Map<String, String> get _headers => {
         'KeyId':
-            gtfsKey, // todo: find a way to check  if these are all there at startup, and disable functionality if needed
+            apiKey,
         'accept': '*/*',
       };
 
-  // Fetch tram trip updates
+  /// Fetch tram trip updates
   Future<FeedMessage> tramTripUpdates() async {
     final String tramTripUpdatesUrl =
         "https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/tram/trip-updates";
@@ -35,7 +42,7 @@ class GtfsApiService {
     }
   }
 
-  // Fetch tram service alerts
+  /// Fetch tram service alerts
   Future<FeedMessage> tramServiceAlerts() async {
     final String serviceAlertsUrl =
         "https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/tram/service-alerts";
@@ -59,7 +66,7 @@ class GtfsApiService {
     }
   }
 
-  // Fetch vehicle positions
+  /// Fetch vehicle positions
   Future<FeedMessage> tramVehiclePositions() async {
     final String vehiclePositionsUrl =
         "https://api.opendata.transport.vic.gov.au/opendata/public-transport/gtfs/realtime/v1/tram/vehicle-positions";
