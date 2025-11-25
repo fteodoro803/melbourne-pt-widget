@@ -40,7 +40,9 @@ void main() async {
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
 
-  Get.put(db.AppDatabase());
+  // Adding to State Management
+  Get.put(db.Database());
+
 
   try {
     await GlobalConfiguration().loadFromAsset("config");    // todo: remove when .env is fully used
@@ -137,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
   HomeWidgetService homeWidgetService = HomeWidgetService();
   PtvService ptvService = PtvService();
   GtfsService gtfsService = GtfsService();
-  db.AppDatabase database = Get.find<db.AppDatabase>();
+  db.Database database = Get.find<db.Database>();
   late Timer _timer;
 
   @override

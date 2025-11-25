@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
-extension DepartureHelpers on AppDatabase {
+extension DepartureHelpers on Database {
   DeparturesTableCompanion createDepartureCompanion(
       {required String runRef,
       required int stopId,
@@ -52,7 +52,7 @@ extension DepartureHelpers on AppDatabase {
         routeId: routeId,
         hasAirConditioning: hasAirConditioning,
         hasLowFloor: hasLowFloor);
-    AppDatabase db = Get.find<AppDatabase>();
+    Database db = Get.find<Database>();
     await db.insertDeparture(departure);
   }
 

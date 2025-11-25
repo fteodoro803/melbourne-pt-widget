@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
-extension GtfsRouteHelpers on AppDatabase {
+extension GtfsRouteHelpers on Database {
   GtfsRoutesTableCompanion createGtfsRouteCompanion(
       {required String routeId,
       required String shortName,

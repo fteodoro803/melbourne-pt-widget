@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
-extension TransportHelpers on AppDatabase {
+extension TransportHelpers on Database {
   TripsTableCompanion createTripCompanion(
       {required String uniqueId,
       required int routeTypeId,

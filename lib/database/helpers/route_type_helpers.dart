@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
-extension RouteTypeHelpers on AppDatabase {
+extension RouteTypeHelpers on Database {
   RouteTypesTableCompanion createRouteTypeCompanion(
       {required int id, required String name}) {
     return RouteTypesTableCompanion(
@@ -16,7 +16,7 @@ extension RouteTypeHelpers on AppDatabase {
   Future<void> addRouteType(int id, String name) async {
     RouteTypesTableCompanion routeType =
         createRouteTypeCompanion(id: id, name: name);
-    AppDatabase db = Get.find<AppDatabase>();
+    Database db = Get.find<Database>();
     await db.insertRouteType(routeType);
   }
 

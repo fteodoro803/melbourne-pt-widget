@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 import 'package:get/get.dart';
 
-extension RouteDirectionHelpers on AppDatabase {
+extension RouteDirectionHelpers on Database {
   LinkRouteDirectionsTableCompanion createRouteDirectionsTypeCompanion(
       {required int routeId, required int directionId}) {
     return LinkRouteDirectionsTableCompanion(
@@ -17,7 +17,7 @@ extension RouteDirectionHelpers on AppDatabase {
     LinkRouteDirectionsTableCompanion routeDirection =
         createRouteDirectionsTypeCompanion(
             routeId: routeId, directionId: directionId);
-    AppDatabase db = Get.find<AppDatabase>();
+    Database db = Get.find<Database>();
     await db.insertRouteDirectionLink(routeDirection);
   }
 

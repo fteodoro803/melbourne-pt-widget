@@ -21,7 +21,7 @@ class _TestScreenState extends State<TestScreen> {
   PtvService ptvService = PtvService();
   GtfsApiService gtfsApiService = GtfsApiService();
   GtfsService gtfsService = GtfsService();
-  var database = Get.find<AppDatabase>();
+  var database = Get.find<Database>();
 
   // // Testing Routes and GTFS
   // final TextEditingController ptvRouteId = TextEditingController();

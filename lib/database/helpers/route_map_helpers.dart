@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
-extension RouteMapHelpers on AppDatabase {
+extension RouteMapHelpers on Database {
   RouteMapTableCompanion createRouteMap(
       {required int ptvId, required String gtfsId}) {
     return RouteMapTableCompanion(

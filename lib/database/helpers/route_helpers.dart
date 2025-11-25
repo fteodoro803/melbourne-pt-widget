@@ -10,7 +10,7 @@ class Colours {
   const Colours(this.colour, this.textColour);
 }
 
-extension RouteHelpers on AppDatabase {
+extension RouteHelpers on Database {
   RoutesTableCompanion createRouteCompanion(
       {required int id,
       required String name,
@@ -42,7 +42,7 @@ extension RouteHelpers on AppDatabase {
         number: number,
         routeTypeId: routeTypeId,
         status: status);
-    AppDatabase db = Get.find<AppDatabase>();
+    Database db = Get.find<Database>();
     await db.insertRoute(route);
   }
 
@@ -73,7 +73,7 @@ extension RouteHelpers on AppDatabase {
   /// Gets routes according to name.
   Future<List<RoutesTableData>> getRoutesByName(
       {String? search, int? routeType}) async {
-    AppDatabase db = Get.find<AppDatabase>();
+    Database db = Get.find<Database>();
 
     drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
     if (search != null && search.isNotEmpty && routeType != null) {

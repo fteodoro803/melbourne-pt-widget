@@ -242,8 +242,8 @@ class RouteMapTable extends Table {
   GtfsAssetsTable,
   RouteMapTable
 ])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
+class Database extends _$Database {
+  Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
 
   @override

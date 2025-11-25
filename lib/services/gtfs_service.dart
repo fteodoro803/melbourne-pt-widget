@@ -37,7 +37,7 @@ class GtfsService {
   //
   // String busRoutesFile = "lib/dev/gtfs/metro_bus/routes.txt";
   // String busTripsFile = "lib/dev/gtfs/metro_bus/trips.txt";
-  db.AppDatabase database = Get.find<db.AppDatabase>();
+  db.Database database = Get.find<db.Database>();
   bool tramAssetsExist = false;
 
   /// Adds GTFS Schedule data to database

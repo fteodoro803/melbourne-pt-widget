@@ -1,4 +1,3 @@
-import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -78,7 +77,7 @@ class Trip {
             routeId != null &&
             directionId != null &&
             runRef != null) {
-          await Get.find<db.AppDatabase>().addDeparture(
+          await Get.find<db.Database>().addDeparture(
               runRef: runRef,
               stopId: stopId,
               routeId: routeId,

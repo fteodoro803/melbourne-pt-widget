@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
-extension StopHelpers on AppDatabase {
+extension StopHelpers on Database {
   StopsTableCompanion createStopCompanion(
       {required int id,
       required String name,

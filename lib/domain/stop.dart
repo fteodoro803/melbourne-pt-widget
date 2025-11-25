@@ -91,7 +91,7 @@ class Stop {
   /// Constructor from database, by ID
   static Future<Stop?> fromId(int id) async {
     db.StopsTableData? dbStop =
-        await Get.find<db.AppDatabase>().getStopById(id);
+        await Get.find<db.Database>().getStopById(id);
     return dbStop != null
         ? Stop.fromDb(dbStop: dbStop)
         : null; // todo: maybe get sequence? or maybe better to keep without sequence, since it doesn't have context

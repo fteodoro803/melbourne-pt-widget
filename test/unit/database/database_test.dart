@@ -7,10 +7,10 @@ import 'package:flutter_project/database/helpers/database_helpers.dart';
 
 void main() {
   group("mergeUpdate -", () {
-    late AppDatabase db;
+    late Database db;
 
     setUp(() async {
-      db = AppDatabase(NativeDatabase.memory());
+      db = Database(NativeDatabase.memory());
     });
 
     tearDown(() async {

@@ -85,7 +85,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeNumber = _routes[index].number;
     // String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
-    Get.find<db.AppDatabase>().addRoute(
+    Get.find<db.Database>().addRoute(
         id: routeId,
         name: routeName,
         number: routeNumber,
@@ -96,7 +96,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    Get.find<db.AppDatabase>().addStop(
+    Get.find<db.Database>().addStop(
         id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
   }
 

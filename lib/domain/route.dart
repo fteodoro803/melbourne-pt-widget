@@ -195,7 +195,7 @@ class Route {
 
   /// Async Factory constructor to create a Route from the Database.
   static Future<Route?> fromDbAsync(db.RoutesTableData dbRoute) async {
-    db.AppDatabase database = Get.find<db.AppDatabase>();
+    db.Database database = Get.find<db.Database>();
     String? gtfsId = await database.convertToGtfsRouteId(dbRoute.id);
     if (gtfsId == null) return null;
 
