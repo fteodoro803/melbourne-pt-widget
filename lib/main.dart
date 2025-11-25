@@ -49,7 +49,7 @@ void main() async {
     Get.put<PtvService>(PtvService());
     Get.put<GtfsService>(GtfsService());
     Get.put<GoogleService>(GoogleService());
-    // todo maybe: HomeWidgetService
+    Get.put<HomeWidgetService>(HomeWidgetService());
 
     runApp(MyApp());
   } catch (e) {
@@ -141,9 +141,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final locationController = TextEditingController();
   List<Trip> _tripList = [];
 
-  HomeWidgetService homeWidgetService = HomeWidgetService();
   PtvService ptvService = Get.find<PtvService>();
   GtfsService gtfsService = Get.find<GtfsService>();
+  HomeWidgetService homeWidgetService = Get.find<HomeWidgetService>();
   db.Database database = Get.find<db.Database>();
   late Timer _timer;
 
