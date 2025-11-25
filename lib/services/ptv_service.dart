@@ -26,6 +26,9 @@ class StopRouteLists {
 /// Handles calling the PTV API, converting to domain models, and storing to database
 
 class PtvService {
+  final ptvApi = PtvApiService();
+
+  // Subservices
   final PtvDepartureService departures = PtvDepartureService();
   final PtvDirectionService directions = PtvDirectionService();
   final PtvRouteService routes = PtvRouteService();
@@ -45,7 +48,7 @@ class PtvService {
     List<Disruption> disruptions = [];
 
     // Fetches disruption data via PTV API
-    var data = await PtvApiService().disruptions(route.id.toString());
+    var data = await ptvApi.disruptions(route.id.toString());
 
     // Empty JSON Response
     if (data == null) {
@@ -85,8 +88,7 @@ class PtvService {
     String expands = "Stop";
     String? runRef = departure.runRef;
     RouteType? routeType = trip.route?.type;
-    var data = await PtvApiService()
-        .patterns(runRef!, routeType!.name, expand: expands);
+    var data = await ptvApi.patterns(runRef!, routeType!.name, expand: expands);
 
     // Empty JSON Response
     if (data == null) {
@@ -152,8 +154,7 @@ class PtvService {
     String expands = "All";
     String? runRef = trip.departures?[0].runRef;
     RouteType? routeType = trip.route?.type;
-    var data =
-        await PtvApiService().runs(runRef!, routeType!.name, expand: expands);
+    var data = await ptvApi.runs(runRef!, routeType!.name, expand: expands);
 
     print("(ptv_service.dart -> fetchRuns) -- Fetched Runs:\n$data");
   }
@@ -176,7 +177,7 @@ class PtvService {
     }
 
     // Fetches stop data via PTV API
-    var data = await PtvApiService().stopsLocation(
+    var data = await ptvApi.stopsLocation(
       locationString,
       maxResults: maxResults.toString(),
       maxDistance: maxDistance.toString(),
