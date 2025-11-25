@@ -8,6 +8,7 @@ import "package:flutter_project/dev/add_screens_old/select_direction_screen.dart
 import "package:flutter_project/dev/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_stop_screen.dart";
 import "package:flutter_project/database/database.dart" as db;
+import "package:flutter_project/services/google_service.dart";
 import "package:flutter_project/services/gtfs_service.dart";
 import "package:flutter_project/services/ptv_service.dart";
 import "package:flutter_project/add_screens/widgets/bottom_navigation_bar.dart";
@@ -47,7 +48,7 @@ void main() async {
     Get.put<db.Database>(db.Database());
     Get.put<PtvService>(PtvService());
     Get.put<GtfsService>(GtfsService());
-    // todo: GoogleService
+    Get.put<GoogleService>(GoogleService());
     // todo maybe: HomeWidgetService
 
     runApp(MyApp());

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/services/google_service.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const Duration DEBOUNCE_DURATION = Duration(milliseconds: 500);
@@ -17,7 +18,7 @@ class SuggestionsSearch extends StatefulWidget {
 }
 
 class _SuggestionsSearchState extends State<SuggestionsSearch> {
-  GoogleService googleService = GoogleService();
+  GoogleService googleService = Get.find<GoogleService>();
   String? _currentQuery; // Query currently being searched for
 
   // The most recent options retrieved from Google Autocomplete API
