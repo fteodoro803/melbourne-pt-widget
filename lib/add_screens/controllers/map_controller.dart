@@ -28,7 +28,7 @@ class MapController extends GetxController {
 
   final MapUtils mapUtils = MapUtils();
   final PtvService ptvService = Get.find<PtvService>();
-  final GtfsService gtfsService = GtfsService();
+  final GtfsService gtfsService = Get.find<GtfsService>();
 
   late Circle radiusCircle;
   LatLng? markerPos;

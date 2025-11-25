@@ -20,7 +20,7 @@ class _TestScreenState extends State<TestScreen> {
   PtvApiService ptvApiService = PtvApiService();
   PtvService ptvService = Get.find<PtvService>();
   GtfsApiService gtfsApiService = GtfsApiService();
-  GtfsService gtfsService = GtfsService();
+  GtfsService gtfsService = Get.find<GtfsService>();
   var database = Get.find<Database>();
 
   // // Testing Routes and GTFS

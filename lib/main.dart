@@ -46,7 +46,7 @@ void main() async {
     // Adding to State Management
     Get.put<db.Database>(db.Database());
     Get.put<PtvService>(PtvService());
-    // todo: GtfsService
+    Get.put<GtfsService>(GtfsService());
     // todo: GoogleService
     // todo maybe: HomeWidgetService
 
@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   HomeWidgetService homeWidgetService = HomeWidgetService();
   PtvService ptvService = Get.find<PtvService>();
-  GtfsService gtfsService = GtfsService();
+  GtfsService gtfsService = Get.find<GtfsService>();
   db.Database database = Get.find<db.Database>();
   late Timer _timer;
 
