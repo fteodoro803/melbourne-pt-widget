@@ -4,7 +4,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class GoogleApiService {
-  String apiKey = dotenv.env["GOOGLE_API_KEY"] ?? "emptyGoogleApiKey";
+  final String apiKey;
+
+  GoogleApiService()
+      : apiKey = dotenv.env["GOOGLE_API_KEY"] ?? "" {
+    if (apiKey.isEmpty) {
+      throw Exception("Missing Google API credentials");
+    }
+  }
 
   Future<Map<String, dynamic>?> getPlaceAutocomplete(String input) async {
     const String url = "https://places.googleapis.com/v1/places:autocomplete";
