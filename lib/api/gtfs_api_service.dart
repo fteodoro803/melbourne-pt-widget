@@ -3,15 +3,18 @@ import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GtfsApiService {
-  final String apiKey;
+  late String apiKey;
 
-  GtfsApiService()
-      : apiKey = dotenv.env["GTFS_API_KEY"] ?? "" {
+  // Constructor
+  GtfsApiService() {
+    apiKey = dotenv.env["GTFS_API_KEY"] ?? "";
+
     if (apiKey.isEmpty) {
       throw Exception("Missing GTFS API credentials");
     }
   }
 
+  // Headers
   Map<String, String> get _headers => {
         'KeyId':
             apiKey,
