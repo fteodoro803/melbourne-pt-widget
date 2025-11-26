@@ -46,7 +46,7 @@ class _FindRoutesScreenState extends State<FindRoutesScreen> {
   List<pt_route.Route> _filteredRoutes = [];
   List<pt_route.Route> _filteredRoutesBySearch = [];
 
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   Map<BusFilter, bool> busFilters = {};
   Map<VLineFilter, bool> vLineFilters = {};
   String _selectedRouteType = "all";

@@ -3,6 +3,7 @@ import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
+import 'package:get/get.dart';
 
 class SelectRouteTypeScreen extends StatefulWidget {
   // Constructor
@@ -21,7 +22,7 @@ class _SelectRouteTypeScreenState extends State<SelectRouteTypeScreen> {
   final String _screenName = "SelectRouteType";
   final List<RouteType> _routeTypes = [];
   DevTools tools = DevTools();
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
 
   // Initialising State
   @override

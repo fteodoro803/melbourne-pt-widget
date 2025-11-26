@@ -49,7 +49,7 @@ class _StopDetailsSheetState extends State<StopDetailsSheet> {
   NavigationService get navigationService => Get.find<NavigationService>();
   SheetController get sheetController => Get.find<SheetController>();
   final SearchUtils searchUtils = SearchUtils();
-  final PtvService ptvService = PtvService();
+  final PtvService ptvService = Get.find<PtvService>();
 
   late StopDetailsState _currentState;
   late Stop _stop;

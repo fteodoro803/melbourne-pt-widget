@@ -47,7 +47,7 @@ class Route {
       required RouteType type,
       required String gtfsId,
       required String status}) async {
-    PtvService ptvService = PtvService();
+    PtvService ptvService = Get.find<PtvService>();
 
     Route route = Route(
         id: id,
@@ -66,7 +66,7 @@ class Route {
   /// Lazy-loading directions and stopAlongRoute
   Future<void> loadDetails() async {
     if (directions == null || stopsAlongRoute == null) {
-      PtvService ptvService = PtvService();
+      PtvService ptvService = Get.find<PtvService>();
       directions = await ptvService.directions.fetchDirections(id);
       stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: this);
     }
@@ -195,7 +195,7 @@ class Route {
 
   /// Async Factory constructor to create a Route from the Database.
   static Future<Route?> fromDbAsync(db.RoutesTableData dbRoute) async {
-    db.AppDatabase database = Get.find<db.AppDatabase>();
+    db.Database database = Get.find<db.Database>();
     String? gtfsId = await database.convertToGtfsRouteId(dbRoute.id);
     if (gtfsId == null) return null;
 

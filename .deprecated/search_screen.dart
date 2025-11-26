@@ -58,7 +58,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Utility
   DevTools tools = DevTools();
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   SearchUtils searchUtils = SearchUtils();
   MapUtils mapUtils = MapUtils();
 

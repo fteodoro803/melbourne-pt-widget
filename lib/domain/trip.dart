@@ -1,4 +1,3 @@
-import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -43,6 +42,7 @@ class Trip {
     String? stopId = stop?.id.toString();
     String? directionId = direction?.id.toString();
     String? routeId = route?.id.toString();
+    db.Database database = Get.find<db.Database>();
 
     // Early exit if any of the prerequisites are null
     if (routeType == null || stopId == null || routeId == null) {
@@ -52,7 +52,7 @@ class Trip {
     }
 
     // Gets Departures and saves to instance
-    PtvService ptvService = PtvService();
+    PtvService ptvService = Get.find<PtvService>();
     departureCount = departureCount ?? defaultDepartureCount;
     departures = await ptvService.departures.fetchDepartures(
         routeType: routeType,
@@ -74,11 +74,9 @@ class Trip {
         bool? hasAirConditioning = departure.hasAirConditioning;
 
         // Can only add to database with valid ids
-        if (stopId != null &&
-            routeId != null &&
-            directionId != null &&
-            runRef != null) {
-          await Get.find<db.AppDatabase>().addDeparture(
+        if (stopId != null && routeId != null &&
+            directionId != null && runRef != null) {
+          await database.addDeparture(
               runRef: runRef,
               stopId: stopId,
               routeId: routeId,

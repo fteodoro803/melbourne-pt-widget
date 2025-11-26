@@ -47,7 +47,7 @@ class _TripDetailsSheetState extends State<TripDetailsSheet> {
   SheetController get sheetController => Get.find<SheetController>();
   late dynamic _initialState;
 
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   SearchUtils searchUtils = SearchUtils();
 
   late Trip _trip;

@@ -27,8 +27,8 @@ class MapController extends GetxController {
   SheetController get sheetController => Get.find<SheetController>();
 
   final MapUtils mapUtils = MapUtils();
-  final PtvService ptvService = PtvService();
-  final GtfsService gtfsService = GtfsService();
+  final PtvService ptvService = Get.find<PtvService>();
+  final GtfsService gtfsService = Get.find<GtfsService>();
 
   late Circle radiusCircle;
   LatLng? markerPos;

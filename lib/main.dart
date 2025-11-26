@@ -8,6 +8,7 @@ import "package:flutter_project/dev/add_screens_old/select_direction_screen.dart
 import "package:flutter_project/dev/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_stop_screen.dart";
 import "package:flutter_project/database/database.dart" as db;
+import "package:flutter_project/services/google_service.dart";
 import "package:flutter_project/services/gtfs_service.dart";
 import "package:flutter_project/services/ptv_service.dart";
 import "package:flutter_project/add_screens/widgets/bottom_navigation_bar.dart";
@@ -32,18 +33,24 @@ import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  // Load .env file
-  await dotenv.load(fileName: ".env");
-  // todo: if dotenv is empty, return (or just put an empty thing on screen saying like api keys not found, and dont run initialisation
-
   tzdata.initializeTimeZones();
   // Ensures Flutter bindings are initialised
   WidgetsFlutterBinding.ensureInitialized();
 
-  Get.put(db.AppDatabase());
-
   try {
     await GlobalConfiguration().loadFromAsset("config");    // todo: remove when .env is fully used
+
+    // Load environment variables
+    await dotenv.load(fileName: ".env");
+    // todo: if dotenv is empty, return (or just put an empty thing on screen saying like api keys not found, and dont run initialisation
+
+    // Adding to State Management
+    Get.put<db.Database>(db.Database());
+    Get.put<PtvService>(PtvService());
+    Get.put<GtfsService>(GtfsService());
+    Get.put<GoogleService>(GoogleService());
+    Get.put<HomeWidgetService>(HomeWidgetService());
+
     runApp(MyApp());
   } catch (e) {
     print("Error during initialization: $e");
@@ -134,10 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
   final locationController = TextEditingController();
   List<Trip> _tripList = [];
 
-  HomeWidgetService homeWidgetService = HomeWidgetService();
-  PtvService ptvService = PtvService();
-  GtfsService gtfsService = GtfsService();
-  db.AppDatabase database = Get.find<db.AppDatabase>();
+  PtvService ptvService = Get.find<PtvService>();
+  GtfsService gtfsService = Get.find<GtfsService>();
+  HomeWidgetService homeWidgetService = Get.find<HomeWidgetService>();
+  db.Database database = Get.find<db.Database>();
   late Timer _timer;
 
   @override

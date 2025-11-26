@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 
-extension GtfsAssetsHelpers on AppDatabase {
+extension GtfsAssetsHelpers on Database {
   GtfsAssetsTableCompanion createGtfsAssetCompanion(
       {required String id, required DateTime dateModified}) {
     return GtfsAssetsTableCompanion(

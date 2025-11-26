@@ -26,7 +26,7 @@ import 'package:csv/csv.dart';
 */
 
 class GtfsService {
-  GtfsApiService gtfsApiService = GtfsApiService();
+  GtfsApiService gtfsApi = GtfsApiService();
   String tramRoutesFile = "assets/gtfs/metro_tram/routes.txt";
   String tramTripsFile = "assets/gtfs/metro_tram/trips.txt";
   String tempShapesFilePath =
@@ -37,7 +37,7 @@ class GtfsService {
   //
   // String busRoutesFile = "lib/dev/gtfs/metro_bus/routes.txt";
   // String busTripsFile = "lib/dev/gtfs/metro_bus/trips.txt";
-  db.AppDatabase database = Get.find<db.AppDatabase>();
+  db.Database database = Get.find<db.Database>();
   bool tramAssetsExist = false;
 
   /// Adds GTFS Schedule data to database
@@ -293,7 +293,7 @@ class GtfsService {
   // todo: edge case, combined routes (501-503)
   Future<List<LatLng>> getTramPositions(int routeId) async {
     List<LatLng> locations = [];
-    final feedMessage = await gtfsApiService.tramVehiclePositions();
+    final feedMessage = await gtfsApi.tramVehiclePositions();
 
     // 1. Map PTV route ID to GTFS route ID
     String? gtfsRouteId = await database.convertToGtfsRouteId(routeId);
@@ -321,7 +321,7 @@ class GtfsService {
   }
 
   Future<void> getTramTripUpdates() async {
-    final feedMessage = await gtfsApiService.tramTripUpdates();
+    final feedMessage = await gtfsApi.tramTripUpdates();
 
     for (var entity in feedMessage.entity) {
       print(entity);

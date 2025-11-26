@@ -42,7 +42,7 @@ class DepartureDetailsSheet extends StatefulWidget {
 class _DepartureDetailsSheetState extends State<DepartureDetailsSheet> {
   NavigationService get navigationService => Get.find<NavigationService>();
   SheetController get sheetController => Get.find<SheetController>();
-  final PtvService ptvService = PtvService();
+  final PtvService ptvService = Get.find<PtvService>();
 
   late dynamic _initialState;
   late Departure _departure;

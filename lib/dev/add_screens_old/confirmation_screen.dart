@@ -8,6 +8,7 @@ import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/add_screens/widgets/custom_list_tile.dart';
 
 import 'package:flutter_project/domain/trip.dart';
+import 'package:get/get.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key, required this.arguments});
@@ -21,7 +22,7 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
   String _screenName = "ConfirmationScreen";
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   DevTools tools = DevTools();
   List<Trip> transportList = [];
   bool _isLoading = true;

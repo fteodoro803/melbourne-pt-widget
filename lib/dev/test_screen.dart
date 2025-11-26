@@ -18,10 +18,10 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   PtvApiService ptvApiService = PtvApiService();
-  PtvService ptvService = PtvService();
+  PtvService ptvService = Get.find<PtvService>();
   GtfsApiService gtfsApiService = GtfsApiService();
-  GtfsService gtfsService = GtfsService();
-  var database = Get.find<AppDatabase>();
+  GtfsService gtfsService = Get.find<GtfsService>();
+  var database = Get.find<Database>();
 
   // // Testing Routes and GTFS
   // final TextEditingController ptvRouteId = TextEditingController();
