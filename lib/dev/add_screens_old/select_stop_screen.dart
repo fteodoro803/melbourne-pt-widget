@@ -25,6 +25,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
   List<PTRoute.Route> _routes = [];
   DevTools tools = DevTools();
   PtvService ptvService = Get.find<PtvService>();
+  db.Database database = Get.find<db.Database>();
 
   // Initialising State
   @override
@@ -85,7 +86,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeNumber = _routes[index].number;
     // String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
-    Get.find<db.Database>().addRoute(
+    database.addRoute(
         id: routeId,
         name: routeName,
         number: routeNumber,
@@ -96,7 +97,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    Get.find<db.Database>().addStop(
+    database.addStop(
         id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
   }
 

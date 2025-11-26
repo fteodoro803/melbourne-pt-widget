@@ -42,6 +42,7 @@ class Trip {
     String? stopId = stop?.id.toString();
     String? directionId = direction?.id.toString();
     String? routeId = route?.id.toString();
+    db.Database database = Get.find<db.Database>();
 
     // Early exit if any of the prerequisites are null
     if (routeType == null || stopId == null || routeId == null) {
@@ -73,11 +74,9 @@ class Trip {
         bool? hasAirConditioning = departure.hasAirConditioning;
 
         // Can only add to database with valid ids
-        if (stopId != null &&
-            routeId != null &&
-            directionId != null &&
-            runRef != null) {
-          await Get.find<db.Database>().addDeparture(
+        if (stopId != null && routeId != null &&
+            directionId != null && runRef != null) {
+          await database.addDeparture(
               runRef: runRef,
               stopId: stopId,
               routeId: routeId,

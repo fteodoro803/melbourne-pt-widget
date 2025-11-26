@@ -23,6 +23,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
   final String _screenName = "selectDirection";
   List<Direction> _directions = [];
   PtvService ptvService = Get.find<PtvService>();
+  db.Database database = Get.find<db.Database>();
   DevTools tools = DevTools();
 
   // Initialising State
@@ -52,9 +53,8 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       String description = _directions[index].description;
       int? routeId = widget.arguments.trip?.route?.id;
 
-      Get.find<db.Database>().addDirection(id, name, description);
-      Get.find<db.Database>()
-          .addRouteDirection(routeId: routeId!, directionId: id);
+      database.addDirection(id, name, description);
+      database.addRouteDirection(routeId: routeId!, directionId: id);
     } else {
       widget.arguments.trip!.direction = null;
     }
