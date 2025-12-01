@@ -45,18 +45,29 @@ class GtfsService {
   }
 
   /// Add gtfs routes to database.
-  Future<void> _initialiseRoutes() async {
-    // 1. Collect routes and relevant info
-    var routes = await gtfsApi.tramRoutes();
+  Future<List<db.GtfsRoutesTableData>> fetchGtfsRoutes() async {
+    // 1. Collect routes from database, if they exist
+    List<db.GtfsRoutesTableData> gtfsRouteList = await database.getGtfsRoutes();
 
-    for (var route in routes) {
-      String routeId = route["route_id"];
-      String shortName = route["route_short_name"];
-      String longName = route["route_long_name"];
+    // 2. Collect from API, if they don't exist
+    if (gtfsRouteList.isEmpty) {
+      var routes = await gtfsApi.tramRoutes();
 
-      // 2. Insert each route to the database
-      await database.addGtfsRoute(
-          id: routeId, shortName: shortName, longName: longName);    }
+      for (var route in routes) {
+        String routeId = route["route_id"];
+        String shortName = route["route_short_name"];
+        String longName = route["route_long_name"];
+
+        // 2a. Insert each route to the database
+        await database.addGtfsRoute(
+            id: routeId, shortName: shortName, longName: longName);
+      }
+
+      // 2b. Get routes from database
+      gtfsRouteList = await database.getGtfsRoutes();
+    }
+
+    return gtfsRouteList;
   }
 
   /// Fetches all gtfs trips offered by PTV for a GTFS Route within a time period.
