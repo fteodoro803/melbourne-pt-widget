@@ -2,13 +2,13 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
 
-extension GeoPathHelpers on Database {
-  GeoPathsTableCompanion createGeoPathCompanion(
+extension GtfsShapeHelpers on Database {
+  GtfsShapesTableCompanion createGeoPathCompanion(
       {required String id,
       required double latitude,
       required double longitude,
       required int sequence}) {
-    return GeoPathsTableCompanion(
+    return GtfsShapesTableCompanion(
       id: drift.Value(id),
       sequence: drift.Value(sequence),
       latitude: drift.Value(latitude),
@@ -16,13 +16,13 @@ extension GeoPathHelpers on Database {
     );
   }
 
-  Future<void> addGeoPaths(
-      {required List<GeoPathsTableCompanion> geoPath}) async {
-    await batchInsert(geoPathsTable, geoPath);
+  Future<void> addGtfsShapes(
+      {required List<GtfsShapesTableCompanion> geoPath}) async {
+    await batchInsert(gtfsShapesTable, geoPath);
   }
 
   /// Gets general GeoPath of a Route
-  Future<List<GeoPathsTableData>> getGeoPath(String gtfsRouteId,
+  Future<List<GtfsShapesTableData>> getGeoPath(String gtfsRouteId,
       {String? direction}) async {
     // 1. Find Trips with a matching Route ID
     var tripsQuery;
@@ -59,7 +59,7 @@ extension GeoPathHelpers on Database {
     });
 
     // 3. Get GeoPaths
-    final geoPathQuery = select(geoPathsTable)
+    final geoPathQuery = select(gtfsShapesTable)
       ..where((tbl) => tbl.id.equals(shapeId))
       ..orderBy([(t) => drift.OrderingTerm.asc(t.sequence)]);
     final geoPath = await geoPathQuery.get();
@@ -67,20 +67,7 @@ extension GeoPathHelpers on Database {
     return geoPath;
   }
 
-  // todo: fetch geopath specified to a trip
-  Future<List<GeoPathsTableData>> getGeoPathShapeId(String gtfsShapeId) async {
-    // 1. Get GeoPath
-    final geoPathQuery = select(geoPathsTable)
-      ..where((tbl) => tbl.id.equals(gtfsShapeId))
-      ..orderBy([(t) => drift.OrderingTerm.asc(t.sequence)]);
-    final geoPath = await geoPathQuery.get();
-
-    return geoPath;
+  Future<void> clearShapesTable() async {
+    await delete(gtfsShapesTable).go();
   }
-
-  Future<void> clearGeoPathsTable() async {
-    await delete(geoPathsTable).go();
-  }
-
-  // todo: experiment, get geopaths (list of geopaths) for a route
 }
