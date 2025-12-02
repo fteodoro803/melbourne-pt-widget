@@ -3,7 +3,7 @@ import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
 
 extension GtfsShapeHelpers on Database {
-  GtfsShapesTableCompanion createGeoPathCompanion(
+  GtfsShapesTableCompanion createGtfsShapeCompanion(
       {required String id,
       required double latitude,
       required double longitude,
@@ -21,11 +21,27 @@ extension GtfsShapeHelpers on Database {
     await batchInsert(gtfsShapesTable, geoPath);
   }
 
+  // Trip data is needed for this to function
+  Future<List<GtfsShapesTableData>> getGtfsShapes(String routeId) async {
+    // 1. Get distinct shape ids for the route
+    var tripQuery = select(gtfsTripsTable)
+      ..where((tbl) => tbl.routeId.equals(routeId));
+    List<String> tripResult = await tripQuery.map((row) => row.shapeId).get();  // Get all shape ids
+    List<String> shapeIds = tripResult.toSet().toList();    // Convert to distinct ids
+
+    // 2. Get shape ids and accumulate in a list
+    var shapeQuery = select(gtfsShapesTable)
+      ..where((tbl) => (tbl.id.isIn(shapeIds)));
+    var shapeResult = await shapeQuery.get();
+
+    return shapeResult;
+  }
+
   /// Gets general GeoPath of a Route
   Future<List<GtfsShapesTableData>> getGeoPath(String gtfsRouteId,
       {String? direction}) async {
     // 1. Find Trips with a matching Route ID
-    var tripsQuery;
+    drift.SimpleSelectStatement<$GtfsTripsTableTable, GtfsTripsTableData> tripsQuery;
     if (direction != null && direction.isNotEmpty) {
       tripsQuery = select(gtfsTripsTable)
         ..where((tbl) =>
@@ -65,6 +81,21 @@ extension GtfsShapeHelpers on Database {
     final geoPath = await geoPathQuery.get();
 
     return geoPath;
+  }
+
+  /// Checks if there is Shape data for the specified route
+  Future<bool> gtfsShapeHasData(String routeId) async {
+    var query = select(gtfsTripsTable)
+      ..where((tbl) => tbl.routeId.equals(routeId))
+      ..limit(1);
+    var result = await query.getSingleOrNull();
+
+    if (result != null) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   Future<void> clearShapesTable() async {

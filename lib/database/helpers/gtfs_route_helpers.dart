@@ -22,6 +22,14 @@ extension GtfsRouteHelpers on Database {
     await insertGtfsRoute(route);
   }
 
+  Future<List<GtfsRoutesTableData>> getGtfsRoutes() async {
+    drift.SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData> query;
+    query = select(gtfsRoutesTable);
+    var result = await query.get();
+
+    return result;
+  }
+
   Future<void> clearGtfsRouteTable() async {
     await delete(gtfsRoutesTable).go();
   }
