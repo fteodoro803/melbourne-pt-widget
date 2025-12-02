@@ -189,7 +189,7 @@ class MapController extends GetxController {
       return;
     }
 
-    List<LatLng> geoPath = await gtfsService.realtime.fetchGeoPath(gtfsRouteId);
+    List<LatLng> geoPath = await gtfsService.schedule.fetchGeoPath(gtfsRouteId);
 
     print(geoPath);
     setGeoPath(geoPath);

@@ -2,8 +2,8 @@ import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:flutter_project/domain/route.dart';
-import 'package:flutter_project/services/gtfs/gtfs_realtime_service.dart';
 import 'package:flutter_project/services/gtfs/gtfs_schedule_service.dart';
+import 'package:flutter_project/services/gtfs/gtfs_realtime_service.dart';
 import 'package:get/get.dart';
 
 /* GTFS Steps
@@ -23,8 +23,8 @@ import 'package:get/get.dart';
 class GtfsService {
   GtfsApiService gtfsApi = GtfsApiService();
   db.Database database = Get.find<db.Database>();
-  GtfsRealtimeService realtime = GtfsRealtimeService();
   GtfsScheduleService schedule = GtfsScheduleService();
+  GtfsRealtimeService realtime = GtfsRealtimeService();
 
   /// Adds GTFS Schedule data to database
   // todo: add functionality to skip initialisation if the data is up to date, or files aren't there
@@ -32,7 +32,7 @@ class GtfsService {
     DateTime startTime = DateTime.now();
 
     // todo: check if version update needed
-    await realtime.fetchGtfsRoutes();
+    await schedule.fetchGtfsRoutes();
 
     DateTime endTime = DateTime.now();
     int duration = endTime.difference(startTime).inSeconds;
