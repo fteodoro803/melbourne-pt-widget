@@ -65,6 +65,21 @@ extension GtfsTripHelpers on Database {
     return routeShapeMap;
   }
 
+  /// Checks if there is Trip data for the specified route
+  Future<bool> gtfsTripsHasData(String routeId) async {
+    var query = select(gtfsTripsTable)
+      ..where((tbl) => tbl.routeId.equals(routeId))
+      ..limit(1);
+    var result = await query.getSingleOrNull();
+
+    if (result != null) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   Future<void> clearGtfsTripsTable() async {
     await delete(gtfsTripsTable).go();
   }

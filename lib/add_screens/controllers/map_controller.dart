@@ -182,7 +182,15 @@ class MapController extends GetxController {
   /// Initializes trip path for a new route
   Future<void> setTripPath(pt_route.Route route, {Stop? stop}) async {
     // List<LatLng> geoPath = await ptvService.fetchGeoPath(route);
-    List<LatLng> geoPath = await gtfsService.fetchGeoPath(route.id);
+    String? gtfsRouteId = await gtfsService.convertPtvRouteToGtfs(route);
+
+    if (gtfsRouteId == null || gtfsRouteId.isEmpty) {
+      print("( map_controller.dart -> setTripPath ) -- gtfsRouteId is null or empty");
+      return;
+    }
+
+    List<LatLng> geoPath = await gtfsService.schedule.fetchGeoPath(gtfsRouteId);
+
     print(geoPath);
     setGeoPath(geoPath);
 

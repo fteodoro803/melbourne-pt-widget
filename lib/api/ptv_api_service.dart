@@ -5,13 +5,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Handles fetching Data from the PTV API v3
 class PtvApiService {
-  final String userId;
-  final String apiKey;
+  late String userId;
+  late String apiKey;
 
   // Constructor
-  PtvApiService()
-    : userId = dotenv.env["PTV_USER_ID"] ?? "",
-      apiKey = dotenv.env["PTV_API_KEY"] ?? "" {
+  PtvApiService() {
+    userId = dotenv.env["PTV_USER_ID"] ?? "";
+    apiKey = dotenv.env["PTV_API_KEY"] ?? "";
+
     if (userId.isEmpty || apiKey.isEmpty) {
       throw Exception("Missing PTV API credentials");
     }

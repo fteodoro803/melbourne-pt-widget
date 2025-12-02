@@ -173,7 +173,7 @@ class LinkStopRouteTypesTable extends Table {
   Set<Column> get primaryKey => {stopId, routeTypeId};
 }
 
-class GeoPathsTable extends Table {
+class GtfsShapesTable extends Table {
   TextColumn get id => text()();
   IntColumn get sequence => integer()();
   RealColumn get latitude => real()();
@@ -187,7 +187,7 @@ class GeoPathsTable extends Table {
 class GtfsTripsTable extends Table {
   TextColumn get id => text()();
   TextColumn get routeId => text().references(GtfsRoutesTable, #id)();
-  TextColumn get shapeId => text().references(GeoPathsTable, #id)();
+  TextColumn get shapeId => text().references(GtfsShapesTable, #id)();
   TextColumn get tripHeadsign => text()();
   IntColumn get wheelchairAccessible => integer()();
   // todo: add last Updated here, and get it from the file's last updated data
@@ -209,8 +209,8 @@ class GtfsRoutesTable extends Table {
 /// Used to keep track of the assets, for the app's initialisation and asset updates.
 class GtfsAssetsTable extends Table {
   TextColumn get id => text()();
-  DateTimeColumn get dateModified => dateTime()();
-  TextColumn get dateModifiedReadable => text()();
+  DateTimeColumn get version => dateTime()();
+  TextColumn get versionReadable => text()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -228,7 +228,6 @@ class RouteMapTable extends Table {
 @DriftDatabase(tables: [
   DeparturesTable,
   DirectionsTable,
-  GeoPathsTable,
   RouteTypesTable,
   RoutesTable,
   StopsTable,
@@ -240,6 +239,7 @@ class RouteMapTable extends Table {
   GtfsTripsTable,
   GtfsRoutesTable,
   GtfsAssetsTable,
+  GtfsShapesTable,
   RouteMapTable
 ])
 class Database extends _$Database {
