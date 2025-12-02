@@ -209,8 +209,8 @@ class GtfsRoutesTable extends Table {
 /// Used to keep track of the assets, for the app's initialisation and asset updates.
 class GtfsAssetsTable extends Table {
   TextColumn get id => text()();
-  DateTimeColumn get dateModified => dateTime()();
-  TextColumn get dateModifiedReadable => text()();
+  DateTimeColumn get version => dateTime()();
+  TextColumn get versionReadable => text()();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -205,4 +205,29 @@ class GtfsApiService {
       throw Exception("( gtfs_api_service.dart -> tramRouteShapes ) -- Error fetching tram shapes $e");
     }
   }
+
+  Future<Map<String, dynamic>> version() async {
+    // 1. Base URL
+    final String url = "$scheduleUrl/version";
+
+    // 2. Adding query parameters
+    final Uri uri = Uri.parse(url);
+
+    // 3. Fetch data
+    try {
+      final response = await http.get(uri);
+      print("(gtfs_api_service.dart -> version) -- Request: ${response.request}");
+      var jsonResponse = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        // print(" ( gtfs_api_service.dart -> version ) -- Version of GTFS Schedule Data: ${response.body}");
+        return jsonResponse;
+      }
+      else {
+        throw Exception(" ( gtfs_api_service.dart -> tramRouteShapes ) -- Failed to load GTFS Schedule version data: ${response.statusCode} - ${response.body}");
+      }
+    } catch (e) {
+      throw Exception("( gtfs_api_service.dart -> tramRouteShapes ) -- Error fetching GTFS Schedule version data $e");
+    }
+  }
 }

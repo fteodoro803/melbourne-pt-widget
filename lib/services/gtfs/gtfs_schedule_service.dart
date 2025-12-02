@@ -1,5 +1,6 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
+import 'package:flutter_project/database/helpers/gtfs_assets_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_shapes_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
@@ -136,5 +137,26 @@ class GtfsScheduleService {
     List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
 
     return geoPath;
+  }
+
+  Future<DateTime?> fetchVersion() async {
+    // 1. Get from GTFS Asset database, if it exists
+    DateTime? version = await database.getGtfsAssetDate(id: "version");
+
+    // 2. If not, get from API
+    if (version == null) {
+      var jsonVersion = await gtfsApi.version();
+      DateTime? gtfsVersion = DateTime.tryParse(jsonVersion["version"]);
+
+      if (gtfsVersion != null) {
+        // Add to database
+        database.addGtfsAsset(id: "version", version: gtfsVersion);
+      }
+
+      version = await database.getGtfsAssetDate(id: "version");
+    }
+
+    print(version);
+    return version;
   }
 }

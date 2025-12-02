@@ -6,15 +6,15 @@ extension GtfsAssetsHelpers on Database {
       {required String id, required DateTime dateModified}) {
     return GtfsAssetsTableCompanion(
       id: drift.Value(id),
-      dateModified: drift.Value(dateModified),
-      dateModifiedReadable: drift.Value(dateModified.toString()),
+      version: drift.Value(dateModified),
+      versionReadable: drift.Value(dateModified.toString()),
     );
   }
 
   Future<void> addGtfsAsset(
-      {required String id, required DateTime dateModified}) async {
+      {required String id, required DateTime version}) async {
     GtfsAssetsTableCompanion asset =
-        createGtfsAssetCompanion(id: id, dateModified: dateModified);
+        createGtfsAssetCompanion(id: id, dateModified: version);
     await insertGtfsAsset(asset);
   }
 
@@ -24,6 +24,6 @@ extension GtfsAssetsHelpers on Database {
     var query = select(gtfsAssetsTable)..where((tbl) => tbl.id.equals(id));
     var result = await query.getSingleOrNull();
 
-    return result?.dateModified;
+    return result?.version;
   }
 }
