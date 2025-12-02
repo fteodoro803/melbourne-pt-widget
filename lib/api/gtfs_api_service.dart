@@ -166,14 +166,43 @@ class GtfsApiService {
       var jsonResponse = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        print(" ( gtfs_api_service.dart -> tramShapes ) -- Shapes for route '$shapeId': ${response.body}");
+        // print(" ( gtfs_api_service.dart -> tramShapes ) -- Shapes for route '$shapeId': ${response.body}");
         return jsonResponse;
       }
       else {
-        throw Exception(" ( gtfs_api_service.dart -> tramShapes ) -- Failed to load gtfs tram shapes for route $shapeId: ${response.statusCode} - ${response.body}");
+        throw Exception(" ( gtfs_api_service.dart -> tramShapes ) -- Failed to load gtfs tram shapes for shape $shapeId: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
       throw Exception("( gtfs_api_service.dart -> tramShapes ) -- Error fetching tram shapes $e");
+    }
+  }
+
+  Future<List<dynamic>> tramRouteShapes(String routeId) async {
+    // 1. Base URL
+    final String url = "$scheduleUrl/routeShapes";
+
+    // 2. Adding query parameters
+    final Uri uri = Uri.parse(url).replace(
+        queryParameters: {
+          "id": routeId
+        }
+    );
+
+    // 3. Fetch data
+    try {
+      final response = await http.get(uri);
+      print("(gtfs_api_service.dart -> tramRouteShapes) -- Request: ${response.request}");
+      var jsonResponse = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        // print(" ( gtfs_api_service.dart -> tramRouteShapes ) -- Shapes for route '$routeId': ${response.body}");
+        return jsonResponse;
+      }
+      else {
+        throw Exception(" ( gtfs_api_service.dart -> tramRouteShapes ) -- Failed to load gtfs tram shapes for route $routeId: ${response.statusCode} - ${response.body}");
+      }
+    } catch (e) {
+      throw Exception("( gtfs_api_service.dart -> tramRouteShapes ) -- Error fetching tram shapes $e");
     }
   }
 }
