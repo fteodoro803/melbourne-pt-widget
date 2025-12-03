@@ -53,7 +53,9 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
 
       var dbDirection = database.directionsDao.createDirectionCompanion(id: id, name: name, description: description);
       database.directionsDao.addDirection(dbDirection);
-      database.linkRouteDirectionsDao.addRouteDirection(routeId: routeId!, directionId: id);
+
+      var dbRouteDirection = database.linkRouteDirectionsDao.createRouteDirectionsTypeCompanion(routeId: routeId!, directionId: id);
+      database.linkRouteDirectionsDao.addRouteDirection(dbRouteDirection);
     } else {
       widget.arguments.trip!.direction = null;
     }

@@ -18,25 +18,16 @@ class LinkRouteDirectionsDao extends DatabaseAccessor<Database>
     );
   }
 
-  // LinkRouteDirections Functions
-  Future<void> _insertRouteDirectionLink(
-      LinkRouteDirectionsTableCompanion routeDirection) async {
+  /// Adds/Updates a routeDirection to the database.
+  Future<void> addRouteDirection(LinkRouteDirectionsTableCompanion routeDirection) async {
     await db.mergeUpdate(
         linkRouteDirectionsTable,
         routeDirection,
             (r) =>
         r.routeId.equals(routeDirection.routeId.value) &
-        r.directionId.equals(routeDirection.directionId.value));
-  }
+        r.directionId.equals(routeDirection.directionId.value));  }
 
-  Future<void> addRouteDirection(
-      {required int routeId, required int directionId}) async {
-    LinkRouteDirectionsTableCompanion routeDirection =
-    createRouteDirectionsTypeCompanion(
-        routeId: routeId, directionId: directionId);
-    await _insertRouteDirectionLink(routeDirection);
-  }
-
+  /// Gets the directions available to a route, from the database.
   Future<List<DirectionsTableData>> getDirectionsByRoute(int routeId) async {
     // 1. Join directions and routeDirections table
     final query = select(directionsTable).join([
