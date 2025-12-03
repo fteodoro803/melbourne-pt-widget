@@ -1,6 +1,8 @@
-import 'package:drift/drift.dart' as drift;
+import 'package:drift/drift.dart';
 import 'package:flutter_project/database/database.dart';
-import 'package:get/get.dart';
+import 'package:flutter_project/database/helpers/database_helpers.dart';
+
+part 'routes_dao.g.dart';
 
 /// Represents the colours a route can have.
 class Colours {
@@ -10,45 +12,52 @@ class Colours {
   const Colours(this.colour, this.textColour);
 }
 
-extension RouteHelpers on Database {
+@DriftAccessor(tables: [RoutesTable])
+class RoutesDao extends DatabaseAccessor<Database>
+    with _$RoutesDaoMixin {
+  RoutesDao(super.db);
+
   RoutesTableCompanion createRouteCompanion(
       {required int id,
-      required String name,
-      required String number,
-      required int routeTypeId,
-      required String status}) {
-    // AppDatabase db = Get.find<AppDatabase>();
-    // String? routeType = await db.getRouteTypeNameFromRouteTypeId(routeTypeId);
+        required String name,
+        required String number,
+        required int routeTypeId,
+        required String status}) {
 
     return RoutesTableCompanion(
-      id: drift.Value(id),
-      name: drift.Value(name),
-      number: drift.Value(number),
-      routeTypeId: drift.Value(routeTypeId),
-      status: drift.Value(status),
-      lastUpdated: drift.Value(DateTime.now()),
+      id: Value(id),
+      name: Value(name),
+      number: Value(number),
+      routeTypeId: Value(routeTypeId),
+      status: Value(status),
+      lastUpdated: Value(DateTime.now()),
     );
+  }
+
+  /// Adds a route to the database, if it doesn't already exist,
+  /// or if it has passed the "expiry" time
+  Future<void> _insertRoute(RoutesTableCompanion route) async {
+    await db.mergeUpdate(routesTable, route, (r) => r.id.equals(route.id.value));
   }
 
   Future<void> addRoute(
       {required int id,
-      required String name,
-      required String number,
-      required int routeTypeId,
-      required String status}) async {
+        required String name,
+        required String number,
+        required int routeTypeId,
+        required String status}) async {
     RoutesTableCompanion route = createRouteCompanion(
         id: id,
         name: name,
         number: number,
         routeTypeId: routeTypeId,
         status: status);
-    Database db = Get.find<Database>();
-    await db.insertRoute(route);
+    await _insertRoute(route);
   }
 
   /// Gets all routes in database.
   Future<List<RoutesTableData>> getRoutes(int? routeType) async {
-    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
+    SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
 
     if (routeType != null) {
       query = select(routesTable)
@@ -63,7 +72,7 @@ extension RouteHelpers on Database {
 
   /// Gets route according to id.
   Future<RoutesTableData?> getRouteById(int id) async {
-    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
+    SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
     query = select(routesTable)..where((tbl) => tbl.id.equals(id));
 
     final result = await query.getSingleOrNull();
@@ -73,21 +82,20 @@ extension RouteHelpers on Database {
   /// Gets routes according to name.
   Future<List<RoutesTableData>> getRoutesByName(
       {String? search, int? routeType}) async {
-    Database db = Get.find<Database>();
 
-    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
+    SimpleSelectStatement<$RoutesTableTable, RoutesTableData> query;
     if (search != null && search.isNotEmpty && routeType != null) {
-      query = db.select(db.routesTable)
+      query = select(routesTable)
         ..where((tbl) =>
-            tbl.name.contains(search) & tbl.routeTypeId.equals(routeType));
+        tbl.name.contains(search) & tbl.routeTypeId.equals(routeType));
     } else if (routeType != null) {
-      query = db.select(db.routesTable)
+      query = select(routesTable)
         ..where((tbl) => tbl.routeTypeId.equals(routeType));
     } else if (search != null && search.isNotEmpty) {
-      query = db.select(db.routesTable)
+      query = select(routesTable)
         ..where((tbl) => tbl.name.contains(search));
     } else {
-      query = db.select(db.routesTable);
+      query = select(routesTable);
     }
 
     final result = await query.get();

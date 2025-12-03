@@ -1,6 +1,4 @@
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
-import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/services/ptv/ptv_base_service.dart';
@@ -14,7 +12,7 @@ class PtvRouteService extends PtvBaseService {
 
     // 1a. Checks if data exists in database, and sets routeList if it exists
     int? routeType = routeTypes != null ? int.tryParse(routeTypes) : null;
-    final dbRouteList = await database.getRoutes(routeType);
+    final dbRouteList = await database.routesDao.getRoutes(routeType);
     if (dbRouteList.isNotEmpty) {
       // routeList = dbRouteList.map(Route.fromDb).toList();
 
@@ -43,7 +41,7 @@ class PtvRouteService extends PtvBaseService {
         routeList.add(newRoute);
 
         // 3. Add to Database
-        await database.addRoute(
+        await database.routesDao.addRoute(
             id: newRoute.id,
             name: newRoute.name,
             number: newRoute.number,
@@ -59,7 +57,7 @@ class PtvRouteService extends PtvBaseService {
   Future<List<Route>> searchRoutes(
       {String? query, RouteType? routeType}) async {
     final dbRouteList =
-        await database.getRoutesByName(search: query, routeType: routeType?.id);
+        await database.routesDao.getRoutesByName(search: query, routeType: routeType?.id);
     // List<Route> domainRouteList = dbRouteList.map(Route.fromDb).toList();
 
     List<Route> domainRouteList = [];
@@ -75,7 +73,7 @@ class PtvRouteService extends PtvBaseService {
   Future<Route?> getRouteById(
       {required int id, bool withDetails = false}) async {
     // 1. Get route from database
-    final dbRoute = await database.getRouteById(id);
+    final dbRoute = await database.routesDao.getRouteById(id);
     Route? route = dbRoute != null ? await Route.fromDbAsync(dbRoute) : null;
 
     // 2. Lazy load route details
@@ -90,7 +88,7 @@ class PtvRouteService extends PtvBaseService {
   // todo: but also, in our functions, we use fetch, but most of them also check the database first. So maybe for consistency, keep it?
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
     final List<db.RoutesTableData> dbRoutes =
-        await database.getRoutesFromStop(stopId);
+        await database.linkRouteStopsDao.getRoutesFromStop(stopId);
 
     // Convert Route's database model to domain model
     // List<Route> routeList = dbRoutes.map(Route.fromDb).toList();

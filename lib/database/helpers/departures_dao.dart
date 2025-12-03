@@ -1,48 +1,68 @@
-import 'package:drift/drift.dart' as drift;
+import 'package:drift/drift.dart';
 import 'package:flutter_project/database/database.dart';
-import 'package:get/get.dart';
+import 'package:flutter_project/database/helpers/database_helpers.dart';
 
-extension DepartureHelpers on Database {
+part 'departures_dao.g.dart';
+
+@DriftAccessor(tables: [DeparturesTable])
+class DeparturesDao extends DatabaseAccessor<Database>
+    with _$DeparturesDaoMixin {
+  DeparturesDao(super.db);
+
   DeparturesTableCompanion createDepartureCompanion(
       {required String runRef,
-      required int stopId,
-      required int routeId,
-      required int directionId,
-      DateTime? scheduledDepartureUTC,
-      DateTime? estimatedDepartureUTC,
-      bool? hasLowFloor,
-      bool? hasAirConditioning}) {
+        required int stopId,
+        required int routeId,
+        required int directionId,
+        DateTime? scheduledDepartureUTC,
+        DateTime? estimatedDepartureUTC,
+        bool? hasLowFloor,
+        bool? hasAirConditioning}) {
     String? scheduledDeparture = getTime(scheduledDepartureUTC);
     String? estimatedDeparture = getTime(estimatedDepartureUTC);
 
     return DeparturesTableCompanion(
-      runRef: drift.Value(runRef),
-      stopId: drift.Value(stopId),
-      routeId: drift.Value(routeId),
-      directionId: drift.Value(directionId),
-      scheduledDepartureUtc: drift.Value(scheduledDepartureUTC),
-      estimatedDepartureUtc: drift.Value(estimatedDepartureUTC),
-      scheduledDeparture: drift.Value(scheduledDeparture),
-      estimatedDeparture: drift.Value(estimatedDeparture),
+      runRef: Value(runRef),
+      stopId: Value(stopId),
+      routeId: Value(routeId),
+      directionId: Value(directionId),
+      scheduledDepartureUtc: Value(scheduledDepartureUTC),
+      estimatedDepartureUtc: Value(estimatedDepartureUTC),
+      scheduledDeparture: Value(scheduledDeparture),
+      estimatedDeparture: Value(estimatedDeparture),
       hasLowFloor:
-          hasLowFloor != null ? drift.Value(hasLowFloor) : drift.Value.absent(),
+      hasLowFloor != null ? Value(hasLowFloor) : Value.absent(),
       hasAirConditioning: hasAirConditioning != null
-          ? drift.Value(hasAirConditioning)
-          : drift.Value.absent(),
-      lastUpdated: drift.Value(DateTime.now()),
+          ? Value(hasAirConditioning)
+          : Value.absent(),
+      lastUpdated: Value(DateTime.now()),
+    );
+  }
+
+  /// Adds a departure to the database, if it doesn't already exist,
+  /// or if it has passed the "expiry" time
+  Future<void> _insertDeparture(DeparturesTableCompanion departure) async {
+    await db.mergeUpdate(
+      departuresTable,
+      departure,
+          (d) =>
+      d.runRef.equals(departure.runRef.value) &
+      d.stopId.equals(departure.stopId.value) &
+      d.routeId.equals(departure.routeId.value) &
+      d.directionId.equals(departure.directionId.value),
     );
   }
 
   // todo: maybe i can just make this take a Departure instance, bc there are so many arguments. Check how to make a departure table a class.
   Future<void> addDeparture(
       {required String runRef,
-      required int stopId,
-      required int routeId,
-      required int directionId,
-      DateTime? scheduledDepartureUTC,
-      DateTime? estimatedDepartureUTC,
-      bool? hasLowFloor,
-      bool? hasAirConditioning}) async {
+        required int stopId,
+        required int routeId,
+        required int directionId,
+        DateTime? scheduledDepartureUTC,
+        DateTime? estimatedDepartureUTC,
+        bool? hasLowFloor,
+        bool? hasAirConditioning}) async {
     DeparturesTableCompanion departure = createDepartureCompanion(
         scheduledDepartureUTC: scheduledDepartureUTC,
         estimatedDepartureUTC: estimatedDepartureUTC,
@@ -52,8 +72,8 @@ extension DepartureHelpers on Database {
         routeId: routeId,
         hasAirConditioning: hasAirConditioning,
         hasLowFloor: hasLowFloor);
-    Database db = Get.find<Database>();
-    await db.insertDeparture(departure);
+
+    await _insertDeparture(departure);
   }
 
   /// Returns a more readable time string from a UTC DateTime object,
@@ -93,5 +113,6 @@ extension DepartureHelpers on Database {
     return "$hour:$minute$meridiem";
   }
 
-  // todo: add vehicle descriptors
+// todo: add vehicle descriptors
+
 }

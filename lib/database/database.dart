@@ -1,6 +1,20 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:flutter_project/database/helpers/database_helpers.dart';
+import 'package:flutter_project/database/helpers/departures_dao.dart';
+import 'package:flutter_project/database/helpers/directions_dao.dart';
+import 'package:flutter_project/database/helpers/gtfs_assets_dao.dart';
+import 'package:flutter_project/database/helpers/gtfs_routes_dao.dart';
+import 'package:flutter_project/database/helpers/gtfs_shapes_dao.dart';
+import 'package:flutter_project/database/helpers/gtfs_trips_dao.dart';
+import 'package:flutter_project/database/helpers/link_route_directions_dao.dart';
+import 'package:flutter_project/database/helpers/link_route_stops_dao.dart';
+import 'package:flutter_project/database/helpers/link_stop_route_directions_dao.dart';
+import 'package:flutter_project/database/helpers/link_stop_route_types_dao.dart';
+import 'package:flutter_project/database/helpers/route_maps_dao.dart';
+import 'package:flutter_project/database/helpers/route_types_dao.dart';
+import 'package:flutter_project/database/helpers/routes_dao.dart';
+import 'package:flutter_project/database/helpers/stops_dao.dart';
+import 'package:flutter_project/database/helpers/trips_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -56,8 +70,6 @@ class DirectionsTable extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
-
-// todo: Patterns
 
 class RoutesTable extends Table {
   IntColumn get id => integer()();
@@ -217,7 +229,7 @@ class GtfsAssetsTable extends Table {
 }
 
 // GTFS to PTV Route ID Mapping
-class RouteMapTable extends Table {
+class RouteMapsTable extends Table {
   IntColumn get ptvId => integer().references(RoutesTable, #id)();
   TextColumn get gtfsId => text().references(GtfsRoutesTable, #id)();
 
@@ -225,23 +237,42 @@ class RouteMapTable extends Table {
   Set<Column> get primaryKey => {ptvId, gtfsId};
 }
 
-@DriftDatabase(tables: [
-  DeparturesTable,
-  DirectionsTable,
-  RouteTypesTable,
-  RoutesTable,
-  StopsTable,
-  TripsTable,
-  LinkRouteStopsTable,
-  LinkStopRouteTypesTable,
-  LinkRouteDirectionsTable,
-  LinkStopRouteDirectionsTable,
-  GtfsTripsTable,
-  GtfsRoutesTable,
-  GtfsAssetsTable,
-  GtfsShapesTable,
-  RouteMapTable
-])
+@DriftDatabase(
+  tables: [
+    DeparturesTable,
+    DirectionsTable,
+    RouteTypesTable,
+    RoutesTable,
+    StopsTable,
+    TripsTable,
+    LinkRouteStopsTable,
+    LinkStopRouteTypesTable,
+    LinkRouteDirectionsTable,
+    LinkStopRouteDirectionsTable,
+    GtfsTripsTable,
+    GtfsRoutesTable,
+    GtfsAssetsTable,
+    GtfsShapesTable,
+    RouteMapsTable
+  ],
+  daos: [
+    DeparturesDao,
+    DirectionsDao,
+    RoutesDao,
+    RouteTypesDao,
+    StopsDao,
+    TripsDao,
+    GtfsAssetsDao,
+    GtfsRoutesDao,
+    GtfsShapesDao,
+    GtfsTripsDao,
+    LinkRouteDirectionsDao,
+    LinkRouteStopsDao,
+    LinkStopRouteDirectionsDao,
+    LinkStopRouteTypesDao,
+    RouteMapsDao,
+  ],
+)
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
@@ -262,135 +293,4 @@ class Database extends _$Database {
       // If you need web support, see https://drift.simonbinder.eu/platforms/web/
     );
   }
-
-  // todo: move these functions to their respective helpers maybe?
-
-  // Departure Functions
-  /// Adds a departure to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-
-  Future<void> insertDeparture(DeparturesTableCompanion departure) async {
-    await mergeUpdate(
-      departuresTable,
-      departure,
-      (d) =>
-          d.runRef.equals(departure.runRef.value) &
-          d.stopId.equals(departure.stopId.value) &
-          d.routeId.equals(departure.routeId.value) &
-          d.directionId.equals(departure.directionId.value),
-    );
-  }
-
-  // Direction Functions
-  /// Adds a direction to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> insertDirection(DirectionsTableCompanion direction) async {
-    await mergeUpdate(
-        directionsTable, direction, (d) => d.id.equals(direction.id.value));
-  }
-
-  // RouteType Functions
-  /// Adds a route type to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> insertRouteType(RouteTypesTableCompanion routeType) async {
-    await mergeUpdate(
-        routeTypesTable, routeType, (r) => r.id.equals(routeType.id.value));
-  }
-
-  // Route Functions
-  /// Adds a route to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> insertRoute(RoutesTableCompanion route) async {
-    await mergeUpdate(routesTable, route, (r) => r.id.equals(route.id.value));
-  }
-
-  // Stop Functions
-  /// Adds a stop to the database, if it doesn't already exist.
-  /// If it does, update the old stop by merging it with the new one.
-  Future<void> insertStop(StopsTableCompanion stop) async {
-    await mergeUpdate(stopsTable, stop, (t) => t.id.equals(stop.id.value));
-  }
-
-  // Transport Functions
-  Future<void> insertTransport(TripsTableCompanion transport) async {
-    await mergeUpdate(tripsTable, transport,
-        (t) => t.uniqueId.equals(transport.uniqueId.value));
-  }
-
-  // LinkRouteDirections Functions
-  Future<void> insertRouteDirectionLink(
-      LinkRouteDirectionsTableCompanion routeDirection) async {
-    await mergeUpdate(
-        linkRouteDirectionsTable,
-        routeDirection,
-        (r) =>
-            r.routeId.equals(routeDirection.routeId.value) &
-            r.directionId.equals(routeDirection.directionId.value));
-  }
-
-  // LinkRouteStops Functions
-  Future<void> insertRouteStopLink(
-      LinkRouteStopsTableCompanion routeStop) async {
-    await mergeUpdate(
-        linkRouteStopsTable,
-        routeStop,
-        (r) =>
-            r.routeId.equals(routeStop.routeId.value) &
-            r.stopId.equals(routeStop.stopId.value));
-  }
-
-  // LinkStopRouteTypes Functions
-  Future<void> insertStopRouteTypeLink(
-      LinkStopRouteTypesTableCompanion stopRouteType) async {
-    await mergeUpdate(
-        linkStopRouteTypesTable,
-        stopRouteType,
-        (s) =>
-            s.stopId.equals(stopRouteType.stopId.value) &
-            s.routeTypeId.equals(stopRouteType.routeTypeId.value));
-  }
-
-  // Link StopDirections Functions
-  Future<void> insertStopRouteDirectionsLink(
-      LinkStopRouteDirectionsTableCompanion stopDirection) async {
-    await mergeUpdate(
-        linkStopRouteDirectionsTable,
-        stopDirection,
-        (s) =>
-            s.stopId.equals(stopDirection.stopId.value) &
-            s.routeId.equals(stopDirection.routeId.value) &
-            s.directionId.equals(stopDirection.directionId.value));
-  }
-
-  // GTFS Route Functions
-  Future<void> insertGtfsRoute(GtfsRoutesTableCompanion route) async {
-    await mergeUpdate(
-        gtfsRoutesTable, route, (r) => r.id.equals(route.id.value));
-  }
-
-  // GTFS Trip Functions
-  Future<void> insertGtfsTrip(GtfsTripsTableCompanion trip) async {
-    await mergeUpdate(gtfsTripsTable, trip, (t) => t.id.equals(trip.id.value));
-  }
-
-  // GTFS Asset Functions
-  Future<void> insertGtfsAsset(GtfsAssetsTableCompanion asset) async {
-    await mergeUpdate(
-        gtfsAssetsTable, asset, (a) => a.id.equals(asset.id.value));
-  }
-
-  // Route Map Functions
-  Future<void> insertRouteMap(RouteMapTableCompanion routeMap) async {
-    await mergeUpdate(
-        routeMapTable,
-        routeMap,
-        (r) =>
-            r.ptvId.equals(routeMap.ptvId.value) &
-            r.gtfsId.equals(routeMap.gtfsId.value));
-  }
-
-  // Table Functions
-  //   Future<void> clearData() async {
-  //     await delete(departures).go();
-  //   }
 }

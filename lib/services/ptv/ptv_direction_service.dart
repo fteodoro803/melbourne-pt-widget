@@ -1,5 +1,3 @@
-import 'package:flutter_project/database/helpers/direction_helpers.dart';
-import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/services/ptv/ptv_base_service.dart';
@@ -13,7 +11,7 @@ class PtvDirectionService extends PtvBaseService {
 
     // 1. Check if directions data exists in database
     // 2a. If it does, set directionList to the retrieved data
-    final dbDirectionsList = await database.getDirectionsByRoute(routeId);
+    final dbDirectionsList = await database.linkRouteDirectionsDao.getDirectionsByRoute(routeId);
     if (dbDirectionsList.isNotEmpty) {
       directionList = dbDirectionsList.map(Direction.fromDb).toList();
     }
@@ -35,9 +33,9 @@ class PtvDirectionService extends PtvBaseService {
         directionList.add(newDirection);
 
         // 4. Add to database
-        await database.addDirection(
+        await database.directionsDao.addDirection(
             newDirection.id, newDirection.name, newDirection.description);
-        await database.addRouteDirection(
+        await database.linkRouteDirectionsDao.addRouteDirection(
             routeId: routeId, directionId: newDirection.id);
       }
     }

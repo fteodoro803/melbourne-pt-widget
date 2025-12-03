@@ -1,6 +1,5 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/services/gtfs/gtfs_schedule_service.dart';
 import 'package:flutter_project/services/gtfs/gtfs_realtime_service.dart';
@@ -41,7 +40,7 @@ class GtfsService {
   }
 
   Future<String?> convertPtvRouteToGtfs(Route route) async {
-    String? gtfsRouteId = await database.convertToGtfsRouteId(route.id);
+    String? gtfsRouteId = await database.routeMapsDao.convertToGtfsRouteId(route.id);
     return gtfsRouteId;
   }
 }

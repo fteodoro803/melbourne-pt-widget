@@ -1,9 +1,5 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/gtfs_assets_helpers.dart';
-import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
-import 'package:flutter_project/database/helpers/gtfs_shapes_helpers.dart';
-import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -14,7 +10,7 @@ class GtfsScheduleService {
   /// Add gtfs routes to database.
   Future<List<db.GtfsRoutesTableData>> fetchGtfsRoutes() async {
     // 1. Collect routes from database, if they exist
-    List<db.GtfsRoutesTableData> gtfsRouteList = await database.getGtfsRoutes();
+    List<db.GtfsRoutesTableData> gtfsRouteList = await database.gtfsRoutesDao.getGtfsRoutes();
 
     // 2. Collect from API, if they don't exist
     if (gtfsRouteList.isEmpty) {
@@ -26,12 +22,12 @@ class GtfsScheduleService {
         String longName = route["route_long_name"];
 
         // 2a. Insert each route to the database
-        await database.addGtfsRoute(
+        await database.gtfsRoutesDao.addGtfsRoute(
             id: routeId, shortName: shortName, longName: longName);
       }
 
       // 2b. Get routes from database
-      gtfsRouteList = await database.getGtfsRoutes();
+      gtfsRouteList = await database.gtfsRoutesDao.getGtfsRoutes();
     }
 
     return gtfsRouteList;
@@ -41,7 +37,7 @@ class GtfsScheduleService {
   /// If no route data is in database, it fetches from the GTFS API and stores it to database.
   Future<List<db.GtfsTripsTableData>> fetchGtfsTrips(String gtfsRouteId) async {
     // 1. Collect from database, if it exists
-    List<db.GtfsTripsTableData> gtfsTripList = await database.getGtfsTripsByRouteId(gtfsRouteId);
+    List<db.GtfsTripsTableData> gtfsTripList = await database.gtfsTripsDao.getGtfsTripsByRouteId(gtfsRouteId);
 
     // 2. Collect from API, if it doesn't exist
     if (gtfsTripList.isEmpty) {
@@ -56,7 +52,7 @@ class GtfsScheduleService {
         int wheelchairAccessible = trip["wheelchair_accessible"];
 
         // 2a. Create Trip Companions for database insertion
-        var newGtfsTrip = database.createGtfsTripCompanion(
+        var newGtfsTrip = database.gtfsTripsDao.createGtfsTripCompanion(
             tripId: tripId,
             routeId: routeId,
             shapeId: shapeId,
@@ -66,10 +62,10 @@ class GtfsScheduleService {
       }
 
       // 2b. Batch insert trips to the database
-      await database.addGtfsTrips(trips: dbTripList);
+      await database.gtfsTripsDao.addGtfsTrips(trips: dbTripList);
 
       // 2c. Get trips from updated database
-      gtfsTripList = await database.getGtfsTripsByRouteId(gtfsRouteId);
+      gtfsTripList = await database.gtfsTripsDao.getGtfsTripsByRouteId(gtfsRouteId);
     }
 
     return gtfsTripList;
@@ -79,7 +75,7 @@ class GtfsScheduleService {
   /// Needs GTFS Trips data to function.
   Future<List<db.GtfsShapesTableData>> fetchShapes(String routeId) async {
     // 1. Collect from database, if it exists
-    List<db.GtfsShapesTableData> gtfsShapeList = await database.getGtfsShapes(routeId);
+    List<db.GtfsShapesTableData> gtfsShapeList = await database.gtfsShapesDao.getGtfsShapes(routeId);
 
     // 2. Collect from API, if it doesn't exist
     if (gtfsShapeList.isEmpty) {
@@ -97,7 +93,7 @@ class GtfsScheduleService {
 
 
         // 2a. Create Shape Companions for database insertion
-        db.GtfsShapesTableCompanion newGtfsShape = database.createGtfsShapeCompanion(
+        db.GtfsShapesTableCompanion newGtfsShape = database.gtfsShapesDao.createGtfsShapeCompanion(
           id: id,
           latitude: latitude,
           longitude: longitude,
@@ -107,10 +103,10 @@ class GtfsScheduleService {
       }
 
       // 2b. Batch insert shapes to the database
-      await database.addGtfsShapes(geoPath: dbShapeList);
+      await database.gtfsShapesDao.addGtfsShapes(geoPath: dbShapeList);
 
       // 2c. Get shapes from updated database
-      gtfsShapeList = await database.getGtfsShapes(routeId);
+      gtfsShapeList = await database.gtfsShapesDao.getGtfsShapes(routeId);
     }
 
     return gtfsShapeList;
@@ -123,7 +119,7 @@ class GtfsScheduleService {
   // todo: if geopath is shorter than the general, maybe make a warning for the app? Like its a 19d or 58a
   Future<List<LatLng>> fetchGeoPath(String routeId, {String? direction}) async {
     // 1. Check if GTFS Shape data exists
-    bool hasShapeData = await database.gtfsShapeHasData(routeId);
+    bool hasShapeData = await database.gtfsShapesDao.gtfsShapeHasData(routeId);
 
     // If it doesn't exist, fetch from API
     if (hasShapeData != true) {
@@ -131,7 +127,7 @@ class GtfsScheduleService {
     }
 
     // 2. Get most-common GeoPath for the route from database
-    List<db.GtfsShapesTableData> geoPathData = await database.getGeoPath(routeId, direction: direction);
+    List<db.GtfsShapesTableData> geoPathData = await database.gtfsShapesDao.getGeoPath(routeId, direction: direction);
 
     // 3. Convert Data to LatLng
     List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();
@@ -141,7 +137,7 @@ class GtfsScheduleService {
 
   Future<DateTime?> fetchVersion() async {
     // 1. Get from GTFS Asset database, if it exists
-    DateTime? version = await database.getGtfsAssetDate(id: "version");
+    DateTime? version = await database.gtfsAssetsDao.getGtfsAssetDate(id: "version");
 
     // 2. If not, get from API
     if (version == null) {
@@ -150,10 +146,10 @@ class GtfsScheduleService {
 
       if (gtfsVersion != null) {
         // Add to database
-        database.addGtfsAsset(id: "version", version: gtfsVersion);
+        database.gtfsAssetsDao.addGtfsAsset(id: "version", version: gtfsVersion);
       }
 
-      version = await database.getGtfsAssetDate(id: "version");
+      version = await database.gtfsAssetsDao.getGtfsAssetDate(id: "version");
     }
 
     print(version);

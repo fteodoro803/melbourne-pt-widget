@@ -1,7 +1,3 @@
-import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
-import 'package:flutter_project/database/helpers/link_stop_directions_helpers.dart';
-import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
-import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/domain/directed_stop.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -52,7 +48,7 @@ class PtvStopService extends PtvBaseService {
     for (var stop in data["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(database.addStop(
+      futures.add(database.stopsDao.addStop(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,
@@ -64,13 +60,13 @@ class PtvStopService extends PtvBaseService {
       for (var route in stop["routes"]) {
         int routeId = route["route_id"];
         int currRouteTypeId = route["route_type"];
-        futures.add(database.addStopRouteType(newStop.id, currRouteTypeId));
+        futures.add(database.linkStopRouteTypesDao.addStopRouteType(newStop.id, currRouteTypeId));
 
         if (route["route_type"] != selectedRouteType) {
           continue;
         }
 
-        futures.add(database.addRouteStop(routeId, newStop.id));
+        futures.add(database.linkRouteStopsDao.addRouteStop(routeId, newStop.id));
       }
     }
 
@@ -123,15 +119,15 @@ class PtvStopService extends PtvBaseService {
       stopList.add(newStop);
 
       // 3. Add to database
-      await database.addStop(
+      await database.stopsDao.addStop(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,
           longitude: newStop.longitude!,
           landmark: newStop.landmark,
           suburb: newStop.suburb);
-      await database.addRouteStop(route.id, newStop.id);
-      await database.addStopRouteDirection(
+      await database.linkRouteStopsDao.addRouteStop(route.id, newStop.id);
+      await database.linkStopRouteDirectionsDao.addStopRouteDirection(
           stopId: newStop.id,
           routeId: route.id,
           directionId: directionId,

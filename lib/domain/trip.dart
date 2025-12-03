@@ -6,7 +6,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 import 'package:flutter_project/services/ptv_service.dart';
 
-import 'package:flutter_project/database/helpers/departure_helpers.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
 
@@ -76,7 +75,7 @@ class Trip {
         // Can only add to database with valid ids
         if (stopId != null && routeId != null &&
             directionId != null && runRef != null) {
-          await database.addDeparture(
+          await database.departuresDao.addDeparture(
               runRef: runRef,
               stopId: stopId,
               routeId: routeId,

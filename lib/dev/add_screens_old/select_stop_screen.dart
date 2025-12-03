@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/domain/route.dart' as PTRoute;
 import 'package:get/get.dart';
-import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
 class SelectStopScreen extends StatefulWidget {
@@ -86,7 +84,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeNumber = _routes[index].number;
     // String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
-    database.addRoute(
+    database.routesDao.addRoute(
         id: routeId,
         name: routeName,
         number: routeNumber,
@@ -97,7 +95,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    database.addStop(
+    database.stopsDao.addStop(
         id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
   }
 

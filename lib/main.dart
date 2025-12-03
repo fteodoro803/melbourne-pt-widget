@@ -1,7 +1,6 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
-import "package:flutter_project/database/helpers/route_map_helpers.dart";
 import "package:flutter_project/dev/add_screens_old/confirmation_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_location_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_direction_screen.dart";
@@ -174,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _initialiseData() async {
     await ptvService.initialise();
     await gtfsService.initialise();
-    await database.syncRouteMap();    // Maps PTV and GTFS route ids
+    await database.routeMapsDao.syncRouteMap();    // Maps PTV and GTFS route ids
   }
 
   // Reads the saved trip data from database and updates departures

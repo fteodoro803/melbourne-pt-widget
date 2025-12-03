@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:drift/drift.dart';
 import 'package:flutter_project/database/database.dart';
 
-extension StopRouteDirectionHelpers on Database {
+extension DatabaseHelpers on Database {
   /// Generic method to merge and update records.
   /// Only updates fields that are present in the new data.
   Future<void> mergeUpdate<T extends Table, D>(
