@@ -2,7 +2,6 @@ import 'package:drift/native.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_project/database/database.dart';
-import 'package:flutter_project/database/helpers/departure_helpers.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
 
 void main() {
@@ -23,7 +22,7 @@ void main() {
       int stopId = 1, routeId = 2, directionId = 3;
       bool hasLowFloor = true, hasAirConditioning = true;
 
-      final departure = db.createDepartureCompanion(
+      final departure = db.departuresDao.createDepartureCompanion(
           runRef: runRef,
           stopId: stopId,
           routeId: routeId,
@@ -66,7 +65,7 @@ void main() {
       bool hasLowFloor = true, hasAirConditioning = true;
 
       // 1. Add initial departure to database
-      final departure = db.createDepartureCompanion(
+      final departure = db.departuresDao.createDepartureCompanion(
         runRef: runRef,
         stopId: stopId,
         routeId: routeId,
@@ -88,7 +87,7 @@ void main() {
       // 2. Update departure
       String updatedRunRef = "1";
       bool updatedHasLowFloor = false;
-      final updatedDeparture = db.createDepartureCompanion(
+      final updatedDeparture = db.departuresDao.createDepartureCompanion(
         runRef: updatedRunRef,
         stopId: stopId,
         routeId: routeId,
@@ -132,7 +131,7 @@ void main() {
       bool? hasLowFloor = true, hasAirConditioning = true;
 
       // 1. Add initial departure to database
-      final departure = db.createDepartureCompanion(
+      final departure = db.departuresDao.createDepartureCompanion(
         runRef: runRef,
         stopId: stopId,
         routeId: routeId,
@@ -153,7 +152,7 @@ void main() {
 
       // 2. Update departure
       bool? updatedHasLowFloor = null, updatedHasAirConditioning = false;
-      final updatedDeparture = db.createDepartureCompanion(
+      final updatedDeparture = db.departuresDao.createDepartureCompanion(
         runRef: runRef,
         stopId: stopId,
         routeId: routeId,
@@ -198,7 +197,7 @@ void main() {
           estimatedDeparture = DateTime(2);
 
       // 1. Add initial departure to database
-      final departure = db.createDepartureCompanion(
+      final departure = db.departuresDao.createDepartureCompanion(
         runRef: runRef,
         stopId: stopId,
         routeId: routeId,
@@ -220,7 +219,7 @@ void main() {
       // 2. Update departure
       DateTime? updatedEstimatedDeparture = null,
           updatedScheduledDeparture = DateTime(3);
-      final updatedDeparture = db.createDepartureCompanion(
+      final updatedDeparture = db.departuresDao.createDepartureCompanion(
         runRef: runRef,
         stopId: stopId,
         routeId: routeId,

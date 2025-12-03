@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
+import 'package:flutter_project/database/helpers/departures_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -225,26 +226,31 @@ class RouteMapTable extends Table {
   Set<Column> get primaryKey => {ptvId, gtfsId};
 }
 
-@DriftDatabase(tables: [
-  DeparturesTable,
-  DirectionsTable,
-  RouteTypesTable,
-  RoutesTable,
-  StopsTable,
-  TripsTable,
-  LinkRouteStopsTable,
-  LinkStopRouteTypesTable,
-  LinkRouteDirectionsTable,
-  LinkStopRouteDirectionsTable,
-  GtfsTripsTable,
-  GtfsRoutesTable,
-  GtfsAssetsTable,
-  GtfsShapesTable,
-  RouteMapTable
-])
+@DriftDatabase(
+  tables: [
+    DeparturesTable,
+    DirectionsTable,
+    RouteTypesTable,
+    RoutesTable,
+    StopsTable,
+    TripsTable,
+    LinkRouteStopsTable,
+    LinkStopRouteTypesTable,
+    LinkRouteDirectionsTable,
+    LinkStopRouteDirectionsTable,
+    GtfsTripsTable,
+    GtfsRoutesTable,
+    GtfsAssetsTable,
+    GtfsShapesTable,
+    RouteMapTable
+  ],
+  daos: [DeparturesDao],
+)
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
+
+
 
   @override
   int get schemaVersion => 1;
@@ -264,22 +270,6 @@ class Database extends _$Database {
   }
 
   // todo: move these functions to their respective helpers maybe?
-
-  // Departure Functions
-  /// Adds a departure to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-
-  Future<void> insertDeparture(DeparturesTableCompanion departure) async {
-    await mergeUpdate(
-      departuresTable,
-      departure,
-      (d) =>
-          d.runRef.equals(departure.runRef.value) &
-          d.stopId.equals(departure.stopId.value) &
-          d.routeId.equals(departure.routeId.value) &
-          d.directionId.equals(departure.directionId.value),
-    );
-  }
 
   // Direction Functions
   /// Adds a direction to the database, if it doesn't already exist,

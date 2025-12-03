@@ -106,7 +106,9 @@ class _TestScreenState extends State<TestScreen> {
     // await gtfsService.realtime.fetchShapes("aus:vic:vic-03-1:");
     // await gtfsService.schedule.fetchGeoPath(routeId);
 
-    await gtfsService.schedule.fetchVersion();
+    // await gtfsService.schedule.fetchVersion();
+    // database.departuresDao
+    // database.departuresDao.
   }
 
   @override
