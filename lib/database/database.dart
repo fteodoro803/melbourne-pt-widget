@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:flutter_project/database/helpers/database_helpers.dart';
 import 'package:flutter_project/database/helpers/departures_dao.dart';
 import 'package:flutter_project/database/helpers/directions_dao.dart';
 import 'package:flutter_project/database/helpers/gtfs_assets_dao.dart';
