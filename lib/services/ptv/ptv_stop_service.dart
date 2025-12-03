@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/domain/directed_stop.dart';
 import 'package:flutter_project/domain/direction.dart';
@@ -62,7 +61,7 @@ class PtvStopService extends PtvBaseService {
       for (var route in stop["routes"]) {
         int routeId = route["route_id"];
         int currRouteTypeId = route["route_type"];
-        futures.add(database.addStopRouteType(newStop.id, currRouteTypeId));
+        futures.add(database.linkStopRouteTypesDao.addStopRouteType(newStop.id, currRouteTypeId));
 
         if (route["route_type"] != selectedRouteType) {
           continue;
