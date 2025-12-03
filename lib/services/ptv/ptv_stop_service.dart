@@ -66,7 +66,8 @@ class PtvStopService extends PtvBaseService {
           continue;
         }
 
-        futures.add(database.linkRouteStopsDao.addRouteStop(routeId, newStop.id));
+        var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(routeId: routeId, stopId: newStop.id);
+        futures.add(database.linkRouteStopsDao.addRouteStop(routeStop));
       }
     }
 
@@ -126,7 +127,10 @@ class PtvStopService extends PtvBaseService {
           longitude: newStop.longitude!,
           landmark: newStop.landmark,
           suburb: newStop.suburb);
-      await database.linkRouteStopsDao.addRouteStop(route.id, newStop.id);
+
+      var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(routeId: route.id, stopId: newStop.id);
+      await database.linkRouteStopsDao.addRouteStop(routeStop);
+
       await database.linkStopRouteDirectionsDao.addStopRouteDirection(
           stopId: newStop.id,
           routeId: route.id,

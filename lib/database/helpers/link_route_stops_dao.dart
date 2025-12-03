@@ -18,25 +18,20 @@ class LinkRouteStopsDao extends DatabaseAccessor<Database>
     );
   }
 
-  // LinkRouteStops Functions
-  Future<void> _insertRouteStopLink(
-      LinkRouteStopsTableCompanion routeStop) async {
+  /// Adds/Updates a routeStop to the database.
+  Future<void> addRouteStop(LinkRouteStopsTableCompanion routeStop) async {
     await db.mergeUpdate(
         linkRouteStopsTable,
         routeStop,
             (r) =>
         r.routeId.equals(routeStop.routeId.value) &
-        r.stopId.equals(routeStop.stopId.value));
+        r.stopId.equals(routeStop.stopId.value)
+    );
   }
 
-  Future<void> addRouteStop(int routeId, int stopId) async {
-    LinkRouteStopsTableCompanion routeStop =
-    createRouteStopCompanion(routeId: routeId, stopId: stopId);
-    await _insertRouteStopLink(routeStop);
-  }
-
+  /// Collects all routes that passes by the stop, from the database.
   Future<List<RoutesTableData>> getRoutesFromStop(int stopId) async {
-    // Join routes to routeStops, where their route ids are equal
+    // 1. Join routes to routeStops, where their route ids are equal
     final query = select(routesTable).join([
       innerJoin(
         linkRouteStopsTable,
@@ -46,7 +41,7 @@ class LinkRouteStopsDao extends DatabaseAccessor<Database>
       ..where(linkRouteStopsTable.stopId
           .equals(stopId)); // filter results where stop id matches
 
-    // Convert the joined results to Route objects
+    // 2. Convert the joined results to Route objects
     final rows = await query.get();
     final results = rows.map((row) {
       return row.readTable(routesTable);
