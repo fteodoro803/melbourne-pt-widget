@@ -18,19 +18,14 @@ class LinkStopRouteTypesDao extends DatabaseAccessor<Database>
     );
   }
 
-  Future<void> _insertStopRouteTypeLink(
-      LinkStopRouteTypesTableCompanion stopRouteType) async {
+  /// Adds/Updates a stopRoute junction to the database.
+  Future<void> addStopRouteType(LinkStopRouteTypesTableCompanion stopRouteType) async {
     await db.mergeUpdate(
         linkStopRouteTypesTable,
         stopRouteType,
             (s) =>
         s.stopId.equals(stopRouteType.stopId.value) &
-        s.routeTypeId.equals(stopRouteType.routeTypeId.value));
-  }
-
-  Future<void> addStopRouteType(int stopId, int routeTypeId) async {
-    LinkStopRouteTypesTableCompanion stopRouteType =
-    createStopRouteTypeCompanion(stopId: stopId, routeTypeId: routeTypeId);
-    await _insertStopRouteTypeLink(stopRouteType);
+        s.routeTypeId.equals(stopRouteType.routeTypeId.value)
+    );
   }
 }

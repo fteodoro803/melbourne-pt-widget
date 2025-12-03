@@ -60,7 +60,9 @@ class PtvStopService extends PtvBaseService {
       for (var route in stop["routes"]) {
         int routeId = route["route_id"];
         int currRouteTypeId = route["route_type"];
-        futures.add(database.linkStopRouteTypesDao.addStopRouteType(newStop.id, currRouteTypeId));
+
+        var stopRouteType = database.linkStopRouteTypesDao.createStopRouteTypeCompanion(stopId: newStop.id, routeTypeId: currRouteTypeId);
+        futures.add(database.linkStopRouteTypesDao.addStopRouteType(stopRouteType));
 
         if (route["route_type"] != selectedRouteType) {
           continue;
@@ -131,11 +133,8 @@ class PtvStopService extends PtvBaseService {
       var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(routeId: route.id, stopId: newStop.id);
       await database.linkRouteStopsDao.addRouteStop(routeStop);
 
-      await database.linkStopRouteDirectionsDao.addStopRouteDirection(
-          stopId: newStop.id,
-          routeId: route.id,
-          directionId: directionId,
-          sequence: newStop.stopSequence);
+      var stopRouteDirection = database.linkStopRouteDirectionsDao.createStopDirectionsTypeCompanion(stopId: newStop.id, routeId: route.id, directionId: directionId, sequence: newStop.stopSequence);
+      await database.linkStopRouteDirectionsDao.addStopRouteDirection(stopRouteDirection);
     }
     // todo: add to database, generate flipped stopDirections
 

@@ -23,31 +23,15 @@ class LinkStopRouteDirectionsDao extends DatabaseAccessor<Database>
     );
   }
 
-  // Link StopDirections Functions
-  Future<void> _insertStopRouteDirectionsLink(
-      LinkStopRouteDirectionsTableCompanion stopDirection) async {
+  /// Adds/Updates a Stop-Route-Direction junction to the database.
+  Future<void> addStopRouteDirection(LinkStopRouteDirectionsTableCompanion stopDirection) async {
     await db.mergeUpdate(
         linkStopRouteDirectionsTable,
         stopDirection,
             (s) =>
         s.stopId.equals(stopDirection.stopId.value) &
         s.routeId.equals(stopDirection.routeId.value) &
-        s.directionId.equals(stopDirection.directionId.value));
-  }
-
-  Future<void> addStopRouteDirection(
-      {required int stopId,
-        required int routeId,
-        required int directionId,
-        int? sequence}) async {
-    LinkStopRouteDirectionsTableCompanion stopDirection =
-    createStopDirectionsTypeCompanion(
-        stopId: stopId,
-        routeId: routeId,
-        directionId: directionId,
-        sequence: sequence);
-    await _insertStopRouteDirectionsLink(stopDirection);
-  }
+        s.directionId.equals(stopDirection.directionId.value));  }
 
 // todo: generate stop sequences in reverse direction
 // get list of directions, and see what's not yet in the list, and then generate by flipping the order
