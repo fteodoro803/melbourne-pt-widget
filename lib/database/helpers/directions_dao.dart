@@ -19,8 +19,7 @@ class DirectionsDao extends DatabaseAccessor<Database>
     );
   }
 
-  /// Adds a direction to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
+  /// Adds/Updates a direction to the database.
   Future<void> addDirection(DirectionsTableCompanion direction) async {
     await db.mergeUpdate(
         directionsTable, direction, (d) => d.id.equals(direction.id.value));
