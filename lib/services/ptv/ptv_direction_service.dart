@@ -33,10 +33,11 @@ class PtvDirectionService extends PtvBaseService {
         directionList.add(newDirection);
 
         // 4. Add to database
-        await database.directionsDao.addDirection(
-            newDirection.id, newDirection.name, newDirection.description);
-        await database.linkRouteDirectionsDao.addRouteDirection(
-            routeId: routeId, directionId: newDirection.id);
+        var dbDirection = database.directionsDao.createDirectionCompanion(id: newDirection.id, name: newDirection.name, description: newDirection.description);
+        await database.directionsDao.addDirection(dbDirection);
+
+        var dbRouteDirection = database.linkRouteDirectionsDao.createRouteDirectionsTypeCompanion(routeId: routeId, directionId: newDirection.id);
+        await database.linkRouteDirectionsDao.addRouteDirection(dbRouteDirection);
       }
     }
 

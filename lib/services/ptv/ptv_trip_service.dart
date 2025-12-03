@@ -5,6 +5,7 @@ import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/services/ptv/ptv_base_service.dart';
 
 class PtvTripService extends PtvBaseService {
+  /// Save Trip to database
   Future<void> saveTrip(Trip trip) async {
     String? uniqueId = trip.uniqueID;
     int? routeTypeId = trip.route?.type.id;
@@ -18,13 +19,15 @@ class PtvTripService extends PtvBaseService {
         routeId != null &&
         stopId != null &&
         directionId != null) {
-      await database.tripsDao.addTrip(
-          uniqueId: uniqueId,
+
+      var dbTrip = database.tripsDao.createTripCompanion(          uniqueId: uniqueId,
           routeTypeId: routeTypeId,
           routeId: routeId,
           stopId: stopId,
           directionId: directionId,
-          index: index);
+          index: index
+      );
+      await database.tripsDao.addTrip(dbTrip);
     } else {
       print(
           " ( ptv_service.dart -> saveTrip ) -- one of the following is null: uniqueId, routeTypeId, routeId, stopId, directionId");

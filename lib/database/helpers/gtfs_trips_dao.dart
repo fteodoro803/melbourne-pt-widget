@@ -24,26 +24,12 @@ class GtfsTripsDao extends DatabaseAccessor<Database>
     );
   }
 
-  // GTFS Trip Functions
-  Future<void> _insertGtfsTrip(GtfsTripsTableCompanion trip) async {
+  /// Adds/Updates a GTFS Trip to the database.
+  Future<void> addGtfsTrip(GtfsTripsTableCompanion trip) async {
     await db.mergeUpdate(gtfsTripsTable, trip, (t) => t.id.equals(trip.id.value));
   }
 
-  Future<void> addGtfsTrip(
-      {required String tripId,
-        required String routeId,
-        required String tripHeadsign,
-        required String shapeId,
-        required int wheelchairAccessible}) async {
-    GtfsTripsTableCompanion trip = createGtfsTripCompanion(
-        tripId: tripId,
-        routeId: routeId,
-        shapeId: shapeId,
-        tripHeadsign: tripHeadsign,
-        wheelchairAccessible: wheelchairAccessible);
-    await _insertGtfsTrip(trip);
-  }
-
+  /// Batch inserts GTFS Trips to the database.
   Future<void> addGtfsTrips(
       {required List<GtfsTripsTableCompanion> trips}) async {
     await db.batchInsert(gtfsTripsTable, trips);

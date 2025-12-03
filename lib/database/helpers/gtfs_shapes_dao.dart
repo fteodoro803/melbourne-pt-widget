@@ -22,6 +22,7 @@ class GtfsShapesDao extends DatabaseAccessor<Database>
     );
   }
 
+  /// Batch inserts a list of GTFS Shapes to the database.
   Future<void> addGtfsShapes(
       {required List<GtfsShapesTableCompanion> geoPath}) async {
     await db.batchInsert(gtfsShapesTable, geoPath);

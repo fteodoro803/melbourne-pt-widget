@@ -84,19 +84,23 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeNumber = _routes[index].number;
     // String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
-    database.routesDao.addRoute(
+
+    var dbRoute = database.routesDao.createRouteCompanion(
         id: routeId,
         name: routeName,
         number: routeNumber,
         routeTypeId: routeTypeId,
-        status: status);
+        status: status
+    );
+    database.routesDao.addRoute(dbRoute);
 
     int stopId = _stops[index].id;
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    database.stopsDao.addStop(
-        id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
+
+    var dbStop = database.stopsDao.createStopCompanion(id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
+    database.stopsDao.addStop(dbStop);
   }
 
   @override

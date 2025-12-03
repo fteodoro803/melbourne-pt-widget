@@ -34,25 +34,9 @@ class RoutesDao extends DatabaseAccessor<Database>
     );
   }
 
-  /// Adds a route to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> _insertRoute(RoutesTableCompanion route) async {
+  /// Adds/Updates a Route to the database.
+  Future<void> addRoute(RoutesTableCompanion route) async {
     await db.mergeUpdate(routesTable, route, (r) => r.id.equals(route.id.value));
-  }
-
-  Future<void> addRoute(
-      {required int id,
-        required String name,
-        required String number,
-        required int routeTypeId,
-        required String status}) async {
-    RoutesTableCompanion route = createRouteCompanion(
-        id: id,
-        name: name,
-        number: number,
-        routeTypeId: routeTypeId,
-        status: status);
-    await _insertRoute(route);
   }
 
   /// Gets all routes in database.

@@ -48,25 +48,31 @@ class PtvStopService extends PtvBaseService {
     for (var stop in data["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(database.stopsDao.addStop(
+
+      var dbStop = database.stopsDao.createStopCompanion(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,
           longitude: newStop.longitude!,
-          landmark: newStop.landmark));
+          landmark: newStop.landmark
+      );
+      futures.add(database.stopsDao.addStop(dbStop));
 
       // 3. Add route-stop relationship to database
       int selectedRouteType = stop["route_type"];
       for (var route in stop["routes"]) {
         int routeId = route["route_id"];
         int currRouteTypeId = route["route_type"];
-        futures.add(database.linkStopRouteTypesDao.addStopRouteType(newStop.id, currRouteTypeId));
+
+        var stopRouteType = database.linkStopRouteTypesDao.createStopRouteTypeCompanion(stopId: newStop.id, routeTypeId: currRouteTypeId);
+        futures.add(database.linkStopRouteTypesDao.addStopRouteType(stopRouteType));
 
         if (route["route_type"] != selectedRouteType) {
           continue;
         }
 
-        futures.add(database.linkRouteStopsDao.addRouteStop(routeId, newStop.id));
+        var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(routeId: routeId, stopId: newStop.id);
+        futures.add(database.linkRouteStopsDao.addRouteStop(routeStop));
       }
     }
 
@@ -119,19 +125,21 @@ class PtvStopService extends PtvBaseService {
       stopList.add(newStop);
 
       // 3. Add to database
-      await database.stopsDao.addStop(
+      var dbStop = database.stopsDao.createStopCompanion(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,
           longitude: newStop.longitude!,
           landmark: newStop.landmark,
-          suburb: newStop.suburb);
-      await database.linkRouteStopsDao.addRouteStop(route.id, newStop.id);
-      await database.linkStopRouteDirectionsDao.addStopRouteDirection(
-          stopId: newStop.id,
-          routeId: route.id,
-          directionId: directionId,
-          sequence: newStop.stopSequence);
+          suburb: newStop.suburb
+      );
+      await database.stopsDao.addStop(dbStop);
+
+      var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(routeId: route.id, stopId: newStop.id);
+      await database.linkRouteStopsDao.addRouteStop(routeStop);
+
+      var stopRouteDirection = database.linkStopRouteDirectionsDao.createStopDirectionsTypeCompanion(stopId: newStop.id, routeId: route.id, directionId: directionId, sequence: newStop.stopSequence);
+      await database.linkStopRouteDirectionsDao.addStopRouteDirection(stopRouteDirection);
     }
     // todo: add to database, generate flipped stopDirections
 

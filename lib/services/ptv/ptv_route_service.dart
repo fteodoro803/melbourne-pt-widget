@@ -41,12 +41,14 @@ class PtvRouteService extends PtvBaseService {
         routeList.add(newRoute);
 
         // 3. Add to Database
-        await database.routesDao.addRoute(
+        var dbRoute = database.routesDao.createRouteCompanion(
             id: newRoute.id,
             name: newRoute.name,
             number: newRoute.number,
             routeTypeId: newRoute.type.id,
-            status: newRoute.status);
+            status: newRoute.status
+        );
+        await database.routesDao.addRoute(dbRoute);
       }
     }
 

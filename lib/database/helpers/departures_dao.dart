@@ -39,9 +39,9 @@ class DeparturesDao extends DatabaseAccessor<Database>
     );
   }
 
-  /// Adds a departure to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> _insertDeparture(DeparturesTableCompanion departure) async {
+  /// Adds departure to the database.
+  /// Upserts if the departure if it already exists.
+  Future<void> addDeparture(DeparturesTableCompanion departure) async {
     await db.mergeUpdate(
       departuresTable,
       departure,
@@ -51,29 +51,6 @@ class DeparturesDao extends DatabaseAccessor<Database>
       d.routeId.equals(departure.routeId.value) &
       d.directionId.equals(departure.directionId.value),
     );
-  }
-
-  // todo: maybe i can just make this take a Departure instance, bc there are so many arguments. Check how to make a departure table a class.
-  Future<void> addDeparture(
-      {required String runRef,
-        required int stopId,
-        required int routeId,
-        required int directionId,
-        DateTime? scheduledDepartureUTC,
-        DateTime? estimatedDepartureUTC,
-        bool? hasLowFloor,
-        bool? hasAirConditioning}) async {
-    DeparturesTableCompanion departure = createDepartureCompanion(
-        scheduledDepartureUTC: scheduledDepartureUTC,
-        estimatedDepartureUTC: estimatedDepartureUTC,
-        runRef: runRef,
-        stopId: stopId,
-        directionId: directionId,
-        routeId: routeId,
-        hasAirConditioning: hasAirConditioning,
-        hasLowFloor: hasLowFloor);
-
-    await _insertDeparture(departure);
   }
 
   /// Returns a more readable time string from a UTC DateTime object,

@@ -22,8 +22,8 @@ class GtfsScheduleService {
         String longName = route["route_long_name"];
 
         // 2a. Insert each route to the database
-        await database.gtfsRoutesDao.addGtfsRoute(
-            id: routeId, shortName: shortName, longName: longName);
+        var dbGtfsRoute = database.gtfsRoutesDao.createGtfsRouteCompanion(id: routeId, shortName: shortName, longName: longName);
+        await database.gtfsRoutesDao.addGtfsRoute(dbGtfsRoute);
       }
 
       // 2b. Get routes from database
@@ -145,8 +145,9 @@ class GtfsScheduleService {
       DateTime? gtfsVersion = DateTime.tryParse(jsonVersion["version"]);
 
       if (gtfsVersion != null) {
-        // Add to database
-        database.gtfsAssetsDao.addGtfsAsset(id: "version", version: gtfsVersion);
+        // 3. Add to database
+        var dbAsset = database.gtfsAssetsDao.createGtfsAssetCompanion(id: "version", dateModified: gtfsVersion);
+        database.gtfsAssetsDao.addGtfsAsset(dbAsset);
       }
 
       version = await database.gtfsAssetsDao.getGtfsAssetDate(id: "version");
