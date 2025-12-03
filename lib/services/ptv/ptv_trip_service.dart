@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/trip_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/stop.dart';
@@ -19,7 +18,7 @@ class PtvTripService extends PtvBaseService {
         routeId != null &&
         stopId != null &&
         directionId != null) {
-      await database.addTrip(
+      await database.tripsDao.addTrip(
           uniqueId: uniqueId,
           routeTypeId: routeTypeId,
           routeId: routeId,
@@ -35,7 +34,7 @@ class PtvTripService extends PtvBaseService {
   /// Checks if Trip is in Database
   Future<bool> isTripSaved(Trip trip) async {
     if (trip.uniqueID != null) {
-      return await database.isTripInDatabase(trip.uniqueID!);
+      return await database.tripsDao.isTripInDatabase(trip.uniqueID!);
     } else {
       return false;
     }
@@ -45,7 +44,7 @@ class PtvTripService extends PtvBaseService {
   Future<List<Trip>> loadTrips() async {
     List<Trip> tripList = [];
 
-    var dbTrips = await database.getTrips();
+    var dbTrips = await database.tripsDao.getTrips();
     Route? route;
     Stop? stop;
     Direction? direction;
@@ -75,6 +74,6 @@ class PtvTripService extends PtvBaseService {
 
   /// Remove Trip from database
   Future<void> deleteTrip(String tripId) async {
-    await database.removeTransport(tripId);
+    await database.tripsDao.removeTrip(tripId);
   }
 }

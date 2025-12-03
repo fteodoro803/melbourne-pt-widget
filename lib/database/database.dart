@@ -15,6 +15,7 @@ import 'package:flutter_project/database/helpers/route_maps_dao.dart';
 import 'package:flutter_project/database/helpers/route_types_dao.dart';
 import 'package:flutter_project/database/helpers/routes_dao.dart';
 import 'package:flutter_project/database/helpers/stops_dao.dart';
+import 'package:flutter_project/database/helpers/trips_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -263,6 +264,7 @@ class RouteMapsTable extends Table {
     RoutesDao,
     RouteTypesDao,
     StopsDao,
+    TripsDao,
     GtfsAssetsDao,
     GtfsRoutesDao,
     GtfsShapesDao,
@@ -295,14 +297,6 @@ class Database extends _$Database {
       ),
       // If you need web support, see https://drift.simonbinder.eu/platforms/web/
     );
-  }
-
-  // todo: move these functions to their respective helpers maybe?
-
-  // Transport Functions
-  Future<void> insertTransport(TripsTableCompanion transport) async {
-    await mergeUpdate(tripsTable, transport,
-        (t) => t.uniqueId.equals(transport.uniqueId.value));
   }
 
   // Table Functions
