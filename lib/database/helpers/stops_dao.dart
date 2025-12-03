@@ -30,30 +30,9 @@ class StopsDao extends DatabaseAccessor<Database>
     );
   }
 
-  /// Adds a stop to the database, if it doesn't already exist.
-  /// If it does, update the old stop by merging it with the new one.
-  Future<void> _insertStop(StopsTableCompanion stop) async {
+  /// Adds/Updates a Stop to the database.
+  Future<void> addStop(StopsTableCompanion stop) async {
     await db.mergeUpdate(stopsTable, stop, (t) => t.id.equals(stop.id.value));
-  }
-
-  /// Adds a stop to the database.
-  Future<void> addStop(
-      {required int id,
-        required String name,
-        required double latitude,
-        required double longitude,
-        String? landmark,
-        String? suburb,
-        String? zone}) async {
-    StopsTableCompanion stop = createStopCompanion(
-        id: id,
-        name: name,
-        latitude: latitude,
-        longitude: longitude,
-        landmark: landmark,
-        suburb: suburb,
-        zone: zone);
-    await _insertStop(stop);
   }
 
   Future<StopsTableData?> getStopById(int id) async {

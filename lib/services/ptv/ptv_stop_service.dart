@@ -48,12 +48,15 @@ class PtvStopService extends PtvBaseService {
     for (var stop in data["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(database.stopsDao.addStop(
+
+      var dbStop = database.stopsDao.createStopCompanion(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,
           longitude: newStop.longitude!,
-          landmark: newStop.landmark));
+          landmark: newStop.landmark
+      );
+      futures.add(database.stopsDao.addStop(dbStop));
 
       // 3. Add route-stop relationship to database
       int selectedRouteType = stop["route_type"];
@@ -122,13 +125,15 @@ class PtvStopService extends PtvBaseService {
       stopList.add(newStop);
 
       // 3. Add to database
-      await database.stopsDao.addStop(
+      var dbStop = database.stopsDao.createStopCompanion(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,
           longitude: newStop.longitude!,
           landmark: newStop.landmark,
-          suburb: newStop.suburb);
+          suburb: newStop.suburb
+      );
+      await database.stopsDao.addStop(dbStop);
 
       var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(routeId: route.id, stopId: newStop.id);
       await database.linkRouteStopsDao.addRouteStop(routeStop);
