@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/route_type_helpers.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/services/ptv/ptv_base_service.dart';
 
@@ -9,7 +8,7 @@ class PtvRouteTypeService extends PtvBaseService {
     List<String> routeTypes = [];
 
     // 1a. If data exists in database, adds that data to routeTypes list
-    final dbRouteTypesList = await database.getRouteTypes();
+    final dbRouteTypesList = await database.routeTypesDao.getRouteTypes();
     if (dbRouteTypesList.isNotEmpty) {
       routeTypes = dbRouteTypesList.map((rt) => rt.name).toList();
     }
@@ -31,7 +30,7 @@ class PtvRouteTypeService extends PtvBaseService {
         routeTypes.add(newRouteType.name);
 
         // 3. Add to database
-        await database.addRouteType(newRouteType.id, newRouteType.name);
+        await database.routeTypesDao.addRouteType(newRouteType.id, newRouteType.name);
       }
     }
 

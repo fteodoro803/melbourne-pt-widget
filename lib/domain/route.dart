@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
@@ -196,7 +195,7 @@ class Route {
   /// Async Factory constructor to create a Route from the Database.
   static Future<Route?> fromDbAsync(db.RoutesTableData dbRoute) async {
     db.Database database = Get.find<db.Database>();
-    String? gtfsId = await database.convertToGtfsRouteId(dbRoute.id);
+    String? gtfsId = await database.routeMapsDao.convertToGtfsRouteId(dbRoute.id);
     if (gtfsId == null) return null;
 
     return Route(
