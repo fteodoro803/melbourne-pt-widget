@@ -71,8 +71,6 @@ class DirectionsTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-// todo: Patterns
-
 class RoutesTable extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
@@ -279,8 +277,6 @@ class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
   Duration expiry = Duration(minutes: 5);
 
-
-
   @override
   int get schemaVersion => 1;
 
@@ -297,9 +293,4 @@ class Database extends _$Database {
       // If you need web support, see https://drift.simonbinder.eu/platforms/web/
     );
   }
-
-  // Table Functions
-  //   Future<void> clearData() async {
-  //     await delete(departures).go();
-  //   }
 }
