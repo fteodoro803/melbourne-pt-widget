@@ -17,23 +17,19 @@ class RouteMapsDao extends DatabaseAccessor<Database>
     );
   }
 
-  // Route Map Functions
-  Future<void> _insertRouteMap(RouteMapsTableCompanion routeMap) async {
+  /// Adds/Updates a PTV-GTFS route map object to the database.
+  Future<void> addRouteMap(RouteMapsTableCompanion routeMap) async {
     await db.mergeUpdate(
         routeMapsTable,
         routeMap,
             (r) =>
         r.ptvId.equals(routeMap.ptvId.value) &
-        r.gtfsId.equals(routeMap.gtfsId.value));
-  }
-
-  Future<void> addRouteMap({required int ptvId, required String gtfsId}) async {
-    RouteMapsTableCompanion route = createRouteMap(ptvId: ptvId, gtfsId: gtfsId);
-    await _insertRouteMap(route);
+        r.gtfsId.equals(routeMap.gtfsId.value)
+    );
   }
 
   // todo: Sync route Maps
-  // Go through PTV Routes and map to corresponding GTFS Routes
+  /// Go through PTV Routes and map to corresponding GTFS Routes
   Future<void> syncRouteMap() async {
     // 1. Go through PTV Routes
     SimpleSelectStatement<$RoutesTableTable, RoutesTableData> ptvQuery;
@@ -47,12 +43,13 @@ class RouteMapsDao extends DatabaseAccessor<Database>
 
       // 3. Map Route IDs between PTV and GTFS
       if (gtfsRoute != null) {
-        addRouteMap(ptvId: ptvRoute.id, gtfsId: gtfsRoute.id);
+        var routeMap = createRouteMap(ptvId: ptvRoute.id, gtfsId: gtfsRoute.id);
+        await addRouteMap(routeMap);
       }
     }
   }
 
-  // Mapping logic for conversion from PTV Route to GTFS Route
+  /// Mapping logic for conversion from PTV Route to GTFS Route
   // todo: Add other cases for metro train and metro bus
   Future<GtfsRoutesTableData?> mapPtvToGtfsRoute(
       RoutesTableCompanion ptvRoute, int routeType) async {

@@ -30,7 +30,8 @@ class PtvRouteTypeService extends PtvBaseService {
         routeTypes.add(newRouteType.name);
 
         // 3. Add to database
-        await database.routeTypesDao.addRouteType(newRouteType.id, newRouteType.name);
+        var dbRouteType = database.routeTypesDao.createRouteTypeCompanion(id: newRouteType.id, name: newRouteType.name);
+        await database.routeTypesDao.addRouteType(dbRouteType);
       }
     }
 

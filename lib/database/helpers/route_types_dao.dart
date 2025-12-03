@@ -18,20 +18,10 @@ class RouteTypesDao extends DatabaseAccessor<Database>
     );
   }
 
-  // RouteType Functions
-  /// Adds a route type to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> _insertRouteType(RouteTypesTableCompanion routeType) async {
+  /// Adds/Updates a Route Type to the database.
+  Future<void> addRouteType(RouteTypesTableCompanion routeType) async {
     await db.mergeUpdate(
-        routeTypesTable, routeType, (r) => r.id.equals(routeType.id.value));
-  }
-
-  /// Adds a route type to the database
-  Future<void> addRouteType(int id, String name) async {
-    RouteTypesTableCompanion routeType =
-    createRouteTypeCompanion(id: id, name: name);
-    await _insertRouteType(routeType);
-  }
+        routeTypesTable, routeType, (r) => r.id.equals(routeType.id.value));  }
 
   /// Gets all route types offered by PTV from the database.
   Future<List<RouteTypesTableData>> getRouteTypes() async {
