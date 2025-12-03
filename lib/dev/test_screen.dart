@@ -103,7 +103,7 @@ class _TestScreenState extends State<TestScreen> {
     // String routeId = "aus:vic:vic-03-1:";
     //
     // await gtfsService.realtime.fetchGtfsTrips("aus:vic:vic-03-1:");
-    // await gtfsService.realtime.fetchShapes("aus:vic:vic-03-1:");
+    await gtfsService.schedule.fetchShapes("aus:vic:vic-03-1:");
     // await gtfsService.schedule.fetchGeoPath(routeId);
 
     // await gtfsService.schedule.fetchVersion();

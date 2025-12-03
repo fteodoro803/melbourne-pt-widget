@@ -1,6 +1,5 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/gtfs_shapes_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -77,7 +76,7 @@ class GtfsScheduleService {
   /// Needs GTFS Trips data to function.
   Future<List<db.GtfsShapesTableData>> fetchShapes(String routeId) async {
     // 1. Collect from database, if it exists
-    List<db.GtfsShapesTableData> gtfsShapeList = await database.getGtfsShapes(routeId);
+    List<db.GtfsShapesTableData> gtfsShapeList = await database.gtfsShapesDao.getGtfsShapes(routeId);
 
     // 2. Collect from API, if it doesn't exist
     if (gtfsShapeList.isEmpty) {
@@ -95,7 +94,7 @@ class GtfsScheduleService {
 
 
         // 2a. Create Shape Companions for database insertion
-        db.GtfsShapesTableCompanion newGtfsShape = database.createGtfsShapeCompanion(
+        db.GtfsShapesTableCompanion newGtfsShape = database.gtfsShapesDao.createGtfsShapeCompanion(
           id: id,
           latitude: latitude,
           longitude: longitude,
@@ -105,10 +104,10 @@ class GtfsScheduleService {
       }
 
       // 2b. Batch insert shapes to the database
-      await database.addGtfsShapes(geoPath: dbShapeList);
+      await database.gtfsShapesDao.addGtfsShapes(geoPath: dbShapeList);
 
       // 2c. Get shapes from updated database
-      gtfsShapeList = await database.getGtfsShapes(routeId);
+      gtfsShapeList = await database.gtfsShapesDao.getGtfsShapes(routeId);
     }
 
     return gtfsShapeList;
@@ -121,7 +120,7 @@ class GtfsScheduleService {
   // todo: if geopath is shorter than the general, maybe make a warning for the app? Like its a 19d or 58a
   Future<List<LatLng>> fetchGeoPath(String routeId, {String? direction}) async {
     // 1. Check if GTFS Shape data exists
-    bool hasShapeData = await database.gtfsShapeHasData(routeId);
+    bool hasShapeData = await database.gtfsShapesDao.gtfsShapeHasData(routeId);
 
     // If it doesn't exist, fetch from API
     if (hasShapeData != true) {
@@ -129,7 +128,7 @@ class GtfsScheduleService {
     }
 
     // 2. Get most-common GeoPath for the route from database
-    List<db.GtfsShapesTableData> geoPathData = await database.getGeoPath(routeId, direction: direction);
+    List<db.GtfsShapesTableData> geoPathData = await database.gtfsShapesDao.getGeoPath(routeId, direction: direction);
 
     // 3. Convert Data to LatLng
     List<LatLng> geoPath = geoPathData.map((e) => LatLng(e.latitude, e.longitude)).toList();

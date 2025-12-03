@@ -5,6 +5,7 @@ import 'package:flutter_project/database/helpers/departures_dao.dart';
 import 'package:flutter_project/database/helpers/directions_dao.dart';
 import 'package:flutter_project/database/helpers/gtfs_assets_dao.dart';
 import 'package:flutter_project/database/helpers/gtfs_routes_dao.dart';
+import 'package:flutter_project/database/helpers/gtfs_shapes_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -252,7 +253,7 @@ class RouteMapTable extends Table {
     DirectionsDao,
     GtfsAssetsDao,
     GtfsRoutesDao,
-
+    GtfsShapesDao,
   ],
 )
 class Database extends _$Database {
