@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/services/ptv_service.dart';
@@ -53,7 +52,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       int? routeId = widget.arguments.trip?.route?.id;
 
       database.directionsDao.addDirection(id, name, description);
-      database.addRouteDirection(routeId: routeId!, directionId: id);
+      database.linkRouteDirectionsDao.addRouteDirection(routeId: routeId!, directionId: id);
     } else {
       widget.arguments.trip!.direction = null;
     }
