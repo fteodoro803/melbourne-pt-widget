@@ -21,16 +21,9 @@ class DirectionsDao extends DatabaseAccessor<Database>
 
   /// Adds a direction to the database, if it doesn't already exist,
   /// or if it has passed the "expiry" time
-  Future<void> _insertDirection(DirectionsTableCompanion direction) async {
+  Future<void> addDirection(DirectionsTableCompanion direction) async {
     await db.mergeUpdate(
         directionsTable, direction, (d) => d.id.equals(direction.id.value));
-  }
-
-  Future<void> addDirection(int id, String name, String description) async {
-    DirectionsTableCompanion direction =
-    createDirectionCompanion(id: id, name: name, description: description);
-
-    await _insertDirection(direction);
   }
 
   Future<DirectionsTableData?> getDirectionById(int id) async {
