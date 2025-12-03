@@ -10,6 +10,7 @@ import 'package:flutter_project/database/helpers/gtfs_trips_dao.dart';
 import 'package:flutter_project/database/helpers/link_route_directions_dao.dart';
 import 'package:flutter_project/database/helpers/link_route_stops_dao.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_directions_dao.dart';
+import 'package:flutter_project/database/helpers/routes_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -255,6 +256,7 @@ class RouteMapTable extends Table {
   daos: [
     DeparturesDao,
     DirectionsDao,
+    RoutesDao,
     GtfsAssetsDao,
     GtfsRoutesDao,
     GtfsShapesDao,
@@ -295,13 +297,6 @@ class Database extends _$Database {
   Future<void> insertRouteType(RouteTypesTableCompanion routeType) async {
     await mergeUpdate(
         routeTypesTable, routeType, (r) => r.id.equals(routeType.id.value));
-  }
-
-  // Route Functions
-  /// Adds a route to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> insertRoute(RoutesTableCompanion route) async {
-    await mergeUpdate(routesTable, route, (r) => r.id.equals(route.id.value));
   }
 
   // Stop Functions

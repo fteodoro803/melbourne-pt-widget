@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/database/helpers/trip_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
@@ -55,7 +54,7 @@ class PtvTripService extends PtvBaseService {
 
     // Convert database trip to domain trip
     for (var dbTrip in dbTrips) {
-      var dbRoute = await database.getRouteById(dbTrip.routeId);
+      var dbRoute = await database.routesDao.getRouteById(dbTrip.routeId);
       route = dbRoute != null ? await Route.fromDbAsync(dbRoute) : null;
 
       var dbStop = await database.getStopById(dbTrip.stopId);

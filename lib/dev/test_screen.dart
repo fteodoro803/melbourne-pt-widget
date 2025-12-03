@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/database/database.dart';
-import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
@@ -76,7 +75,7 @@ class _TestScreenState extends State<TestScreen> {
     // 1. Get Routes
     List<pt_route.Route> routes = [];
     for (final routeId in routeIds) {
-      var data = await database.getRouteById(routeId);
+      var data = await database.routesDao.getRouteById(routeId);
       if (data != null) {
         // var route = pt_route.Route.fromDb(data);
         var route = await pt_route.Route.fromDbAsync(data);
@@ -100,13 +99,13 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> gtfsTest() async {
-    // String routeId = "aus:vic:vic-03-1:";
+    String routeId = "aus:vic:vic-03-1:";
     //
-    // await gtfsService.realtime.fetchGtfsTrips("aus:vic:vic-03-1:");
-    await gtfsService.schedule.fetchShapes("aus:vic:vic-03-1:");
-    // await gtfsService.schedule.fetchGeoPath(routeId);
+    await gtfsService.schedule.fetchGtfsTrips(routeId);
+    await gtfsService.schedule.fetchShapes(routeId);
+    await gtfsService.schedule.fetchGeoPath(routeId);
 
-    // await gtfsService.schedule.fetchVersion();
+    await gtfsService.schedule.fetchVersion();
     // database.departuresDao
     // database.departuresDao.
   }
