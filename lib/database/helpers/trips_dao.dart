@@ -26,27 +26,11 @@ class TripsDao extends DatabaseAccessor<Database>
     );
   }
 
-  // Transport Functions
-  Future<void> _insertTrip(TripsTableCompanion transport) async {
+  /// Adds/Updates a direction to the database.
+  Future<void> addTrip(TripsTableCompanion transport) async {
     await db.mergeUpdate(tripsTable, transport,
-            (t) => t.uniqueId.equals(transport.uniqueId.value));
-  }
-
-  Future<void> addTrip(
-      {required String uniqueId,
-        required int routeTypeId,
-        required int routeId,
-        required int stopId,
-        required int directionId,
-        int? index}) async {
-    TripsTableCompanion transport = createTripCompanion(
-        uniqueId: uniqueId,
-        routeTypeId: routeTypeId,
-        routeId: routeId,
-        stopId: stopId,
-        directionId: directionId,
-        index: index);
-    await _insertTrip(transport);
+            (t) => t.uniqueId.equals(transport.uniqueId.value)
+    );
   }
 
   Future<void> removeTrip(String uniqueId) async {
