@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/link_stop_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/domain/directed_stop.dart';
@@ -130,7 +129,7 @@ class PtvStopService extends PtvBaseService {
           landmark: newStop.landmark,
           suburb: newStop.suburb);
       await database.linkRouteStopsDao.addRouteStop(route.id, newStop.id);
-      await database.addStopRouteDirection(
+      await database.linkStopRouteDirectionsDao.addStopRouteDirection(
           stopId: newStop.id,
           routeId: route.id,
           directionId: directionId,
