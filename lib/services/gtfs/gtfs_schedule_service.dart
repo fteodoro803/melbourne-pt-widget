@@ -1,6 +1,5 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_shapes_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
 import 'package:get/get.dart';
@@ -13,7 +12,7 @@ class GtfsScheduleService {
   /// Add gtfs routes to database.
   Future<List<db.GtfsRoutesTableData>> fetchGtfsRoutes() async {
     // 1. Collect routes from database, if they exist
-    List<db.GtfsRoutesTableData> gtfsRouteList = await database.getGtfsRoutes();
+    List<db.GtfsRoutesTableData> gtfsRouteList = await database.gtfsRoutesDao.getGtfsRoutes();
 
     // 2. Collect from API, if they don't exist
     if (gtfsRouteList.isEmpty) {
@@ -25,12 +24,12 @@ class GtfsScheduleService {
         String longName = route["route_long_name"];
 
         // 2a. Insert each route to the database
-        await database.addGtfsRoute(
+        await database.gtfsRoutesDao.addGtfsRoute(
             id: routeId, shortName: shortName, longName: longName);
       }
 
       // 2b. Get routes from database
-      gtfsRouteList = await database.getGtfsRoutes();
+      gtfsRouteList = await database.gtfsRoutesDao.getGtfsRoutes();
     }
 
     return gtfsRouteList;

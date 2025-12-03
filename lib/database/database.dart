@@ -4,6 +4,7 @@ import 'package:flutter_project/database/helpers/database_helpers.dart';
 import 'package:flutter_project/database/helpers/departures_dao.dart';
 import 'package:flutter_project/database/helpers/directions_dao.dart';
 import 'package:flutter_project/database/helpers/gtfs_assets_dao.dart';
+import 'package:flutter_project/database/helpers/gtfs_routes_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -250,6 +251,8 @@ class RouteMapTable extends Table {
     DeparturesDao,
     DirectionsDao,
     GtfsAssetsDao,
+    GtfsRoutesDao,
+
   ],
 )
 class Database extends _$Database {
@@ -348,12 +351,6 @@ class Database extends _$Database {
             s.stopId.equals(stopDirection.stopId.value) &
             s.routeId.equals(stopDirection.routeId.value) &
             s.directionId.equals(stopDirection.directionId.value));
-  }
-
-  // GTFS Route Functions
-  Future<void> insertGtfsRoute(GtfsRoutesTableCompanion route) async {
-    await mergeUpdate(
-        gtfsRoutesTable, route, (r) => r.id.equals(route.id.value));
   }
 
   // GTFS Trip Functions
