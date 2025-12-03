@@ -75,7 +75,7 @@ class Trip {
         // Can only add to database with valid ids
         if (stopId != null && routeId != null &&
             directionId != null && runRef != null) {
-          await database.departuresDao.addDeparture(
+          var dbDeparture = database.departuresDao.createDepartureCompanion(
               runRef: runRef,
               stopId: stopId,
               routeId: routeId,
@@ -83,7 +83,10 @@ class Trip {
               scheduledDepartureUTC: scheduledUTC,
               estimatedDepartureUTC: estimatedUTC,
               hasAirConditioning: hasAirConditioning,
-              hasLowFloor: hasLowFloor);
+              hasLowFloor: hasLowFloor
+          );
+
+          await database.departuresDao.addDeparture(dbDeparture);
         }
       }
     }
