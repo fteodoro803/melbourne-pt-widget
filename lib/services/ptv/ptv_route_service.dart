@@ -1,5 +1,4 @@
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
 import 'package:flutter_project/database/helpers/route_helpers.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/route_type.dart';
@@ -90,7 +89,7 @@ class PtvRouteService extends PtvBaseService {
   // todo: but also, in our functions, we use fetch, but most of them also check the database first. So maybe for consistency, keep it?
   Future<List<Route>> fetchRoutesFromStop(int stopId) async {
     final List<db.RoutesTableData> dbRoutes =
-        await database.getRoutesFromStop(stopId);
+        await database.linkRouteStopsDao.getRoutesFromStop(stopId);
 
     // Convert Route's database model to domain model
     // List<Route> routeList = dbRoutes.map(Route.fromDb).toList();

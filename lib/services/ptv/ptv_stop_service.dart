@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/link_route_stops_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_directions_helpers.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_types_helpers.dart';
 import 'package:flutter_project/database/helpers/stop_helpers.dart';
@@ -70,7 +69,7 @@ class PtvStopService extends PtvBaseService {
           continue;
         }
 
-        futures.add(database.addRouteStop(routeId, newStop.id));
+        futures.add(database.linkRouteStopsDao.addRouteStop(routeId, newStop.id));
       }
     }
 
@@ -130,7 +129,7 @@ class PtvStopService extends PtvBaseService {
           longitude: newStop.longitude!,
           landmark: newStop.landmark,
           suburb: newStop.suburb);
-      await database.addRouteStop(route.id, newStop.id);
+      await database.linkRouteStopsDao.addRouteStop(route.id, newStop.id);
       await database.addStopRouteDirection(
           stopId: newStop.id,
           routeId: route.id,

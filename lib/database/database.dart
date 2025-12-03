@@ -8,6 +8,7 @@ import 'package:flutter_project/database/helpers/gtfs_routes_dao.dart';
 import 'package:flutter_project/database/helpers/gtfs_shapes_dao.dart';
 import 'package:flutter_project/database/helpers/gtfs_trips_dao.dart';
 import 'package:flutter_project/database/helpers/link_route_directions_dao.dart';
+import 'package:flutter_project/database/helpers/link_route_stops_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -258,6 +259,7 @@ class RouteMapTable extends Table {
     GtfsShapesDao,
     GtfsTripsDao,
     LinkRouteDirectionsDao,
+    LinkRouteStopsDao,
   ],
 )
 class Database extends _$Database {
@@ -311,17 +313,6 @@ class Database extends _$Database {
   Future<void> insertTransport(TripsTableCompanion transport) async {
     await mergeUpdate(tripsTable, transport,
         (t) => t.uniqueId.equals(transport.uniqueId.value));
-  }
-
-  // LinkRouteStops Functions
-  Future<void> insertRouteStopLink(
-      LinkRouteStopsTableCompanion routeStop) async {
-    await mergeUpdate(
-        linkRouteStopsTable,
-        routeStop,
-        (r) =>
-            r.routeId.equals(routeStop.routeId.value) &
-            r.stopId.equals(routeStop.stopId.value));
   }
 
   // LinkStopRouteTypes Functions
