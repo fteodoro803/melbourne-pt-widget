@@ -18,17 +18,10 @@ class GtfsAssetsDao extends DatabaseAccessor<Database>
     );
   }
 
-  // GTFS Asset Functions
-  Future<void> _insertGtfsAsset(GtfsAssetsTableCompanion asset) async {
+  /// Adds/Updates a GTFS Asset to the database.
+  Future<void> addGtfsAsset(GtfsAssetsTableCompanion asset) async {
     await db.mergeUpdate(
         gtfsAssetsTable, asset, (a) => a.id.equals(asset.id.value));
-  }
-
-  Future<void> addGtfsAsset(
-      {required String id, required DateTime version}) async {
-    GtfsAssetsTableCompanion asset =
-    createGtfsAssetCompanion(id: id, dateModified: version);
-    await _insertGtfsAsset(asset);
   }
 
   /// Returns the DateTime of the date when the asset was last modified.

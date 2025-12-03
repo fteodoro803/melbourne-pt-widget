@@ -145,8 +145,9 @@ class GtfsScheduleService {
       DateTime? gtfsVersion = DateTime.tryParse(jsonVersion["version"]);
 
       if (gtfsVersion != null) {
-        // Add to database
-        database.gtfsAssetsDao.addGtfsAsset(id: "version", version: gtfsVersion);
+        // 3. Add to database
+        var dbAsset = database.gtfsAssetsDao.createGtfsAssetCompanion(id: "version", dateModified: gtfsVersion);
+        database.gtfsAssetsDao.addGtfsAsset(dbAsset);
       }
 
       version = await database.gtfsAssetsDao.getGtfsAssetDate(id: "version");
