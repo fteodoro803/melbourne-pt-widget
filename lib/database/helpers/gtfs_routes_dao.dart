@@ -10,28 +10,20 @@ class GtfsRoutesDao extends DatabaseAccessor<Database>
   GtfsRoutesDao(super.db);
 
   GtfsRoutesTableCompanion createGtfsRouteCompanion(
-      {required String routeId,
+      {required String id,
         required String shortName,
         required String longName}) {
     return GtfsRoutesTableCompanion(
-      id: Value(routeId),
+      id: Value(id),
       shortName: Value(shortName),
       longName: Value(longName),
     );
   }
 
-  Future<void> _insertGtfsRoute(GtfsRoutesTableCompanion route) async {
+  /// Adds/Updates a GTFS Route to the database.
+  Future<void> addGtfsRoute(GtfsRoutesTableCompanion route) async {
     await db.mergeUpdate(
         gtfsRoutesTable, route, (r) => r.id.equals(route.id.value));
-  }
-
-  Future<void> addGtfsRoute(
-      {required String id,
-        required String shortName,
-        required String longName}) async {
-    GtfsRoutesTableCompanion route = createGtfsRouteCompanion(
-        routeId: id, shortName: shortName, longName: longName);
-    await _insertGtfsRoute(route);
   }
 
   Future<List<GtfsRoutesTableData>> getGtfsRoutes() async {
