@@ -11,6 +11,7 @@ import 'package:flutter_project/database/helpers/link_route_directions_dao.dart'
 import 'package:flutter_project/database/helpers/link_route_stops_dao.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_directions_dao.dart';
 import 'package:flutter_project/database/helpers/link_stop_route_types_dao.dart';
+import 'package:flutter_project/database/helpers/route_maps_dao.dart';
 import 'package:flutter_project/database/helpers/routes_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -228,7 +229,7 @@ class GtfsAssetsTable extends Table {
 }
 
 // GTFS to PTV Route ID Mapping
-class RouteMapTable extends Table {
+class RouteMapsTable extends Table {
   IntColumn get ptvId => integer().references(RoutesTable, #id)();
   TextColumn get gtfsId => text().references(GtfsRoutesTable, #id)();
 
@@ -252,7 +253,7 @@ class RouteMapTable extends Table {
     GtfsRoutesTable,
     GtfsAssetsTable,
     GtfsShapesTable,
-    RouteMapTable
+    RouteMapsTable
   ],
   daos: [
     DeparturesDao,
@@ -266,6 +267,7 @@ class RouteMapTable extends Table {
     LinkRouteStopsDao,
     LinkStopRouteDirectionsDao,
     LinkStopRouteTypesDao,
+    RouteMapsDao,
   ],
 )
 class Database extends _$Database {
@@ -312,16 +314,6 @@ class Database extends _$Database {
   Future<void> insertTransport(TripsTableCompanion transport) async {
     await mergeUpdate(tripsTable, transport,
         (t) => t.uniqueId.equals(transport.uniqueId.value));
-  }
-
-  // Route Map Functions
-  Future<void> insertRouteMap(RouteMapTableCompanion routeMap) async {
-    await mergeUpdate(
-        routeMapTable,
-        routeMap,
-        (r) =>
-            r.ptvId.equals(routeMap.ptvId.value) &
-            r.gtfsId.equals(routeMap.gtfsId.value));
   }
 
   // Table Functions

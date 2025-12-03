@@ -1,6 +1,5 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/route_map_helpers.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -17,7 +16,7 @@ class GtfsRealtimeService {
     final feedMessage = await gtfsApi.tramVehiclePositions();
 
     // 1. Map PTV route ID to GTFS route ID
-    String? gtfsRouteId = await database.convertToGtfsRouteId(routeId);
+    String? gtfsRouteId = await database.routeMapsDao.convertToGtfsRouteId(routeId);
 
     // 2. Get GTFS route IDs associated with the route
     List<db.GtfsTripsTableData>? trips = gtfsRouteId != null

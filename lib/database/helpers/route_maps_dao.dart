@@ -1,25 +1,42 @@
-import 'package:drift/drift.dart' as drift;
+import 'package:drift/drift.dart';
 import 'package:flutter_project/database/database.dart';
+import 'package:flutter_project/database/helpers/database_helpers.dart';
 
-extension RouteMapHelpers on Database {
-  RouteMapTableCompanion createRouteMap(
+part 'route_maps_dao.g.dart';
+
+@DriftAccessor(tables: [RouteMapsTable])
+class RouteMapsDao extends DatabaseAccessor<Database>
+    with _$RouteMapsDaoMixin {
+  RouteMapsDao(super.db);
+
+  RouteMapsTableCompanion createRouteMap(
       {required int ptvId, required String gtfsId}) {
-    return RouteMapTableCompanion(
-      ptvId: drift.Value(ptvId),
-      gtfsId: drift.Value(gtfsId),
+    return RouteMapsTableCompanion(
+      ptvId: Value(ptvId),
+      gtfsId: Value(gtfsId),
     );
   }
 
+  // Route Map Functions
+  Future<void> _insertRouteMap(RouteMapsTableCompanion routeMap) async {
+    await db.mergeUpdate(
+        routeMapsTable,
+        routeMap,
+            (r) =>
+        r.ptvId.equals(routeMap.ptvId.value) &
+        r.gtfsId.equals(routeMap.gtfsId.value));
+  }
+
   Future<void> addRouteMap({required int ptvId, required String gtfsId}) async {
-    RouteMapTableCompanion route = createRouteMap(ptvId: ptvId, gtfsId: gtfsId);
-    await insertRouteMap(route);
+    RouteMapsTableCompanion route = createRouteMap(ptvId: ptvId, gtfsId: gtfsId);
+    await _insertRouteMap(route);
   }
 
   // todo: Sync route Maps
   // Go through PTV Routes and map to corresponding GTFS Routes
   Future<void> syncRouteMap() async {
     // 1. Go through PTV Routes
-    drift.SimpleSelectStatement<$RoutesTableTable, RoutesTableData> ptvQuery;
+    SimpleSelectStatement<$RoutesTableTable, RoutesTableData> ptvQuery;
     ptvQuery = select(routesTable);
     List<RoutesTableData> ptvResult = await ptvQuery.get();
 
@@ -42,8 +59,8 @@ extension RouteMapHelpers on Database {
     String name = ptvRoute.name.value;
     String number = ptvRoute.number.value;
 
-    drift.SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData>
-        query;
+    SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData>
+    query;
     if (routeType == 1) {
       // tram
       query = select(gtfsRoutesTable)
@@ -58,7 +75,7 @@ extension RouteMapHelpers on Database {
   }
 
   Future<String?> convertToGtfsRouteId(int ptvRouteId) async {
-    var query = select(routeMapTable)
+    var query = select(routeMapsTable)
       ..where((tbl) => tbl.ptvId.equals(ptvRouteId));
 
     final result = await query.getSingleOrNull();
@@ -66,7 +83,7 @@ extension RouteMapHelpers on Database {
   }
 
   Future<int?> convertToPtvRouteId(String gtfsRouteId) async {
-    var query = select(routeMapTable)
+    var query = select(routeMapsTable)
       ..where((tbl) => tbl.gtfsId.equals(gtfsRouteId));
 
     final result = await query.getSingleOrNull();
