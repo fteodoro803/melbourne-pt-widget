@@ -1,6 +1,5 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -38,7 +37,7 @@ class GtfsScheduleService {
   /// If no route data is in database, it fetches from the GTFS API and stores it to database.
   Future<List<db.GtfsTripsTableData>> fetchGtfsTrips(String gtfsRouteId) async {
     // 1. Collect from database, if it exists
-    List<db.GtfsTripsTableData> gtfsTripList = await database.getGtfsTripsByRouteId(gtfsRouteId);
+    List<db.GtfsTripsTableData> gtfsTripList = await database.gtfsTripsDao.getGtfsTripsByRouteId(gtfsRouteId);
 
     // 2. Collect from API, if it doesn't exist
     if (gtfsTripList.isEmpty) {
@@ -53,7 +52,7 @@ class GtfsScheduleService {
         int wheelchairAccessible = trip["wheelchair_accessible"];
 
         // 2a. Create Trip Companions for database insertion
-        var newGtfsTrip = database.createGtfsTripCompanion(
+        var newGtfsTrip = database.gtfsTripsDao.createGtfsTripCompanion(
             tripId: tripId,
             routeId: routeId,
             shapeId: shapeId,
@@ -63,10 +62,10 @@ class GtfsScheduleService {
       }
 
       // 2b. Batch insert trips to the database
-      await database.addGtfsTrips(trips: dbTripList);
+      await database.gtfsTripsDao.addGtfsTrips(trips: dbTripList);
 
       // 2c. Get trips from updated database
-      gtfsTripList = await database.getGtfsTripsByRouteId(gtfsRouteId);
+      gtfsTripList = await database.gtfsTripsDao.getGtfsTripsByRouteId(gtfsRouteId);
     }
 
     return gtfsTripList;
