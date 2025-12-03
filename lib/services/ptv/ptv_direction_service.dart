@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/direction_helpers.dart';
 import 'package:flutter_project/database/helpers/link_route_directions_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -35,7 +34,7 @@ class PtvDirectionService extends PtvBaseService {
         directionList.add(newDirection);
 
         // 4. Add to database
-        await database.addDirection(
+        await database.directionsDao.addDirection(
             newDirection.id, newDirection.name, newDirection.description);
         await database.addRouteDirection(
             routeId: routeId, directionId: newDirection.id);

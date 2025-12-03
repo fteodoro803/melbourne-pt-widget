@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
 import 'package:flutter_project/database/helpers/departures_dao.dart';
+import 'package:flutter_project/database/helpers/directions_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -244,7 +245,10 @@ class RouteMapTable extends Table {
     GtfsShapesTable,
     RouteMapTable
   ],
-  daos: [DeparturesDao],
+  daos: [
+    DeparturesDao,
+    DirectionsDao,
+  ],
 )
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
@@ -270,14 +274,6 @@ class Database extends _$Database {
   }
 
   // todo: move these functions to their respective helpers maybe?
-
-  // Direction Functions
-  /// Adds a direction to the database, if it doesn't already exist,
-  /// or if it has passed the "expiry" time
-  Future<void> insertDirection(DirectionsTableCompanion direction) async {
-    await mergeUpdate(
-        directionsTable, direction, (d) => d.id.equals(direction.id.value));
-  }
 
   // RouteType Functions
   /// Adds a route type to the database, if it doesn't already exist,

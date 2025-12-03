@@ -7,7 +7,6 @@ import 'package:flutter_project/screen_arguments.dart';
 
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
-import 'package:flutter_project/database/helpers/direction_helpers.dart';
 
 class SelectDirectionScreen extends StatefulWidget {
   const SelectDirectionScreen({super.key, required this.arguments});
@@ -53,7 +52,7 @@ class _SelectDirectionScreenState extends State<SelectDirectionScreen> {
       String description = _directions[index].description;
       int? routeId = widget.arguments.trip?.route?.id;
 
-      database.addDirection(id, name, description);
+      database.directionsDao.addDirection(id, name, description);
       database.addRouteDirection(routeId: routeId!, directionId: id);
     } else {
       widget.arguments.trip!.direction = null;
