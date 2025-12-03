@@ -1,6 +1,5 @@
 import 'package:flutter_project/api/gtfs_api_service.dart';
 import 'package:flutter_project/database/database.dart' as db;
-import 'package:flutter_project/database/helpers/gtfs_assets_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_route_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_shapes_helpers.dart';
 import 'package:flutter_project/database/helpers/gtfs_trip_helpers.dart';
@@ -141,7 +140,7 @@ class GtfsScheduleService {
 
   Future<DateTime?> fetchVersion() async {
     // 1. Get from GTFS Asset database, if it exists
-    DateTime? version = await database.getGtfsAssetDate(id: "version");
+    DateTime? version = await database.gtfsAssetsDao.getGtfsAssetDate(id: "version");
 
     // 2. If not, get from API
     if (version == null) {
@@ -150,10 +149,10 @@ class GtfsScheduleService {
 
       if (gtfsVersion != null) {
         // Add to database
-        database.addGtfsAsset(id: "version", version: gtfsVersion);
+        database.gtfsAssetsDao.addGtfsAsset(id: "version", version: gtfsVersion);
       }
 
-      version = await database.getGtfsAssetDate(id: "version");
+      version = await database.gtfsAssetsDao.getGtfsAssetDate(id: "version");
     }
 
     print(version);

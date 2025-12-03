@@ -3,6 +3,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_project/database/helpers/database_helpers.dart';
 import 'package:flutter_project/database/helpers/departures_dao.dart';
 import 'package:flutter_project/database/helpers/directions_dao.dart';
+import 'package:flutter_project/database/helpers/gtfs_assets_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -248,6 +249,7 @@ class RouteMapTable extends Table {
   daos: [
     DeparturesDao,
     DirectionsDao,
+    GtfsAssetsDao,
   ],
 )
 class Database extends _$Database {
@@ -357,12 +359,6 @@ class Database extends _$Database {
   // GTFS Trip Functions
   Future<void> insertGtfsTrip(GtfsTripsTableCompanion trip) async {
     await mergeUpdate(gtfsTripsTable, trip, (t) => t.id.equals(trip.id.value));
-  }
-
-  // GTFS Asset Functions
-  Future<void> insertGtfsAsset(GtfsAssetsTableCompanion asset) async {
-    await mergeUpdate(
-        gtfsAssetsTable, asset, (a) => a.id.equals(asset.id.value));
   }
 
   // Route Map Functions
