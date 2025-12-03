@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/dev/dev_tools.dart';
-import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/screen_arguments.dart';
 import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/domain/stop.dart';
@@ -96,7 +95,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String stopName = _stops[index].name;
     double? latitude = _stops[index].latitude;
     double? longitude = _stops[index].longitude;
-    database.addStop(
+    database.stopsDao.addStop(
         id: stopId, name: stopName, latitude: latitude!, longitude: longitude!);
   }
 

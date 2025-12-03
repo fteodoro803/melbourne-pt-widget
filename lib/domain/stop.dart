@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/route_type.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -92,7 +91,7 @@ class Stop {
   static Future<Stop?> fromId(int id) async {
     db.Database database = Get.find<db.Database>();
 
-    db.StopsTableData? dbStop = await database.getStopById(id);
+    db.StopsTableData? dbStop = await database.stopsDao.getStopById(id);
     return dbStop != null
         ? Stop.fromDb(dbStop: dbStop)
         : null; // todo: maybe get sequence? or maybe better to keep without sequence, since it doesn't have context

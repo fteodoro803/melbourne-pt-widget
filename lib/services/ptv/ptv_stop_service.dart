@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/domain/directed_stop.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -49,7 +48,7 @@ class PtvStopService extends PtvBaseService {
     for (var stop in data["stops"]) {
       Stop newStop = Stop.fromApi(stop);
       stopList.add(newStop);
-      futures.add(database.addStop(
+      futures.add(database.stopsDao.addStop(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,
@@ -120,7 +119,7 @@ class PtvStopService extends PtvBaseService {
       stopList.add(newStop);
 
       // 3. Add to database
-      await database.addStop(
+      await database.stopsDao.addStop(
           id: newStop.id,
           name: newStop.name,
           latitude: newStop.latitude!,

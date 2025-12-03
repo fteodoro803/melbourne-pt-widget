@@ -1,4 +1,3 @@
-import 'package:flutter_project/database/helpers/stop_helpers.dart';
 import 'package:flutter_project/database/helpers/trip_helpers.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -57,7 +56,7 @@ class PtvTripService extends PtvBaseService {
       var dbRoute = await database.routesDao.getRouteById(dbTrip.routeId);
       route = dbRoute != null ? await Route.fromDbAsync(dbRoute) : null;
 
-      var dbStop = await database.getStopById(dbTrip.stopId);
+      var dbStop = await database.stopsDao.getStopById(dbTrip.stopId);
       stop = dbStop != null ? Stop.fromDb(dbStop: dbStop) : null;
       // todo: get sequence to stop
 

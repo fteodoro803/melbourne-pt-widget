@@ -14,6 +14,7 @@ import 'package:flutter_project/database/helpers/link_stop_route_types_dao.dart'
 import 'package:flutter_project/database/helpers/route_maps_dao.dart';
 import 'package:flutter_project/database/helpers/route_types_dao.dart';
 import 'package:flutter_project/database/helpers/routes_dao.dart';
+import 'package:flutter_project/database/helpers/stops_dao.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -261,6 +262,7 @@ class RouteMapsTable extends Table {
     DirectionsDao,
     RoutesDao,
     RouteTypesDao,
+    StopsDao,
     GtfsAssetsDao,
     GtfsRoutesDao,
     GtfsShapesDao,
@@ -296,13 +298,6 @@ class Database extends _$Database {
   }
 
   // todo: move these functions to their respective helpers maybe?
-
-  // Stop Functions
-  /// Adds a stop to the database, if it doesn't already exist.
-  /// If it does, update the old stop by merging it with the new one.
-  Future<void> insertStop(StopsTableCompanion stop) async {
-    await mergeUpdate(stopsTable, stop, (t) => t.id.equals(stop.id.value));
-  }
 
   // Transport Functions
   Future<void> insertTransport(TripsTableCompanion transport) async {
