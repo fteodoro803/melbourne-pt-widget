@@ -2,16 +2,12 @@ import 'package:flutter_project/domain/departure.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/stop.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 import 'package:flutter_project/services/ptv_service.dart';
 
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
 
-part 'trip.g.dart';
-
-@JsonSerializable()
 class Trip {
   Stop? stop;
   Route? route;
@@ -129,8 +125,4 @@ class Trip {
   }
 
   // todo: factory constructor fromDB
-
-  // Methods for JSON Serialization
-  factory Trip.fromJson(Map<String, dynamic> json) => _$TripFromJson(json);
-  Map<String, dynamic> toJson() => _$TripToJson(this);
 }
