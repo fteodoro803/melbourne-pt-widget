@@ -1,10 +1,6 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
-part 'direction.g.dart';
-
 /// Represents a direction of travel for a route.
-@JsonSerializable()
 class Direction {
   int id;
   String name;
@@ -36,9 +32,4 @@ class Direction {
         name: dbDirection.name,
         description: dbDirection.description);
   }
-
-  // Methods for JSON Serialization
-  factory Direction.fromJson(Map<String, dynamic> json) =>
-      _$DirectionFromJson(json);
-  Map<String, dynamic> toJson() => _$DirectionToJson(this);
 }

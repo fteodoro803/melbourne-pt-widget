@@ -3,15 +3,11 @@ import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/domain/stop.dart';
 import 'package:flutter_project/services/ptv_service.dart';
 import 'package:get/get.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/palettes.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
-part 'route.g.dart';
-
 /// Represents PTV's route, with identification and styling information.
 /// Handles colour mapping based on route type.
-@JsonSerializable()
 class Route {
   int id;
   String name;
@@ -163,10 +159,6 @@ class Route {
 
     return str;
   }
-
-  /// Methods for JSON Serialization.
-  factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
-  Map<String, dynamic> toJson() => _$RouteToJson(this);
 
   /// Factory constructor to create a Route from the PTV API response
   factory Route.fromApi(Map<String, dynamic> json) {

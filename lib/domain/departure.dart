@@ -1,10 +1,5 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'departure.g.dart';
-
 /// Represents a transport's departure, with information on its respective vehicle.
 /// Handles conversion from UTC time to Melbourne's local time
-@JsonSerializable()
 class Departure {
   // Departures in UTC Time
   DateTime? scheduledDepartureUTC;
@@ -138,9 +133,4 @@ class Departure {
       platformNumber: platformNumber,
     );
   }
-
-  /// Methods for JSON Serialization
-  factory Departure.fromJson(Map<String, dynamic> json) =>
-      _$DepartureFromJson(json);
-  Map<String, dynamic> toJson() => _$DepartureToJson(this);
 }

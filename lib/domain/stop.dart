@@ -1,13 +1,9 @@
 import 'package:flutter_project/domain/route.dart';
 import 'package:flutter_project/domain/route_type.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_project/database/database.dart' as db;
 import 'package:get/get.dart';
 
-part 'stop.g.dart';
-
 /// Represents a Stop a transport can pass through.
-@JsonSerializable()
 class Stop {
   int id; // convert this to integer ~note
   String name; //~note what happens if in an api call, these are null?
@@ -96,8 +92,4 @@ class Stop {
         ? Stop.fromDb(dbStop: dbStop)
         : null; // todo: maybe get sequence? or maybe better to keep without sequence, since it doesn't have context
   }
-
-  // Methods for JSON Serialization
-  factory Stop.fromJson(Map<String, dynamic> json) => _$StopFromJson(json);
-  Map<String, dynamic> toJson() => _$StopToJson(this);
 }
