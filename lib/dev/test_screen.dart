@@ -104,7 +104,7 @@ class _TestScreenState extends State<TestScreen> {
     int? id = int.tryParse(routeId);
     if (id == null) return;
 
-    var route = await ptvService.routes.getRouteById(id: id);
+    var route = await ptvService.routes.fetchRoute(id: id);
     print(route);
 
     if (route == null) return;
