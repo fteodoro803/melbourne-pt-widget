@@ -17,7 +17,7 @@ class Route {
 
   // Lazy loaded details
   bool isLoaded = false;
-  String gtfsId = "PLACEHOLDER";  // find a way to make gtfsId nullable
+  String gtfsId = "PLACEHOLDER";  // make gtfsId nullable?
   String? colour; // Hex colour code for background
   String? textColour; // Hex colour code for text
   List<Direction>? directions;

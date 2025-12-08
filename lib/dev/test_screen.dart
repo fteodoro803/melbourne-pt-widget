@@ -99,9 +99,15 @@ class _TestScreenState extends State<TestScreen> {
     print(group);
   }
 
-  Future<void> test() async {
-    pt_route.Route route = pt_route.Route(id: 725, name: "name", type: RouteType.tram, status: "status", number: "number");
+  Future<void> test(String? routeId) async {
+    if (routeId == null) return;
+    int? id = int.tryParse(routeId);
+    if (id == null) return;
+
+    var route = await ptvService.routes.getRouteById(id: id);
     print(route);
+
+    if (route == null) return;
     await route.loadDetails();
     print(route);
   }
@@ -158,7 +164,7 @@ class _TestScreenState extends State<TestScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                test();
+                test(ptvRouteControllers[0].text);
               },
               child: Text("Test"),
             ),
