@@ -12,11 +12,16 @@ class GtfsRoutesDao extends DatabaseAccessor<Database>
   GtfsRoutesTableCompanion createGtfsRouteCompanion(
       {required String id,
         required String shortName,
-        required String longName}) {
+        required String longName,
+        required String colour,
+        required String textColour,
+      }) {
     return GtfsRoutesTableCompanion(
       id: Value(id),
       shortName: Value(shortName),
       longName: Value(longName),
+      colour: Value(colour),
+      textColour: Value(textColour)
     );
   }
 
@@ -24,6 +29,12 @@ class GtfsRoutesDao extends DatabaseAccessor<Database>
   Future<void> addGtfsRoute(GtfsRoutesTableCompanion route) async {
     await db.mergeUpdate(
         gtfsRoutesTable, route, (r) => r.id.equals(route.id.value));
+  }
+
+  Future<GtfsRoutesTableData?> getRoute(String id) async {
+    var query = select(gtfsRoutesTable)..where((r) => r.id.equals(id));
+    var result = await query.getSingleOrNull();
+    return result;
   }
 
   Future<List<GtfsRoutesTableData>> getGtfsRoutes() async {

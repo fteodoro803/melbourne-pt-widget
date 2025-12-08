@@ -11,15 +11,15 @@ import 'package:flutter_project/database/database.dart' as db;
 class Route {
   int id;
   String name;
-  String
-      number; // todo: should this be an int? Maybe nullable, since train doesnt have a number
-  String?
-      colour; // Hex colour code for background       // todo: maybe this shouldn't be optional? Since if there is no colour, it'll always use a fallback
-  String? textColour; // Hex colour code for text
+  String number; // should this be an int? Maybe nullable, since train doesnt have a number
   RouteType type;
-  String gtfsId;
   String status;
 
+  // Lazy loaded details
+  bool isLoaded = false;
+  String gtfsId = "PLACEHOLDER";  // find a way to make gtfsId nullable
+  String? colour; // Hex colour code for background
+  String? textColour; // Hex colour code for text
   List<Direction>? directions;
   List<Stop>? stopsAlongRoute;
 
@@ -29,10 +29,7 @@ class Route {
       required this.name,
       required this.number,
       required this.type,
-      required this.gtfsId,
-      required this.status}) {
-    setRouteColour(type.name);
-  }
+      required this.status});
 
   /// Factory method to initialise a Route with async [directions] and [stopsAlongRoute]
   static Future<Route> withDetails(
@@ -49,7 +46,6 @@ class Route {
         name: name,
         number: number,
         type: type,
-        gtfsId: gtfsId,
         status: status);
     route.stopsAlongRoute =
         await ptvService.stops.fetchStopsByRoute(route: route);
@@ -60,16 +56,26 @@ class Route {
 
   /// Lazy-loading directions and stopAlongRoute
   Future<void> loadDetails() async {
-    if (directions == null || stopsAlongRoute == null) {
-      PtvService ptvService = Get.find<PtvService>();
-      directions = await ptvService.directions.fetchDirections(id);
-      stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: this);
+    var ptvService = Get.find<PtvService>();
+    directions = await ptvService.directions.fetchDirections(id);
+    stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: this);
+
+    var database = Get.find<db.Database>();
+    gtfsId = await database.routeMapsDao.convertToGtfsRouteId(id) ?? "EMPTY";
+    var gtfsRoute = await database.gtfsRoutesDao.getRoute(gtfsId);
+    if (gtfsRoute == null) {
+      print("( route.dart -> loadDetails ) -- gtfsRoute is null");
+      return;
     }
+    colour = gtfsRoute.colour;
+    textColour = gtfsRoute.textColour;
+
+    isLoaded = true;
   }
 
   // Override == operator to compare routes based on the routeNumber.
   @override
-  bool operator ==(Object other) {
+  bool operator == (Object other) {
     if (identical(this, other)) return true;
     return other is Route && other.id == id;
   }
@@ -167,22 +173,9 @@ class Route {
       name: json["route_name"],
       number: json["route_number"],
       type: RouteType.fromId(json["route_type"]),
-      gtfsId: json["route_gtfs_id"],
       status: json["route_service_status"]["description"],
     );
   }
-
-  // /// Factory constructor to create a Route from a database RoutesData object.
-  // factory Route.fromDb(db.RoutesTableData dbRoute) {
-  //   return Route(
-  //     id: dbRoute.id,
-  //     name: dbRoute.name,
-  //     number: dbRoute.number,
-  //     gtfsId: "PLACEHOLDER",
-  //     type: RouteType.fromId(dbRoute.routeTypeId),
-  //     status: dbRoute.status,
-  //   );
-  // }
 
   /// Async Factory constructor to create a Route from the Database.
   static Future<Route?> fromDbAsync(db.RoutesTableData dbRoute) async {
@@ -195,7 +188,6 @@ class Route {
       name: dbRoute.name,
       number: dbRoute.number,
       type: RouteType.fromId(dbRoute.routeTypeId),
-      gtfsId: gtfsId,
       status: dbRoute.status,
     );
   }

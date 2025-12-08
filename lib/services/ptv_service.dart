@@ -216,16 +216,13 @@ class PtvService {
         int routeId = route["route_id"];
         int routeTypeId = route["route_type"];
         RouteType routeType = RouteType.fromId(routeTypeId);
-        String gtfsId = "TEMPORARY"; // todo: fix this
-        String status =
-            "TEMPORARY"; // todo: fix this, or the logic of the class
+        String status = "TEMPORARY"; // todo: fix this, or the logic of the class
 
         Route newRoute = Route(
             name: routeName,
             number: routeNumber,
             id: routeId,
             type: routeType,
-            gtfsId: gtfsId,
             status: status);
 
         stops.add(newStop);
