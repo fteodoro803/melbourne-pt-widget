@@ -22,11 +22,12 @@ Copy-paste these commands to
        - ```dart run build_runner build --delete-conflicting-outputs```
      - If modifying the domain or database files (continuous)
        - ```dart run build_runner watch --delete-conflicting-outputs```
-  3. Setup environment
-     - 
-  4. Optional: Manually ensure developer credential files don't get tracked by Git (can be done with setup_env.dart)
-     - ```git update-index --assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
-     - to undo: ```git update-index --no-assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
+  3. Optional: Manually ensure developer credential files don't get tracked by Git (can be done with setup_env.dart)
+       - ```git update-index --assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
+       - to undo: ```git update-index --no-assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
+  4. Platform-specific
+     1. iOS - install dependencies
+        - ```pod install```
 
 ### Notes
 - Changes to config.ini / secrets.properties / AppDelegate.swift __*must*__ not be pushed
