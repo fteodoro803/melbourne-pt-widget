@@ -30,29 +30,6 @@ class Route {
       required this.type,
       required this.status});
 
-  /// Factory method to initialise a Route with async [directions] and [stopsAlongRoute]
-  static Future<Route> withDetails(
-      {required int id,
-      required String name,
-      required String number,
-      required RouteType type,
-      required String gtfsId,
-      required String status}) async {
-    PtvService ptvService = Get.find<PtvService>();
-
-    Route route = Route(
-        id: id,
-        name: name,
-        number: number,
-        type: type,
-        status: status);
-    route.stopsAlongRoute =
-        await ptvService.stops.fetchStopsByRoute(route: route);
-    route.directions = await ptvService.directions.fetchDirections(route.id);
-
-    return route;
-  }
-
   /// Lazy-loading directions and stopAlongRoute
   Future<void> loadDetails() async {
     var ptvService = Get.find<PtvService>();
