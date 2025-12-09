@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/api/ptv_api_service.dart';
 import 'package:flutter_project/database/database.dart';
+import 'package:flutter_project/domain/route_type.dart';
 import 'package:flutter_project/services/ptv_service.dart';
 import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/api/gtfs_api_service.dart';
@@ -98,16 +99,17 @@ class _TestScreenState extends State<TestScreen> {
     print(group);
   }
 
-  Future<void> gtfsTest() async {
-    String routeId = "aus:vic:vic-03-1:";
-    //
-    await gtfsService.schedule.fetchGtfsTrips(routeId);
-    await gtfsService.schedule.fetchShapes(routeId);
-    await gtfsService.schedule.fetchGeoPath(routeId);
+  Future<void> test(String? routeId) async {
+    if (routeId == null) return;
+    int? id = int.tryParse(routeId);
+    if (id == null) return;
 
-    await gtfsService.schedule.fetchVersion();
-    // database.departuresDao
-    // database.departuresDao.
+    var route = await ptvService.routes.fetchRoute(id: id);
+    print(route);
+
+    if (route == null) return;
+    await route.loadDetails();
+    print(route);
   }
 
   @override
@@ -162,9 +164,9 @@ class _TestScreenState extends State<TestScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                gtfsTest();
+                test(ptvRouteControllers[0].text);
               },
-              child: Text("Gtfs"),
+              child: Text("Test"),
             ),
           ],
         ));

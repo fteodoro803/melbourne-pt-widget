@@ -212,6 +212,8 @@ class GtfsRoutesTable extends Table {
   TextColumn get id => text()();
   TextColumn get shortName => text()();
   TextColumn get longName => text()();
+  TextColumn get colour => text()();
+  TextColumn get textColour => text()();
 
   @override
   Set<Column> get primaryKey => {id};

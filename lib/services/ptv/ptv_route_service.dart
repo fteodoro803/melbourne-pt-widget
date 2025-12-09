@@ -72,9 +72,10 @@ class PtvRouteService extends PtvBaseService {
   }
 
   /// Fetches routes from database, by id.
-  Future<Route?> getRouteById(
+  Future<Route?> fetchRoute(
       {required int id, bool withDetails = false}) async {
     // 1. Get route from database
+    // No need to get from API because every route is initialised in the beginning
     final dbRoute = await database.routesDao.getRouteById(id);
     Route? route = dbRoute != null ? await Route.fromDbAsync(dbRoute) : null;
 

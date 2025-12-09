@@ -20,9 +20,11 @@ class GtfsScheduleService {
         String routeId = route["route_id"];
         String shortName = route["route_short_name"];
         String longName = route["route_long_name"];
+        String colour = route["route_color"];
+        String textColour = route["route_text_color"];
 
         // 2a. Insert each route to the database
-        var dbGtfsRoute = database.gtfsRoutesDao.createGtfsRouteCompanion(id: routeId, shortName: shortName, longName: longName);
+        var dbGtfsRoute = database.gtfsRoutesDao.createGtfsRouteCompanion(id: routeId, shortName: shortName, longName: longName, colour: colour, textColour: textColour);
         await database.gtfsRoutesDao.addGtfsRoute(dbGtfsRoute);
       }
 
