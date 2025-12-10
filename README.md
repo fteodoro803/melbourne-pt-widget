@@ -12,7 +12,6 @@ For the program to work, follow these steps:
      - [PTV API](https://timetableapi.ptv.vic.gov.au/swagger/ui/index) (Developer ID and Key)
      - [GTFS Realtime API](https://opendata.transport.vic.gov.au/dataset/gtfs-realtime) (API Key)
      - [Google Maps](https://developers.google.com/maps) (API Key)
-  2. Run `setup_env.dart` to setup your environment variables
 
 Copy-paste these commands to 
   1. Get dependencies 
@@ -23,11 +22,14 @@ Copy-paste these commands to
      - If modifying the domain or database files (continuous)
        - ```dart run build_runner watch --delete-conflicting-outputs```
   3. Optional: Manually ensure developer credential files don't get tracked by Git (can be done with setup_env.dart)
-       - ```git update-index --assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
-       - to undo: ```git update-index --no-assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
+     - ```git update-index --assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
+     - to undo: ```git update-index --no-assume-unchanged assets/cfg/config.json android/secrets.properties ios/Runner/AppDelegate.swift```
   4. Platform-specific
      1. iOS - install dependencies
+        - ```cd ios```
         - ```pod install```
+  5. Setup environment variables
+     - ```dart setup_env.dart```
 
 ### Notes
 - Changes to config.ini / secrets.properties / AppDelegate.swift __*must*__ not be pushed
