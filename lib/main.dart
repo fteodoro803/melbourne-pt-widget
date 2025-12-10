@@ -7,6 +7,7 @@ import "package:flutter_project/dev/add_screens_old/select_direction_screen.dart
 import "package:flutter_project/dev/add_screens_old/select_route_type_screen.dart";
 import "package:flutter_project/dev/add_screens_old/select_stop_screen.dart";
 import "package:flutter_project/database/database.dart" as db;
+import "package:flutter_project/domain/route.dart";
 import "package:flutter_project/services/google_service.dart";
 import "package:flutter_project/services/gtfs_service.dart";
 import "package:flutter_project/services/ptv_service.dart";
@@ -182,9 +183,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     List<Trip> tripList = await ptvService.trips.loadTrips();
 
-    // Updates all Departures
+    // Updates all Departures and loads additional route details
     for (var trip in tripList) {
       await trip.updateDepartures(departureCount: 3);
+      await trip.route?.loadDetails(detail: RouteDetail.gtfs);
     }
 
     setState(() {

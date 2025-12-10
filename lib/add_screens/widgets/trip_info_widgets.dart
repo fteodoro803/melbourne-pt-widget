@@ -59,13 +59,13 @@ class RouteLabelContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     String routeType = route.type.name;
     String routeLabel = TripUtils.getLabel(route, routeType) ?? 'Unknown';
-    Color routeColour = ColourUtils.hexToColour(route.colour!);
-    Color routeTextColour = ColourUtils.hexToColour(route.textColour!);
+    Color routeColour = ColourUtils.hexToColour(route.colour);
+    Color routeTextColour = ColourUtils.hexToColour(route.textColour);
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: route.colour != null ? routeColour : Colors.grey,
+        color: routeColour,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -73,7 +73,7 @@ class RouteLabelContainer extends StatelessWidget {
         style: TextStyle(
           fontSize: textSize,
           fontWeight: FontWeight.bold,
-          color: route.textColour != null ? routeTextColour : Colors.black,
+          color: routeTextColour,
         ),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
@@ -168,9 +168,7 @@ class RouteWidget extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: route.colour != null
-                ? ColourUtils.hexToColour(route.colour!)
-                : Colors.grey,
+            color: ColourUtils.hexToColour(route.colour),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -178,9 +176,7 @@ class RouteWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: route.textColour != null
-                  ? ColourUtils.hexToColour(route.textColour!)
-                  : Colors.black,
+              color: ColourUtils.hexToColour(route.textColour),
             ),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,

@@ -52,6 +52,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     for (int i = 0; i < transportList.length; i++) {
       // print("( confirmation_screen.dart -> _initialiseDepartures() ) -- transportList[$i] = ${transportList[i]}");
       await transportList[i].updateDepartures();
+      await transportList[i].route?.loadDetails();
     }
 
     // setState(() {});

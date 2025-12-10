@@ -65,6 +65,7 @@ class PtvRouteService extends PtvBaseService {
     List<Route> domainRouteList = [];
     for (int i = 0; i < dbRouteList.length; i++) {
       Route? newRoute = await Route.fromDbAsync(dbRouteList[i]);
+      await newRoute?.loadDetails(detail: RouteDetail.gtfs);
       if (newRoute != null) domainRouteList.add(newRoute);
     }
 

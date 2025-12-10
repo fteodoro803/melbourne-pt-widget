@@ -5,6 +5,8 @@ import 'package:flutter_project/services/ptv_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter_project/database/database.dart' as db;
 
+enum RouteDetail { ptv, gtfs }
+
 /// Represents PTV's route, with identification and styling information.
 /// Handles colour mapping based on route type.
 class Route {
@@ -28,20 +30,25 @@ class Route {
   Route({required this.id, required this.name, required this.number, required this.type, required this.status});
 
   /// Lazy-loading directions and stopAlongRoute.
-  Future<void> loadDetails() async {
-    var ptvService = Get.find<PtvService>();
-    directions = await ptvService.directions.fetchDirections(id);
-    stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: this);
+  Future<void> loadDetails({RouteDetail? detail}) async {
 
-    var database = Get.find<db.Database>();
-    gtfsId = await database.routeMapsDao.convertToGtfsRouteId(id) ?? "EMPTY";
-    var gtfsRoute = await database.gtfsRoutesDao.getRoute(gtfsId);
-    if (gtfsRoute == null) {
-      print("( route.dart -> loadDetails ) -- gtfsRoute is null");
-      return;
+    if (detail == null || detail == RouteDetail.ptv) {
+      var ptvService = Get.find<PtvService>();
+      directions = await ptvService.directions.fetchDirections(id);
+      stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: this);
     }
-    colour = gtfsRoute.colour;
-    textColour = gtfsRoute.textColour;
+
+    if (detail == null || detail == RouteDetail.gtfs) {
+      var database = Get.find<db.Database>();
+      gtfsId = await database.routeMapsDao.convertToGtfsRouteId(id) ?? "EMPTY";
+      var gtfsRoute = await database.gtfsRoutesDao.getRoute(gtfsId);
+      if (gtfsRoute == null) {
+        print("( route.dart -> loadDetails ) -- gtfsRoute is null");
+        return;
+      }
+      colour = gtfsRoute.colour;
+      textColour = gtfsRoute.textColour;
+    }
   }
 
   // Override == operator to compare routes based on the routeNumber.
