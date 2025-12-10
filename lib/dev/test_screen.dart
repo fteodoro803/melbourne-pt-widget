@@ -106,10 +106,11 @@ class _TestScreenState extends State<TestScreen> {
 
     var route = await ptvService.routes.fetchRoute(id: id);
     print(route);
-
+    //
     if (route == null) return;
     await route.loadDetails();
     print(route);
+
   }
 
   @override

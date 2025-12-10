@@ -1,3 +1,4 @@
+import 'package:flutter_project/database/database.dart';
 import 'package:flutter_project/domain/directed_stop.dart';
 import 'package:flutter_project/domain/direction.dart';
 import 'package:flutter_project/domain/route.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_project/domain/trip.dart';
 import 'package:flutter_project/services/ptv/ptv_base_service.dart';
 import 'package:flutter_project/services/ptv/ptv_direction_service.dart';
 import 'package:flutter_project/services/utility/list_extensions.dart';
+import 'package:get/get.dart';
 
 // todo: move this class somewhere else
 class RouteStops {
@@ -87,7 +89,7 @@ class PtvStopService extends PtvBaseService {
   // todo: fetch data from database first, preferring database
   // todo: filter stops using gtfs, to match gtfs
   Future<List<Stop>> fetchStopsByRoute(
-      {required Route route, Direction? direction, bool? filter}) async {
+      {required Route route, Direction? direction, bool? filter = true}) async {
     List<Stop> stopList = [];
 
     // 1. Determine which direction to use
@@ -101,47 +103,65 @@ class PtvStopService extends PtvBaseService {
       directionId = directions[0].id;
     }
 
-    var data = await apiService.stopsRoute(
-      route.id.toString(),
-      route.type.id.toString(),
-      directionId: directionId.toString(), // null if no direction available
-    );
-
-    // Empty JSON Response
-    if (data == null) {
-      handleNullResponse("fetchStopsRoute");
-      return stopList;
+    // Check if data exists in database
+    var database = Get.find<Database>();
+    var dbStopsRoute = await database.linkStopRouteDirectionsDao.getStopRouteDirection(routeId: route.id, directionId: directionId);
+    if (dbStopsRoute.isNotEmpty) {
+      for (int i=0; i<dbStopsRoute.length; i++) {
+        Stop stop = Stop.fromDb(dbStop: dbStopsRoute[i], sequence: i+1);
+        stopList.add(stop);
+      }
     }
 
-    // 2. Convert departure time response to DateTime object
-    for (var stop in data["stops"]) {
-      Stop newStop = Stop.fromApi(stop);
+    // If it doesn't, retrieve from API and add to database
+    else {
+      var data = await apiService.stopsRoute(
+        route.id.toString(),
+        route.type.id.toString(),
+        directionId: directionId.toString(), // null if no direction available
+      );
 
-      // 2a. Filter skips stops that don't exist anymore
-      if (filter == true && (newStop.stopSequence == 0)) {
-        continue;
+      // Empty JSON Response
+      if (data == null) {
+        handleNullResponse("fetchStopsRoute");
+        return stopList;
       }
 
-      stopList.add(newStop);
+      // 2. Convert departure time response to DateTime object
+      for (var stop in data["stops"]) {
+        Stop newStop = Stop.fromApi(stop);
 
-      // 3. Add to database
-      var dbStop = database.stopsDao.createStopCompanion(
-          id: newStop.id,
-          name: newStop.name,
-          latitude: newStop.latitude!,
-          longitude: newStop.longitude!,
-          landmark: newStop.landmark,
-          suburb: newStop.suburb
-      );
-      await database.stopsDao.addStop(dbStop);
+        // 2a. Filter skips stops that don't exist anymore
+        if (filter == true && (newStop.stopSequence == 0)) {
+          continue;
+        }
 
-      var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(routeId: route.id, stopId: newStop.id);
-      await database.linkRouteStopsDao.addRouteStop(routeStop);
+        stopList.add(newStop);
 
-      var stopRouteDirection = database.linkStopRouteDirectionsDao.createStopDirectionsTypeCompanion(stopId: newStop.id, routeId: route.id, directionId: directionId, sequence: newStop.stopSequence);
-      await database.linkStopRouteDirectionsDao.addStopRouteDirection(stopRouteDirection);
+        // 3. Add to database
+        var dbStop = database.stopsDao.createStopCompanion(
+            id: newStop.id,
+            name: newStop.name,
+            latitude: newStop.latitude!,
+            longitude: newStop.longitude!,
+            landmark: newStop.landmark,
+            suburb: newStop.suburb
+        );
+        await database.stopsDao.addStop(dbStop);
+
+        var routeStop = database.linkRouteStopsDao.createRouteStopCompanion(
+            routeId: route.id, stopId: newStop.id);
+        await database.linkRouteStopsDao.addRouteStop(routeStop);
+
+        var stopRouteDirection = database.linkStopRouteDirectionsDao
+            .createStopDirectionsTypeCompanion(stopId: newStop.id,
+            routeId: route.id,
+            directionId: directionId,
+            sequence: newStop.stopSequence);
+        await database.linkStopRouteDirectionsDao.addStopRouteDirection(
+            stopRouteDirection);
+      }
     }
-    // todo: add to database, generate flipped stopDirections
 
     return stopList;
   }
