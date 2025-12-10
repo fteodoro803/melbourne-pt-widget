@@ -10,6 +10,13 @@ class Direction {
   Direction({required this.id, required this.name, required this.description});
 
   @override
+  bool operator == (Object other) =>
+      identical(this, other) || (other is Direction && other.id == id);
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
   String toString() {
     return "Direction:\n"
         "\tID: $id\t"
