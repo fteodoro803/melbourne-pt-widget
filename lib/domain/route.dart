@@ -8,29 +8,26 @@ import 'package:flutter_project/database/database.dart' as db;
 /// Represents PTV's route, with identification and styling information.
 /// Handles colour mapping based on route type.
 class Route {
-  int id;
-  String name;
-  String number; // should this be an int? Maybe nullable, since train doesnt have a number
-  RouteType type;
+  final int id;
+  final String name;
+  final String number; // should this be an int? Maybe nullable, since train doesnt have a number
+  final RouteType type;
   String status;
 
   // Lazy loaded details
-  bool isLoaded = false;
+  bool get hasGtfs => gtfsId.isNotEmpty;
   String gtfsId = "";  // make gtfsId nullable?
-  String? colour; // Hex colour code for background
-  String? textColour; // Hex colour code for text
+  String colour = "707372";       // Fallback Hex colour code for background
+  String textColour = "FFFFFF";   // Fallback Hex colour code for text
+
+  bool get hasStopDirections => (directions != null) && (stopsAlongRoute != null);
   List<Direction>? directions;
   List<Stop>? stopsAlongRoute;
 
-  /// Creates a route object, and matches its details to its respective colour.
-  Route(
-      {required this.id,
-      required this.name,
-      required this.number,
-      required this.type,
-      required this.status});
+  /// Creates a route object.
+  Route({required this.id, required this.name, required this.number, required this.type, required this.status});
 
-  /// Lazy-loading directions and stopAlongRoute
+  /// Lazy-loading directions and stopAlongRoute.
   Future<void> loadDetails() async {
     var ptvService = Get.find<PtvService>();
     directions = await ptvService.directions.fetchDirections(id);
@@ -45,8 +42,6 @@ class Route {
     }
     colour = gtfsRoute.colour;
     textColour = gtfsRoute.textColour;
-
-    isLoaded = true;
   }
 
   // Override == operator to compare routes based on the routeNumber.
