@@ -148,22 +148,6 @@ class SearchUtils {
     return uniqueStops;
   }
 
-  /// Finds the sequence of stops along a given route
-  /// Removes stops that are no longer active
-  Future<List<Stop>> getStopsAlongRoute(
-      List<Direction> directions, pt_route.Route route) async {
-    List<Stop> stops = [];
-    if (directions.isNotEmpty) {
-      stops = await ptvService.stops
-          .fetchStopsByRoute(route: route, direction: directions[0]);
-      stops = stops.where((s) => s.stopSequence != 0).toList();
-    } else {
-      stops = await ptvService.stops.fetchStopsByRoute(route: route);
-    }
-
-    return stops;
-  }
-
   /// Takes a list of stops along a route and groups them based on suburb
   Future<List<SuburbStops>> getSuburbStops(
       List<Stop> stopsAlongRoute, pt_route.Route route) async {
