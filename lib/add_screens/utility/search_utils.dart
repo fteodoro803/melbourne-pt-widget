@@ -221,16 +221,4 @@ class SearchUtils {
       backgroundColor: isSaved ? Color(0xFF4E754F) : Color(0xFF7C291F),
     );
   }
-
-  /// Finds the stops along a route and the directions for a route
-  Future<pt_route.Route> initializeRoute(pt_route.Route route) async {
-    List<Direction> directions =
-        await ptvService.directions.fetchDirections(route.id);
-    List<Stop> stopsAlongRoute = await getStopsAlongRoute(directions, route);
-    pt_route.Route newRoute = route;
-    newRoute.directions = directions;
-    newRoute.stopsAlongRoute = stopsAlongRoute;
-
-    return newRoute;
-  }
 }
