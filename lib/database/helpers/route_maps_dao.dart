@@ -56,12 +56,17 @@ class RouteMapsDao extends DatabaseAccessor<Database>
     String ptvName = ptvRoute.name.value;
     String ptvNumber = ptvRoute.number.value;
     String? ptvGtfsId = ptvRoute.gtfsId.value;
+    int ptvRouteType = ptvRoute.routeTypeId.value;
+
+    int gtfsTramType = 0;
+    int gtfsTrainType = 2;
+    int gtfsBusType = 3;
 
     SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData> query;
     // Tram case
     if (ptvRouteType == 1) {
       query = select(gtfsRoutesTable)
-        ..where((tbl) => tbl.shortName.equals(ptvNumber));
+        ..where((tbl) => tbl.shortName.equals(ptvNumber) & tbl.routeType.equals(gtfsTramType));
     }
     
     // Train case
@@ -71,7 +76,15 @@ class RouteMapsDao extends DatabaseAccessor<Database>
       // Skip replacement buses for now
       // Todo: add replacement buses
       query = select(gtfsRoutesTable)
-          ..where((tbl) => tbl.id.contains(ptvGtfsId) & tbl.shortName.equals("Replacement Bus").not());
+          ..where((tbl) => tbl.id.contains(ptvGtfsId) & tbl.shortName.equals("Replacement Bus").not() & tbl.routeType.equals(gtfsTrainType));
+    }
+
+    // Bus case
+    else if (ptvRouteType == 2) {
+      if (ptvGtfsId == null) return null;
+
+      query = select(gtfsRoutesTable)
+        ..where((tbl) => tbl.id.contains(ptvGtfsId) & tbl.routeType.equals(gtfsBusType));
     }
     
     else {
