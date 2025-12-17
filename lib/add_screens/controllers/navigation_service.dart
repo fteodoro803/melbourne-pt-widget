@@ -96,16 +96,15 @@ class NavigationService extends GetxService {
   /// Navigate to Stop Details
   Future<void> navigateToStop(Stop stop, pt_route.Route route) async {
     String? originSheet = sheetController.currentSheet.value.name;
-    pt_route.Route newRoute = route;
 
     if (originSheet == 'Nearby Stops' ||
         originSheet == 'Trip Details' ||
         originSheet == 'Stop Details') {
-      newRoute = await searchUtils.initializeRoute(newRoute);
-      await mapController.setTripPath(newRoute, stop: stop);
+      await route.loadDetails();
+      await mapController.setTripPath(route, stop: stop);
     }
 
-    StopDetailsState newState = StopDetailsState(stop: stop, route: newRoute);
+    StopDetailsState newState = StopDetailsState(stop: stop, route: route);
     sheetController.pushSheet('Stop Details', newState);
 
     sheetController.animateSheetTo(0.3);
@@ -119,16 +118,17 @@ class NavigationService extends GetxService {
 
   /// Navigate to Route Details
   Future<void> navigateToRoute(pt_route.Route route) async {
-    pt_route.Route newRoute = await searchUtils.initializeRoute(route);
+
+    await route.loadDetails(); // loads route's stops, colour, and directions
 
     sheetController.navigationStack.clear();
-    RouteDetailsState newState = RouteDetailsState(route: newRoute);
+    RouteDetailsState newState = RouteDetailsState(route: route);
     sheetController.pushSheet('Route Details', newState);
 
     sheetController.showSheet.value = true;
     sheetController.animateSheetTo(0.4);
 
-    await mapController.setTripPath(newRoute);
+    await mapController.setTripPath(route);
     await mapController.renderTripPath();
     await mapController.showPolyLine();
   }
@@ -138,7 +138,7 @@ class NavigationService extends GetxService {
     await trip.updateDepartures(departureCount: 20);
 
     if (sheetController.navigationStack.isEmpty) {
-      trip.route = await searchUtils.initializeRoute(trip.route!);
+      await trip.route?.loadDetails();    // loads route's colour, stops, and direction
       await Get.find<MapController>().setTripPath(trip.route!);
     }
 

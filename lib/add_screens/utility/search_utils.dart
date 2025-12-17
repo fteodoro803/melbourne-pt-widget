@@ -108,6 +108,7 @@ class SearchUtils {
 
     List<Stop> stopList = stopRouteLists.stops;
     List<pt_route.Route> routeList = stopRouteLists.routes;
+    await Future.wait(routeList.map((r) => r.loadDetails(detail: pt_route.RouteDetail.gtfs)));
 
     int stopIndex = 0;
 
@@ -146,22 +147,6 @@ class SearchUtils {
     }
 
     return uniqueStops;
-  }
-
-  /// Finds the sequence of stops along a given route
-  /// Removes stops that are no longer active
-  Future<List<Stop>> getStopsAlongRoute(
-      List<Direction> directions, pt_route.Route route) async {
-    List<Stop> stops = [];
-    if (directions.isNotEmpty) {
-      stops = await ptvService.stops
-          .fetchStopsByRoute(route: route, direction: directions[0]);
-      stops = stops.where((s) => s.stopSequence != 0).toList();
-    } else {
-      stops = await ptvService.stops.fetchStopsByRoute(route: route);
-    }
-
-    return stops;
   }
 
   /// Takes a list of stops along a route and groups them based on suburb
@@ -220,17 +205,5 @@ class SearchUtils {
       duration: const Duration(milliseconds: 2000),
       backgroundColor: isSaved ? Color(0xFF4E754F) : Color(0xFF7C291F),
     );
-  }
-
-  /// Finds the stops along a route and the directions for a route
-  Future<pt_route.Route> initializeRoute(pt_route.Route route) async {
-    List<Direction> directions =
-        await ptvService.directions.fetchDirections(route.id);
-    List<Stop> stopsAlongRoute = await getStopsAlongRoute(directions, route);
-    pt_route.Route newRoute = route;
-    newRoute.directions = directions;
-    newRoute.stopsAlongRoute = stopsAlongRoute;
-
-    return newRoute;
   }
 }
