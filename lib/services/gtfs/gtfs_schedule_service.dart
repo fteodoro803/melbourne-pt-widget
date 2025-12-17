@@ -19,6 +19,8 @@ class GtfsScheduleService {
       routes += tramRoutes;
       var trainRoutes = await gtfsApi.routes(routeType: "train");
       routes += trainRoutes;
+      var busRoutes = await gtfsApi.routes(routeType: "bus");
+      routes += busRoutes;
 
       for (var route in routes) {
         String routeId = route["route_id"];
@@ -26,9 +28,10 @@ class GtfsScheduleService {
         String? longName = route["route_long_name"];
         String colour = route["route_color"];
         String textColour = route["route_text_color"];
+        int routeType = route["route_type"];
 
         // 2a. Insert each route to the database
-        var dbGtfsRoute = database.gtfsRoutesDao.createGtfsRouteCompanion(id: routeId, shortName: shortName, longName: longName, colour: colour, textColour: textColour);
+        var dbGtfsRoute = database.gtfsRoutesDao.createGtfsRouteCompanion(id: routeId, shortName: shortName, longName: longName, colour: colour, textColour: textColour, routeType: routeType);
         await database.gtfsRoutesDao.addGtfsRoute(dbGtfsRoute);
       }
 

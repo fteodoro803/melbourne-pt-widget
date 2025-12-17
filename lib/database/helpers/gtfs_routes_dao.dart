@@ -15,13 +15,15 @@ class GtfsRoutesDao extends DatabaseAccessor<Database>
         String? longName,
         required String colour,
         required String textColour,
+        required int routeType,
       }) {
     return GtfsRoutesTableCompanion(
       id: Value(id),
       shortName: Value(shortName),
       longName: longName != null ? Value(longName) : Value.absent(),
       colour: Value(colour),
-      textColour: Value(textColour)
+      textColour: Value(textColour),
+      routeType: Value(routeType),
     );
   }
 
