@@ -14,7 +14,11 @@ class GtfsScheduleService {
 
     // 2. Collect from API, if they don't exist
     if (gtfsRouteList.isEmpty) {
-      var routes = await gtfsApi.tramRoutes();
+      var routes = [];
+      var tramRoutes = await gtfsApi.routes(routeType: "tram");
+      routes += tramRoutes;
+      var trainRoutes = await gtfsApi.routes(routeType: "train");
+      routes += trainRoutes;
 
       for (var route in routes) {
         String routeId = route["route_id"];

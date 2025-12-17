@@ -97,11 +97,28 @@ class GtfsApiService {
     }
   }
 
-  /// Fetch scheduled tram routes in GTFS formatting
-  Future<List<dynamic>> tramRoutes() async {
+  /// Fetch scheduled tram routes in GTFS formatting.
+  /// Route type examples are "tram", "bus", "train".
+  Future<List<dynamic>> routes({String? routeType}) async {
+    // 1. Base url
     final String url = "$scheduleUrl/routes";
+
+    // 2. Adding query parameters, if they exist
+    Uri uri;
+    if (routeType == null) {
+      uri = Uri.parse(url);
+    }
+    else {
+      uri = Uri.parse(url).replace(
+          queryParameters: {
+            "type": routeType.toString()
+          }
+      );
+    }
+
+    // 3. Fetch data
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(uri);
       print("(gtfs_api_service.dart -> tramRoutes) -- Request: ${response.request}");
       var jsonResponse = json.decode(response.body);
 
