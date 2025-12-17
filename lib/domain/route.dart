@@ -29,21 +29,22 @@ class Route {
   /// Creates a route object.
   Route({required this.id, required this.name, required this.number, required this.type, required this.status});
 
-  /// Lazy-loading directions and stopAlongRoute.
+  /// Lazy-loading PTV and GTFS data.
+  /// PTV data - route's stops and directions
+  /// GTFS data - route's id, text, and background colours
   Future<void> loadDetails({RouteDetail? detail}) async {
-
-    if (detail == null || detail == RouteDetail.ptv) {
+    if ((detail == null || detail == RouteDetail.ptv) && !hasStopDirections) {
       var ptvService = Get.find<PtvService>();
       directions = await ptvService.directions.fetchDirections(id);
       stopsAlongRoute = await ptvService.stops.fetchStopsByRoute(route: this);
     }
 
-    if (detail == null || detail == RouteDetail.gtfs) {
+    if ((detail == null || detail == RouteDetail.gtfs) && !hasGtfs) {
       var database = Get.find<db.Database>();
       gtfsId = await database.routeMapsDao.convertToGtfsRouteId(id) ?? "EMPTY";
       var gtfsRoute = await database.gtfsRoutesDao.getRoute(gtfsId);
       if (gtfsRoute == null) {
-        print("( route.dart -> loadDetails ) -- gtfsRoute is null");
+        print("( route.dart -> loadDetails ) -- gtfsRoute is null for route $id");
         return;
       }
       colour = gtfsRoute.colour;

@@ -108,6 +108,7 @@ class SearchUtils {
 
     List<Stop> stopList = stopRouteLists.stops;
     List<pt_route.Route> routeList = stopRouteLists.routes;
+    await Future.wait(routeList.map((r) => r.loadDetails(detail: pt_route.RouteDetail.gtfs)));
 
     int stopIndex = 0;
 
