@@ -21,6 +21,7 @@ class RoutesDao extends DatabaseAccessor<Database>
       {required int id,
         required String name,
         required String number,
+        String? gtfsId,
         required int routeTypeId,
         required String status}) {
 
@@ -28,6 +29,7 @@ class RoutesDao extends DatabaseAccessor<Database>
       id: Value(id),
       name: Value(name),
       number: Value(number),
+      gtfsId: gtfsId != null ? Value(gtfsId) : Value.absent(),
       routeTypeId: Value(routeTypeId),
       status: Value(status),
       lastUpdated: Value(DateTime.now()),
