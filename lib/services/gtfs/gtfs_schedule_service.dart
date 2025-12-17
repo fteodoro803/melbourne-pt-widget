@@ -19,7 +19,7 @@ class GtfsScheduleService {
       for (var route in routes) {
         String routeId = route["route_id"];
         String shortName = route["route_short_name"];
-        String longName = route["route_long_name"];
+        String? longName = route["route_long_name"];
         String colour = route["route_color"];
         String textColour = route["route_text_color"];
 

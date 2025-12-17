@@ -14,6 +14,7 @@ class Route {
   final String name;
   final String number; // should this be an int? Maybe nullable, since train doesnt have a number
   final RouteType type;
+  String? ptvGtfsId;
   String status;
 
   // Lazy loaded details
@@ -27,7 +28,7 @@ class Route {
   List<Stop>? stopsAlongRoute;
 
   /// Creates a route object.
-  Route({required this.id, required this.name, required this.number, required this.type, required this.status});
+  Route({required this.id, required this.name, required this.number, required this.type, required this.status, this.ptvGtfsId});
 
   /// Lazy-loading directions and stopAlongRoute.
   Future<void> loadDetails({RouteDetail? detail}) async {
@@ -72,6 +73,7 @@ class Route {
         "\t Colour: $colour\t"
         "\t TextColour: $textColour\n"
         "\t GtfsId: $gtfsId\t"
+        "\t PtvGtfsId: $ptvGtfsId\n"
         "\t Status: $status\n";
 
     if (directions != null && directions!.isNotEmpty) {
@@ -93,6 +95,7 @@ class Route {
       id: json["route_id"],
       name: json["route_name"],
       number: json["route_number"],
+      ptvGtfsId: json["route_gtfs_id"],
       type: RouteType.fromId(json["route_type"]),
       status: json["route_service_status"]["description"],
     );

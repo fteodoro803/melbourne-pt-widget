@@ -45,6 +45,7 @@ class PtvRouteService extends PtvBaseService {
             id: newRoute.id,
             name: newRoute.name,
             number: newRoute.number,
+            gtfsId: newRoute.ptvGtfsId,
             routeTypeId: newRoute.type.id,
             status: newRoute.status
         );

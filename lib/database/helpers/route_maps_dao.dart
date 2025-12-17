@@ -52,17 +52,29 @@ class RouteMapsDao extends DatabaseAccessor<Database>
   /// Mapping logic for conversion from PTV Route to GTFS Route
   // todo: Add other cases for metro train and metro bus
   Future<GtfsRoutesTableData?> mapPtvToGtfsRoute(
-      RoutesTableCompanion ptvRoute, int routeType) async {
-    String name = ptvRoute.name.value;
-    String number = ptvRoute.number.value;
+      RoutesTableCompanion ptvRoute, int ptvRouteType) async {
+    String ptvName = ptvRoute.name.value;
+    String ptvNumber = ptvRoute.number.value;
+    String? ptvGtfsId = ptvRoute.gtfsId.value;
 
-    SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData>
-    query;
-    if (routeType == 1) {
-      // tram
+    SimpleSelectStatement<$GtfsRoutesTableTable, GtfsRoutesTableData> query;
+    // Tram case
+    if (ptvRouteType == 1) {
       query = select(gtfsRoutesTable)
-        ..where((tbl) => tbl.shortName.equals(number));
-    } else {
+        ..where((tbl) => tbl.shortName.equals(ptvNumber));
+    }
+    
+    // Train case
+    else if (ptvRouteType == 0) {
+      if (ptvGtfsId == null) return null;
+
+      // Skip replacement buses for now
+      // Todo: add replacement buses
+      query = select(gtfsRoutesTable)
+          ..where((tbl) => tbl.id.contains(ptvGtfsId) & tbl.shortName.equals("Replacement Bus").not());
+    }
+    
+    else {
       // query = select(gtfsRoutesTable);
       return null;
     }

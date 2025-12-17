@@ -82,7 +82,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
     String routeName = _routes[index].name;
     int routeTypeId = _routes[index].type.id;
     String routeNumber = _routes[index].number;
-    // String gtfsId = _routes[index].gtfsId;
+    String gtfsId = _routes[index].gtfsId;
     String status = _routes[index].status;
 
     var dbRoute = database.routesDao.createRouteCompanion(
@@ -90,6 +90,7 @@ class _SelectStopScreenState extends State<SelectStopScreen> {
         name: routeName,
         number: routeNumber,
         routeTypeId: routeTypeId,
+        gtfsId: gtfsId,
         status: status
     );
     database.routesDao.addRoute(dbRoute);
