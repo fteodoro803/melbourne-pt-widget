@@ -23,8 +23,7 @@ Copy-paste these commands to
        - ```dart run build_runner watch --delete-conflicting-outputs```
   3. Platform-specific
      1. iOS - install dependencies
-        - ```cd ios```
-        - ```pod install```
+        - ```cd ios && pod install && cd ..```
   4. Setup environment variables
      - ```dart setup_env.dart```
 
