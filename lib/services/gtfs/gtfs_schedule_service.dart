@@ -19,8 +19,8 @@ class GtfsScheduleService {
       routes += tramRoutes;
       var trainRoutes = await gtfsApi.routes(routeType: "train");
       routes += trainRoutes;
-      var busRoutes = await gtfsApi.routes(routeType: "bus");
-      routes += busRoutes;
+      // var busRoutes = await gtfsApi.routes(routeType: "bus");
+      // routes += busRoutes;
 
       for (var route in routes) {
         String routeId = route["route_id"];

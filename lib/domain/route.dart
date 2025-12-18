@@ -44,12 +44,29 @@ class Route {
       var database = Get.find<db.Database>();
       gtfsId = await database.routeMapsDao.convertToGtfsRouteId(id) ?? "EMPTY";
       var gtfsRoute = await database.gtfsRoutesDao.getRoute(gtfsId);
+
       if (gtfsRoute == null) {
         print("( route.dart -> loadDetails ) -- gtfsRoute is null for route $id");
+        _setPlaceholderColours();
         return;
+
       }
       colour = gtfsRoute.colour;
       textColour = gtfsRoute.textColour;
+    }
+  }
+
+  // For routes without ptv-gtfs mapping
+  void _setPlaceholderColours() {
+    if (type == RouteType.bus || type == RouteType.nightBus) {
+      // print("( route.dart -> _setPlaceholderColours ) -- using placeholder bus colour");
+      colour = "FF8200";
+      textColour = "000000";
+    }
+    if (type == RouteType.vLine) {
+      // print("( route.dart -> _setPlaceholderColours ) -- using placeholder vLine colour");
+      colour = "8F1A95";
+      textColour = "FFFFFF";
     }
   }
 
