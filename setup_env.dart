@@ -108,11 +108,11 @@ void createEnvPrompts() {
       print('\tAborted.');
       return;
     }
+  }
 
-    // Add Google API Key if it exists
-    if (googleApiKey.isNotEmpty) {
-      addGoogleApiKey(googleApiKey);
-    }
+  // Add Google API Key if it exists
+  if (googleApiKey.isNotEmpty) {
+    addGoogleApiKey(googleApiKey);
   }
 
   envFile.writeAsStringSync(buffer.toString());
